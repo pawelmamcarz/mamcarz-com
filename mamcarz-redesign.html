@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paweł Mamcarz — Procurement Expert & Project Manager</title>
+<meta name="description" content="Paweł Mamcarz — Associate Partner CEE w apsolut Group / All for One. 25+ lat w zakupach strategicznych, SAP Ariba, transformacji cyfrowej. Ponad 100 organizacji w portfolio.">
+<meta property="og:title" content="Paweł Mamcarz — Procurement Expert & Project Manager">
+<meta property="og:description" content="Associate Partner CEE w apsolut Group. 25+ lat w zakupach strategicznych i transformacji cyfrowej dla ponad 100 organizacji.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mamcarz.com">
+<meta property="og:image" content="https://mamcarz.com/logo.png">
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161d;
+    --bg3: #1a1e28;
+    --gold: #c8a96e;
+    --gold-light: #e8d09e;
+    --text: #e8e4dc;
+    --muted: #7a7a8a;
+    --border: rgba(200,169,110,0.2);
+    --accent: #2a6496;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(13,15,20,0.98), transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+    font-weight: 400;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HAMBURGER */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--gold);
+    transition: all 0.3s;
+  }
+
+  .nav-hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+
+  .nav-hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav-hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 30%, rgba(200,169,110,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(42,100,150,0.08) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,169,110,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,169,110,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  .hero-content {
+    position: relative;
+    max-width: 900px;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-name em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-desc {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+    font-weight: 300;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 400;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--gold);
+    background: rgba(200,169,110,0.05);
+  }
+
+  .hero-stats {
+    position: absolute;
+    right: 4rem;
+    bottom: 8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    opacity: 0;
+    animation: fadeLeft 0.8s 1s forwards;
+  }
+
+  .stat {
+    text-align: right;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 3rem;
+    left: 4rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 8rem 4rem;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 3rem;
+  }
+
+  /* ABOUT */
+  #about {
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .about-photo-wrap {
+    position: relative;
+  }
+
+  .about-photo {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: var(--bg3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold) 0%, transparent 50%);
+    opacity: 0.15;
+    z-index: 1;
+  }
+
+  .about-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about-frame {
+    position: absolute;
+    top: -1rem;
+    left: -1rem;
+    right: 1rem;
+    bottom: 1rem;
+    border: 1px solid var(--border);
+    pointer-events: none;
+  }
+
+  .about-badge {
+    position: absolute;
+    bottom: -2rem;
+    right: -2rem;
+    background: var(--gold);
+    color: var(--bg);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .about-badge-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .about-badge-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .about-text p {
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+
+  .expertise-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-top: 2.5rem;
+  }
+
+  .expertise-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  .expertise-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  /* EXPERIENCE */
+  .timeline {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    padding-left: 3rem;
+    padding-bottom: 3.5rem;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s;
+  }
+
+  .timeline-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -5px;
+    top: 6px;
+    width: 11px;
+    height: 11px;
+    background: var(--bg);
+    border: 2px solid var(--gold);
+  }
+
+  .timeline-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-company {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .timeline-role {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .timeline-desc {
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: 600px;
+  }
+
+  /* SKILLS */
+  #skills {
+    background: var(--bg2);
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .skill-card {
+    background: var(--bg2);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .skill-card:hover { background: var(--bg3); }
+
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+  }
+
+  .skill-card:hover::before { transform: scaleX(1); }
+
+  .skill-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .skill-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .skill-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* PORTFOLIO */
+  #portfolio {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .portfolio-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .pcard {
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    cursor: pointer;
+  }
+
+  .pcard--wide {
+    grid-column: span 2;
+    min-height: 220px;
+  }
+
+  .pcard__bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.6s;
+  }
+
+  .pcard:hover .pcard__bg {
+    transform: scale(1.04);
+  }
+
+  .pcard__deco {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    font-size: 4rem;
+    opacity: 0.07;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .pcard__body {
+    position: relative;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 100%);
+    transition: background 0.3s;
+  }
+
+  .pcard:hover .pcard__body {
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 100%);
+  }
+
+  .pcard__tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .pcard__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .pcard--wide .pcard__title {
+    font-size: 2.2rem;
+  }
+
+  .pcard__desc {
+    font-size: 0.88rem;
+    color: rgba(232,228,220,0.75);
+    line-height: 1.6;
+    max-width: 560px;
+    flex: 1;
+  }
+
+  .pcard__link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-top: 0.5rem;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.3s;
+  }
+
+  .pcard:hover .pcard__link {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* CLIENTS */
+  .clients-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .client-item {
+    background: var(--bg2);
+    padding: 1.2rem 1rem;
+    text-align: center;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 400;
+    transition: all 0.3s;
+  }
+
+  .client-item:hover {
+    background: var(--bg3);
+    color: var(--gold);
+  }
+
+  /* CONTACT */
+  #contact {
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contact-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .contact-info p {
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  .contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .contact-detail {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .contact-detail-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .form-input, .form-textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.9rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.3s;
+    width: 100%;
+  }
+
+  .form-input:focus, .form-textarea:focus {
+    border-color: var(--gold);
+  }
+
+  .form-textarea { min-height: 140px; resize: vertical; }
+
+  .form-status {
+    font-size: 0.85rem;
+    padding: 0.8rem 1.2rem;
+    display: none;
+  }
+
+  .form-status.success {
+    display: block;
+    color: #6ec86e;
+    border: 1px solid rgba(110,200,110,0.3);
+  }
+
+  .form-status.error {
+    display: block;
+    color: #c86e6e;
+    border: 1px solid rgba(200,110,110,0.3);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 2.5rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .footer-links a:hover { color: var(--gold); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { transform: scaleX(1); }
+    50% { transform: scaleX(0.6); transform-origin: left; }
+  }
+
+  /* DIVIDER */
+  .gold-divider {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 2rem 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    section { padding: 5rem 2rem; }
+    #hero { padding: 0 2rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .portfolio-cards { grid-template-columns: 1fr; }
+    .pcard--wide { grid-column: span 1; }
+    .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .hero-stats { display: none; }
+    .nav-links { display: none; }
+    .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); padding: 2rem; gap: 1.5rem; }
+    .nav-hamburger { display: flex; }
+    .expertise-list { grid-template-columns: 1fr; }
+    .clients-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">PM — Mamcarz.com</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">O mnie</a></li>
+    <li><a href="#resume">Doświadczenie</a></li>
+    <li><a href="#skills">Kompetencje</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menu nawigacyjne">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="hero-tag">Associate Partner CEE · apsolut Group / All for One · SAP Procurement</p>
+    <h1 class="hero-name">Paweł<br><em>Mamcarz</em></h1>
+    <p class="hero-desc">Associate Partner CEE w apsolut Group. 25+ lat w zakupach strategicznych i transformacji cyfrowej dla ponad 100 organizacji — od PKN Orlen i KGHM po LOT, Żabkę i Motor Oil Hellas.</p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn-primary">Współpracujmy</a>
+      <a href="#resume" class="btn-ghost">Doświadczenie</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">450+</div>
+      <div class="stat-label">Klientów apsolut</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">500M</div>
+      <div class="stat-label">PLN zakupów / rok</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">Lat doświadczenia</div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span>Przewiń</span>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-photo-wrap">
+      <div class="about-photo">
+        <img src="IMG_3284.jpeg" alt="Paweł Mamcarz" loading="lazy">
+      </div>
+      <div class="about-frame"></div>
+      <div class="about-badge">
+        <div class="about-badge-num">25+</div>
+        <div class="about-badge-text">lat w procurement</div>
+      </div>
+    </div>
+    <div class="about-text">
+      <p class="section-label">O mnie</p>
+      <h2 class="section-title">Procurement<br><em style="font-style:italic;color:var(--gold)">z pasją</em></h2>
+      <p><strong style="color:var(--gold)">Associate Partner CEE w apsolut Group</strong> — wiodącej firmie konsultingowej SAP Procurement w Europie (SAP Gold Partner, wielokrotny SAP Ariba MEE Partner of the Year, od marca 2026 część All for One Group). Buduję region CEE od podstaw: 20+ wdrożeń w Polsce, Czechach, Słowacji, Węgrzech i Rumunii.</p>
+      <p>Ponad 25 lat doświadczenia w zakupach strategicznych, sourcingu i transformacji cyfrowej — portfel ponad 500 mln PLN rocznie, projekty o łącznej wartości ponad 500 mln EUR dla ponad 100 organizacji. Wdrożenia SAP Ariba, SAP Fieldglass i SAP S/4HANA dla KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i wielu innych.</p>
+      <p>Twórca i kierownik projektu CONNECT w PKN Orlen (2012–2014) — największej platformy sourcingowej w Polsce, obejmującej 15 spółek w 4 krajach, zespół 60 osób. Wcześniej: PZU, PwC (projekty dla PGE, PGNIG, Orlen, Aeroflot), PKP PLK, PKP Intercity.</p>
+      <p style="color:var(--gold);font-size:0.9rem;">Poza biurem: właściciel WarsawFlightSafety, pilot akrobacyjny (Diverse Extreme Team 2013), fotograf prasowy agencji Forum.</p>
+      <div class="expertise-list">
+        <div class="expertise-item"><div class="expertise-dot"></div>SAP Ariba / Fieldglass / S/4HANA</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Procurement & Strategic Sourcing</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Sales Leadership & BD (CEE)</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Change & Program Management</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Public Procurement (PZP)</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Energetyka, przemysł, pharma</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESUME -->
+<section id="resume">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Kariera</p>
+    <h2 class="section-title">Doświadczenie<br>zawodowe</h2>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:3rem;max-width:700px;">SGH Warszawa (1995–2000) · Wirtschaftsuniversität Wien CEMS Master (2001) · Warsaw Executive MBA, Univ. of Minnesota / SGH (2005) · APMP Project Management, PMI (2008) · Języki: polski, angielski, niemiecki, rosyjski</p>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">07.2021 · obecnie</div>
+        <div class="timeline-company">apsolut Group <span style="font-size:0.7rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.05em">/ All for One Group od 03.2026</span></div>
+        <div class="timeline-role">Associate Partner, CEE Region</div>
+        <p class="timeline-desc">Budowanie regionu CEE od podstaw — 20+ wdrożeń SAP Ariba, SAP Fieldglass i SAP S/4HANA w Polsce, Czechach, Słowacji, Węgrzech i Rumunii. Klienci: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. apsolut — wielokrotny SAP Ariba MEE Partner of the Year, 450+ klientów, od marca 2026 część All for One Group SE.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">04.2017 – 06.2021</div>
+        <div class="timeline-company">SAP Polska Sp. z o.o.</div>
+        <div class="timeline-role">SAP Ariba Senior Account Executive</div>
+        <p class="timeline-desc">Budowanie rynku SAP Ariba w Polsce i regionie CEE. Współpraca z liderami rynku na poziomie C-suite (CFO, CPO, CIO). Tworzenie unikalnych propozycji wartości dla transformacji cyfrowej funkcji zakupowej.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">11.2016 – 05.2017</div>
+        <div class="timeline-company">PZU S.A.</div>
+        <div class="timeline-role">Dyrektor Projektu Strategicznego</div>
+        <p class="timeline-desc">Strategiczny projekt transformacji zakupów dla największego ubezpieczyciela w CEE. Spend visibility, strategie dla kluczowych kategorii, blueprint i roadmapa pełnej transformacji, RFI dla narzędzia IT klasy enterprise.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">07.2015 – 11.2016</div>
+        <div class="timeline-company">PwC Polska Sp. z o.o.</div>
+        <div class="timeline-role">Wicedyrektor w Advisory / Procurement Expert</div>
+        <p class="timeline-desc">Metodyka CAPP (Complete &amp; Agile Procurement). Projekty dla PGE SA, PGNIG SA, PKN Orlen SA, PZU SA, Elektrownia Puławy, Aeroflot, Russian Railways, Airport Vnukovo, BRW SA, Kopex SA.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">06.2013 – 09.2015</div>
+        <div class="timeline-company">PKP Polskie Linie Kolejowe S.A.</div>
+        <div class="timeline-role">Doradca Zarządu</div>
+        <p class="timeline-desc">Ekspert w przetargach publicznych (PZP) o wartości ponad 100 mln PLN. Negocjacje umowy ramowej z SAP AG dla grupy PKP (4 spółki). Audyt platformy Marketplanet.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">12.2014 – 05.2015</div>
+        <div class="timeline-company">PKP Intercity S.A.</div>
+        <div class="timeline-role">Dyrektor Programu Nowego Systemu Sprzedaży</div>
+        <p class="timeline-desc">Wdrożenie Revenue Management System (JDA/RPO). Zespół 30+ osób. Integracja z KURS 90, Oracle EBS, kanałami sprzedaży (kasa, web, mobile).</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">03.2012 – 09.2014</div>
+        <div class="timeline-company">PKN ORLEN S.A.</div>
+        <div class="timeline-role">Project Manager — Platforma CONNECT</div>
+        <p class="timeline-desc">Kierownik projektu wdrożenia platformy sourcingowej CONNECT dla 15 spółek Grupy ORLEN w 4 krajach (PL, CZ, DE, LT). Największe tego typu wdrożenie w Polsce — 60 osób, SAP SRM/MM + Oracle EBS. Moduły: RFx, e-aukcje, kontrakty, centralne drzewo kategorii, baza dostawców.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">01.2006 – 09.2008</div>
+        <div class="timeline-company">PKN ORLEN S.A.</div>
+        <div class="timeline-role">Kierownik Działu Zamówień Generalnych</div>
+        <p class="timeline-desc">30-osobowy dział. Domeny: IT/Telco, Consulting, Admin, Maintenance, stacje paliw, flota. Portfolio ponad 500 mln PLN/rok. Wdrożenie SAP SRM. Strategie zakupowe dla IT/telco, retail (1800 stacji paliw, SAP RETAIL).</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">2004 – 2006</div>
+        <div class="timeline-company">Telekomunikacja Polska S.A.</div>
+        <div class="timeline-role">Critical Changes Manager — TP Convergence Programme</div>
+        <p class="timeline-desc">Wdrożenie Oracle EBS dla centrum SSC w Lublinie. Koordynacja 215 członków zespołu i 29 kierowników podprojektów.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">2002 – 2004</div>
+        <div class="timeline-company">Bank Millennium S.A.</div>
+        <div class="timeline-role">Buyer / Lider strumienia IT/Telco</div>
+        <p class="timeline-desc">Centralizacja zakupów IT: software, hardware, usługi maintenance, SLA. Renegocjacje kontraktów, program redukcji kosztów administracyjnych.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">1999 – 2002</div>
+        <div class="timeline-company">Elektrim S.A. / Bank Austria Creditanstalt, Wiedeń</div>
+        <div class="timeline-role">Financial Controller &amp; Risk Management Specialist</div>
+        <p class="timeline-desc">Kontroler finansowy drugiego co do wielkości konglomeratu telko/kablowego/energetycznego w Polsce. Emisja obligacji PLN 200 mln (Elektrim/PZU), Commercial Papers PLN 460 mln (Elektrim/PEKAO). Analityk rynków CEE w Wiedniu — fixed income, obligacje, swapy.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <p class="section-label" style="max-width:1200px;margin:0 auto 1rem;">Kompetencje</p>
+  <h2 class="section-title" style="max-width:1200px;margin:0 auto 3rem;">Obszary<br>specjalizacji</h2>
+  <div class="skills-grid">
+    <div class="skill-card">
+      <div class="skill-icon">🔷</div>
+      <div class="skill-name">SAP Ariba · Fieldglass · S/4HANA</div>
+      <p class="skill-desc">End-to-end wdrożenia SAP Ariba (Sourcing, Contracts, SLP, Buying), SAP Fieldglass i S/4HANA Procurement. 20+ projektów w CEE. Znajomość też: Oracle EBS, SAP SRM, Marketplanet, Ivalua, Basware.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">⚙️</div>
+      <div class="skill-name">Procurement & Strategic Sourcing</div>
+      <p class="skill-desc">Ponad 25 lat w zakupach strategicznych. Portfolio ponad 500 mln PLN/rok (PKN Orlen). Projekty o łącznej wartości ponad 500 mln EUR dla 100+ organizacji z energetyki, przemysłu ciężkiego, lotnictwa, pharmy i finansów.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">🌍</div>
+      <div class="skill-name">Sales Leadership & BD (CEE)</div>
+      <p class="skill-desc">Budowanie obecności rynkowej od zera w Polsce i Europie Środkowej. Relacje C-level: CFO, CPO, CIO. Klienci: KGHM, Żabka, PLL LOT, Motor Oil Hellas, MOL, Orange, Polpharma, Adamed, CIECH, Lotte Wedel.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">📐</div>
+      <div class="skill-name">Program & Change Management</div>
+      <p class="skill-desc">Certyfikat APMP (PMI, 2008). Zarządzanie programami wielospółkowymi (15 spółek, 4 kraje, 60 osób — ORLEN CONNECT). Koordynacja 215 członków zespołu (TP SA). Revenue Management dla PKP Intercity.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">⚖️</div>
+      <div class="skill-name">Prawo Zamówień Publicznych</div>
+      <p class="skill-desc">Ekspert w przetargach publicznych PZP — PKP PLK, wartość ponad 100 mln PLN. Strategie zakupowe dla PGNIG SA w reżimie PZP. Negocjacje umów ramowych SAP AG dla grupy PKP.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">✈️</div>
+      <div class="skill-name">Pilot akrobacyjny · Fotograf</div>
+      <p class="skill-desc">Właściciel WarsawFlightSafety — szkoła akrobacji lotniczej. Pilot pokazowy (Diverse Extreme Team 2013). Fotograf prasowy Agencji Forum od 2003 r. Sesje air-to-air, współorganizator ATAM.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <p class="section-label">Portfolio</p>
+  <h2 class="section-title">Projekty<br>własne</h2>
+
+  <div class="portfolio-cards">
+
+    <!-- akrobacja.top -->
+    <a href="https://akrobacja.top" target="_blank" rel="noopener noreferrer" class="pcard pcard--wide">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#0d1a2e 0%,#1a2d4a 60%,#0a1220 100%)"></div>
+      <div class="pcard__deco">✈</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Voucher · E-commerce · Lotnictwo</div>
+        <div class="pcard__title">akrobacja.top</div>
+        <div class="pcard__desc">Platforma sprzedaży voucherów na loty akrobacyjne samolotem Extra 300 LP z lotniska Radom Piastów EPRP. Ekstremalny lot z filmowaniem — prezent dla fanów adrenaliny i lotnictwa. Projekt łączący pasję pilota akrobacyjnego z przedsiębiorczością online.</div>
+        <div class="pcard__link">akrobacja.top →</div>
+      </div>
+    </a>
+
+    <!-- FilmoLot.pl -->
+    <a href="https://filmolot.pl" target="_blank" rel="noopener noreferrer" class="pcard">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#1a1008 0%,#2e1a06 60%,#120c04 100%)"></div>
+      <div class="pcard__deco">🎬</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Fotografia · Film · Air-to-Air</div>
+        <div class="pcard__title">FilmoLot.pl</div>
+        <div class="pcard__desc">Projekt fotografii i wideo lotniczego — sesje air-to-air, dokumentacja pokazów i wydarzeń lotniczych. Współorganizator ATAM (Air-to-Air Meeting) w Piotrkowie Trybunalskim.</div>
+        <div class="pcard__link">filmolot.pl →</div>
+      </div>
+    </a>
+
+    <!-- czympojade.pl -->
+    <a href="https://czympojade.pl" target="_blank" rel="noopener noreferrer" class="pcard">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#0a1a14 0%,#122e22 60%,#081410 100%)"></div>
+      <div class="pcard__deco">🚌</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Aplikacja webowa · Transport</div>
+        <div class="pcard__title">czympojade.pl</div>
+        <div class="pcard__desc">Projekt aplikacji mobilnej i webowej wspomagającej planowanie transportu. Przykład samodzielnego tworzenia produktów cyfrowych — od koncepcji UX po wdrożenie.</div>
+        <div class="pcard__link">czympojade.pl →</div>
+      </div>
+    </a>
+
+    <!-- przypominamy.com -->
+    <a href="https://przypominamy.com" target="_blank" rel="noopener noreferrer" class="pcard pcard--wide">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#0a1428 0%,#162240 60%,#080e1c 100%)"></div>
+      <div class="pcard__deco">💬</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Start-up · SaaS · SMS / MMS / IVR</div>
+        <div class="pcard__title">Przypominamy.com</div>
+        <div class="pcard__desc">Platforma powiadomień SMS, MMS i głosowych (IVR/TTS) dla biznesu — przypomnienia, bulk messaging, automatyzacja komunikacji z klientem. Startup założony i rozwijany od podstaw, współfinansowany ze środków EU (POIG 8.1). Opisany m.in. przez di.com.pl jako innowacyjne narzędzie B2B.</div>
+        <div class="pcard__link">przypominamy.com →</div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section style="background:var(--bg);padding:5rem 4rem;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Referencje</p>
+    <h2 class="section-title" style="margin-bottom:3rem;">Wybrani<br>klienci</h2>
+    <div class="clients-grid">
+      <div class="client-item">PKN Orlen</div>
+      <div class="client-item">KGHM</div>
+      <div class="client-item">PGE SA</div>
+      <div class="client-item">PGNIG SA</div>
+      <div class="client-item">PZU SA</div>
+      <div class="client-item">PLL LOT</div>
+      <div class="client-item">Żabka Polska</div>
+      <div class="client-item">Motor Oil Hellas</div>
+      <div class="client-item">MOL</div>
+      <div class="client-item">Orange / TP SA</div>
+      <div class="client-item">PKP PLK</div>
+      <div class="client-item">PKP Intercity</div>
+      <div class="client-item">Polpharma</div>
+      <div class="client-item">Adamed</div>
+      <div class="client-item">CIECH</div>
+      <div class="client-item">Lotte Wedel</div>
+      <div class="client-item">Bank Millennium</div>
+      <div class="client-item">Pfleiderer</div>
+      <div class="client-item">Aeroflot</div>
+      <div class="client-item">Hitachi Energy</div>
+      <div class="client-item">PKP Energetyka</div>
+      <div class="client-item">Elektrownia Puławy</div>
+      <div class="client-item">Kopex SA</div>
+      <div class="client-item">BRW SA</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="contact-info">
+      <p class="section-label">Kontakt</p>
+      <h2 class="section-title">Porozmawiajmy<br>o projekcie</h2>
+      <p>Jestem dostępny dla projektów freelance i długoterminowej współpracy doradczej. Napisz lub zadzwoń — odezwę się szybko.</p>
+      <div class="contact-details">
+        <div class="contact-detail">
+          <div class="contact-detail-icon">🌐</div>
+          <span>mamcarz.com</span>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">in</div>
+          <span>LinkedIn / Paweł Mamcarz</span>
+        </div>
+      </div>
+    </div>
+    <form class="contact-form" id="contactForm" action="https://formsubmit.co/kontakt@mamcarz.com" method="POST">
+      <input type="hidden" name="_subject" value="Nowa wiadomość z mamcarz.com">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="https://mamcarz.com/mamcarz-redesign.html#contact">
+      <div class="form-group">
+        <label class="form-label" for="name">Imię i nazwisko</label>
+        <input type="text" name="name" id="name" class="form-input" placeholder="Jan Kowalski" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Adres e-mail</label>
+        <input type="email" name="email" id="email" class="form-input" placeholder="jan@firma.pl" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="subject">Temat współpracy</label>
+        <input type="text" name="subject" id="subject" class="form-input" placeholder="Transformacja zakupów / Projekt IT...">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="message">Wiadomość</label>
+        <textarea name="message" id="message" class="form-textarea" placeholder="Opisz swój projekt..." required></textarea>
+      </div>
+      <button type="submit" class="btn-primary" style="cursor:pointer;border:none;font-family:'DM Sans',sans-serif;">Wyślij wiadomość</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© Paweł Mamcarz 2026 — mamcarz.com</div>
+  <ul class="footer-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#about">O mnie</a></li>
+    <li><a href="#resume">CV</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Hamburger menu
+  const hamburger = document.getElementById('navHamburger');
+  const navLinks = document.getElementById('navLinks');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navLinks.classList.toggle('open');
+  });
+
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      navLinks.classList.remove('open');
+    });
+  });
+
+  // Scroll animation for timeline items
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 120);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.timeline-item').forEach(el => observer.observe(el));
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navAnchors = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 200) current = s.id;
+    });
+    navAnchors.forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--gold)' : '';
+    });
+  });
+</script>
+
+</body>
+</html>
