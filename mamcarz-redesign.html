@@ -14,14 +14,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0f14;
-    --bg2: #13161d;
-    --bg3: #1a1e28;
+    --bg: #101318;
+    --bg2: #181c24;
+    --bg3: #222830;
     --gold: #c8a96e;
     --gold-light: #e8d09e;
-    --text: #e8e4dc;
-    --muted: #7a7a8a;
-    --border: rgba(200,169,110,0.2);
+    --text: #eae6de;
+    --text-secondary: #b0afc0;
+    --muted: #9a99aa;
+    --border: rgba(200,169,110,0.25);
     --accent: #2a6496;
   }
 
@@ -170,7 +171,7 @@
 
   .hero-desc {
     font-size: 1.15rem;
-    color: var(--muted);
+    color: var(--text-secondary);
     max-width: 520px;
     margin-bottom: 3rem;
     opacity: 0;
@@ -386,7 +387,7 @@
   }
 
   .about-text p {
-    color: var(--muted);
+    color: var(--text-secondary);
     margin-bottom: 1.5rem;
     font-size: 1rem;
   }
@@ -477,7 +478,7 @@
   }
 
   .timeline-desc {
-    color: var(--muted);
+    color: var(--text-secondary);
     font-size: 0.95rem;
     max-width: 600px;
   }
@@ -533,7 +534,7 @@
 
   .skill-desc {
     font-size: 0.9rem;
-    color: var(--muted);
+    color: var(--text-secondary);
     line-height: 1.6;
   }
 
@@ -623,8 +624,8 @@
   }
 
   .pcard__desc {
-    font-size: 0.88rem;
-    color: rgba(232,228,220,0.75);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
     line-height: 1.6;
     max-width: 560px;
     flex: 1;
@@ -658,9 +659,9 @@
     background: var(--bg2);
     padding: 1.2rem 1rem;
     text-align: center;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     letter-spacing: 0.08em;
-    color: var(--muted);
+    color: var(--text-secondary);
     font-weight: 400;
     transition: all 0.3s;
   }
@@ -687,7 +688,7 @@
   }
 
   .contact-info p {
-    color: var(--muted);
+    color: var(--text-secondary);
     margin-bottom: 2rem;
   }
 
@@ -715,45 +716,6 @@
     font-size: 1rem;
     flex-shrink: 0;
   }
-
-  .contact-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .form-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .form-input, .form-textarea {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 0.9rem 1.2rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 300;
-    outline: none;
-    transition: border-color 0.3s;
-    width: 100%;
-  }
-
-  .form-input:focus, .form-textarea:focus {
-    border-color: var(--gold);
-  }
-
-  .form-textarea { min-height: 140px; resize: vertical; }
-
 
   /* FOOTER */
   footer {
@@ -901,7 +863,7 @@
       <p>Projekty, które robię, mają realną skalę: ponad 500 mln EUR wartości zakontraktowanej pracy dla ponad 100 organizacji — KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. Największy projekt: CONNECT dla Grupy ORLEN — 15 spółek, 4 kraje, 60-osobowy zespół, największa platforma sourcingowa w Polsce. Wcześniej PGE, PGNiG, Aeroflot, PKP PLK, PKP Intercity.</p>
       <p>W latach 2008–2012 zboczyłem ze ścieżki korporacyjnej — i dobrze, że to zrobiłem. Założyłem kilka własnych rzeczy: <strong>RMS sp. z o.o.</strong> (startup z dotacją POIG 8.1), <strong>Przypominamy.com</strong> i prowadziłem kilkanaście projektów doradczych zakupowych. Pierwsze starcie ze światem jako founder, nie jako konsultant — zdobywanie dotacji UE, budowanie produktu od zera, sprzedaż własnych usług.</p>
       <p style="color:var(--gold);font-size:0.9rem;">Poza biurem: posiadam licencję pilota śmigłowcowego <strong>PPL(H)</strong> i samolotowego <strong>PPL(A) z uprawnieniami do akrobacji</strong>. Właściciel WarsawFlightSafety, pilot pokazowy Diverse Extreme Team (2013). Do tego fotograf prasowy agencji Forum — sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios).</p>
-      <p style="font-size:0.85rem;color:var(--muted);margin-top:0.8rem;">Z Internetem związany od 1993 — pierwsza strona WWW na maszynie VAX UMCS w Lublinie, administrator sieci na SGH. Kiedyś SUN, SGI Indigo, IBM AIX; dziś głównie Cloudflare, React i zbyt wiele otwartych kart w przeglądarce.</p>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.8rem;">Z Internetem związany od 1993 — pierwsza strona WWW na maszynie VAX UMCS w Lublinie, administrator sieci na SGH. Kiedyś SUN, SGI Indigo, IBM AIX; dziś głównie Cloudflare, React i zbyt wiele otwartych kart w przeglądarce.</p>
       <div class="expertise-list">
         <div class="expertise-item"><div class="expertise-dot"></div>SAP Ariba / Fieldglass / S/4HANA</div>
         <div class="expertise-item"><div class="expertise-dot"></div>Procurement & Strategic Sourcing</div>
@@ -919,13 +881,13 @@
   <div style="max-width:1200px;margin:0 auto;">
     <p class="section-label">Kariera</p>
     <h2 class="section-title">Doświadczenie<br>zawodowe</h2>
-    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:3rem;max-width:700px;">SGH Warszawa (1995–2000) · Wirtschaftsuniversität Wien CEMS Master (2001) · Warsaw Executive MBA, Univ. of Minnesota / SGH (2005) · APMP Project Management, PMI (2008) · Języki: polski, angielski, niemiecki, rosyjski</p>
+    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:3rem;max-width:700px;">SGH Warszawa (1995–2000) · Wirtschaftsuniversität Wien CEMS Master (2001) · Warsaw Executive MBA, Univ. of Minnesota / SGH (2005) · APMP Project Management, PMI (2008) · Języki: polski, angielski, niemiecki, rosyjski</p>
     <div class="timeline">
 
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-year">07.2021 · obecnie</div>
-        <div class="timeline-company">apsolut Group <span style="font-size:0.7rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.05em">/ All for One Group od 03.2026</span></div>
+        <div class="timeline-company">apsolut Group <span style="font-size:0.7rem;color:var(--text-secondary);font-family:'DM Mono',monospace;letter-spacing:0.05em">/ All for One Group od 03.2026</span></div>
         <div class="timeline-role">Associate Partner, CEE Region</div>
         <p class="timeline-desc">Budowanie regionu CEE od podstaw — 20+ wdrożeń SAP Ariba, SAP Fieldglass i SAP S/4HANA w Polsce, Czechach, Słowacji, Węgrzech i Rumunii. Klienci: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. apsolut — wielokrotny SAP Ariba MEE Partner of the Year, 450+ klientów, od marca 2026 część All for One Group SE.</p>
       </div>
@@ -1016,8 +978,10 @@
 
 <!-- SKILLS -->
 <section id="skills">
-  <p class="section-label" style="max-width:1200px;margin:0 auto 1rem;">Kompetencje</p>
-  <h2 class="section-title" style="max-width:1200px;margin:0 auto 3rem;">Obszary<br>specjalizacji</h2>
+  <div style="max-width:1200px;margin:0 auto;">
+  <p class="section-label">Kompetencje</p>
+  <h2 class="section-title">Obszary<br>specjalizacji</h2>
+  </div>
   <div class="skills-grid">
     <div class="skill-card">
       <div class="skill-icon">🔷</div>
@@ -1111,10 +1075,10 @@
 </section>
 
 <!-- CLIENTS -->
-<section style="background:var(--bg);padding:5rem 4rem;">
+<section id="clients">
   <div style="max-width:1200px;margin:0 auto;">
     <p class="section-label">Referencje</p>
-    <h2 class="section-title" style="margin-bottom:3rem;">Wybrani<br>klienci</h2>
+    <h2 class="section-title">Wybrani<br>klienci</h2>
     <div class="clients-grid">
       <div class="client-item">PKN Orlen</div>
       <div class="client-item">KGHM</div>
