@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paweł Mamcarz — Procurement Expert & Project Manager</title>
+<meta name="description" content="Paweł Mamcarz — Associate Partner CEE w apsolut Group / All for One. 25+ lat w zakupach strategicznych, SAP Ariba, transformacji cyfrowej. Ponad 100 organizacji w portfolio.">
+<meta property="og:title" content="Paweł Mamcarz — Procurement Expert & Project Manager">
+<meta property="og:description" content="Associate Partner CEE w apsolut Group. 25+ lat w zakupach strategicznych i transformacji cyfrowej dla ponad 100 organizacji.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mamcarz.com">
+<meta property="og:image" content="https://mamcarz.com/logo.png">
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #101318;
+    --bg2: #181c24;
+    --bg3: #222830;
+    --gold: #c8a96e;
+    --gold-light: #e8d09e;
+    --text: #eae6de;
+    --text-secondary: #b0afc0;
+    --muted: #9a99aa;
+    --border: rgba(200,169,110,0.25);
+    --accent: #2a6496;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(13,15,20,0.98), transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+    font-weight: 400;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HAMBURGER */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--gold);
+    transition: all 0.3s;
+  }
+
+  .nav-hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+
+  .nav-hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav-hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 30%, rgba(200,169,110,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(42,100,150,0.08) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,169,110,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,169,110,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  .hero-content {
+    position: relative;
+    max-width: 900px;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-name em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-desc {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 520px;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+    font-weight: 300;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 400;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--gold);
+    background: rgba(200,169,110,0.05);
+  }
+
+  .hero-stats {
+    position: absolute;
+    right: 4rem;
+    bottom: 8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    opacity: 0;
+    animation: fadeLeft 0.8s 1s forwards;
+  }
+
+  .stat {
+    text-align: right;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 3rem;
+    left: 4rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 8rem 4rem;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 3rem;
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  /* ABOUT */
+  #about {
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .about-photo-wrap {
+    position: relative;
+  }
+
+  .about-photo {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: var(--bg3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold) 0%, transparent 50%);
+    opacity: 0.15;
+    z-index: 1;
+  }
+
+  .about-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about-frame {
+    position: absolute;
+    top: -1rem;
+    left: -1rem;
+    right: 1rem;
+    bottom: 1rem;
+    border: 1px solid var(--border);
+    pointer-events: none;
+  }
+
+  .about-badge {
+    position: absolute;
+    bottom: -2rem;
+    right: -2rem;
+    background: var(--gold);
+    color: var(--bg);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .about-badge-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .about-badge-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .about-text p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+
+  .about-highlight {
+    color: var(--gold);
+    font-size: 0.9rem;
+  }
+
+  .about-aside {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.8rem;
+  }
+
+  .expertise-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-top: 2.5rem;
+  }
+
+  .expertise-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  .expertise-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  /* EXPERIENCE */
+  .resume-education {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+    max-width: 700px;
+  }
+
+  .timeline {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    padding-left: 3rem;
+    padding-bottom: 3.5rem;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s;
+  }
+
+  .timeline-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -5px;
+    top: 6px;
+    width: 11px;
+    height: 11px;
+    background: var(--bg);
+    border: 2px solid var(--gold);
+  }
+
+  .timeline-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-company {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .timeline-role {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .timeline-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    max-width: 600px;
+  }
+
+  /* SKILLS */
+  #skills {
+    background: var(--bg2);
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .skill-card {
+    background: var(--bg2);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .skill-card:hover { background: var(--bg3); }
+
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+  }
+
+  .skill-card:hover::before { transform: scaleX(1); }
+
+  .skill-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .skill-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .skill-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* PORTFOLIO */
+  #portfolio {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .portfolio-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .pcard {
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    cursor: pointer;
+  }
+
+  .pcard--wide {
+    grid-column: span 2;
+    min-height: 220px;
+  }
+
+  .pcard__bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.6s;
+  }
+
+  .pcard:hover .pcard__bg {
+    transform: scale(1.04);
+  }
+
+  .pcard__deco {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    font-size: 4rem;
+    opacity: 0.07;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .pcard__body {
+    position: relative;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 100%);
+    transition: background 0.3s;
+  }
+
+  .pcard:hover .pcard__body {
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 100%);
+  }
+
+  .pcard__tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .pcard__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .pcard--wide .pcard__title {
+    font-size: 2.2rem;
+  }
+
+  .pcard__desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 560px;
+    flex: 1;
+  }
+
+  .pcard__link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-top: 0.5rem;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.3s;
+  }
+
+  .pcard:hover .pcard__link {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* CASE STUDIES */
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .case-card {
+    background: var(--bg);
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.3s;
+  }
+
+  .case-card:hover { background: var(--bg3); }
+
+  .case-industry {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  .case-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .case-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex: 1;
+  }
+
+  .case-results {
+    border-top: 1px solid var(--border);
+    padding-top: 1.2rem;
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .case-metric {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .case-metric-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .case-metric-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .testimonial {
+    background: var(--bg2);
+    padding: 2.5rem;
+  }
+
+  .testimonial-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--gold);
+  }
+
+  .testimonial-author {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .testimonial-author strong {
+    display: block;
+    color: var(--text);
+    font-size: 0.8rem;
+    letter-spacing: 0;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 0.2rem;
+  }
+
+  /* PROCESS */
+  .process-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .process-step {
+    background: var(--bg);
+    padding: 2.5rem;
+    position: relative;
+  }
+
+  .process-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    opacity: 0.3;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .process-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+  }
+
+  .process-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* CLIENTS */
+  .clients-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .client-item {
+    background: var(--bg2);
+    padding: 1.2rem 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    font-weight: 400;
+    transition: all 0.3s;
+  }
+
+  .client-item:hover {
+    background: var(--bg3);
+    color: var(--gold);
+  }
+
+  /* CONTACT */
+  #contact {
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contact-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .contact-info p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  .contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .contact-detail {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .contact-detail-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 2.5rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .footer-links a:hover { color: var(--gold); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { transform: scaleX(1); }
+    50% { transform: scaleX(0.6); transform-origin: left; }
+  }
+
+  /* DIVIDER */
+  .gold-divider {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 2rem 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    section { padding: 5rem 2rem; }
+    #hero { padding: 0 2rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .portfolio-cards { grid-template-columns: 1fr; }
+    .pcard--wide { grid-column: span 1; }
+    .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .hero-stats { display: none; }
+    .nav-links { display: none; }
+    .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); padding: 2rem; gap: 1.5rem; }
+    .nav-hamburger { display: flex; }
+    .expertise-list { grid-template-columns: 1fr; }
+    .clients-grid { grid-template-columns: repeat(3, 1fr); }
+    .cases-grid { grid-template-columns: 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .process-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">PM — Mamcarz.com</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">O mnie</a></li>
+    <li><a href="#resume">Doświadczenie</a></li>
+    <li><a href="#skills">Kompetencje</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menu nawigacyjne">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="hero-tag">Associate Partner CEE · apsolut Group / All for One · SAP Procurement</p>
+    <h1 class="hero-name">Paweł<br><em>Mamcarz</em></h1>
+    <p class="hero-desc">Buduję region CEE od podstaw — ponad 20 wdrożeń SAP Ariba w Polsce, Czechach, Słowacji, Węgrzech i Rumunii. Od PKN Orlen i KGHM po LOT, Żabkę i Motor Oil Hellas.</p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn-primary">Współpracujmy</a>
+      <a href="#resume" class="btn-ghost">Doświadczenie</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">100+</div>
+      <div class="stat-label">Organizacji w portfolio</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">500M</div>
+      <div class="stat-label">PLN zakupów / rok</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">Lat doświadczenia</div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span>Przewiń</span>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-photo-wrap">
+      <div class="about-photo">
+        <img src="IMG_3284.jpeg" alt="Paweł Mamcarz" loading="lazy">
+      </div>
+      <div class="about-frame"></div>
+      <div class="about-badge">
+        <div class="about-badge-num">25+</div>
+        <div class="about-badge-text">lat w procurement</div>
+      </div>
+    </div>
+    <div class="about-text">
+      <p class="section-label">O mnie</p>
+      <h2 class="section-title">Procurement<br><em>z pasją</em></h2>
+      <p>Od ponad 25 lat zajmuję się zakupami — od analityki finansowej, przez zarządzanie działami zakupów w PKN Orlen i Banku Millennium, po budowanie rynku SAP Ariba w Polsce i regionie CEE. Dziś jako <strong style="color:var(--gold)">Associate Partner w apsolut Group</strong> (SAP Gold Partner, wielokrotny SAP Ariba MEE Partner of the Year, od marca 2026 część All for One Group) rozwijam region CEE — ponad 20 wdrożeń w Polsce, Czechach, Słowacji, Węgrzech i Rumunii.</p>
+      <p>Łączna wartość realizowanych projektów: ponad 500 mln EUR dla ponad 100 organizacji — KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. Największy z nich: CONNECT dla Grupy ORLEN — 15 spółek, 4 kraje, 60-osobowy zespół, największa platforma sourcingowa w Polsce. Wcześniej m.in. PGE, PGNiG, Aeroflot, PKP PLK, PKP Intercity.</p>
+      <p>W latach 2008–2012 odszedłem od korporacji i zbudowałem własne firmy: <strong>RMS sp. z o.o.</strong> (startup z dotacją POIG 8.1), <strong>Przypominamy.com</strong> oraz kilkanaście projektów doradczych. To doświadczenie z drugiej strony — pozyskiwanie finansowania UE, budowanie produktu od zera, samodzielna sprzedaż.</p>
+      <p class="about-highlight">Poza pracą: licencja pilota śmigłowcowego <strong>PPL(H)</strong> i samolotowego <strong>PPL(A) z uprawnieniami do akrobacji</strong>. Właściciel WarsawFlightSafety, pilot pokazowy Diverse Extreme Team (2013). Fotograf prasowy agencji Forum — sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios).</p>
+      <p class="about-aside">Z technologią od 1993 — pierwsza strona WWW na VAX UMCS w Lublinie, administrator sieci na SGH. Kiedyś SUN, SGI Indigo, IBM AIX; dziś Cloudflare, React i własne projekty webowe.</p>
+      <div class="expertise-list">
+        <div class="expertise-item"><div class="expertise-dot"></div>SAP Ariba / Fieldglass / S/4HANA</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Zakupy strategiczne</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Sprzedaż i rozwój biznesu (CEE)</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Zarządzanie programami i zmianą</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Prawo Zamówień Publicznych (PZP)</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Energetyka, przemysł, pharma</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESUME -->
+<section id="resume">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Kariera</p>
+    <h2 class="section-title">Doświadczenie<br><em>zawodowe</em></h2>
+    <p class="resume-education">SGH Warszawa (1995–2000) · Wirtschaftsuniversität Wien CEMS Master (2001) · Warsaw Executive MBA, Univ. of Minnesota / SGH (2005) · APMP Project Management, PMI (2008) · Języki: polski, angielski, niemiecki, rosyjski</p>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">07.2021 · obecnie</div>
+        <div class="timeline-company">apsolut Group <span style="font-size:0.7rem;color:var(--text-secondary);font-family:'DM Mono',monospace;letter-spacing:0.05em">/ All for One Group od 03.2026</span></div>
+        <div class="timeline-role">Associate Partner, CEE Region</div>
+        <p class="timeline-desc">Budowanie regionu CEE od podstaw — 20+ wdrożeń SAP Ariba, SAP Fieldglass i SAP S/4HANA w Polsce, Czechach, Słowacji, Węgrzech i Rumunii. Klienci: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. apsolut — wielokrotny SAP Ariba MEE Partner of the Year, 450+ klientów, od marca 2026 część All for One Group SE.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">04.2017 – 06.2021</div>
+        <div class="timeline-company">SAP Polska Sp. z o.o.</div>
+        <div class="timeline-role">SAP Ariba Senior Account Executive</div>
+        <p class="timeline-desc">Budowanie rynku SAP Ariba w Polsce i regionie CEE od zera. Sprzedaż rozwiązań procurement bezpośrednio do CFO, CPO i CIO największych firm w regionie. Pierwsze wdrożenia SAP Ariba w Polsce.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">11.2016 – 05.2017</div>
+        <div class="timeline-company">PZU S.A.</div>
+        <div class="timeline-role">Dyrektor Projektu Strategicznego</div>
+        <p class="timeline-desc">Transformacja zakupów dla największego ubezpieczyciela w CEE. Analiza wydatków, strategie kategoriowe, plan wdrożenia i wybór platformy IT. Pełna roadmapa od diagnozy po docelowy model operacyjny.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">07.2015 – 11.2016</div>
+        <div class="timeline-company">PwC Polska Sp. z o.o.</div>
+        <div class="timeline-role">Wicedyrektor w Advisory / Procurement Expert</div>
+        <p class="timeline-desc">Metodyka CAPP (Complete &amp; Agile Procurement). Projekty dla PGE SA, PGNIG SA, PKN Orlen SA, PZU SA, Elektrownia Puławy, Aeroflot, Russian Railways, Airport Vnukovo, BRW SA, Kopex SA.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">06.2013 – 09.2015</div>
+        <div class="timeline-company">PKP Polskie Linie Kolejowe S.A.</div>
+        <div class="timeline-role">Doradca Zarządu</div>
+        <p class="timeline-desc">Ekspert w przetargach publicznych (PZP) o wartości ponad 100 mln PLN. Negocjacje umowy ramowej z SAP AG dla grupy PKP (4 spółki). Audyt platformy Marketplanet.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">12.2014 – 05.2015</div>
+        <div class="timeline-company">PKP Intercity S.A.</div>
+        <div class="timeline-role">Dyrektor Programu Nowego Systemu Sprzedaży</div>
+        <p class="timeline-desc">Wdrożenie Revenue Management System (JDA/RPO). Zespół 30+ osób. Integracja z KURS 90, Oracle EBS, kanałami sprzedaży (kasa, web, mobile).</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">03.2012 – 09.2014</div>
+        <div class="timeline-company">PKN ORLEN S.A.</div>
+        <div class="timeline-role">Project Manager — Platforma CONNECT</div>
+        <p class="timeline-desc">Kierownik projektu wdrożenia platformy sourcingowej CONNECT dla 15 spółek Grupy ORLEN w 4 krajach (PL, CZ, DE, LT). Największe tego typu wdrożenie w Polsce — 60 osób, SAP SRM/MM + Oracle EBS. Moduły: RFx, e-aukcje, kontrakty, centralne drzewo kategorii, baza dostawców.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">01.2006 – 09.2008</div>
+        <div class="timeline-company">PKN ORLEN S.A.</div>
+        <div class="timeline-role">Kierownik Działu Zamówień Generalnych</div>
+        <p class="timeline-desc">30-osobowy dział. Domeny: IT/Telco, Consulting, Admin, Maintenance, stacje paliw, flota. Portfolio ponad 500 mln PLN/rok. Wdrożenie SAP SRM. Strategie zakupowe dla IT/telco, retail (1800 stacji paliw, SAP RETAIL).</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">2004 – 2006</div>
+        <div class="timeline-company">Telekomunikacja Polska S.A.</div>
+        <div class="timeline-role">Critical Changes Manager — TP Convergence Programme</div>
+        <p class="timeline-desc">Wdrożenie Oracle EBS dla centrum SSC w Lublinie. Koordynacja 215 członków zespołu i 29 kierowników podprojektów.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">2002 – 2004</div>
+        <div class="timeline-company">Bank Millennium S.A.</div>
+        <div class="timeline-role">Buyer / Lider strumienia IT/Telco</div>
+        <p class="timeline-desc">Centralizacja zakupów IT: software, hardware, usługi maintenance, SLA. Renegocjacje kontraktów, program redukcji kosztów administracyjnych.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">1999 – 2002</div>
+        <div class="timeline-company">Elektrim S.A. / Bank Austria Creditanstalt, Wiedeń</div>
+        <div class="timeline-role">Financial Controller &amp; Risk Management Specialist</div>
+        <p class="timeline-desc">Kontroler finansowy drugiego co do wielkości konglomeratu telekomunikacyjno-energetycznego w Polsce. Emisja obligacji 200 mln PLN (Elektrim/PZU), krótkoterminowe papiery dłużne 460 mln PLN (Elektrim/PEKAO). Analityk rynków CEE w Wiedniu — instrumenty dłużne i pochodne.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div style="max-width:1200px;margin:0 auto;">
+  <p class="section-label">Kompetencje</p>
+  <h2 class="section-title">Obszary<br><em>specjalizacji</em></h2>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-card">
+      <div class="skill-icon">🔷</div>
+      <div class="skill-name">SAP Ariba · Fieldglass · S/4HANA</div>
+      <p class="skill-desc">Kompleksowe wdrożenia SAP Ariba (Sourcing, Contracts, SLP, Buying), SAP Fieldglass i S/4HANA Procurement. 20+ projektów w CEE. Doświadczenie również z Oracle EBS, SAP SRM, Marketplanet, Ivalua, Basware.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">⚙️</div>
+      <div class="skill-name">Zakupy strategiczne</div>
+      <p class="skill-desc">25 lat doświadczenia. Zarządzanie portfelem zakupów 500 mln PLN/rok (PKN Orlen). Projekty o łącznej wartości 500 mln EUR dla 100+ organizacji z energetyki, przemysłu, lotnictwa, pharmy i finansów.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">🌍</div>
+      <div class="skill-name">Sprzedaż i rozwój biznesu (CEE)</div>
+      <p class="skill-desc">Budowanie obecności rynkowej od zera w Polsce i Europie Środkowej. Relacje C-level: CFO, CPO, CIO. Klienci: KGHM, Żabka, PLL LOT, Motor Oil Hellas, MOL, Orange, Polpharma, Adamed, CIECH, Lotte Wedel.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">📐</div>
+      <div class="skill-name">Zarządzanie programami i zmianą</div>
+      <p class="skill-desc">Certyfikat APMP (PMI, 2008). Zarządzanie programami wielospółkowymi (15 spółek, 4 kraje, 60 osób — ORLEN CONNECT). Koordynacja 215 członków zespołu (TP SA). Revenue Management dla PKP Intercity.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">⚖️</div>
+      <div class="skill-name">Prawo Zamówień Publicznych</div>
+      <p class="skill-desc">Ekspert w przetargach publicznych PZP — PKP PLK, wartość ponad 100 mln PLN. Strategie zakupowe dla PGNIG SA w reżimie PZP. Negocjacje umów ramowych SAP AG dla grupy PKP.</p>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">✈️</div>
+      <div class="skill-name">Poza procurement</div>
+      <p class="skill-desc">Pilot akrobacyjny PPL(A)/PPL(H), właściciel WarsawFlightSafety. Pilot pokazowy Diverse Extreme Team (2013). Fotograf prasowy Agencji Forum od 2003 r. — <a href="https://akrobacja.top" target="_blank" rel="noopener" style="color:var(--gold)">akrobacja.top</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Wybrane projekty</p>
+    <h2 class="section-title">Case<br><em>studies</em></h2>
+  </div>
+  <div class="cases-grid">
+    <div class="case-card">
+      <div class="case-industry">Energetyka · Multi-country</div>
+      <div class="case-title">Platforma sourcingowa CONNECT — Grupa ORLEN</div>
+      <div class="case-desc">Wdrożenie centralnej platformy zakupowej dla 15 spółek Grupy ORLEN w 4 krajach (PL, CZ, DE, LT). Największy tego typu projekt w Polsce — ujednolicenie procesów RFx, e-aukcji, kontraktów i bazy dostawców w jednym systemie SAP SRM/MM.</div>
+      <div class="case-results">
+        <div class="case-metric">
+          <div class="case-metric-num">15</div>
+          <div class="case-metric-label">spółek</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">4</div>
+          <div class="case-metric-label">kraje</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">60</div>
+          <div class="case-metric-label">osób w zespole</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-industry">Retail · FMCG · CEE</div>
+      <div class="case-title">SAP Ariba — Żabka Polska</div>
+      <div class="case-desc">Kompleksowe wdrożenie SAP Ariba Sourcing i Contracts dla największej sieci convenience w Europie. Digitalizacja procesów sourcingowych i kontraktowych dla kategorii indirect — od IT po usługi marketingowe.</div>
+      <div class="case-results">
+        <div class="case-metric">
+          <div class="case-metric-num">9000+</div>
+          <div class="case-metric-label">sklepów w sieci</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">SAP</div>
+          <div class="case-metric-label">Ariba Sourcing & Contracts</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-industry">Przemysł wydobywczy</div>
+      <div class="case-title">SAP Ariba & Fieldglass — KGHM</div>
+      <div class="case-desc">Wdrożenie SAP Ariba i SAP Fieldglass dla jednego z największych producentów miedzi i srebra na świecie. Zarządzanie dostawcami zewnętrznymi i usługami kontraktowymi w modelu zintegrowanym z SAP S/4HANA.</div>
+      <div class="case-results">
+        <div class="case-metric">
+          <div class="case-metric-num">Top 3</div>
+          <div class="case-metric-label">producent miedzi globalnie</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">SAP</div>
+          <div class="case-metric-label">Ariba + Fieldglass + S/4HANA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <p class="section-label">Portfolio</p>
+  <h2 class="section-title">Projekty<br><em>własne</em></h2>
+
+  <div class="portfolio-cards">
+
+    <!-- akrobacja.top -->
+    <a href="https://akrobacja.top" target="_blank" rel="noopener noreferrer" class="pcard pcard--wide">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#0d1a2e 0%,#1a2d4a 60%,#0a1220 100%)"></div>
+      <div class="pcard__deco">✈</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Voucher · E-commerce · Lotnictwo</div>
+        <div class="pcard__title">akrobacja.top</div>
+        <div class="pcard__desc">Platforma sprzedaży voucherów na loty akrobacyjne samolotem Extra 300L z lotniska Radom-Piastów (EPRP). E-commerce, checkout z płatnościami online, automatyczna generacja voucherów PDF, kalendarz rezerwacji i panel administracyjny.</div>
+        <div class="pcard__link">akrobacja.top →</div>
+      </div>
+    </a>
+
+    <!-- FilmoLot.pl -->
+    <a href="https://filmolot.pl" target="_blank" rel="noopener noreferrer" class="pcard">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#1a1008 0%,#2e1a06 60%,#120c04 100%)"></div>
+      <div class="pcard__deco">🎬</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Fotografia · Film · Air-to-Air</div>
+        <div class="pcard__title">FilmoLot.pl</div>
+        <div class="pcard__desc">Projekt fotografii i wideo lotniczego — sesje air-to-air, dokumentacja pokazów i wydarzeń lotniczych. Współorganizator ATAM (Air-to-Air Meeting) w Piotrkowie Trybunalskim.</div>
+        <div class="pcard__link">filmolot.pl →</div>
+      </div>
+    </a>
+
+    <!-- czympojade.pl -->
+    <a href="https://czympojade.pl" target="_blank" rel="noopener noreferrer" class="pcard">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#0a1a14 0%,#122e22 60%,#081410 100%)"></div>
+      <div class="pcard__deco">🚌</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Aplikacja webowa · Transport</div>
+        <div class="pcard__title">czympojade.pl</div>
+        <div class="pcard__desc">Aplikacja webowa i mobilna do szybkiego wyszukiwania połączeń transportowych — autobusy, pociągi, busy. Jeden z pierwszych tego typu serwisów w Polsce, zbudowany od zera: backend, frontend, integracja z rozkładami przewoźników.</div>
+        <div class="pcard__link">czympojade.pl →</div>
+      </div>
+    </a>
+
+    <!-- przypominamy.com -->
+    <a href="https://przypominamy.com" target="_blank" rel="noopener noreferrer" class="pcard pcard--wide">
+      <div class="pcard__bg" style="background:linear-gradient(135deg,#0a1428 0%,#162240 60%,#080e1c 100%)"></div>
+      <div class="pcard__deco">💬</div>
+      <div class="pcard__body">
+        <div class="pcard__tag">Start-up · SaaS · SMS / MMS / IVR</div>
+        <div class="pcard__title">Przypominamy.com</div>
+        <div class="pcard__desc">Platforma powiadomień SMS, MMS i głosowych (IVR/TTS) dla biznesu — przypomnienia, bulk messaging, automatyzacja komunikacji z klientem. Startup założony i rozwijany od podstaw, współfinansowany ze środków EU (POIG 8.1). Opisany m.in. przez di.com.pl jako innowacyjne narzędzie B2B.</div>
+        <div class="pcard__link">przypominamy.com →</div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section id="clients">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Klienci</p>
+    <h2 class="section-title">Wybrani<br><em>klienci</em></h2>
+    <div class="clients-grid">
+      <div class="client-item">PKN Orlen</div>
+      <div class="client-item">KGHM</div>
+      <div class="client-item">PGE SA</div>
+      <div class="client-item">PGNIG SA</div>
+      <div class="client-item">PZU SA</div>
+      <div class="client-item">PLL LOT</div>
+      <div class="client-item">Żabka Polska</div>
+      <div class="client-item">Motor Oil Hellas</div>
+      <div class="client-item">MOL</div>
+      <div class="client-item">Orange / TP SA</div>
+      <div class="client-item">PKP PLK</div>
+      <div class="client-item">PKP Intercity</div>
+      <div class="client-item">Polpharma</div>
+      <div class="client-item">Adamed</div>
+      <div class="client-item">CIECH</div>
+      <div class="client-item">Lotte Wedel</div>
+      <div class="client-item">Bank Millennium</div>
+      <div class="client-item">Pfleiderer</div>
+      <div class="client-item">Aeroflot</div>
+      <div class="client-item">Hitachi Energy</div>
+      <div class="client-item">PKP Energetyka</div>
+      <div class="client-item">Elektrownia Puławy</div>
+      <div class="client-item">Kopex SA</div>
+      <div class="client-item">BRW SA</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Współpraca</p>
+    <h2 class="section-title">Jak<br><em>pracuję</em></h2>
+  </div>
+  <div class="process-grid">
+    <div class="process-step">
+      <div class="process-num">01</div>
+      <div class="process-title">Diagnoza</div>
+      <div class="process-desc">Analiza obecnych procesów zakupowych, dojrzałości organizacji i gotowości do transformacji. Mapowanie wydatków, identyfikacja szybkich usprawnień.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">02</div>
+      <div class="process-title">Strategia</div>
+      <div class="process-desc">Opracowanie docelowego modelu operacyjnego, wybór platformy (SAP Ariba, Fieldglass, S/4HANA), roadmapa wdrożenia i business case.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">03</div>
+      <div class="process-title">Wdrożenie</div>
+      <div class="process-desc">Prowadzenie projektu od konfiguracji po go-live. Zarządzanie zespołem, integratorem i interesariuszami. Szkolenia i change management.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">04</div>
+      <div class="process-title">Wartość</div>
+      <div class="process-desc">Mierzenie efektów: oszczędności, compliance, adopcja użytkowników. Optymalizacja po wdrożeniu i rozwój kolejnych modułów.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS (hidden until real quotes are added)
+<section id="testimonials">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Opinie</p>
+    <h2 class="section-title">Co mówią<br><em>współpracownicy</em></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial">
+      <div class="testimonial-quote">TODO: prawdziwa opinia</div>
+      <div class="testimonial-author">
+        <strong>Imię i stanowisko</strong>
+        Firma
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="testimonial-quote">TODO: prawdziwa opinia</div>
+      <div class="testimonial-author">
+        <strong>Imię i stanowisko</strong>
+        Firma
+      </div>
+    </div>
+  </div>
+</section>
+-->
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="contact-info">
+      <p class="section-label">Kontakt</p>
+      <h2 class="section-title">Porozmawiajmy<br><em>o projekcie</em></h2>
+      <p>Szukasz wsparcia w transformacji zakupów, wdrożeniu SAP Ariba lub budowie strategii procurement? Napisz — chętnie porozmawiam o Twoim projekcie.</p>
+      <div class="contact-details">
+        <a href="mailto:pawel@mamcarz.com" class="contact-detail" style="text-decoration:none;color:var(--text);">
+          <div class="contact-detail-icon">✉</div>
+          <span>pawel@mamcarz.com</span>
+        </a>
+        <a href="https://www.linkedin.com/in/pawelmamcarz/" target="_blank" rel="noopener noreferrer" class="contact-detail" style="text-decoration:none;color:var(--text);">
+          <div class="contact-detail-icon">in</div>
+          <span>LinkedIn / Paweł Mamcarz</span>
+        </a>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">🌐</div>
+          <span>mamcarz.com</span>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form" style="padding:0;background:none;border:none;">
+      <div id="ai-chat" style="background:var(--bg2);border:1px solid var(--border);display:flex;flex-direction:column;height:480px;">
+        <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.8rem;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade8066;"></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);">Agent AI · Paweł Mamcarz</span>
+        </div>
+        <div id="chat-messages" style="flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;"></div>
+        <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:0.8rem;">
+          <input id="chat-input" type="text" placeholder="Napisz wiadomość..." aria-label="Wiadomość do asystenta AI" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;transition:border 0.2s;" onkeydown="if(event.key==='Enter')sendMsg()">
+          <button onclick="sendMsg()" aria-label="Wyślij wiadomość" style="background:var(--gold);color:#000;border:none;padding:0.7rem 1.2rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;font-weight:600;transition:opacity 0.2s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">WYŚLIJ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 1993–2026 Paweł Mamcarz — mamcarz.com</div>
+  <ul class="footer-links">
+    <li><a href="#hero">Strona główna</a></li>
+    <li><a href="#about">O mnie</a></li>
+    <li><a href="#resume">CV</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Hamburger menu
+  const hamburger = document.getElementById('navHamburger');
+  const navLinks = document.getElementById('navLinks');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navLinks.classList.toggle('open');
+  });
+
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      navLinks.classList.remove('open');
+    });
+  });
+
+  // Scroll animation for timeline items
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 120);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.timeline-item').forEach(el => observer.observe(el));
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navAnchors = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 200) current = s.id;
+    });
+    navAnchors.forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--gold)' : '';
+    });
+  });
+
+  // AI Chat — Llama 3.3 via Cloudflare Worker
+  const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
+  const chatHistory = [];
+
+  function addMsg(text, isUser) {
+    const el = document.createElement("div");
+    el.style.cssText = isUser
+      ? "align-self:flex-end;background:var(--gold);color:#000;padding:0.7rem 1rem;max-width:80%;font-size:0.88rem;line-height:1.5;"
+      : "align-self:flex-start;background:var(--bg3);border:1px solid var(--border);padding:0.7rem 1rem;max-width:85%;font-size:0.88rem;line-height:1.6;color:var(--text);";
+    el.innerHTML = text;
+    const msgs = document.getElementById("chat-messages");
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+    return el;
+  }
+
+  async function sendMsg() {
+    const inp = document.getElementById("chat-input");
+    const text = inp.value.trim();
+    if (!text) return;
+    addMsg(text, true);
+    inp.value = "";
+
+    chatHistory.push({ role: "user", content: text });
+
+    const thinking = addMsg('<span style="opacity:0.5">Myślę...</span>', false);
+
+    try {
+      const res = await fetch(CHAT_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: chatHistory }),
+      });
+
+      const data = await res.json();
+
+      if (data.reply) {
+        thinking.innerHTML = data.reply.replace(/\n/g, "<br>");
+        chatHistory.push({ role: "assistant", content: data.reply });
+      } else {
+        thinking.innerHTML = "Przepraszam, coś poszło nie tak. Spróbuj ponownie lub napisz na <a href=\"mailto:pawel@mamcarz.com\" style=\"color:var(--gold)\">pawel@mamcarz.com</a>";
+      }
+    } catch (err) {
+      thinking.innerHTML = "Nie udało się połączyć z AI. Napisz bezpośrednio: <a href=\"mailto:pawel@mamcarz.com\" style=\"color:var(--gold)\">pawel@mamcarz.com</a>";
+    }
+  }
+
+  setTimeout(() => {
+    addMsg("Cześć! Jestem asystentem AI Pawła Mamcarza 👋<br>Mogę odpowiedzieć na pytania o jego <strong>usługi</strong>, <strong>doświadczenie</strong> lub pomóc nawiązać <strong>kontakt</strong>. Czym mogę pomóc?", false);
+  }, 300);
+
+  document.getElementById("chat-input").addEventListener("focus", function() {
+    this.style.borderColor = "var(--gold)";
+  });
+  document.getElementById("chat-input").addEventListener("blur", function() {
+    this.style.borderColor = "var(--border)";
+  });
+</script>
+
+</body>
+</html>
