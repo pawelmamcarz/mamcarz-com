@@ -670,6 +670,162 @@
     transform: translateY(0);
   }
 
+  /* CASE STUDIES */
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .case-card {
+    background: var(--bg);
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.3s;
+  }
+
+  .case-card:hover { background: var(--bg3); }
+
+  .case-industry {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  .case-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .case-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex: 1;
+  }
+
+  .case-results {
+    border-top: 1px solid var(--border);
+    padding-top: 1.2rem;
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .case-metric {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .case-metric-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .case-metric-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .testimonial {
+    background: var(--bg2);
+    padding: 2.5rem;
+  }
+
+  .testimonial-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--gold);
+  }
+
+  .testimonial-author {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .testimonial-author strong {
+    display: block;
+    color: var(--text);
+    font-size: 0.8rem;
+    letter-spacing: 0;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 0.2rem;
+  }
+
+  /* PROCESS */
+  .process-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .process-step {
+    background: var(--bg);
+    padding: 2.5rem;
+    position: relative;
+  }
+
+  .process-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    opacity: 0.3;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .process-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+  }
+
+  .process-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
   /* CLIENTS */
   .clients-grid {
     display: grid;
@@ -811,6 +967,9 @@
     .nav-hamburger { display: flex; }
     .expertise-list { grid-template-columns: 1fr; }
     .clients-grid { grid-template-columns: repeat(3, 1fr); }
+    .cases-grid { grid-template-columns: 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .process-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -882,11 +1041,11 @@
     <div class="about-text">
       <p class="section-label">O mnie</p>
       <h2 class="section-title">Procurement<br><em>z pasją</em></h2>
-      <p>Zakupy to moja działka od ponad 25 lat — i mam na myśli całą drogę: od analityki finansowej, przez zarządzanie dużymi działami zakupów w PKN Orlen i Banku Millennium, aż po budowanie rynku SAP Ariba w Polsce i regionie CEE. Dziś jako <strong style="color:var(--gold)">Associate Partner w apsolut Group</strong> (SAP Gold Partner, wielokrotny SAP Ariba MEE Partner of the Year, od marca 2026 część All for One Group) rozwijam region od podstaw — już ponad 20 wdrożeń w Polsce, Czechach, Słowacji, Węgrzech i Rumunii.</p>
-      <p>Projekty, które robię, mają realną skalę: ponad 500 mln EUR wartości zakontraktowanej pracy dla ponad 100 organizacji — KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. Największy projekt: CONNECT dla Grupy ORLEN — 15 spółek, 4 kraje, 60-osobowy zespół, największa platforma sourcingowa w Polsce. Wcześniej PGE, PGNiG, Aeroflot, PKP PLK, PKP Intercity.</p>
-      <p>W latach 2008–2012 zboczyłem ze ścieżki korporacyjnej — i dobrze, że to zrobiłem. Założyłem kilka własnych rzeczy: <strong>RMS sp. z o.o.</strong> (startup z dotacją POIG 8.1), <strong>Przypominamy.com</strong> i prowadziłem kilkanaście projektów doradczych zakupowych. Pierwsze starcie ze światem jako founder, nie jako konsultant — zdobywanie dotacji UE, budowanie produktu od zera, sprzedaż własnych usług.</p>
-      <p class="about-highlight">Poza biurem: posiadam licencję pilota śmigłowcowego <strong>PPL(H)</strong> i samolotowego <strong>PPL(A) z uprawnieniami do akrobacji</strong>. Właściciel WarsawFlightSafety, pilot pokazowy Diverse Extreme Team (2013). Do tego fotograf prasowy agencji Forum — sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios).</p>
-      <p class="about-aside">Z Internetem związany od 1993 — pierwsza strona WWW na maszynie VAX UMCS w Lublinie, administrator sieci na SGH. Kiedyś SUN, SGI Indigo, IBM AIX; dziś głównie Cloudflare, React i zbyt wiele otwartych kart w przeglądarce.</p>
+      <p>Od ponad 25 lat zajmuję się zakupami — od analityki finansowej, przez zarządzanie działami zakupów w PKN Orlen i Banku Millennium, po budowanie rynku SAP Ariba w Polsce i regionie CEE. Dziś jako <strong style="color:var(--gold)">Associate Partner w apsolut Group</strong> (SAP Gold Partner, wielokrotny SAP Ariba MEE Partner of the Year, od marca 2026 część All for One Group) rozwijam region CEE — ponad 20 wdrożeń w Polsce, Czechach, Słowacji, Węgrzech i Rumunii.</p>
+      <p>Łączna wartość realizowanych projektów: ponad 500 mln EUR dla ponad 100 organizacji — KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. Największy z nich: CONNECT dla Grupy ORLEN — 15 spółek, 4 kraje, 60-osobowy zespół, największa platforma sourcingowa w Polsce. Wcześniej m.in. PGE, PGNiG, Aeroflot, PKP PLK, PKP Intercity.</p>
+      <p>W latach 2008–2012 odszedłem od korporacji i zbudowałem własne firmy: <strong>RMS sp. z o.o.</strong> (startup z dotacją POIG 8.1), <strong>Przypominamy.com</strong> oraz kilkanaście projektów doradczych. To doświadczenie z drugiej strony — pozyskiwanie finansowania UE, budowanie produktu od zera, samodzielna sprzedaż.</p>
+      <p class="about-highlight">Poza pracą: licencja pilota śmigłowcowego <strong>PPL(H)</strong> i samolotowego <strong>PPL(A) z uprawnieniami do akrobacji</strong>. Właściciel WarsawFlightSafety, pilot pokazowy Diverse Extreme Team (2013). Fotograf prasowy agencji Forum — sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios).</p>
+      <p class="about-aside">Z technologią od 1993 — pierwsza strona WWW na VAX UMCS w Lublinie, administrator sieci na SGH. Kiedyś SUN, SGI Indigo, IBM AIX; dziś Cloudflare, React i własne projekty webowe.</p>
       <div class="expertise-list">
         <div class="expertise-item"><div class="expertise-dot"></div>SAP Ariba / Fieldglass / S/4HANA</div>
         <div class="expertise-item"><div class="expertise-dot"></div>Zakupy strategiczne</div>
@@ -920,7 +1079,7 @@
         <div class="timeline-year">04.2017 – 06.2021</div>
         <div class="timeline-company">SAP Polska Sp. z o.o.</div>
         <div class="timeline-role">SAP Ariba Senior Account Executive</div>
-        <p class="timeline-desc">Budowanie rynku SAP Ariba w Polsce i regionie CEE. Współpraca z liderami rynku na poziomie C-suite (CFO, CPO, CIO). Tworzenie unikalnych propozycji wartości dla transformacji cyfrowej funkcji zakupowej.</p>
+        <p class="timeline-desc">Budowanie rynku SAP Ariba w Polsce i regionie CEE od zera. Sprzedaż rozwiązań procurement bezpośrednio do CFO, CPO i CIO największych firm w regionie. Pierwsze wdrożenia SAP Ariba w Polsce.</p>
       </div>
 
       <div class="timeline-item">
@@ -928,7 +1087,7 @@
         <div class="timeline-year">11.2016 – 05.2017</div>
         <div class="timeline-company">PZU S.A.</div>
         <div class="timeline-role">Dyrektor Projektu Strategicznego</div>
-        <p class="timeline-desc">Strategiczny projekt transformacji zakupów dla największego ubezpieczyciela w CEE. Spend visibility, strategie dla kluczowych kategorii, blueprint i roadmapa pełnej transformacji, RFI dla narzędzia IT klasy enterprise.</p>
+        <p class="timeline-desc">Transformacja zakupów dla największego ubezpieczyciela w CEE. Analiza wydatków, strategie kategoriowe, plan wdrożenia i wybór platformy IT. Pełna roadmapa od diagnozy po docelowy model operacyjny.</p>
       </div>
 
       <div class="timeline-item">
@@ -992,7 +1151,7 @@
         <div class="timeline-year">1999 – 2002</div>
         <div class="timeline-company">Elektrim S.A. / Bank Austria Creditanstalt, Wiedeń</div>
         <div class="timeline-role">Financial Controller &amp; Risk Management Specialist</div>
-        <p class="timeline-desc">Kontroler finansowy drugiego co do wielkości konglomeratu telko/kablowego/energetycznego w Polsce. Emisja obligacji PLN 200 mln (Elektrim/PZU), Commercial Papers PLN 460 mln (Elektrim/PEKAO). Analityk rynków CEE w Wiedniu — fixed income, obligacje, swapy.</p>
+        <p class="timeline-desc">Kontroler finansowy drugiego co do wielkości konglomeratu telekomunikacyjno-energetycznego w Polsce. Emisja obligacji 200 mln PLN (Elektrim/PZU), krótkoterminowe papiery dłużne 460 mln PLN (Elektrim/PEKAO). Analityk rynków CEE w Wiedniu — instrumenty dłużne i pochodne.</p>
       </div>
 
     </div>
@@ -1009,12 +1168,12 @@
     <div class="skill-card">
       <div class="skill-icon">🔷</div>
       <div class="skill-name">SAP Ariba · Fieldglass · S/4HANA</div>
-      <p class="skill-desc">End-to-end wdrożenia SAP Ariba (Sourcing, Contracts, SLP, Buying), SAP Fieldglass i S/4HANA Procurement. 20+ projektów w CEE. Znajomość też: Oracle EBS, SAP SRM, Marketplanet, Ivalua, Basware.</p>
+      <p class="skill-desc">Kompleksowe wdrożenia SAP Ariba (Sourcing, Contracts, SLP, Buying), SAP Fieldglass i S/4HANA Procurement. 20+ projektów w CEE. Doświadczenie również z Oracle EBS, SAP SRM, Marketplanet, Ivalua, Basware.</p>
     </div>
     <div class="skill-card">
       <div class="skill-icon">⚙️</div>
       <div class="skill-name">Zakupy strategiczne</div>
-      <p class="skill-desc">Ponad 25 lat w procurement. Portfolio ponad 500 mln PLN/rok (PKN Orlen). Projekty o łącznej wartości ponad 500 mln EUR dla 100+ organizacji z energetyki, przemysłu ciężkiego, lotnictwa, pharmy i finansów.</p>
+      <p class="skill-desc">25 lat doświadczenia. Zarządzanie portfelem zakupów 500 mln PLN/rok (PKN Orlen). Projekty o łącznej wartości 500 mln EUR dla 100+ organizacji z energetyki, przemysłu, lotnictwa, pharmy i finansów.</p>
     </div>
     <div class="skill-card">
       <div class="skill-icon">🌍</div>
@@ -1033,8 +1192,67 @@
     </div>
     <div class="skill-card">
       <div class="skill-icon">✈️</div>
-      <div class="skill-name">Pilot akrobacyjny · Fotograf</div>
-      <p class="skill-desc">Właściciel WarsawFlightSafety — szkoła akrobacji lotniczej. Pilot pokazowy (Diverse Extreme Team 2013). Fotograf prasowy Agencji Forum od 2003 r. Sesje air-to-air, współorganizator ATAM.</p>
+      <div class="skill-name">Poza procurement</div>
+      <p class="skill-desc">Pilot akrobacyjny PPL(A)/PPL(H), właściciel WarsawFlightSafety. Pilot pokazowy Diverse Extreme Team (2013). Fotograf prasowy Agencji Forum od 2003 r. — <a href="https://akrobacja.top" target="_blank" rel="noopener" style="color:var(--gold)">akrobacja.top</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Wybrane projekty</p>
+    <h2 class="section-title">Case<br><em>studies</em></h2>
+  </div>
+  <div class="cases-grid">
+    <div class="case-card">
+      <div class="case-industry">Energetyka · Multi-country</div>
+      <div class="case-title">Platforma sourcingowa CONNECT — Grupa ORLEN</div>
+      <div class="case-desc">Wdrożenie centralnej platformy zakupowej dla 15 spółek Grupy ORLEN w 4 krajach (PL, CZ, DE, LT). Największy tego typu projekt w Polsce — ujednolicenie procesów RFx, e-aukcji, kontraktów i bazy dostawców w jednym systemie SAP SRM/MM.</div>
+      <div class="case-results">
+        <div class="case-metric">
+          <div class="case-metric-num">15</div>
+          <div class="case-metric-label">spółek</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">4</div>
+          <div class="case-metric-label">kraje</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">60</div>
+          <div class="case-metric-label">osób w zespole</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-industry">Retail · FMCG · CEE</div>
+      <div class="case-title">SAP Ariba — Żabka Polska</div>
+      <div class="case-desc">Kompleksowe wdrożenie SAP Ariba Sourcing i Contracts dla największej sieci convenience w Europie. Digitalizacja procesów sourcingowych i kontraktowych dla kategorii indirect — od IT po usługi marketingowe.</div>
+      <div class="case-results">
+        <div class="case-metric">
+          <div class="case-metric-num">9000+</div>
+          <div class="case-metric-label">sklepów w sieci</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">SAP</div>
+          <div class="case-metric-label">Ariba Sourcing & Contracts</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-industry">Przemysł wydobywczy</div>
+      <div class="case-title">SAP Ariba & Fieldglass — KGHM</div>
+      <div class="case-desc">Wdrożenie SAP Ariba i SAP Fieldglass dla jednego z największych producentów miedzi i srebra na świecie. Zarządzanie dostawcami zewnętrznymi i usługami kontraktowymi w modelu zintegrowanym z SAP S/4HANA.</div>
+      <div class="case-results">
+        <div class="case-metric">
+          <div class="case-metric-num">Top 3</div>
+          <div class="case-metric-label">producent miedzi globalnie</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">SAP</div>
+          <div class="case-metric-label">Ariba + Fieldglass + S/4HANA</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1053,7 +1271,7 @@
       <div class="pcard__body">
         <div class="pcard__tag">Voucher · E-commerce · Lotnictwo</div>
         <div class="pcard__title">akrobacja.top</div>
-        <div class="pcard__desc">Platforma sprzedaży voucherów na loty akrobacyjne samolotem Extra 300 LP z lotniska Radom Piastów EPRP. Ekstremalny lot z filmowaniem — prezent dla fanów adrenaliny i lotnictwa. Projekt łączący pasję pilota akrobacyjnego z przedsiębiorczością online.</div>
+        <div class="pcard__desc">Platforma sprzedaży voucherów na loty akrobacyjne samolotem Extra 300L z lotniska Radom-Piastów (EPRP). E-commerce, checkout z płatnościami online, automatyczna generacja voucherów PDF, kalendarz rezerwacji i panel administracyjny.</div>
         <div class="pcard__link">akrobacja.top →</div>
       </div>
     </a>
@@ -1130,6 +1348,61 @@
     </div>
   </div>
 </section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Współpraca</p>
+    <h2 class="section-title">Jak<br><em>pracuję</em></h2>
+  </div>
+  <div class="process-grid">
+    <div class="process-step">
+      <div class="process-num">01</div>
+      <div class="process-title">Diagnoza</div>
+      <div class="process-desc">Analiza obecnych procesów zakupowych, dojrzałości organizacji i gotowości do transformacji. Mapowanie wydatków, identyfikacja szybkich usprawnień.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">02</div>
+      <div class="process-title">Strategia</div>
+      <div class="process-desc">Opracowanie docelowego modelu operacyjnego, wybór platformy (SAP Ariba, Fieldglass, S/4HANA), roadmapa wdrożenia i business case.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">03</div>
+      <div class="process-title">Wdrożenie</div>
+      <div class="process-desc">Prowadzenie projektu od konfiguracji po go-live. Zarządzanie zespołem, integratorem i interesariuszami. Szkolenia i change management.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">04</div>
+      <div class="process-title">Wartość</div>
+      <div class="process-desc">Mierzenie efektów: oszczędności, compliance, adopcja użytkowników. Optymalizacja po wdrożeniu i rozwój kolejnych modułów.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS (hidden until real quotes are added)
+<section id="testimonials">
+  <div style="max-width:1200px;margin:0 auto;">
+    <p class="section-label">Opinie</p>
+    <h2 class="section-title">Co mówią<br><em>współpracownicy</em></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial">
+      <div class="testimonial-quote">TODO: prawdziwa opinia</div>
+      <div class="testimonial-author">
+        <strong>Imię i stanowisko</strong>
+        Firma
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="testimonial-quote">TODO: prawdziwa opinia</div>
+      <div class="testimonial-author">
+        <strong>Imię i stanowisko</strong>
+        Firma
+      </div>
+    </div>
+  </div>
+</section>
+-->
 
 <!-- CONTACT -->
 <section id="contact">
