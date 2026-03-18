@@ -431,11 +431,55 @@
   }
 
   /* EXPERIENCE */
-  .resume-education {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+  .resume-edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
     margin-bottom: 3rem;
-    max-width: 700px;
+  }
+
+  .resume-edu-item {
+    background: var(--bg);
+    padding: 1.2rem 1.5rem;
+  }
+
+  .resume-edu-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+
+  .resume-edu-name {
+    font-size: 0.85rem;
+    color: var(--text);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .resume-edu-name strong {
+    font-weight: 500;
+  }
+
+  .resume-langs {
+    padding: 1.2rem 1.5rem;
+    background: var(--bg);
+    grid-column: span 2;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .resume-lang {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .resume-lang strong {
+    color: var(--text);
+    font-weight: 500;
   }
 
   .timeline {
@@ -967,6 +1011,8 @@
     .nav-hamburger { display: flex; }
     .expertise-list { grid-template-columns: 1fr; }
     .clients-grid { grid-template-columns: repeat(3, 1fr); }
+    .resume-edu-grid { grid-template-columns: 1fr; }
+    .resume-langs { grid-column: span 1; }
     .cases-grid { grid-template-columns: 1fr; }
     .testimonials-grid { grid-template-columns: 1fr; }
     .process-grid { grid-template-columns: 1fr 1fr; }
@@ -1063,7 +1109,30 @@
   <div style="max-width:1200px;margin:0 auto;">
     <p class="section-label">Kariera</p>
     <h2 class="section-title">Doświadczenie<br><em>zawodowe</em></h2>
-    <p class="resume-education">SGH Warszawa (1995–2000) · Wirtschaftsuniversität Wien CEMS Master (2001) · Warsaw Executive MBA, Univ. of Minnesota / SGH (2005) · APMP Project Management, PMI (2008) · Języki: polski, angielski, niemiecki, rosyjski</p>
+    <div class="resume-edu-grid">
+      <div class="resume-edu-item">
+        <div class="resume-edu-year">1995 – 2000</div>
+        <div class="resume-edu-name"><strong>SGH</strong> Warszawa — Finanse i Bankowość</div>
+      </div>
+      <div class="resume-edu-item">
+        <div class="resume-edu-year">2001</div>
+        <div class="resume-edu-name"><strong>Wirtschaftsuniversität Wien</strong> — CEMS Master</div>
+      </div>
+      <div class="resume-edu-item">
+        <div class="resume-edu-year">2005</div>
+        <div class="resume-edu-name"><strong>Warsaw Executive MBA</strong> — Univ. of Minnesota / SGH</div>
+      </div>
+      <div class="resume-edu-item">
+        <div class="resume-edu-year">2008</div>
+        <div class="resume-edu-name"><strong>APMP</strong> Project Management, PMI</div>
+      </div>
+      <div class="resume-langs">
+        <div class="resume-lang"><strong>Polski</strong> — ojczysty</div>
+        <div class="resume-lang"><strong>Angielski</strong> — biegły</div>
+        <div class="resume-lang"><strong>Niemiecki</strong> — zaawansowany</div>
+        <div class="resume-lang"><strong>Rosyjski</strong> — komunikatywny</div>
+      </div>
+    </div>
     <div class="timeline">
 
       <div class="timeline-item">
