@@ -309,6 +309,11 @@
     margin-bottom: 3rem;
   }
 
+  .section-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
   /* ABOUT */
   #about {
     background: var(--bg2);
@@ -392,6 +397,17 @@
     font-size: 1rem;
   }
 
+  .about-highlight {
+    color: var(--gold);
+    font-size: 0.9rem;
+  }
+
+  .about-aside {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.8rem;
+  }
+
   .expertise-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -415,6 +431,13 @@
   }
 
   /* EXPERIENCE */
+  .resume-education {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+    max-width: 700px;
+  }
+
   .timeline {
     position: relative;
     margin-top: 1rem;
@@ -817,7 +840,7 @@
   <div class="hero-content">
     <p class="hero-tag">Associate Partner CEE · apsolut Group / All for One · SAP Procurement</p>
     <h1 class="hero-name">Paweł<br><em>Mamcarz</em></h1>
-    <p class="hero-desc">Associate Partner CEE w apsolut Group. 25+ lat w zakupach strategicznych i transformacji cyfrowej dla ponad 100 organizacji — od PKN Orlen i KGHM po LOT, Żabkę i Motor Oil Hellas.</p>
+    <p class="hero-desc">Buduję region CEE od podstaw — ponad 20 wdrożeń SAP Ariba w Polsce, Czechach, Słowacji, Węgrzech i Rumunii. Od PKN Orlen i KGHM po LOT, Żabkę i Motor Oil Hellas.</p>
     <div class="hero-cta">
       <a href="#contact" class="btn-primary">Współpracujmy</a>
       <a href="#resume" class="btn-ghost">Doświadczenie</a>
@@ -825,8 +848,8 @@
   </div>
   <div class="hero-stats">
     <div class="stat">
-      <div class="stat-num">450+</div>
-      <div class="stat-label">Klientów apsolut</div>
+      <div class="stat-num">100+</div>
+      <div class="stat-label">Organizacji w portfolio</div>
     </div>
     <div class="stat">
       <div class="stat-num">500M</div>
@@ -858,18 +881,18 @@
     </div>
     <div class="about-text">
       <p class="section-label">O mnie</p>
-      <h2 class="section-title">Procurement<br><em style="font-style:italic;color:var(--gold)">z pasją</em></h2>
+      <h2 class="section-title">Procurement<br><em>z pasją</em></h2>
       <p>Zakupy to moja działka od ponad 25 lat — i mam na myśli całą drogę: od analityki finansowej, przez zarządzanie dużymi działami zakupów w PKN Orlen i Banku Millennium, aż po budowanie rynku SAP Ariba w Polsce i regionie CEE. Dziś jako <strong style="color:var(--gold)">Associate Partner w apsolut Group</strong> (SAP Gold Partner, wielokrotny SAP Ariba MEE Partner of the Year, od marca 2026 część All for One Group) rozwijam region od podstaw — już ponad 20 wdrożeń w Polsce, Czechach, Słowacji, Węgrzech i Rumunii.</p>
       <p>Projekty, które robię, mają realną skalę: ponad 500 mln EUR wartości zakontraktowanej pracy dla ponad 100 organizacji — KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL i inni. Największy projekt: CONNECT dla Grupy ORLEN — 15 spółek, 4 kraje, 60-osobowy zespół, największa platforma sourcingowa w Polsce. Wcześniej PGE, PGNiG, Aeroflot, PKP PLK, PKP Intercity.</p>
       <p>W latach 2008–2012 zboczyłem ze ścieżki korporacyjnej — i dobrze, że to zrobiłem. Założyłem kilka własnych rzeczy: <strong>RMS sp. z o.o.</strong> (startup z dotacją POIG 8.1), <strong>Przypominamy.com</strong> i prowadziłem kilkanaście projektów doradczych zakupowych. Pierwsze starcie ze światem jako founder, nie jako konsultant — zdobywanie dotacji UE, budowanie produktu od zera, sprzedaż własnych usług.</p>
-      <p style="color:var(--gold);font-size:0.9rem;">Poza biurem: posiadam licencję pilota śmigłowcowego <strong>PPL(H)</strong> i samolotowego <strong>PPL(A) z uprawnieniami do akrobacji</strong>. Właściciel WarsawFlightSafety, pilot pokazowy Diverse Extreme Team (2013). Do tego fotograf prasowy agencji Forum — sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios).</p>
-      <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.8rem;">Z Internetem związany od 1993 — pierwsza strona WWW na maszynie VAX UMCS w Lublinie, administrator sieci na SGH. Kiedyś SUN, SGI Indigo, IBM AIX; dziś głównie Cloudflare, React i zbyt wiele otwartych kart w przeglądarce.</p>
+      <p class="about-highlight">Poza biurem: posiadam licencję pilota śmigłowcowego <strong>PPL(H)</strong> i samolotowego <strong>PPL(A) z uprawnieniami do akrobacji</strong>. Właściciel WarsawFlightSafety, pilot pokazowy Diverse Extreme Team (2013). Do tego fotograf prasowy agencji Forum — sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios).</p>
+      <p class="about-aside">Z Internetem związany od 1993 — pierwsza strona WWW na maszynie VAX UMCS w Lublinie, administrator sieci na SGH. Kiedyś SUN, SGI Indigo, IBM AIX; dziś głównie Cloudflare, React i zbyt wiele otwartych kart w przeglądarce.</p>
       <div class="expertise-list">
         <div class="expertise-item"><div class="expertise-dot"></div>SAP Ariba / Fieldglass / S/4HANA</div>
-        <div class="expertise-item"><div class="expertise-dot"></div>Procurement & Strategic Sourcing</div>
-        <div class="expertise-item"><div class="expertise-dot"></div>Sales Leadership & BD (CEE)</div>
-        <div class="expertise-item"><div class="expertise-dot"></div>Change & Program Management</div>
-        <div class="expertise-item"><div class="expertise-dot"></div>Public Procurement (PZP)</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Zakupy strategiczne</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Sprzedaż i rozwój biznesu (CEE)</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Zarządzanie programami i zmianą</div>
+        <div class="expertise-item"><div class="expertise-dot"></div>Prawo Zamówień Publicznych (PZP)</div>
         <div class="expertise-item"><div class="expertise-dot"></div>Energetyka, przemysł, pharma</div>
       </div>
     </div>
@@ -880,8 +903,8 @@
 <section id="resume">
   <div style="max-width:1200px;margin:0 auto;">
     <p class="section-label">Kariera</p>
-    <h2 class="section-title">Doświadczenie<br>zawodowe</h2>
-    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:3rem;max-width:700px;">SGH Warszawa (1995–2000) · Wirtschaftsuniversität Wien CEMS Master (2001) · Warsaw Executive MBA, Univ. of Minnesota / SGH (2005) · APMP Project Management, PMI (2008) · Języki: polski, angielski, niemiecki, rosyjski</p>
+    <h2 class="section-title">Doświadczenie<br><em>zawodowe</em></h2>
+    <p class="resume-education">SGH Warszawa (1995–2000) · Wirtschaftsuniversität Wien CEMS Master (2001) · Warsaw Executive MBA, Univ. of Minnesota / SGH (2005) · APMP Project Management, PMI (2008) · Języki: polski, angielski, niemiecki, rosyjski</p>
     <div class="timeline">
 
       <div class="timeline-item">
@@ -980,7 +1003,7 @@
 <section id="skills">
   <div style="max-width:1200px;margin:0 auto;">
   <p class="section-label">Kompetencje</p>
-  <h2 class="section-title">Obszary<br>specjalizacji</h2>
+  <h2 class="section-title">Obszary<br><em>specjalizacji</em></h2>
   </div>
   <div class="skills-grid">
     <div class="skill-card">
@@ -990,17 +1013,17 @@
     </div>
     <div class="skill-card">
       <div class="skill-icon">⚙️</div>
-      <div class="skill-name">Procurement & Strategic Sourcing</div>
-      <p class="skill-desc">Ponad 25 lat w zakupach strategicznych. Portfolio ponad 500 mln PLN/rok (PKN Orlen). Projekty o łącznej wartości ponad 500 mln EUR dla 100+ organizacji z energetyki, przemysłu ciężkiego, lotnictwa, pharmy i finansów.</p>
+      <div class="skill-name">Zakupy strategiczne</div>
+      <p class="skill-desc">Ponad 25 lat w procurement. Portfolio ponad 500 mln PLN/rok (PKN Orlen). Projekty o łącznej wartości ponad 500 mln EUR dla 100+ organizacji z energetyki, przemysłu ciężkiego, lotnictwa, pharmy i finansów.</p>
     </div>
     <div class="skill-card">
       <div class="skill-icon">🌍</div>
-      <div class="skill-name">Sales Leadership & BD (CEE)</div>
+      <div class="skill-name">Sprzedaż i rozwój biznesu (CEE)</div>
       <p class="skill-desc">Budowanie obecności rynkowej od zera w Polsce i Europie Środkowej. Relacje C-level: CFO, CPO, CIO. Klienci: KGHM, Żabka, PLL LOT, Motor Oil Hellas, MOL, Orange, Polpharma, Adamed, CIECH, Lotte Wedel.</p>
     </div>
     <div class="skill-card">
       <div class="skill-icon">📐</div>
-      <div class="skill-name">Program & Change Management</div>
+      <div class="skill-name">Zarządzanie programami i zmianą</div>
       <p class="skill-desc">Certyfikat APMP (PMI, 2008). Zarządzanie programami wielospółkowymi (15 spółek, 4 kraje, 60 osób — ORLEN CONNECT). Koordynacja 215 członków zespołu (TP SA). Revenue Management dla PKP Intercity.</p>
     </div>
     <div class="skill-card">
@@ -1019,7 +1042,7 @@
 <!-- PORTFOLIO -->
 <section id="portfolio">
   <p class="section-label">Portfolio</p>
-  <h2 class="section-title">Projekty<br>własne</h2>
+  <h2 class="section-title">Projekty<br><em>własne</em></h2>
 
   <div class="portfolio-cards">
 
@@ -1054,7 +1077,7 @@
       <div class="pcard__body">
         <div class="pcard__tag">Aplikacja webowa · Transport</div>
         <div class="pcard__title">czympojade.pl</div>
-        <div class="pcard__desc">Projekt aplikacji mobilnej i webowej wspomagającej planowanie transportu. Przykład samodzielnego tworzenia produktów cyfrowych — od koncepcji UX po wdrożenie.</div>
+        <div class="pcard__desc">Aplikacja webowa i mobilna do szybkiego wyszukiwania połączeń transportowych — autobusy, pociągi, busy. Jeden z pierwszych tego typu serwisów w Polsce, zbudowany od zera: backend, frontend, integracja z rozkładami przewoźników.</div>
         <div class="pcard__link">czympojade.pl →</div>
       </div>
     </a>
@@ -1077,8 +1100,8 @@
 <!-- CLIENTS -->
 <section id="clients">
   <div style="max-width:1200px;margin:0 auto;">
-    <p class="section-label">Referencje</p>
-    <h2 class="section-title">Wybrani<br>klienci</h2>
+    <p class="section-label">Klienci</p>
+    <h2 class="section-title">Wybrani<br><em>klienci</em></h2>
     <div class="clients-grid">
       <div class="client-item">PKN Orlen</div>
       <div class="client-item">KGHM</div>
@@ -1113,17 +1136,21 @@
   <div class="contact-inner">
     <div class="contact-info">
       <p class="section-label">Kontakt</p>
-      <h2 class="section-title">Porozmawiajmy<br>o projekcie</h2>
-      <p>Jestem dostępny dla projektów freelance i długoterminowej współpracy doradczej. Napisz lub zadzwoń — odezwę się szybko.</p>
+      <h2 class="section-title">Porozmawiajmy<br><em>o projekcie</em></h2>
+      <p>Szukasz wsparcia w transformacji zakupów, wdrożeniu SAP Ariba lub budowie strategii procurement? Napisz — chętnie porozmawiam o Twoim projekcie.</p>
       <div class="contact-details">
-        <div class="contact-detail">
-          <div class="contact-detail-icon">🌐</div>
-          <span>mamcarz.com</span>
-        </div>
+        <a href="mailto:pawel@mamcarz.com" class="contact-detail" style="text-decoration:none;color:var(--text);">
+          <div class="contact-detail-icon">✉</div>
+          <span>pawel@mamcarz.com</span>
+        </a>
         <a href="https://www.linkedin.com/in/pawelmamcarz/" target="_blank" rel="noopener noreferrer" class="contact-detail" style="text-decoration:none;color:var(--text);">
           <div class="contact-detail-icon">in</div>
           <span>LinkedIn / Paweł Mamcarz</span>
         </a>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">🌐</div>
+          <span>mamcarz.com</span>
+        </div>
       </div>
     </div>
     <div class="contact-form" style="padding:0;background:none;border:none;">
@@ -1146,7 +1173,7 @@
 <footer>
   <div class="footer-copy">© 1993–2026 Paweł Mamcarz — mamcarz.com</div>
   <ul class="footer-links">
-    <li><a href="#hero">Home</a></li>
+    <li><a href="#hero">Strona główna</a></li>
     <li><a href="#about">O mnie</a></li>
     <li><a href="#resume">CV</a></li>
     <li><a href="#contact">Kontakt</a></li>
@@ -1197,7 +1224,7 @@
     });
   });
 
-  // AI Chat — Gemini Flash via Cloudflare Worker
+  // AI Chat — Llama 3.3 via Cloudflare Worker
   const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
   const chatHistory = [];
 
