@@ -34,7 +34,7 @@ Poza pracą:
 - Właściciel WarsawFlightSafety — szkoła akrobacji lotniczej
 - Pilot pokazowy Diverse Extreme Team (2013)
 - Fotograf prasowy agencji Forum — sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios)
-- Projekty własne: akrobacja.top, filmolot.pl, czympojade.pl, przypominamy.com
+- Projekty własne: akrobacja.com, filmolot.pl, czympojade.pl, przypominamy.com
 - Z Internetem związany od 1993 — pierwsza strona WWW na VAX UMCS w Lublinie
 
 Kontakt:
