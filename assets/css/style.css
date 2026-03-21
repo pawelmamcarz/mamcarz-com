@@ -65,6 +65,21 @@
 
   .nav-links a:hover { color: var(--gold); }
 
+  .nav-lang {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    margin-left: 1rem;
+  }
+
+  .nav-lang:hover { color: var(--gold); border-color: var(--gold); }
+
   /* HAMBURGER */
   .nav-hamburger {
     display: none;
