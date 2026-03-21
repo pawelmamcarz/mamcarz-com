@@ -2,3 +2,7 @@ User-agent: *
 Allow: /
 
 Sitemap: https://mamcarz.com/sitemap.xml
+
+# LLMs
+LLMs-Txt: https://mamcarz.com/llms.txt
+LLMs-Full-Txt: https://mamcarz.com/llms-full.txt
