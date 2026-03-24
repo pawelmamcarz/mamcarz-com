@@ -112,6 +112,8 @@ Available for: conferences, corporate events, universities (guest lectures, seme
 
 Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with aerobatics rating. Owner of WarsawFlightSafety (aerobatic flight school), former display pilot for Diverse Extreme Team (2013). Press photographer for Forum Agency since 2003 — air-to-air photography, video production for TVP and Greek island municipalities.
 
+Improv performer — live improvised comedy shows at Resort Komedii in Warsaw (resortkomedii.pl).
+
 Websites: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (transport app), przypominamy.com (SMS/MMS SaaS platform).
 
 Connected to technology since 1993 — first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX; currently Cloudflare, React, and custom web projects.
