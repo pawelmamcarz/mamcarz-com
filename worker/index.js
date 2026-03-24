@@ -20,7 +20,7 @@ Kariera:
 - Bank Millennium (2002–2004) — Buyer / Lider IT/Telco
 - Elektrim / Bank Austria Creditanstalt Wiedeń (1999–2002) — Financial Controller
 
-Wykształcenie: SGH Warszawa, CEMS Master Wirtschaftsuniversität Wien, Warsaw Executive MBA (Univ. of Minnesota / SGH), APMP PMI
+Wykształcenie: SGH Warszawa (Finanse i Bankowość / Metody Statystyczne i Systemy Informacyjne), CEMS Master Wirtschaftsuniversität Wien, Warsaw Executive MBA (Univ. of Minnesota / SGH), APMP PMI
 Języki: polski, angielski, niemiecki, rosyjski
 
 Usługi:
