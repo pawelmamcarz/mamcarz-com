@@ -1,18 +1,75 @@
-// Hamburger menu
+// Hamburger menu + overlay
 const hamburger = document.getElementById('navHamburger');
 const navLinks = document.getElementById('navLinks');
+const navOverlay = document.getElementById('navOverlay');
+
+function closeMenu() {
+  hamburger.classList.remove('active');
+  navLinks.classList.remove('open');
+  if (navOverlay) navOverlay.classList.remove('open');
+}
 
 hamburger.addEventListener('click', () => {
+  const isOpen = navLinks.classList.toggle('open');
   hamburger.classList.toggle('active');
-  navLinks.classList.toggle('open');
+  if (navOverlay) navOverlay.classList.toggle('open', isOpen);
 });
 
 navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    hamburger.classList.remove('active');
-    navLinks.classList.remove('open');
-  });
+  link.addEventListener('click', closeMenu);
 });
+
+if (navOverlay) {
+  navOverlay.addEventListener('click', closeMenu);
+}
+
+// Nav scroll state
+const nav = document.querySelector('nav');
+let navTicking = false;
+
+window.addEventListener('scroll', () => {
+  if (!navTicking) {
+    requestAnimationFrame(() => {
+      nav.classList.toggle('nav-scrolled', window.scrollY > 80);
+      navTicking = false;
+    });
+    navTicking = true;
+  }
+}, { passive: true });
+
+// Back to top button
+const backToTop = document.getElementById('backToTop');
+if (backToTop) {
+  let bttTicking = false;
+  window.addEventListener('scroll', () => {
+    if (!bttTicking) {
+      requestAnimationFrame(() => {
+        backToTop.classList.toggle('visible', window.scrollY > 600);
+        bttTicking = false;
+      });
+      bttTicking = true;
+    }
+  }, { passive: true });
+
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// Scroll reveal for .reveal elements
+const revealEls = document.querySelectorAll('.reveal');
+if (revealEls.length > 0) {
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  revealEls.forEach(el => revealObserver.observe(el));
+}
 
 // Scroll animation for timeline items — unobserve after reveal
 const timelineItems = document.querySelectorAll('.timeline-item');
@@ -71,10 +128,12 @@ navAnchors.forEach(a => {
 // AI Chat — Llama 3.3 via Cloudflare Worker
 const chatMsgs = document.getElementById("chat-messages");
 const chatInput = document.getElementById("chat-input");
+const chatSendBtn = document.querySelector("#ai-chat button[onclick]");
 
 if (chatMsgs && chatInput) {
   const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
   const chatHistory = [];
+  let chatBusy = false;
 
   function addMsg(text, isUser) {
     const el = document.createElement("div");
@@ -85,11 +144,21 @@ if (chatMsgs && chatInput) {
     return el;
   }
 
+  function setChatBusy(busy) {
+    chatBusy = busy;
+    if (chatSendBtn) {
+      chatSendBtn.style.opacity = busy ? '0.5' : '1';
+      chatSendBtn.style.pointerEvents = busy ? 'none' : 'auto';
+    }
+    chatInput.disabled = busy;
+  }
+
   window.sendMsg = async function() {
     const text = chatInput.value.trim();
-    if (!text) return;
+    if (!text || chatBusy) return;
     addMsg(text, true);
     chatInput.value = "";
+    setChatBusy(true);
 
     chatHistory.push({ role: "user", content: text });
     if (chatHistory.length > 20) chatHistory.splice(0, chatHistory.length - 20);
@@ -113,6 +182,9 @@ if (chatMsgs && chatInput) {
       }
     } catch (err) {
       thinking.innerHTML = "Nie udało się połączyć z AI. Napisz bezpośrednio: <a href=\"mailto:pawel@mamcarz.com\" style=\"color:var(--gold)\">pawel@mamcarz.com</a>";
+    } finally {
+      setChatBusy(false);
+      chatInput.focus();
     }
   };
 
@@ -123,3 +195,21 @@ if (chatMsgs && chatInput) {
   chatInput.addEventListener("focus", function() { this.style.borderColor = "var(--gold)"; });
   chatInput.addEventListener("blur", function() { this.style.borderColor = "var(--border)"; });
 }
+
+// Procurement diagram tabs
+const procFrame = document.getElementById('proc-frame');
+if (procFrame) {
+  const diagrams = {
+    '1': '/diagrams/diagram1_universal.html',
+    '2': '/diagrams/diagram2_ariba.html',
+    '3': '/diagrams/diagram3_maturity.html'
+  };
+  document.querySelectorAll('.proc-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.proc-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      procFrame.src = diagrams[this.dataset.diagram];
+    });
+  });
+}
+

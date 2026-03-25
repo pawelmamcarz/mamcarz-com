@@ -112,6 +112,9 @@
   </button>
 </nav>
 
+<div class="nav-overlay" id="navOverlay"></div>
+<button class="back-to-top" id="backToTop" aria-label="Wróć na górę">↑</button>
+
 <main>
 <!-- HERO -->
 <section id="hero">
@@ -149,7 +152,7 @@
 <!-- ABOUT -->
 <section id="about">
   <div class="about-grid">
-    <div class="about-photo-wrap">
+    <div class="about-photo-wrap reveal">
       <div class="about-photo">
         <img src="/IMG_3284.jpeg" alt="Paweł Mamcarz" loading="lazy" width="4032" height="3024">
       </div>
@@ -159,7 +162,7 @@
         <div class="about-badge-text">lat w procurement</div>
       </div>
     </div>
-    <div class="about-text">
+    <div class="about-text reveal">
       <p class="section-label">O mnie</p>
       <h2 class="section-title">Procurement<br><em>z pasją</em></h2>
       <p>Od ponad 25 lat zajmuję się zakupami — od analityki finansowej, przez zarządzanie działami zakupów w PKN Orlen i Banku Millennium, po budowanie rynku SAP Ariba w Polsce i regionie CEE. Dziś jako <strong style="color:var(--gold)">Associate Partner w apsolut Group</strong> (SAP Gold Partner, wielokrotny SAP Ariba MEE Partner of the Year, od marca 2026 część All for One Group) rozwijam region CEE — ponad 20 wdrożeń w Polsce, Czechach, Słowacji, Węgrzech i Rumunii.</p>
@@ -181,7 +184,7 @@
 
 <!-- EDUCATION -->
 <section id="education">
-  <div class="container">
+  <div class="container reveal">
     <p class="section-label">Wykształcenie i języki</p>
     <h2 class="section-title">Edukacja<br><em>i certyfikaty</em></h2>
   </div>
@@ -213,7 +216,7 @@
 
 <!-- RESUME -->
 <section id="resume">
-  <div class="container">
+  <div class="container reveal">
     <p class="section-label">Kariera</p>
     <h2 class="section-title">Doświadczenie<br><em>zawodowe</em></h2>
     <div class="timeline">
@@ -312,7 +315,7 @@
 
 <!-- SKILLS -->
 <section id="skills">
-  <div class="container">
+  <div class="container reveal">
   <p class="section-label">Kompetencje</p>
   <h2 class="section-title">Obszary<br><em>specjalizacji</em></h2>
   </div>
@@ -348,11 +351,20 @@
       <p class="skill-desc">Pilot akrobacyjny PPL(A)/PPL(H), właściciel <a href="https://akrobacja.com" target="_blank" rel="noopener" style="color:var(--gold)">Akrobacja.com</a>. Fotograf prasowy Agencji Forum. Improwizator — spotkaj mnie w <a href="https://resortkomedii.pl" target="_blank" rel="noopener" style="color:var(--gold)">Resorcie Komedii</a> w Warszawie.</p>
     </div>
   </div>
+
+  <div class="proc-embed">
+    <div class="proc-tabs">
+      <button class="proc-tab active" data-diagram="1">Proces 2026</button>
+      <button class="proc-tab" data-diagram="2">SAP Ariba Mapping</button>
+      <button class="proc-tab" data-diagram="3">Maturity Assessment</button>
+    </div>
+    <iframe id="proc-frame" src="/diagrams/diagram1_universal.html" class="proc-embed__frame" title="Procurement Process 2026 — interaktywny diagram"></iframe>
+  </div>
 </section>
 
 <!-- CASE STUDIES -->
 <section id="cases">
-  <div class="container">
+  <div class="container reveal">
     <p class="section-label">Wybrane projekty</p>
     <h2 class="section-title">Case<br><em>studies</em></h2>
   </div>
@@ -411,8 +423,8 @@
 
 <!-- PORTFOLIO -->
 <section id="portfolio">
-  <p class="section-label">Portfolio</p>
-  <h2 class="section-title">Projekty<br><em>własne</em></h2>
+  <p class="section-label reveal">Portfolio</p>
+  <h2 class="section-title reveal">Projekty<br><em>własne</em></h2>
 
   <div class="portfolio-cards">
 
@@ -481,7 +493,7 @@
 
 <!-- CLIENTS -->
 <section id="clients">
-  <div class="container">
+  <div class="container reveal">
     <p class="section-label">Klienci</p>
     <h2 class="section-title">Wybrani<br><em>klienci</em></h2>
     <div class="clients-grid">
@@ -515,7 +527,7 @@
 
 <!-- PROCESS -->
 <section id="process">
-  <div class="container">
+  <div class="container reveal">
     <p class="section-label">Współpraca</p>
     <h2 class="section-title">Jak<br><em>pracuję</em></h2>
   </div>
@@ -571,7 +583,7 @@
 <!-- CONTACT -->
 <section id="contact">
   <div class="contact-inner">
-    <div class="contact-info">
+    <div class="contact-info reveal">
       <p class="section-label">Kontakt</p>
       <h2 class="section-title">Porozmawiajmy<br><em>o projekcie</em></h2>
       <p>Szukasz wsparcia w transformacji zakupów, wdrożeniu SAP Ariba lub budowie strategii procurement? Napisz — chętnie porozmawiam o Twoim projekcie.</p>

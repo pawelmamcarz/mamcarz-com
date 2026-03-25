@@ -37,6 +37,13 @@
     align-items: center;
     background: linear-gradient(to bottom, rgba(13,15,20,0.98), transparent);
     backdrop-filter: blur(8px);
+    transition: background 0.3s, padding 0.3s, box-shadow 0.3s;
+  }
+
+  nav.nav-scrolled {
+    background: rgba(13,15,20,0.97);
+    padding: 0.8rem 4rem;
+    box-shadow: 0 1px 0 var(--border);
   }
 
   .nav-logo {
@@ -995,6 +1002,128 @@
 
   .footer-links a:hover { color: var(--gold); }
 
+  /* PROCUREMENT DIAGRAM EMBED */
+  .proc-embed {
+    max-width: 1200px;
+    margin: 3rem auto 0;
+    border: 1px solid var(--border);
+  }
+
+  .proc-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+
+  .proc-tab {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+
+  .proc-tab:hover {
+    color: var(--text);
+    background: rgba(200,169,110,0.05);
+  }
+
+  .proc-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(200,169,110,0.08);
+  }
+
+  .proc-embed__frame {
+    display: block;
+    width: 100%;
+    height: 860px;
+    border: none;
+    background: #080C18;
+  }
+
+  @media (max-width: 900px) {
+    .proc-embed { margin: 2rem 0 0; }
+    .proc-embed__frame { height: 1100px; }
+    .proc-tab { font-size: 0.6rem; padding: 0.7rem 0.5rem; letter-spacing: 0.05em; }
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* BACK TO TOP */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 90;
+    width: 44px;
+    height: 44px;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(8px);
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+  }
+
+  /* FOCUS STATES */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  /* MOBILE MENU OVERLAY */
+  .nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .nav-overlay.open {
+    display: block;
+    opacity: 1;
+  }
+
   /* ANIMATIONS */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(30px); }
@@ -1022,17 +1151,28 @@
   /* RESPONSIVE */
   @media (max-width: 900px) {
     nav { padding: 1.2rem 2rem; }
+    nav.nav-scrolled { padding: 0.8rem 2rem; }
     section { padding: 5rem 2rem; }
-    #hero { padding: 0 2rem; }
+    #hero { padding: 0 2rem; flex-direction: column; justify-content: center; }
     .about-grid { grid-template-columns: 1fr; gap: 3rem; }
     .skills-grid { grid-template-columns: 1fr; }
     .portfolio-cards { grid-template-columns: 1fr; }
     .pcard--wide { grid-column: span 1; }
     .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
     footer { flex-direction: column; gap: 1.5rem; text-align: center; }
-    .hero-stats { display: none; }
+    .hero-stats {
+      position: static;
+      flex-direction: row;
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+      opacity: 1;
+      animation: none;
+    }
+    .stat { text-align: center; flex: 1; }
+    .stat-num { font-size: 1.8rem; }
+    .stat-label { font-size: 0.6rem; }
     .nav-links { display: none; }
-    .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); padding: 2rem; gap: 1.5rem; }
+    .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: rgba(16,19,24,0.98); backdrop-filter: blur(12px); padding: 2rem; gap: 1.5rem; z-index: 101; }
     .nav-hamburger { display: flex; }
     .expertise-list { grid-template-columns: 1fr; }
     .clients-grid { grid-template-columns: repeat(3, 1fr); }

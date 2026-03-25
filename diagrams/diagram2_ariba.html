@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagram 2 — SAP Ariba Module Mapping</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0A0E1A;color:#E8ECF4;font-family:'DM Sans',sans-serif;min-height:100vh;padding:30px 20px}
+h1{font-family:'Space Mono',monospace;font-size:clamp(1.2rem,2.5vw,1.8rem);text-align:center;color:#F97316;margin-bottom:2px}
+.sub{text-align:center;font-size:.78rem;color:#6b7899;margin-bottom:4px;font-style:italic}
+.brand{text-align:center;font-size:.62rem;color:#3d4a6a;letter-spacing:2px;text-transform:uppercase;font-family:'Space Mono',monospace;margin-bottom:28px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:1100px;margin:0 auto}
+.section-header{grid-column:1/-1;padding:10px 18px;border-radius:10px;font-family:'Space Mono',monospace;font-size:.82rem;font-weight:700;letter-spacing:1px}
+.sh-s{background:rgba(249,115,22,.1);color:#F97316;border:1px solid rgba(249,115,22,.2)}
+.sh-o{background:rgba(59,130,246,.1);color:#3B82F6;border:1px solid rgba(59,130,246,.2)}
+.sh-n{background:rgba(168,85,247,.1);color:#A855F7;border:1px solid rgba(168,85,247,.2)}
+
+.card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:18px 20px;transition:border-color .3s,transform .2s}
+.card:hover{border-color:#F97316;transform:translateY(-2px)}
+.card-num{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;float:right;line-height:1}
+.card-num.s{color:rgba(249,115,22,.3)}.card-num.o{color:rgba(59,130,246,.3)}.card-num.n{color:rgba(168,85,247,.3)}
+.card h3{font-size:.88rem;font-weight:700;margin-bottom:8px}
+.card h3.s{color:#F97316}.card h3.o{color:#3B82F6}.card h3.n{color:#A855F7}
+.card .desc{font-size:.75rem;color:#6b7899;line-height:1.55;margin-bottom:12px}
+.modules{display:flex;flex-wrap:wrap;gap:5px}
+.mod{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:500;transition:background .2s}
+.mod-s{background:rgba(249,115,22,.1);color:#F97316;border:1px solid rgba(249,115,22,.25)}
+.mod-o{background:rgba(59,130,246,.1);color:#3B82F6;border:1px solid rgba(59,130,246,.25)}
+.mod-n{background:rgba(168,85,247,.1);color:#A855F7;border:1px solid rgba(168,85,247,.25)}
+.mod-bn{background:rgba(6,182,212,.1);color:#06B6D4;border:1px solid rgba(6,182,212,.25)}
+.mod-ext{background:rgba(34,197,94,.1);color:#22C55E;border:1px solid rgba(34,197,94,.25)}
+
+.note{font-size:.7rem;color:#4a5575;font-style:italic;margin-top:8px}
+
+.footer{text-align:center;margin-top:28px;padding-top:18px;border-top:1px solid #1a2236}
+.footer .legend{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.footer .li{display:flex;align-items:center;gap:5px;font-size:.66rem;color:#6b7899}
+.footer .ld{width:8px;height:8px;border-radius:3px}
+.footer p{font-size:.68rem;color:#3d4a6a}
+
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>SAP Ariba / Platform Module Mapping</h1>
+<div class="sub">Process steps → SAP modules & ecosystem partners · Kontekst apsolut Group</div>
+<div class="brand">apsolut · All for One Group · SAP Gold Partner</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="footer">
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:#F97316"></div>SAP Ariba (Strategic)</div>
+    <div class="li"><div class="ld" style="background:#3B82F6"></div>SAP Ariba (Operational)</div>
+    <div class="li"><div class="ld" style="background:#06B6D4"></div>SAP Business Network</div>
+    <div class="li"><div class="ld" style="background:#A855F7"></div>SAP Platform / AI</div>
+    <div class="li"><div class="ld" style="background:#22C55E"></div>Ecosystem / 3rd Party</div>
+  </div>
+  <p>Module mapping based on SAP Ariba portfolio as of 2026. Ecosystem partners are indicative.</p>
+</div>
+
+<script>
+const data=[
+  {type:'header',cls:'sh-s',text:'STRATEGIC PROCUREMENT MANAGEMENT — Up-Stream / e-Sourcing'},
+  {n:'1',cls:'s',title:'Procurement Planning',
+   desc:'Demand sensing, ML-powered predictive planning, S&OP integration, budget alignment',
+   mods:[{t:'SAP S/4HANA Procurement Planning',c:'mod-s'},{t:'SAP IBP',c:'mod-s'},{t:'Ariba Spend Analysis',c:'mod-s'}]},
+  {n:'2',cls:'s',title:'Market Analysis',
+   desc:'AI market intelligence, commodity monitoring, geopolitical signal scanning, price prediction',
+   mods:[{t:'Ariba Discovery',c:'mod-s'},{t:'Ariba Spend Analysis',c:'mod-s'},{t:'SAP Business AI',c:'mod-n'},{t:'Commodity IQ / external feeds',c:'mod-ext'}]},
+  {n:'3',cls:'s',title:'Category Strategy Definition',
+   desc:'Data-driven strategies with ESG targets, risk appetite frameworks, scenario modelling',
+   mods:[{t:'Ariba Strategic Sourcing Suite',c:'mod-s'},{t:'Ariba Category Management',c:'mod-s'},{t:'SAP Analytics Cloud',c:'mod-n'}]},
+  {n:'4',cls:'s',title:'Sourcing & Supplier Appraisal',
+   desc:'AI-managed RFx, autonomous bid evaluation, ESG + risk qualification, supplier onboarding',
+   mods:[{t:'Ariba Sourcing',c:'mod-s'},{t:'Ariba SLP',c:'mod-s'},{t:'SAP Business Network',c:'mod-bn'},{t:'Joule AI (RFx)',c:'mod-n'},{t:'EcoVadis / IntegrityNext',c:'mod-ext'}]},
+  {n:'5',cls:'s',title:'Contracting & Implementation',
+   desc:'Smart contracts, AI clause negotiation, risk identification, CSDDD due diligence',
+   mods:[{t:'Ariba Contracts',c:'mod-s'},{t:'Ariba Supplier Risk',c:'mod-s'},{t:'SAP Signavio',c:'mod-n'},{t:'DocuSign / Icertis',c:'mod-ext'}]},
+
+  {type:'header',cls:'sh-o',text:'OPERATIONAL PROCUREMENT MANAGEMENT — Down-Stream / e-Procurement'},
+  {n:'6',cls:'o',title:'Product/Service Identification',
+   desc:'Guided buying with AI catalogs, preferred supplier matching, maverick spend detection',
+   mods:[{t:'Ariba Buying & Invoicing',c:'mod-o'},{t:'Ariba Catalog',c:'mod-o'},{t:'Ariba Spot Buy',c:'mod-o'},{t:'Amazon Business / Mercateo',c:'mod-ext'}]},
+  {n:'7',cls:'o',title:'PR & Authorization',
+   desc:'Intake management, smart approval routing, auto-approve low-risk, budget validation',
+   mods:[{t:'Ariba Buying',c:'mod-o'},{t:'Ariba Intake Management',c:'mod-o'},{t:'Joule AI (approvals)',c:'mod-n'}]},
+  {n:'8',cls:'o',title:'Purchase Order',
+   desc:'Touchless PO at 90%+ automation, dynamic creation from contracts/catalogs, real-time confirmation',
+   mods:[{t:'Ariba Buying',c:'mod-o'},{t:'SAP Business Network',c:'mod-bn'},{t:'SAP S/4HANA MM',c:'mod-o'}]},
+  {n:'9',cls:'o',title:'Order Delivery Monitoring',
+   desc:'Digital twin shipment tracking, predictive risk scoring, auto-escalation, carbon per shipment',
+   mods:[{t:'SAP Business Network',c:'mod-bn'},{t:'Ariba Supply Chain Collaboration',c:'mod-o'},{t:'SAP TM / SAP BTP',c:'mod-n'},{t:'FourKites / project44',c:'mod-ext'}]},
+  {n:'10',cls:'o',title:'Invoicing & Payment',
+   desc:'Touchless invoices, AI 3-way matching, dynamic discounting, SCF, working capital optimization',
+   mods:[{t:'Ariba Invoice Management',c:'mod-o'},{t:'Ariba Supply Chain Finance',c:'mod-o'},{t:'SAP Business Network',c:'mod-bn'},{t:'Taulia / CRX Markets',c:'mod-ext'}]},
+
+  {type:'header',cls:'sh-n',text:'NEW LAYERS 2026 — AI, Risk, ESG, Data, SRM 2.0'},
+  {n:'AI',cls:'n',title:'AI & Orchestration Layer',
+   desc:'End-to-end AI orchestration from intake to payment. Agent architects supervise autonomous workflows.',
+   mods:[{t:'Joule AI',c:'mod-n'},{t:'SAP Business AI',c:'mod-n'},{t:'SAP Signavio (Process Intelligence)',c:'mod-n'},{t:'SAP Build Process Automation',c:'mod-n'}]},
+  {n:'R',cls:'n',title:'Risk & Resilience Layer',
+   desc:'Continuous multi-tier monitoring, digital twins for disruption scenarios, geopolitical + climate signals.',
+   mods:[{t:'Ariba Supplier Risk',c:'mod-s'},{t:'SAP BN Risk Insights',c:'mod-bn'},{t:'Resilinc',c:'mod-ext'},{t:'Everstream Analytics',c:'mod-ext'}]},
+  {n:'E',cls:'n',title:'ESG & Sustainability Layer',
+   desc:'Scope 3 tracking per transaction, CSRD/CSDDD compliance automation, circular procurement metrics.',
+   mods:[{t:'Ariba Supplier Risk (ESG)',c:'mod-s'},{t:'SAP Sustainability Control Tower',c:'mod-n'},{t:'SAP Green Ledger',c:'mod-n'},{t:'EcoVadis',c:'mod-ext'}]},
+  {n:'D',cls:'n',title:'Data & Analytics Foundation',
+   desc:'Unified data fabric, master data quality as KPI, spend cubes, supplier 360°, predictive analytics.',
+   mods:[{t:'Ariba Spend Analysis',c:'mod-s'},{t:'SAP Datasphere',c:'mod-n'},{t:'SAP Analytics Cloud',c:'mod-n'},{t:'SAP Master Data Governance',c:'mod-n'}]},
+  {n:'S',cls:'n',title:'SRM 2.0 / Supplier Innovation',
+   desc:'Joint development programs, preferred innovation queues, technology co-creation, ecosystem building.',
+   mods:[{t:'Ariba SLP',c:'mod-s'},{t:'SAP Business Network (Collaboration)',c:'mod-bn'},{t:'SAP Ariba Discovery',c:'mod-s'}]},
+];
+
+const grid=document.getElementById('grid');
+data.forEach(item=>{
+  if(item.type==='header'){
+    const el=document.createElement('div');
+    el.className=`section-header ${item.cls}`;
+    el.textContent=item.text;
+    grid.appendChild(el);
+  } else {
+    const el=document.createElement('div');
+    el.className='card';
+    el.innerHTML=`<div class="card-num ${item.cls}">${item.n}</div><h3 class="${item.cls}">${item.title}</h3><div class="desc">${item.desc}</div><div class="modules">${item.mods.map(m=>`<span class="mod ${m.c}">${m.t}</span>`).join('')}</div>`;
+    grid.appendChild(el);
+  }
+});
+</script>
+</body>
+</html>

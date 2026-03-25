@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagram 3 — Procurement Maturity Assessment</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080C18;color:#E8ECF4;font-family:'DM Sans',sans-serif;min-height:100vh;padding:30px 20px}
+h1{font-family:'Space Mono',monospace;font-size:clamp(1.2rem,2.5vw,1.8rem);text-align:center;margin-bottom:2px}
+h1 .gr{background:linear-gradient(90deg,#F97316,#A855F7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;font-size:.78rem;color:#6b7899;margin-bottom:4px;font-style:italic}
+.brand{text-align:center;font-size:.62rem;color:#3d4a6a;letter-spacing:2px;text-transform:uppercase;font-family:'Space Mono',monospace;margin-bottom:28px}
+
+.layout{display:flex;gap:28px;max-width:1200px;margin:0 auto;align-items:flex-start;flex-wrap:wrap}
+.left{flex:1;min-width:500px}
+.right{width:380px;flex-shrink:0}
+
+/* Dimension rows */
+.dim-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;margin-bottom:6px;transition:background .2s}
+.dim-row:hover{background:rgba(255,255,255,.03)}
+.dim-label{width:180px;font-size:.82rem;font-weight:600;flex-shrink:0}
+.dim-bars{display:flex;gap:0;flex:1}
+.bar-group{flex:1;position:relative;display:flex;flex-direction:column;gap:2px}
+.bar-group-label{font-size:.58rem;color:#4a5575;text-align:center;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.bars{display:flex;gap:3px;justify-content:center}
+.bar{width:36px;height:22px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;transition:all .2s;border:1px solid transparent}
+.bar.empty{background:#141926;color:#3d4a6a;border-color:#1e293b}
+.bar.filled-asis{color:#fff}
+.bar.filled-tobe{color:#fff}
+.bar:hover{transform:scale(1.1);z-index:2}
+
+.gap-badge{width:60px;text-align:center;font-family:'Space Mono',monospace;font-size:.78rem;font-weight:700;flex-shrink:0}
+.gap-pos{color:#22C55E}.gap-zero{color:#4a5575}.gap-neg{color:#EF4444}
+
+/* Score summary */
+.summary{background:#111827;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-top:16px}
+.summary h3{font-family:'Space Mono',monospace;font-size:.85rem;color:#A855F7;margin-bottom:12px}
+.score-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1a2236;font-size:.78rem}
+.score-row:last-child{border-bottom:none}
+.score-label{color:#6b7899}
+.score-val{font-family:'Space Mono',monospace;font-weight:700}
+
+/* Radar */
+.radar-wrap{background:#111827;border:1px solid #1e293b;border-radius:14px;padding:20px;text-align:center}
+.radar-wrap h3{font-family:'Space Mono',monospace;font-size:.85rem;color:#A855F7;margin-bottom:14px}
+canvas{max-width:340px;width:100%}
+
+/* Legend */
+.legend-row{display:flex;justify-content:center;gap:20px;margin-top:10px}
+.leg{display:flex;align-items:center;gap:5px;font-size:.68rem;color:#6b7899}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+
+/* Scale note */
+.scale{text-align:center;font-size:.65rem;color:#3d4a6a;margin-top:16px}
+.scale span{margin:0 6px}
+
+/* Responsive */
+@media(max-width:920px){.layout{flex-direction:column}.left{min-width:0}.right{width:100%}}
+</style>
+</head>
+<body>
+
+<h1><span class="gr">Procurement Maturity Assessment</span></h1>
+<div class="sub">Interactive as-is → to-be gap analysis · Click bars to adjust scores</div>
+<div class="brand">Pitch Tool · apsolut · All for One Group</div>
+
+<div class="layout">
+<div class="left">
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px;padding:0 16px">
+    <div style="width:180px;font-size:.7rem;color:#4a5575;font-weight:700">DIMENSION</div>
+    <div style="flex:1;display:flex">
+      <div style="flex:1;text-align:center;font-size:.62rem;color:#F97316;letter-spacing:1px">AS-IS (CURRENT)</div>
+      <div style="flex:1;text-align:center;font-size:.62rem;color:#A855F7;letter-spacing:1px">TO-BE (TARGET 2027)</div>
+    </div>
+    <div style="width:60px;text-align:center;font-size:.62rem;color:#4a5575;letter-spacing:1px">GAP</div>
+  </div>
+  <div id="dimRows"></div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="scale">
+    <span>1 Ad-hoc</span><span>2 Developing</span><span>3 Defined</span><span>4 Managed</span><span>5 Optimized</span>
+  </div>
+</div>
+
+<div class="right">
+  <div class="radar-wrap">
+    <h3>Maturity Radar</h3>
+    <canvas id="radar" width="340" height="340"></canvas>
+    <div class="legend-row">
+      <div class="leg"><div class="leg-dot" style="background:rgba(249,115,22,.6)"></div>As-Is</div>
+      <div class="leg"><div class="leg-dot" style="background:rgba(168,85,247,.6)"></div>To-Be</div>
+    </div>
+  </div>
+
+  <div style="background:#111827;border:1px solid #1e293b;border-radius:14px;padding:18px;margin-top:14px">
+    <h3 style="font-family:'Space Mono',monospace;font-size:.82rem;color:#22C55E;margin-bottom:10px">Top Priority Gaps</h3>
+    <div id="gapList"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const dims = [
+  {id:'ai',      label:'AI & Orchestration',       color:'#A855F7', asIs:1, toBe:4},
+  {id:'risk',    label:'Risk & Resilience',         color:'#EF4444', asIs:1, toBe:4},
+  {id:'esg',     label:'ESG / Sustainability',      color:'#22C55E', asIs:1, toBe:3},
+  {id:'data',    label:'Data & Analytics',           color:'#06B6D4', asIs:2, toBe:4},
+  {id:'srm',     label:'Supplier Innovation',        color:'#F97316', asIs:2, toBe:4},
+  {id:'strat',   label:'Strategic Procurement',      color:'#F97316', asIs:3, toBe:5},
+  {id:'oper',    label:'Operational Procurement',    color:'#3B82F6', asIs:3, toBe:5},
+  {id:'integ',   label:'Platform Integration',       color:'#A855F7', asIs:2, toBe:5},
+];
+
+function render() {
+  // Dimension rows
+  const container = document.getElementById('dimRows');
+  container.innerHTML = '';
+  dims.forEach((d, idx) => {
+    const gap = d.toBe - d.asIs;
+    const gapCls = gap > 0 ? 'gap-pos' : gap === 0 ? 'gap-zero' : 'gap-neg';
+    const gapStr = gap > 0 ? `+${gap}` : String(gap);
+
+    let html = `<div class="dim-row"><div class="dim-label" style="color:${d.color}">${d.label}</div><div class="dim-bars"><div class="bar-group"><div class="bars">`;
+    for (let v = 1; v <= 5; v++) {
+      const filled = v <= d.asIs;
+      html += `<div class="bar ${filled ? 'filled-asis' : 'empty'}" style="${filled ? `background:${d.color};opacity:.7;border-color:${d.color}` : ''}" data-dim="${idx}" data-type="asIs" data-val="${v}">${v}</div>`;
+    }
+    html += `</div></div><div class="bar-group"><div class="bars">`;
+    for (let v = 1; v <= 5; v++) {
+      const filled = v <= d.toBe;
+      html += `<div class="bar ${filled ? 'filled-tobe' : 'empty'}" style="${filled ? 'background:#A855F7;border-color:#A855F7' : ''}" data-dim="${idx}" data-type="toBe" data-val="${v}">${v}</div>`;
+    }
+    html += `</div></div></div><div class="gap-badge ${gapCls}">${gapStr}</div></div>`;
+    container.innerHTML += html;
+  });
+
+  // Click handlers
+  container.querySelectorAll('.bar').forEach(bar => {
+    bar.addEventListener('click', () => {
+      const idx = parseInt(bar.dataset.dim);
+      const type = bar.dataset.type;
+      const val = parseInt(bar.dataset.val);
+      dims[idx][type] = val;
+      render();
+    });
+  });
+
+  // Summary
+  const totalAsIs = dims.reduce((s, d) => s + d.asIs, 0);
+  const totalToBe = dims.reduce((s, d) => s + d.toBe, 0);
+  const avgAsIs = (totalAsIs / dims.length).toFixed(1);
+  const avgToBe = (totalToBe / dims.length).toFixed(1);
+  const maxGap = Math.max(...dims.map(d => d.toBe - d.asIs));
+  const readiness = Math.round((totalAsIs / (dims.length * 5)) * 100);
+
+  document.getElementById('summary').innerHTML = `
+    <h3>Score Summary</h3>
+    <div class="score-row"><span class="score-label">Average As-Is</span><span class="score-val" style="color:#F97316">${avgAsIs} / 5.0</span></div>
+    <div class="score-row"><span class="score-label">Average To-Be</span><span class="score-val" style="color:#A855F7">${avgToBe} / 5.0</span></div>
+    <div class="score-row"><span class="score-label">Total Gap</span><span class="score-val" style="color:#22C55E">+${totalToBe - totalAsIs} points</span></div>
+    <div class="score-row"><span class="score-label">Max Single Gap</span><span class="score-val" style="color:#EF4444">${maxGap}</span></div>
+    <div class="score-row"><span class="score-label">Current Readiness</span><span class="score-val">${readiness}%</span></div>
+  `;
+
+  // Gap list
+  const sorted = dims.map((d, i) => ({...d, gap: d.toBe - d.asIs, i})).sort((a, b) => b.gap - a.gap);
+  document.getElementById('gapList').innerHTML = sorted.slice(0, 4).map(d =>
+    `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1a2236;font-size:.78rem">
+      <span style="color:${d.color}">${d.label}</span>
+      <span style="font-family:'Space Mono',monospace;color:#22C55E;font-weight:700">+${d.gap}</span>
+    </div>`
+  ).join('');
+
+  drawRadar();
+}
+
+function drawRadar() {
+  const c = document.getElementById('radar');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W = 340, H = 340, cx = W / 2, cy = H / 2, R = 130;
+  ctx.clearRect(0, 0, W, H);
+
+  const n = dims.length;
+  const step = (Math.PI * 2) / n;
+
+  // Grid
+  for (let lv = 1; lv <= 5; lv++) {
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const a = -Math.PI / 2 + (i % n) * step;
+      const r = (lv / 5) * R;
+      i === 0 ? ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a)) : ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,.06)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Axes + labels
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + i * step;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a));
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.stroke();
+    const lr = R + 22;
+    ctx.fillStyle = 'rgba(255,255,255,.4)';
+    ctx.font = '9px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(dims[i].label, cx + lr * Math.cos(a), cy + lr * Math.sin(a));
+  }
+
+  // As-Is polygon
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const idx = i % n;
+    const a = -Math.PI / 2 + idx * step;
+    const r = (dims[idx].asIs / 5) * R;
+    i === 0 ? ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a)) : ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(249, 115, 22, 0.12)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(249, 115, 22, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // To-Be polygon
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const idx = i % n;
+    const a = -Math.PI / 2 + idx * step;
+    const r = (dims[idx].toBe / 5) * R;
+    i === 0 ? ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a)) : ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(168, 85, 247, 0.12)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(168, 85, 247, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Dots
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + i * step;
+    // As-Is dot
+    const r1 = (dims[i].asIs / 5) * R;
+    ctx.beginPath();
+    ctx.arc(cx + r1 * Math.cos(a), cy + r1 * Math.sin(a), 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(249, 115, 22, 0.8)';
+    ctx.fill();
+    // To-Be dot
+    const r2 = (dims[i].toBe / 5) * R;
+    ctx.beginPath();
+    ctx.arc(cx + r2 * Math.cos(a), cy + r2 * Math.sin(a), 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(168, 85, 247, 0.8)';
+    ctx.fill();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
