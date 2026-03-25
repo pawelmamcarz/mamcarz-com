@@ -196,20 +196,4 @@ if (chatMsgs && chatInput) {
   chatInput.addEventListener("blur", function() { this.style.borderColor = "var(--border)"; });
 }
 
-// Procurement diagram tabs
-const procFrame = document.getElementById('proc-frame');
-if (procFrame) {
-  const diagrams = {
-    '1': '/diagrams/diagram1_universal.html',
-    '2': '/diagrams/diagram2_ariba.html',
-    '3': '/diagrams/diagram3_maturity.html'
-  };
-  document.querySelectorAll('.proc-tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-      document.querySelectorAll('.proc-tab').forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      procFrame.src = diagrams[this.dataset.diagram];
-    });
-  });
-}
 

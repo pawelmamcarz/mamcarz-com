@@ -1002,58 +1002,6 @@
 
   .footer-links a:hover { color: var(--gold); }
 
-  /* PROCUREMENT DIAGRAM EMBED */
-  .proc-embed {
-    max-width: 1200px;
-    margin: 3rem auto 0;
-    border: 1px solid var(--border);
-  }
-
-  .proc-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg3);
-  }
-
-  .proc-tab {
-    flex: 1;
-    padding: 0.8rem 1rem;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: color 0.2s, background 0.2s;
-    border-bottom: 2px solid transparent;
-  }
-
-  .proc-tab:hover {
-    color: var(--text);
-    background: rgba(200,169,110,0.05);
-  }
-
-  .proc-tab.active {
-    color: var(--gold);
-    border-bottom-color: var(--gold);
-    background: rgba(200,169,110,0.08);
-  }
-
-  .proc-embed__frame {
-    display: block;
-    width: 100%;
-    height: 860px;
-    border: none;
-    background: #080C18;
-  }
-
-  @media (max-width: 900px) {
-    .proc-embed { margin: 2rem 0 0; }
-    .proc-embed__frame { height: 1100px; }
-    .proc-tab { font-size: 0.6rem; padding: 0.7rem 0.5rem; letter-spacing: 0.05em; }
-  }
 
   /* SCROLL REVEAL */
   .reveal {
