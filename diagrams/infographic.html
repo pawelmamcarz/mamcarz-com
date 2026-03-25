@@ -7,8 +7,13 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#E8E8E8;color:#222;display:flex;justify-content:center;padding:20px}
-.page{width:1500px;min-height:780px;background:linear-gradient(135deg,#ECECEC 0%,#E0E0E0 100%);border-radius:6px;position:relative;overflow:hidden;display:grid;grid-template-columns:340px 1fr 340px;gap:0;padding:40px 36px 36px 40px}
+body{font-family:'Inter',sans-serif;background:#E8E8E8;color:#222;display:flex;justify-content:center;padding:20px;min-width:0}
+.page{width:100%;max-width:1460px;min-height:780px;background:linear-gradient(135deg,#ECECEC 0%,#E0E0E0 100%);border-radius:6px;position:relative;overflow:hidden;display:grid;grid-template-columns:300px 1fr 300px;gap:0;padding:32px 28px 28px 32px}
+@media(max-width:900px){
+  .page{grid-template-columns:1fr;padding:20px}
+  .center{order:-1;height:400px}
+  .comp-table{font-size:.68rem}
+}
 
 /* LEFT COLUMN */
 .left{display:flex;flex-direction:column;gap:0;z-index:2}

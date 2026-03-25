@@ -5,43 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Procurement Process 2026 — Interaktywny Model Zakupowy | Paweł Mamcarz</title>
 <meta name="description" content="Interaktywny model procesu zakupowego 2026 z warstwami AI, ESG, Risk i SRM 2.0. Mapowanie modułów SAP Ariba i narzędzie maturity assessment. Paweł Mamcarz — Associate Partner apsolut Group.">
-<meta name="keywords" content="procurement process 2026, SAP Ariba modules, procurement maturity, AI procurement, ESG procurement, strategic sourcing, Paweł Mamcarz, apsolut Group">
-<meta name="author" content="Paweł Mamcarz">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://mamcarz.com/procurement-2026/">
 <link rel="alternate" hreflang="pl" href="https://mamcarz.com/procurement-2026/">
 <link rel="alternate" hreflang="x-default" href="https://mamcarz.com/procurement-2026/">
-
-<!-- Open Graph -->
 <meta property="og:title" content="Procurement Process 2026 — Interaktywny Model Zakupowy">
-<meta property="og:description" content="Interaktywny model procesu zakupowego 2026 z warstwami AI, ESG, Risk i SRM 2.0. Mapowanie modułów SAP Ariba i maturity assessment.">
+<meta property="og:description" content="Interaktywny model procesu zakupowego 2026 z warstwami AI, ESG, Risk i SRM 2.0.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mamcarz.com/procurement-2026/">
 <meta property="og:image" content="https://mamcarz.com/logo.png">
 <meta property="og:locale" content="pl_PL">
 <meta property="og:site_name" content="Paweł Mamcarz">
-
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
-  .diagram-section { padding: 0 4rem 4rem; max-width: 1200px; margin: 0 auto; }
-  .diagram-section h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
-  .diagram-section h2 em { font-style: italic; color: var(--gold); }
-  .diagram-section .diagram-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
-  .diagram-frame { width: 100%; border: 1px solid var(--border); background: #080C18; }
-  .diagram-frame--tall { height: 820px; }
-  .diagram-frame--grid { height: 1400px; }
-  .diagram-frame--maturity { height: 780px; }
-  .diagram-divider { border: none; border-top: 1px solid var(--border); margin: 0 4rem; max-width: 1200px; }
+  /* Reset the global section padding for this page */
+  .diag-section {
+    padding: 4rem 4rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .diag-section + .diag-divider { margin: 0 4rem; border: none; border-top: 1px solid var(--border); }
+  .diag-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .diag-section h2 em { font-style: italic; color: var(--gold); }
+  .diag-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .diag-frame {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--border);
+    background: #080C18;
+  }
   @media (max-width: 900px) {
-    .diagram-section { padding: 0 2rem 3rem; }
-    .diagram-frame--tall { height: 1100px; }
-    .diagram-frame--grid { height: 2400px; }
-    .diagram-frame--maturity { height: 1200px; }
-    .diagram-divider { margin: 0 2rem; }
+    .diag-section { padding: 3rem 2rem 3rem; }
+    .diag-section + .diag-divider { margin: 0 2rem; }
   }
 </style>
 </head>
@@ -62,10 +70,10 @@
     <span></span><span></span><span></span>
   </button>
 </nav>
-
 <div class="nav-overlay" id="navOverlay"></div>
 
 <main>
+
 <!-- PAGE HERO -->
 <section class="page-hero">
   <div class="page-hero-bg"></div>
@@ -73,43 +81,40 @@
   <div class="page-hero-content">
     <div class="breadcrumb"><a href="/">Strona główna</a> / <a href="/#skills">Kompetencje</a> / <span>Procurement 2026</span></div>
     <h1 class="page-title">Procurement<br><em>Process 2026</em></h1>
-    <p class="page-subtitle">Od sekwencyjnego cyklu do ekosystemu orkiestrowanego przez AI. Interaktywny model procesu zakupowego z 5 nowymi warstwami: AI & Orchestration, Risk, ESG, Data Analytics i SRM 2.0.</p>
+    <p class="page-subtitle">Od sekwencyjnego cyklu do ekosystemu orkiestrowanego przez AI. Interaktywny model z 5 nowymi warstwami: AI & Orchestration, Risk, ESG, Data Analytics i SRM 2.0.</p>
   </div>
 </section>
 
-<!-- INFOGRAPHIC -->
-<section class="diagram-section" style="padding-top:4rem;">
+<!-- 1. INFOGRAPHIC -->
+<div class="diag-section">
   <h2>Infografika: <em>od cyklu do ekosystemu</em></h2>
-  <p class="diagram-sub">Wizualny przegląd transformacji procesu zakupowego — 2015 vs 2026, warstwy AI, Risk i ESG.</p>
-  <iframe src="/diagrams/infographic.html" class="diagram-frame" style="height:840px;" title="Procurement 2026 — infographic"></iframe>
-</section>
+  <p class="diag-sub">Wizualny przegląd transformacji — 2015 vs 2026, warstwy AI, Risk i ESG. Infografika EN.</p>
+  <iframe src="/diagrams/infographic.html" class="diag-frame" style="height:820px;" title="Procurement 2026 — infographic" scrolling="no"></iframe>
+</div>
+<hr class="diag-divider">
 
-<hr class="diagram-divider">
-
-<!-- DIAGRAM 1: Universal Process -->
-<section class="diagram-section" style="padding-top:4rem;">
+<!-- 2. UNIVERSAL PROCESS -->
+<div class="diag-section">
   <h2>Diagram procesu <em>zakupowego</em></h2>
-  <p class="diagram-sub">Kliknij segment koła lub ikonę warstwy, aby zobaczyć szczegóły w panelu bocznym.</p>
-  <iframe src="/diagrams/diagram1_universal.html" class="diagram-frame diagram-frame--tall" title="Procurement Process 2026 — interaktywny diagram"></iframe>
-</section>
+  <p class="diag-sub">Kliknij segment koła lub ikonę warstwy, aby zobaczyć szczegóły w panelu bocznym.</p>
+  <iframe src="/diagrams/diagram1_universal.html" class="diag-frame" style="height:820px;" title="Procurement Process 2026 — interaktywny diagram"></iframe>
+</div>
+<hr class="diag-divider">
 
-<hr class="diagram-divider">
-
-<!-- DIAGRAM 2: SAP Ariba Module Mapping -->
-<section class="diagram-section" style="padding-top:4rem;">
+<!-- 3. SAP ARIBA MAPPING -->
+<div class="diag-section">
   <h2>Mapowanie modułów <em>SAP Ariba</em></h2>
-  <p class="diagram-sub">Każdy krok procesu z mapowaniem konkretnych modułów SAP Ariba, Business Network i partnerów ekosystemowych.</p>
-  <iframe src="/diagrams/diagram2_ariba.html" class="diagram-frame diagram-frame--grid" title="SAP Ariba Module Mapping"></iframe>
-</section>
+  <p class="diag-sub">Każdy krok procesu z mapowaniem konkretnych modułów SAP Ariba, Business Network i partnerów ekosystemowych.</p>
+  <iframe src="/diagrams/diagram2_ariba.html" class="diag-frame" style="height:1500px;" title="SAP Ariba Module Mapping"></iframe>
+</div>
+<hr class="diag-divider">
 
-<hr class="diagram-divider">
-
-<!-- DIAGRAM 3: Maturity Assessment -->
-<section class="diagram-section" style="padding-top:4rem;">
+<!-- 4. MATURITY ASSESSMENT -->
+<div class="diag-section">
   <h2>Maturity <em>Assessment</em></h2>
-  <p class="diagram-sub">Interaktywne narzędzie as-is vs to-be — kliknij bary, aby zmienić score. Radar chart z gap analysis i priorytetami.</p>
-  <iframe src="/diagrams/diagram3_maturity.html" class="diagram-frame diagram-frame--maturity" title="Procurement Maturity Assessment"></iframe>
-</section>
+  <p class="diag-sub">Interaktywne narzędzie as-is vs to-be — kliknij bary, aby zmienić score. Radar chart z gap analysis.</p>
+  <iframe src="/diagrams/diagram3_maturity.html" class="diag-frame" style="height:820px;" title="Procurement Maturity Assessment"></iframe>
+</div>
 
 <!-- CTA -->
 <section class="cta-banner">
@@ -133,6 +138,7 @@
     <div class="related-link-title">Case studies</div>
   </a>
 </div>
+
 </main>
 
 <footer>
