@@ -48,8 +48,13 @@
     background: #080C18;
   }
   @media (max-width: 900px) {
-    .diag-section { padding: 3rem 2rem 3rem; }
-    .diag-section + .diag-divider { margin: 0 2rem; }
+    .diag-section { padding: 3rem 1.5rem 3rem; }
+    .diag-section + .diag-divider { margin: 0 1.5rem; }
+    /* diagram2 single-column on mobile needs more height */
+    iframe[title="SAP Ariba Module Mapping"] { height: 3800px !important; }
+    iframe[title="Procurement Process 2026 — interaktywny diagram"] { height: 1300px !important; }
+    iframe[title="Procurement Maturity Assessment"] { height: 1400px !important; }
+    iframe[title="Procurement 2026 — infographic"] { height: 1100px !important; }
   }
 </style>
 </head>
@@ -89,7 +94,7 @@
 <div class="diag-section">
   <h2>Infografika: <em>od cyklu do ekosystemu</em></h2>
   <p class="diag-sub">Wizualny przegląd transformacji — 2015 vs 2026, warstwy AI, Risk i ESG. Infografika EN.</p>
-  <iframe src="/diagrams/infographic.html" class="diag-frame" style="height:820px;" title="Procurement 2026 — infographic" scrolling="no"></iframe>
+  <iframe src="/diagrams/infographic.html" class="diag-frame" style="height:820px;" title="Procurement 2026 — infographic"></iframe>
 </div>
 <hr class="diag-divider">
 
@@ -97,7 +102,7 @@
 <div class="diag-section">
   <h2>Diagram procesu <em>zakupowego</em></h2>
   <p class="diag-sub">Kliknij segment koła lub ikonę warstwy, aby zobaczyć szczegóły w panelu bocznym.</p>
-  <iframe src="/diagrams/diagram1_universal.html" class="diag-frame" style="height:820px;" title="Procurement Process 2026 — interaktywny diagram"></iframe>
+  <iframe src="/diagrams/diagram1_universal.html" class="diag-frame" style="height:900px;" title="Procurement Process 2026 — interaktywny diagram"></iframe>
 </div>
 <hr class="diag-divider">
 
@@ -105,7 +110,7 @@
 <div class="diag-section">
   <h2>Mapowanie modułów <em>SAP Ariba</em></h2>
   <p class="diag-sub">Każdy krok procesu z mapowaniem konkretnych modułów SAP Ariba, Business Network i partnerów ekosystemowych.</p>
-  <iframe src="/diagrams/diagram2_ariba.html" class="diag-frame" style="height:1500px;" title="SAP Ariba Module Mapping"></iframe>
+  <iframe src="/diagrams/diagram2_ariba.html" class="diag-frame" style="height:2200px;" title="SAP Ariba Module Mapping"></iframe>
 </div>
 <hr class="diag-divider">
 
@@ -113,7 +118,7 @@
 <div class="diag-section">
   <h2>Maturity <em>Assessment</em></h2>
   <p class="diag-sub">Interaktywne narzędzie as-is vs to-be — kliknij bary, aby zmienić score. Radar chart z gap analysis.</p>
-  <iframe src="/diagrams/diagram3_maturity.html" class="diag-frame" style="height:820px;" title="Procurement Maturity Assessment"></iframe>
+  <iframe src="/diagrams/diagram3_maturity.html" class="diag-frame" style="height:950px;" title="Procurement Maturity Assessment"></iframe>
 </div>
 
 <!-- CTA -->
