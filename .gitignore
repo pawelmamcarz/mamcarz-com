@@ -2,3 +2,4 @@
 *.zip
 *.docx
 .wrangler/
+deploy.sh
