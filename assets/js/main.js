@@ -128,7 +128,8 @@ navAnchors.forEach(a => {
 // AI Chat — Llama 3.3 via Cloudflare Worker
 const chatMsgs = document.getElementById("chat-messages");
 const chatInput = document.getElementById("chat-input");
-const chatSendBtn = document.querySelector("#ai-chat button[onclick]");
+const chatForm = document.getElementById("chat-form");
+const chatSendBtn = document.getElementById("chat-send");
 
 if (chatMsgs && chatInput) {
   const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
@@ -148,7 +149,7 @@ if (chatMsgs && chatInput) {
     chatBusy = busy;
     if (chatSendBtn) {
       chatSendBtn.style.opacity = busy ? '0.5' : '1';
-      chatSendBtn.style.pointerEvents = busy ? 'none' : 'auto';
+      chatSendBtn.disabled = busy;
     }
     chatInput.disabled = busy;
   }
@@ -178,9 +179,11 @@ if (chatMsgs && chatInput) {
         thinking.innerHTML = data.reply.replace(/\n/g, "<br>");
         chatHistory.push({ role: "assistant", content: data.reply });
       } else {
+        thinking.setAttribute("role", "alert");
         thinking.innerHTML = "Przepraszam, coś poszło nie tak. Spróbuj ponownie lub napisz na <a href=\"mailto:pawel@mamcarz.com\" style=\"color:var(--gold)\">pawel@mamcarz.com</a>";
       }
     } catch (err) {
+      thinking.setAttribute("role", "alert");
       thinking.innerHTML = "Nie udało się połączyć z AI. Napisz bezpośrednio: <a href=\"mailto:pawel@mamcarz.com\" style=\"color:var(--gold)\">pawel@mamcarz.com</a>";
     } finally {
       setChatBusy(false);
@@ -194,6 +197,13 @@ if (chatMsgs && chatInput) {
 
   chatInput.addEventListener("focus", function() { this.style.borderColor = "var(--gold)"; });
   chatInput.addEventListener("blur", function() { this.style.borderColor = "var(--border)"; });
+
+  if (chatForm) {
+    chatForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      window.sendMsg();
+    });
+  }
 }
 
 
