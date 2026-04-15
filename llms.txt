@@ -1,14 +1,14 @@
-# Paweł Mamcarz — Procurement Expert & SAP Ariba
+# Paweł Mamcarz | Procurement Expert & SAP Ariba
 
 > Associate Partner CEE at apsolut Group (part of All for One Group SE). 25+ years in strategic procurement, SAP Ariba, and digital transformation for 100+ organizations across Central and Eastern Europe.
 
 ## About
 
-Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group — a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year. His portfolio spans 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania for clients including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, and MOL.
+Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year. His portfolio spans 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania for clients including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, and MOL.
 
 Before joining apsolut, he held senior roles at SAP Polska (SAP Ariba Senior Account Executive), PZU (Strategic Project Director), PwC (Vice Director, Advisory), PKP PLK (Board Advisor), PKP Intercity (Program Director), and PKN ORLEN (Procurement Department Head, CONNECT Platform Project Manager).
 
-He managed a 500M PLN/year procurement portfolio at PKN ORLEN and led the CONNECT sourcing platform — the largest of its kind in Poland (15 companies, 4 countries, 60-person team).
+He managed a 500M PLN/year procurement portfolio at PKN ORLEN and led the CONNECT sourcing platform, the largest of its kind in Poland (15 companies, 4 countries, 60-person team).
 
 Education: SGH Warsaw (Finance & Banking), WU Wien (CEMS Master), Warsaw Executive MBA (Univ. of Minnesota / SGH), APMP (PMI).
 
@@ -46,4 +46,4 @@ Languages: Polish (native), English (fluent), German (advanced), Russian (commun
 
 ## PL
 
-Paweł Mamcarz — ekspert zakupowy, konsultant ds. wdrożeń systemów zakupowych (SAP Ariba, Fieldglass, S/4HANA). Associate Partner CEE w apsolut Group / All for One Group. 25+ lat w zakupach strategicznych, transformacji zakupów i zamówieniach publicznych (PZP). Ponad 100 organizacji w portfolio — PKN Orlen, KGHM, Żabka, LOT, PGE, PZU, MOL, Motor Oil Hellas. Konsulting zakupowy, doradztwo zakupowe, audyt zakupów, platforma zakupowa, e-procurement.
+Paweł Mamcarz, ekspert zakupowy, konsultant ds. wdrożeń systemów zakupowych (SAP Ariba, Fieldglass, S/4HANA). Associate Partner CEE w apsolut Group / All for One Group. 25+ lat w zakupach strategicznych, transformacji zakupów i zamówieniach publicznych (PZP). Ponad 100 organizacji w portfolio: PKN Orlen, KGHM, Żabka, LOT, PGE, PZU, MOL, Motor Oil Hellas. Konsulting zakupowy, doradztwo zakupowe, audyt zakupów, platforma zakupowa, e-procurement.

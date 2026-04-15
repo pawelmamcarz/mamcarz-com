@@ -1,10 +1,10 @@
-# Paweł Mamcarz — Procurement Expert & SAP Ariba
+# Paweł Mamcarz | Procurement Expert & SAP Ariba
 
 > Associate Partner CEE at apsolut Group (part of All for One Group SE). 25+ years in strategic procurement, SAP Ariba, and digital transformation for 100+ organizations across Central and Eastern Europe.
 
 ## About
 
-Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group — a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year (part of All for One Group SE since March 2026). His portfolio spans 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania.
+Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year (part of All for One Group SE since March 2026). His portfolio spans 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania.
 
 Key clients: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PKN Orlen, PGE, PGNIG, PZU, Orange/TP SA, Polpharma, Adamed, CIECH, Lotte Wedel, Hitachi Energy, Pfleiderer, Bank Millennium, Aeroflot, PKP PLK, PKP Intercity, PKP Energetyka, Elektrownia Puławy, Kopex, BRW.
 
@@ -12,22 +12,22 @@ Total project value: 500M+ EUR across 100+ organizations in energy, heavy indust
 
 ## Career History
 
-- **2021–present**: Associate Partner CEE, apsolut Group / All for One Group — building the CEE region from scratch, 20+ SAP Ariba/Fieldglass/S/4HANA implementations
-- **2017–2021**: SAP Ariba Senior Account Executive, SAP Polska — built the SAP Ariba market in Poland and CEE from zero, first SAP Ariba deployments in Poland
-- **2016–2017**: Strategic Project Director, PZU S.A. — procurement transformation for CEE's largest insurer (spend analytics, category strategies, TOM, IT platform selection)
-- **2015–2016**: Vice Director Advisory / Procurement Expert, PwC Polska — CAPP methodology, projects for PGE, PGNIG, PKN Orlen, PZU, Aeroflot, Russian Railways
-- **2013–2015**: Board Advisor, PKP PLK — public procurement expert (PZP) for tenders 100M+ PLN, SAP AG framework agreement for PKP group (4 companies)
-- **2014–2015**: Program Director, PKP Intercity — Revenue Management System (JDA/RPO), 30+ person team, integration with sales channels
-- **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN — largest sourcing platform in Poland (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
-- **2006–2008**: Head of General Procurement, PKN ORLEN — 30-person department, 500M PLN/year portfolio, SAP SRM implementation, 1800 fuel stations
-- **2004–2006**: Critical Changes Manager, Telekomunikacja Polska — Oracle EBS for SSC, coordinating 215 team members
-- **2002–2004**: Buyer / IT/Telco Stream Lead, Bank Millennium — IT procurement centralization, contract renegotiations
-- **1999–2002**: Financial Controller & Risk Management, Elektrim / Bank Austria Creditanstalt Vienna — bond issuance (200M PLN), commercial papers (460M PLN), CEE fixed income analysis
+- **2021–present**: Associate Partner CEE, apsolut Group / All for One Group: building the CEE region from scratch, 20+ SAP Ariba/Fieldglass/S/4HANA implementations
+- **2017–2021**: SAP Ariba Senior Account Executive, SAP Polska: built the SAP Ariba market in Poland and CEE from zero, first SAP Ariba deployments in Poland
+- **2016–2017**: Strategic Project Director, PZU S.A.: procurement transformation for CEE's largest insurer (spend analytics, category strategies, TOM, IT platform selection)
+- **2015–2016**: Vice Director Advisory / Procurement Expert, PwC Polska: CAPP methodology, projects for PGE, PGNIG, PKN Orlen, PZU, Aeroflot, Russian Railways
+- **2013–2015**: Board Advisor, PKP PLK: public procurement expert (PZP) for tenders 100M+ PLN, SAP AG framework agreement for PKP group (4 companies)
+- **2014–2015**: Program Director, PKP Intercity: Revenue Management System (JDA/RPO), 30+ person team, integration with sales channels
+- **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN: largest sourcing platform in Poland (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
+- **2006–2008**: Head of General Procurement, PKN ORLEN: 30-person department, 500M PLN/year portfolio, SAP SRM implementation, 1800 fuel stations
+- **2004–2006**: Critical Changes Manager, Telekomunikacja Polska: Oracle EBS for SSC, coordinating 215 team members
+- **2002–2004**: Buyer / IT/Telco Stream Lead, Bank Millennium: IT procurement centralization, contract renegotiations
+- **1999–2002**: Financial Controller & Risk Management, Elektrim / Bank Austria Creditanstalt Vienna: bond issuance (200M PLN), commercial papers (460M PLN), CEE fixed income analysis
 
 ## Education & Certifications
 
-- SGH Warsaw School of Economics — Finance & Banking / Statistical Methods & Information Systems (1995–2000)
-- Wirtschaftsuniversität Wien — CEMS Master (2001)
+- SGH Warsaw School of Economics, Finance & Banking / Statistical Methods & Information Systems (1995–2000)
+- Wirtschaftsuniversität Wien, CEMS Master (2001)
 - Warsaw Executive MBA, University of Minnesota / SGH (2005)
 - APMP Project Management, PMI (2008)
 - Languages: Polish (native), English (fluent), German (advanced), Russian (communicative)
@@ -36,13 +36,13 @@ Total project value: 500M+ EUR across 100+ organizations in energy, heavy indust
 
 ### SAP Ariba Implementation
 End-to-end deployment of SAP Ariba modules across CEE:
-- SAP Ariba Sourcing — RFx, e-auctions, award scenarios
-- SAP Ariba Contracts — contract lifecycle management, compliance
-- SAP Ariba Buying & Invoicing — catalog-based purchasing, PO management
-- SAP Ariba Supplier Lifecycle & Performance (SLP) — onboarding, qualification, scorecards
-- SAP Ariba Supplier Risk — risk monitoring, financial health, compliance tracking
-- SAP Fieldglass — external workforce and services procurement
-- SAP S/4HANA Procurement — integration with MM, local fiscal requirements (KSeF Poland, NAV Hungary, e-Factura Romania)
+- SAP Ariba Sourcing: RFx, e-auctions, award scenarios
+- SAP Ariba Contracts: contract lifecycle management, compliance
+- SAP Ariba Buying & Invoicing: catalog-based purchasing, PO management
+- SAP Ariba Supplier Lifecycle & Performance (SLP): onboarding, qualification, scorecards
+- SAP Ariba Supplier Risk: risk monitoring, financial health, compliance tracking
+- SAP Fieldglass: external workforce and services procurement
+- SAP S/4HANA Procurement: integration with MM, local fiscal requirements (KSeF Poland, NAV Hungary, e-Factura Romania)
 - Also experienced with: Oracle EBS, SAP SRM, Marketplanet, Ivalua, Basware
 
 apsolut Group is among the world's leading SAP Ariba integration partners with 450+ clients globally.
@@ -56,7 +56,7 @@ apsolut Group is among the world's leading SAP Ariba integration partners with 4
 - Change management and user adoption
 - Technology selection and implementation support (platform-agnostic advisory)
 
-### Public Procurement Advisory (PZP — Prawo Zamówień Publicznych)
+### Public Procurement Advisory (PZP: Prawo Zamówień Publicznych)
 - Expert advisory for large public sector tenders (100M+ PLN)
 - Tender strategy and documentation support (SIWZ/SWZ)
 - Framework agreement negotiation (e.g., SAP AG for PKP group)
@@ -98,7 +98,7 @@ apsolut Group is among the world's leading SAP Ariba integration partners with 4
 
 Available as keynote speaker, panelist, or workshop facilitator on:
 - Digital procurement transformation in CEE
-- SAP Ariba implementation — lessons from 20+ projects
+- SAP Ariba implementation: lessons from 20+ projects
 - Building procurement function from scratch
 - Public procurement meets digital: PZP and e-procurement
 - Leadership in procurement organizations
@@ -110,13 +110,13 @@ Available for: conferences, corporate events, universities (guest lectures, seme
 
 ## Beyond Procurement
 
-Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with aerobatics rating. Owner of WarsawFlightSafety (aerobatic flight school), former display pilot for Diverse Extreme Team (2013). Press photographer for Forum Agency since 2003 — air-to-air photography, video production for TVP and Greek island municipalities.
+Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with aerobatics rating. Owner of WarsawFlightSafety (aerobatic flight school), former display pilot for Diverse Extreme Team (2013). Press photographer for Forum Agency since 2003: air-to-air photography, video production for TVP and Greek island municipalities.
 
-Improv performer — live improvised comedy shows at Resort Komedii in Warsaw (resortkomedii.pl).
+Improv performer with regular live shows at Resort Komedii in Warsaw (resortkomedii.pl).
 
 Websites: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (transport app), przypominamy.com (SMS/MMS SaaS platform).
 
-Connected to technology since 1993 — first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX; currently Cloudflare, React, and custom web projects.
+Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX; currently Cloudflare, React, and custom web projects.
 
 ## Contact
 
@@ -143,4 +143,4 @@ Connected to technology since 1993 — first website on VAX at UMCS Lublin, netw
 
 Ekspert zakupowy, konsultant zakupowy, konsulting zakupowy, doradztwo zakupowe, wdrożenie systemu zakupowego, system zakupowy, platforma zakupowa, transformacja zakupów, optymalizacja zakupów, zakupy strategiczne, zarządzanie zakupami, procurement, sourcing strategiczny, e-procurement, zamówienia publiczne, PZP, przetargi publiczne, SAP Ariba wdrożenie, SAP Ariba Polska, SAP Ariba CEE, SAP Fieldglass, SAP S/4HANA zakupy, digitalizacja zakupów, cyfryzacja zakupów, audyt zakupów, analiza wydatków, spend analysis, strategie kategoriowe, zarządzanie dostawcami, supplier management, SRM, Ariba Sourcing, Ariba Contracts, Ariba Buying, zarządzanie ryzykiem dostawców, compliance zakupowy.
 
-Paweł Mamcarz — ekspert ds. zakupów, Associate Partner CEE w apsolut Group (All for One Group). Ponad 25 lat doświadczenia w zakupach strategicznych i wdrożeniach systemów zakupowych dla największych firm w Polsce i Europie Środkowo-Wschodniej. Specjalizacja: SAP Ariba, SAP Fieldglass, SAP S/4HANA, transformacja funkcji zakupowej, prawo zamówień publicznych (PZP). Klienci: PKN Orlen, KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PGE, PGNIG, PZU, Orange, Polpharma, Adamed, PKP PLK, PKP Intercity, Bank Millennium.
+Paweł Mamcarz, ekspert ds. zakupów, Associate Partner CEE w apsolut Group (All for One Group). Ponad 25 lat doświadczenia w zakupach strategicznych i wdrożeniach systemów zakupowych dla największych firm w Polsce i Europie Środkowo-Wschodniej. Specjalizacja: SAP Ariba, SAP Fieldglass, SAP S/4HANA, transformacja funkcji zakupowej, prawo zamówień publicznych (PZP). Klienci: PKN Orlen, KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PGE, PGNIG, PZU, Orange, Polpharma, Adamed, PKP PLK, PKP Intercity, Bank Millennium.
