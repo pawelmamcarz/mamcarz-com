@@ -1096,8 +1096,48 @@
   /* FOCUS STATES */
   a:focus-visible,
   button:focus-visible,
-  input:focus-visible {
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible,
+  .skill-card:focus-visible,
+  .pcard:focus-visible,
+  .pcard a:focus-visible,
+  .nav-links a:focus-visible,
+  .contact-detail:focus-visible,
+  .btn-primary:focus-visible {
     outline: 2px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* SKIP LINK */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    z-index: 10000;
+  }
+
+  .skip-link:focus {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.75rem 1.25rem;
+    background: var(--gold);
+    color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-decoration: none;
+    outline: 2px solid #000;
     outline-offset: 2px;
   }
 
