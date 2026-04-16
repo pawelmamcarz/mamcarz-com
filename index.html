@@ -156,7 +156,20 @@
   <div class="about-grid">
     <div class="about-photo-wrap reveal">
       <div class="about-photo">
-        <img src="/IMG_3284.jpeg" alt="Paweł Mamcarz" loading="lazy" decoding="async" width="4032" height="3024">
+        <picture>
+          <source type="image/webp"
+                  srcset="/assets/img/IMG_3284-480.webp 480w,
+                          /assets/img/IMG_3284-960.webp 960w,
+                          /assets/img/IMG_3284-1920.webp 1920w"
+                  sizes="(max-width: 768px) 90vw, 480px">
+          <img src="/assets/img/IMG_3284-960.jpg"
+               srcset="/assets/img/IMG_3284-480.jpg 480w,
+                       /assets/img/IMG_3284-960.jpg 960w,
+                       /assets/img/IMG_3284-1920.jpg 1920w"
+               sizes="(max-width: 768px) 90vw, 480px"
+               alt="Paweł Mamcarz" loading="lazy" decoding="async"
+               width="960" height="720">
+        </picture>
       </div>
       <div class="about-frame"></div>
       <div class="about-badge">
