@@ -60,6 +60,8 @@
 </head>
 <body>
 
+<a href="#main" class="skip-link">Przejdź do treści</a>
+
 <!-- NAV -->
 <nav aria-label="Main navigation">
   <a href="/" class="nav-logo" style="text-decoration:none">PM — Mamcarz.com</a>
@@ -77,14 +79,14 @@
 </nav>
 <div class="nav-overlay" id="navOverlay"></div>
 
-<main>
+<main id="main" tabindex="-1">
 
 <!-- PAGE HERO -->
 <section class="page-hero">
   <div class="page-hero-bg"></div>
   <div class="page-hero-grid"></div>
   <div class="page-hero-content">
-    <div class="breadcrumb"><a href="/">Strona główna</a> / <a href="/#skills">Kompetencje</a> / <span>Procurement 2026</span></div>
+    <nav class="breadcrumb" aria-label="Okruszki"><a href="/">Strona główna</a> / <a href="/#skills">Kompetencje</a> / <span aria-current="page">Procurement 2026</span></nav>
     <h1 class="page-title">Procurement<br><em>Process 2026</em></h1>
     <p class="page-subtitle">Od sekwencyjnego cyklu do ekosystemu orkiestrowanego przez AI. Interaktywny model z 5 nowymi warstwami: AI & Orchestration, Risk, ESG, Data Analytics i SRM 2.0.</p>
   </div>
@@ -147,7 +149,7 @@
 </main>
 
 <footer>
-  <div class="footer-copy">&copy; 1993&ndash;2026 Paweł Mamcarz &mdash; mamcarz.com</div>
+  <div class="footer-copy">© 1993–2026 Paweł Mamcarz — mamcarz.com</div>
   <ul class="footer-links">
     <li><a href="/">Strona główna</a></li>
     <li><a href="/#about">O mnie</a></li>

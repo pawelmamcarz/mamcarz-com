@@ -1,0 +1,13 @@
+{
+  "name": "mamcarz-com",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static site for mamcarz.com. The worker/ subfolder holds the Cloudflare Worker for the AI chat.",
+  "scripts": {
+    "optimize:images": "node scripts/optimize-images.js"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

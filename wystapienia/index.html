@@ -36,6 +36,8 @@
 </head>
 <body>
 
+<a href="#main" class="skip-link">Przejdź do treści</a>
+
 <!-- NAV -->
 <nav aria-label="Main navigation">
   <a href="/" class="nav-logo" style="text-decoration:none">PM — Mamcarz.com</a>
@@ -52,15 +54,15 @@
   </button>
 </nav>
 
-<main>
+<main id="main" tabindex="-1">
 <!-- HERO -->
 <section class="page-hero">
   <div class="page-hero-bg"></div>
   <div class="page-hero-grid"></div>
   <div class="page-hero-content">
-    <div class="breadcrumb">
-      <a href="/">Strona główna</a> / <span>Wystąpienia i wykłady</span>
-    </div>
+    <nav class="breadcrumb" aria-label="Okruszki">
+      <a href="/">Strona główna</a> / <span aria-current="page">Wystąpienia i wykłady</span>
+    </nav>
     <h1 class="page-title">Wystąpienia <em>i wykłady</em></h1>
     <p class="page-subtitle">25+ lat doświadczenia w zakupach strategicznych i transformacji cyfrowej — na scenie konferencyjnej, w sali wykładowej i przy stole warsztatowym. Dzielę się wiedzą praktyczną, popartą realizacją ponad 100 projektów dla organizacji w całym regionie CEE.</p>
   </div>
@@ -160,7 +162,7 @@
 <!-- FOOTER -->
 
 <footer>
-  <div class="footer-copy">&copy; 1993&ndash;2026 Paweł Mamcarz — mamcarz.com</div>
+  <div class="footer-copy">© 1993–2026 Paweł Mamcarz — mamcarz.com</div>
   <ul class="footer-links">
     <li><a href="/">Strona główna</a></li>
     <li><a href="/#about">O mnie</a></li>

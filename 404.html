@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>404 — Strona nie istnieje | mamcarz.com</title>
+<meta name="description" content="Tej strony nie ma pod tym adresem. Wróć na stronę główną albo napisz do Pawła — chętnie pomoże znaleźć to, czego szukasz.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +13,8 @@
 <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
+
+<a href="#main" class="skip-link">Przejdź do treści</a>
 
 <nav aria-label="Main navigation">
   <a href="/" class="nav-logo" style="text-decoration:none">PM — Mamcarz.com</a>
@@ -30,13 +33,16 @@
   </button>
 </nav>
 
-<main>
+<main id="main" tabindex="-1">
 <section style="min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;">
   <div>
-    <p class="section-label">Błąd 404</p>
-    <h1 style="font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,6rem);font-weight:700;margin-bottom:1rem;">Strona nie<br><em style="font-style:italic;color:var(--gold)">istnieje</em></h1>
-    <p style="color:var(--text-secondary);font-size:1rem;margin-bottom:2rem;max-width:400px;margin-left:auto;margin-right:auto;">Ta strona mogła zostać przeniesiona lub usunięta. Sprawdź adres lub wróć na stronę główną.</p>
-    <a href="/" class="btn-primary" style="display:inline-block;padding:1rem 2.5rem;background:var(--gold);color:var(--bg);text-decoration:none;font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;">Strona główna</a>
+    <p class="section-label">Błąd 404 — poza zasięgiem radaru</p>
+    <h1 style="font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,6rem);font-weight:700;margin-bottom:1rem;">Tej strony<br><em style="font-style:italic;color:var(--gold)">tu nie ma</em></h1>
+    <p style="color:var(--text-secondary);font-size:1rem;margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto;">Nawet najlepszy plan lotu czasem prowadzi w złe miejsce. Wróć na stronę główną — albo napisz do mnie, chętnie pomogę znaleźć to, czego szukasz.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="/" class="btn-primary" style="display:inline-block;padding:1rem 2.5rem;background:var(--gold);color:var(--bg);text-decoration:none;font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;">Wróć do bazy</a>
+      <a href="mailto:pawel@mamcarz.com" style="display:inline-block;padding:1rem 2.5rem;background:transparent;color:var(--text);text-decoration:none;font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;border:1px solid var(--border);">Napisz do mnie</a>
+    </div>
   </div>
 </section>
 </main>
