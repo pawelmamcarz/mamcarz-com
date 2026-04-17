@@ -22,13 +22,19 @@ async function ensureDir(dir) {
 async function processOne(src, name) {
   const buf = await readFile(path.join(ROOT, src));
   const meta = await sharp(buf).metadata();
-  for (const w of WIDTHS) {
-    if (meta.width && w > meta.width) continue;
-    const base = path.join(OUT_DIR, `${name}-${w}`);
-    await sharp(buf).resize({ width: w }).webp({ quality: WEBP_QUALITY }).toFile(`${base}.webp`);
-    await sharp(buf).resize({ width: w }).jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toFile(`${base}.jpg`);
-    console.log(`✓ ${name}-${w}.webp / .jpg`);
-  }
+  await Promise.all(
+    WIDTHS
+      .filter(w => !meta.width || w <= meta.width)
+      .flatMap(w => {
+        const base = path.join(OUT_DIR, `${name}-${w}`);
+        return [
+          sharp(buf).resize({ width: w }).webp({ quality: WEBP_QUALITY }).toFile(`${base}.webp`)
+            .then(() => console.log(`✓ ${name}-${w}.webp`)),
+          sharp(buf).resize({ width: w }).jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toFile(`${base}.jpg`)
+            .then(() => console.log(`✓ ${name}-${w}.jpg`)),
+        ];
+      })
+  );
 }
 
 await ensureDir(OUT_DIR);
