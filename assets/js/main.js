@@ -1,3 +1,15 @@
+// Email obfuscation: build real mailto: from data-attributes at runtime so the
+// address isn't sitting in plain text for scrapers in the rendered HTML.
+document.querySelectorAll('.js-email').forEach(el => {
+  const user = el.dataset.user;
+  const domain = el.dataset.domain;
+  if (!user || !domain) return;
+  const addr = user + '@' + domain;
+  el.href = 'mailto:' + addr;
+  const slot = el.querySelector('.js-email-text');
+  if (slot) slot.textContent = addr;
+});
+
 // Hamburger menu + overlay
 const hamburger = document.getElementById('navHamburger');
 const navLinks = document.getElementById('navLinks');
