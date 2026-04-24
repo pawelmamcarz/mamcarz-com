@@ -6,7 +6,7 @@
 
 Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group — a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year (part of All for One Group SE since March 2026). His portfolio spans 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania.
 
-Key clients: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PKN Orlen, PGE, PGNIG, PZU, Orange/TP SA, Polpharma, Adamed, CIECH, Lotte Wedel, Hitachi Energy, Pfleiderer, Bank Millennium, Aeroflot, PKP PLK, PKP Intercity, PKP Energetyka, Elektrownia Puławy, Kopex, BRW.
+Key clients: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PKN Orlen, PGE, PGNiG, PZU, Orange/TP SA, Adamed, CIECH, Lotte Wedel, Hitachi Energy, Pfleiderer, Bank Millennium, Aeroflot, PKP PLK, PKP Intercity, PKP Energetyka, Elektrownia Puławy, Kopex, BRW.
 
 Total project value: 500M+ EUR across 100+ organizations in energy, heavy industry, aviation, pharma, FMCG, finance, and public sector.
 
@@ -15,7 +15,7 @@ Total project value: 500M+ EUR across 100+ organizations in energy, heavy indust
 - **2021–present**: Associate Partner CEE, apsolut Group / All for One Group — building the CEE region from scratch, 20+ SAP Ariba/Fieldglass/S/4HANA implementations
 - **2017–2021**: SAP Ariba Senior Account Executive, SAP Polska — built the SAP Ariba market in Poland and CEE from zero, first SAP Ariba deployments in Poland
 - **2016–2017**: Strategic Project Director, PZU S.A. — procurement transformation for CEE's largest insurer (spend analytics, category strategies, TOM, IT platform selection)
-- **2015–2016**: Vice Director Advisory / Procurement Expert, PwC Polska — CAPP methodology, projects for PGE, PGNIG, PKN Orlen, PZU, Aeroflot, Russian Railways
+- **2015–2016**: Vice Director Advisory / Procurement Expert, PwC Polska — CAPP methodology, projects for PGE, PGNiG, PKN Orlen, PZU, Aeroflot, Russian Railways
 - **2013–2015**: Board Advisor, PKP PLK — public procurement expert (PZP) for tenders 100M+ PLN, SAP AG framework agreement for PKP group (4 companies)
 - **2014–2015**: Program Director, PKP Intercity — Revenue Management System (JDA/RPO), 30+ person team, integration with sales channels
 - **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN — largest sourcing platform in Poland (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
@@ -29,7 +29,7 @@ Total project value: 500M+ EUR across 100+ organizations in energy, heavy indust
 - SGH Warsaw School of Economics — Finance & Banking / Statistical Methods & Information Systems (1995–2000)
 - Wirtschaftsuniversität Wien — CEMS Master (2001)
 - Warsaw Executive MBA, University of Minnesota / SGH (2005)
-- APMP Project Management, PMI (2008)
+- PMP Project Management, PMI (2008)
 - Languages: Polish (native), English (fluent), German (advanced), Russian (communicative)
 
 ## Services
@@ -143,4 +143,4 @@ Connected to technology since 1993 — first website on VAX at UMCS Lublin, netw
 
 Ekspert zakupowy, konsultant zakupowy, konsulting zakupowy, doradztwo zakupowe, wdrożenie systemu zakupowego, system zakupowy, platforma zakupowa, transformacja zakupów, optymalizacja zakupów, zakupy strategiczne, zarządzanie zakupami, procurement, sourcing strategiczny, e-procurement, zamówienia publiczne, PZP, przetargi publiczne, SAP Ariba wdrożenie, SAP Ariba Polska, SAP Ariba CEE, SAP Fieldglass, SAP S/4HANA zakupy, digitalizacja zakupów, cyfryzacja zakupów, audyt zakupów, analiza wydatków, spend analysis, strategie kategoriowe, zarządzanie dostawcami, supplier management, SRM, Ariba Sourcing, Ariba Contracts, Ariba Buying, zarządzanie ryzykiem dostawców, compliance zakupowy.
 
-Paweł Mamcarz — ekspert ds. zakupów, Associate Partner CEE w apsolut Group (All for One Group). Ponad 25 lat doświadczenia w zakupach strategicznych i wdrożeniach systemów zakupowych dla największych firm w Polsce i Europie Środkowo-Wschodniej. Specjalizacja: SAP Ariba, SAP Fieldglass, SAP S/4HANA, transformacja funkcji zakupowej, prawo zamówień publicznych (PZP). Klienci: PKN Orlen, KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PGE, PGNIG, PZU, Orange, Polpharma, Adamed, PKP PLK, PKP Intercity, Bank Millennium.
+Paweł Mamcarz — ekspert ds. zakupów, Associate Partner CEE w apsolut Group (All for One Group). Ponad 25 lat doświadczenia w zakupach strategicznych i wdrożeniach systemów zakupowych dla największych firm w Polsce i Europie Środkowo-Wschodniej. Specjalizacja: SAP Ariba, SAP Fieldglass, SAP S/4HANA, transformacja funkcji zakupowej, prawo zamówień publicznych (PZP). Klienci: PKN Orlen, KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PGE, PGNiG, PZU, Orange, Adamed, PKP PLK, PKP Intercity, Bank Millennium.
