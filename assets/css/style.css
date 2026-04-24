@@ -1221,6 +1221,133 @@
     .cta-banner { padding: 3rem 2rem; }
   }
 
+  /* TRUST BAR (post-hero) */
+  .trust-bar {
+    padding: 2.2rem 4rem;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trust-bar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .trust-bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .trust-bar-names {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem 2rem;
+    justify-content: center;
+  }
+
+  .trust-bar-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    transition: color 0.3s;
+  }
+
+  .trust-bar-name:hover { color: var(--gold); }
+
+  @media (max-width: 768px) {
+    .trust-bar { padding: 1.6rem 1.5rem; }
+    .trust-bar-inner { gap: 1.2rem; flex-direction: column; }
+    .trust-bar-names { gap: 0.9rem 1.4rem; }
+  }
+
+  /* HOME MID-PAGE CTA */
+  .home-cta {
+    padding: 4rem 4rem;
+    background: var(--bg);
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .home-cta h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.8rem;
+  }
+
+  .home-cta h2 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .home-cta p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0 auto 1.6rem;
+    max-width: 560px;
+  }
+
+  .home-cta .btn-primary { display: inline-block; }
+
+  /* SKILL OUTCOME LINE */
+  .skill-outcome {
+    margin-top: 0.9rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-top: 1px solid var(--border);
+    padding-top: 0.9rem;
+    line-height: 1.5;
+  }
+
+  /* CONTACT AVAILABILITY SIGNAL */
+  .contact-availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--border);
+    background: rgba(200,169,110,0.05);
+  }
+
+  .contact-availability::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade8066;
+    animation: pulseDot 2.4s infinite;
+  }
+
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+  }
+
   /* ═══════════════════════════════════════════════════════
      SUBPAGE STYLES
   ═══════════════════════════════════════════════════════ */
