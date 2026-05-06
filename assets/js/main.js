@@ -225,4 +225,67 @@ if (chatMsgs && chatInput) {
   chatInput.addEventListener("blur", function() { this.style.borderColor = "var(--border)"; });
 }
 
+// Resume expand/collapse toggle
+const resumeToggle = document.getElementById('resume-toggle');
+const resumeHidden = document.getElementById('resume-hidden');
+if (resumeToggle && resumeHidden) {
+  resumeToggle.addEventListener('click', () => {
+    const isVisible = resumeHidden.classList.toggle('visible');
+    resumeToggle.textContent = isVisible
+      ? 'Zwiń historię ↑'
+      : 'Pokaż całą karierę (1999–2015) ↓';
+  });
+}
 
+// Contact section tabs
+const contactTabs = document.querySelectorAll('.contact-tab');
+const contactPanels = document.querySelectorAll('.contact-tabpanel');
+if (contactTabs.length > 0) {
+  contactTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      contactTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      contactPanels.forEach(p => p.setAttribute('hidden', ''));
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      const panel = document.getElementById('tab-' + tab.dataset.tab);
+      if (panel) panel.removeAttribute('hidden');
+    });
+  });
+}
+
+// Contact form (Web3Forms)
+const contactFormEl = document.getElementById('contact-form');
+const cfStatus = document.getElementById('cf-status');
+if (contactFormEl && cfStatus) {
+  contactFormEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (contactFormEl.querySelector('[name="website"]').value) return;
+    const submitBtn = document.getElementById('cf-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wysyłanie…';
+    cfStatus.className = 'cf-status';
+    cfStatus.textContent = '';
+    const data = Object.fromEntries(new FormData(contactFormEl));
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if (json.success) {
+        cfStatus.className = 'cf-status cf-status--ok';
+        cfStatus.textContent = 'Wiadomość wysłana. Odpiszę w ciągu doby.';
+        contactFormEl.reset();
+      } else {
+        throw new Error(json.message || 'error');
+      }
+    } catch {
+      cfStatus.className = 'cf-status cf-status--err';
+      cfStatus.textContent = 'Błąd wysyłania. Napisz bezpośrednio na pawel@mamcarz.com.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Wyślij wiadomość';
+    }
+  });
+}
