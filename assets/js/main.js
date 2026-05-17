@@ -83,7 +83,7 @@ if (revealEls.length > 0) {
   revealEls.forEach(el => revealObserver.observe(el));
 }
 
-// Scroll animation for timeline items — unobserve after reveal
+// Scroll animation for timeline items: unobserve after reveal
 const timelineItems = document.querySelectorAll('.timeline-item');
 if (timelineItems.length > 0) {
   const observer = new IntersectionObserver((entries) => {
@@ -99,7 +99,7 @@ if (timelineItems.length > 0) {
   timelineItems.forEach(el => observer.observe(el));
 }
 
-// Smooth nav highlight — only on homepage (anchor-based nav)
+// Smooth nav highlight: only on homepage (anchor-based nav)
 const sections = document.querySelectorAll('section[id]');
 const navAnchors = document.querySelectorAll('.nav-links a');
 
@@ -137,30 +137,30 @@ navAnchors.forEach(a => {
   }
 });
 
-// AI Chat — Llama 3.3 via Cloudflare Worker
+// AI Chat: Llama 3.3 via Cloudflare Worker
 const chatMsgs = document.getElementById("chat-messages");
 const chatInput = document.getElementById("chat-input");
-const chatSendBtn = document.querySelector("#ai-chat button[onclick]");
+const chatSendBtn = document.getElementById("chat-send");
 
-if (chatMsgs && chatInput) {
+if (chatMsgs && chatInput && chatSendBtn) {
   const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
   const chatHistory = [];
   let chatBusy = false;
 
   const lang = (document.documentElement.lang || "pl").toLowerCase().startsWith("en") ? "en" : "pl";
-  const mail = '<a href="mailto:pawel@mamcarz.com" style="color:var(--gold)">pawel@mamcarz.com</a>';
+  const mail = '<a href="mailto:pawel@mamcarz.com" class="gold-link">pawel@mamcarz.com</a>';
   const t = {
     pl: {
       thinking: "Zaglądam do notatek…",
-      apiError: `Hmm, coś mi się zacięło. Spróbuj jeszcze raz — albo napisz wprost do Pawła na ${mail}.`,
-      netError: `Nie mogę się teraz połączyć z AI. Najszybszy kontakt to ${mail} — odpowiadam zwykle w ciągu doby.`,
-      greeting: "Cześć! Jestem asystentem Pawła Mamcarza 👋<br>Paweł od 25 lat projektuje procurement dla firm takich jak KGHM, Żabka czy PKN ORLEN — a poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego <strong>usługi</strong>, <strong>doświadczenie</strong> albo jak się z nim <strong>skontaktować</strong>."
+      apiError: `Hmm, coś mi się zacięło. Spróbuj jeszcze raz albo napisz wprost do Pawła na ${mail}.`,
+      netError: `Nie mogę się teraz połączyć z AI. Najszybszy kontakt to ${mail}, odpowiadam zwykle w ciągu doby.`,
+      greeting: "Cześć! Jestem asystentem Pawła Mamcarza 👋<br>Paweł od 25 lat projektuje procurement dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego <strong>usługi</strong>, <strong>doświadczenie</strong> albo jak się z nim <strong>skontaktować</strong>."
     },
     en: {
       thinking: "Checking my notes…",
-      apiError: `Hmm, something got stuck. Try again — or drop Paweł a line at ${mail}.`,
-      netError: `Can't reach the AI right now. Fastest way is ${mail} — Paweł usually replies within a day.`,
-      greeting: "Hi! I'm Paweł Mamcarz's AI assistant 👋<br>Paweł has been shaping procurement for 25+ years at organisations like KGHM, Żabka and PKN ORLEN — outside work he flies helicopters, plays improv and takes photos. Ask me about his <strong>services</strong>, <strong>experience</strong> or how to <strong>get in touch</strong>."
+      apiError: `Hmm, something got stuck. Try again, or drop Paweł a line at ${mail}.`,
+      netError: `Can't reach the AI right now. Fastest way is ${mail}, Paweł usually replies within a day.`,
+      greeting: "Hi! I'm Paweł Mamcarz's AI assistant 👋<br>Paweł has been shaping procurement for 25+ years at organisations like KGHM, Żabka and PKN ORLEN. Outside work he flies helicopters, plays improv and takes photos. Ask me about his <strong>services</strong>, <strong>experience</strong> or how to <strong>get in touch</strong>."
     }
   }[lang];
 
@@ -175,14 +175,11 @@ if (chatMsgs && chatInput) {
 
   function setChatBusy(busy) {
     chatBusy = busy;
-    if (chatSendBtn) {
-      chatSendBtn.style.opacity = busy ? '0.5' : '1';
-      chatSendBtn.style.pointerEvents = busy ? 'none' : 'auto';
-    }
+    chatSendBtn.disabled = busy;
     chatInput.disabled = busy;
   }
 
-  window.sendMsg = async function() {
+  async function sendMsg() {
     const text = chatInput.value.trim();
     if (!text || chatBusy) return;
     addMsg(text, true);
@@ -192,7 +189,7 @@ if (chatMsgs && chatInput) {
     chatHistory.push({ role: "user", content: text });
     if (chatHistory.length > 20) chatHistory.splice(0, chatHistory.length - 20);
 
-    const thinking = addMsg('<span role="status" style="opacity:0.5">' + t.thinking + '</span>', false);
+    const thinking = addMsg('<span role="status" class="chat-thinking">' + t.thinking + '</span>', false);
 
     try {
       const res = await fetch(CHAT_API, {
@@ -215,14 +212,14 @@ if (chatMsgs && chatInput) {
       setChatBusy(false);
       chatInput.focus();
     }
-  };
+  }
 
-  setTimeout(() => {
-    addMsg(t.greeting, false);
-  }, 300);
+  chatSendBtn.addEventListener("click", sendMsg);
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMsg();
+  });
 
-  chatInput.addEventListener("focus", function() { this.style.borderColor = "var(--gold)"; });
-  chatInput.addEventListener("blur", function() { this.style.borderColor = "var(--border)"; });
+  setTimeout(() => addMsg(t.greeting, false), 300);
 }
 
 

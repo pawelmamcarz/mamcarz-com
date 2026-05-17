@@ -3,58 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>404 — Strona nie istnieje | mamcarz.com</title>
-<meta name="description" content="Tej strony nie ma pod tym adresem. Wróć na stronę główną albo napisz do Pawła — chętnie pomoże znaleźć to, czego szukasz.">
+<title>404 · Strona nie istnieje | mamcarz.com</title>
+<meta name="description" content="Tej strony nie ma pod tym adresem. Wróć na stronę główną albo napisz do Pawła, chętnie pomoże znaleźć to, czego szukasz.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css">
+
+<style>
+html[lang="en"] [data-lang="pl"],
+html[lang="pl"] [data-lang="en"] { display: none !important; }
+</style>
+
+<script>
+(function() {
+  var isEN = location.pathname.indexOf('/en/') === 0;
+  var lang = isEN ? 'en' : 'pl';
+  document.documentElement.lang = lang;
+  document.title = isEN
+    ? '404 · Page not found | mamcarz.com'
+    : '404 · Strona nie istnieje | mamcarz.com';
+  var meta = document.querySelector('meta[name="description"]');
+  if (meta) meta.setAttribute('content', isEN
+    ? 'This page is not at this address. Head back to the home page or send Paweł a message, happy to help you find what you are looking for.'
+    : 'Tej strony nie ma pod tym adresem. Wróć na stronę główną albo napisz do Pawła, chętnie pomoże znaleźć to, czego szukasz.');
+})();
+</script>
 </head>
 <body>
 
-<a href="#main" class="skip-link">Przejdź do treści</a>
+<a href="#main" class="skip-link" data-lang="pl">Przejdź do treści</a>
+<a href="#main" class="skip-link" data-lang="en">Skip to main content</a>
 
 <nav aria-label="Main navigation">
-  <a href="/" class="nav-logo" style="text-decoration:none">PM — Mamcarz.com</a>
-  <ul class="nav-links" id="navLinks">
+  <a href="/" class="nav-logo" data-lang="pl" style="text-decoration:none">PM · Mamcarz.com</a>
+  <a href="/en/" class="nav-logo" data-lang="en" style="text-decoration:none">PM · Mamcarz.com</a>
+  <ul class="nav-links" id="navLinks" data-lang="pl">
     <li><a href="/#about">O mnie</a></li>
     <li><a href="/#resume">Doświadczenie</a></li>
     <li><a href="/uslugi/wdrozenie-sap-ariba">Usługi</a></li>
     <li><a href="/case-studies">Case studies</a></li>
     <li><a href="/#contact">Kontakt</a></li>
   </ul>
-  <a href="/en/" class="nav-lang">EN</a>
-  <button class="nav-hamburger" id="navHamburger" aria-label="Menu nawigacyjne">
-    <span></span>
-    <span></span>
-    <span></span>
+  <ul class="nav-links" data-lang="en">
+    <li><a href="/en/#about">About</a></li>
+    <li><a href="/en/#resume">Experience</a></li>
+    <li><a href="/en/uslugi/wdrozenie-sap-ariba">Services</a></li>
+    <li><a href="/en/case-studies">Case studies</a></li>
+    <li><a href="/en/#contact">Contact</a></li>
+  </ul>
+  <a href="/en/" class="nav-lang" data-lang="pl">EN</a>
+  <a href="/" class="nav-lang" data-lang="en">PL</a>
+  <button class="nav-hamburger" id="navHamburger" data-lang="pl" aria-label="Menu nawigacyjne">
+    <span></span><span></span><span></span>
+  </button>
+  <button class="nav-hamburger" data-lang="en" aria-label="Navigation menu">
+    <span></span><span></span><span></span>
   </button>
 </nav>
 
 <main id="main" tabindex="-1">
-<section style="min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;">
-  <div>
-    <p class="section-label">Błąd 404 — poza zasięgiem radaru</p>
-    <h1 style="font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,6rem);font-weight:700;margin-bottom:1rem;">Tej strony<br><em style="font-style:italic;color:var(--gold)">tu nie ma</em></h1>
-    <p style="color:var(--text-secondary);font-size:1rem;margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto;">Nawet najlepszy plan lotu czasem prowadzi w złe miejsce. Wróć na stronę główną — albo napisz do mnie, chętnie pomogę znaleźć to, czego szukasz.</p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-      <a href="/" class="btn-primary" style="display:inline-block;padding:1rem 2.5rem;background:var(--gold);color:var(--bg);text-decoration:none;font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;">Wróć do bazy</a>
-      <a href="#" class="js-email" data-user="pawel" data-domain="mamcarz.com" style="display:inline-block;padding:1rem 2.5rem;background:transparent;color:var(--text);text-decoration:none;font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;border:1px solid var(--border);">Napisz do mnie</a>
+<section class="not-found">
+  <div class="not-found-inner">
+    <div data-lang="pl">
+      <p class="section-label">Błąd 404, poza zasięgiem radaru</p>
+      <h1 class="not-found-title">Tej strony<br><em>tu nie ma</em></h1>
+      <p class="not-found-desc">Nawet najlepszy plan lotu czasem prowadzi w złe miejsce. Wróć na stronę główną albo napisz, chętnie pomogę znaleźć to, czego szukasz.</p>
+      <div class="not-found-cta">
+        <a href="/" class="btn-primary">Wróć do bazy</a>
+        <a href="#" class="js-email btn-ghost" data-user="pawel" data-domain="mamcarz.com">Napisz do mnie</a>
+      </div>
+    </div>
+    <div data-lang="en">
+      <p class="section-label">Error 404, off the radar</p>
+      <h1 class="not-found-title">This page<br><em>is not here</em></h1>
+      <p class="not-found-desc">Even the best flight plan sometimes ends up in the wrong place. Head back to the home page or send a message, happy to help you find what you are looking for.</p>
+      <div class="not-found-cta">
+        <a href="/en/" class="btn-primary">Back to base</a>
+        <a href="#" class="js-email btn-ghost" data-user="pawel" data-domain="mamcarz.com">Email me</a>
+      </div>
     </div>
   </div>
 </section>
 </main>
 
 <footer>
-  <div class="footer-copy">© 1993–2026 Paweł Mamcarz — mamcarz.com</div>
-  <ul class="footer-links">
+  <div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div>
+  <ul class="footer-links" data-lang="pl">
     <li><a href="/">Strona główna</a></li>
     <li><a href="/#about">O mnie</a></li>
     <li><a href="/uslugi/wdrozenie-sap-ariba">Usługi</a></li>
     <li><a href="/case-studies">Case studies</a></li>
     <li><a href="/#contact">Kontakt</a></li>
+  </ul>
+  <ul class="footer-links" data-lang="en">
+    <li><a href="/en/">Home</a></li>
+    <li><a href="/en/#about">About</a></li>
+    <li><a href="/en/uslugi/wdrozenie-sap-ariba">Services</a></li>
+    <li><a href="/en/case-studies">Case studies</a></li>
+    <li><a href="/en/#contact">Contact</a></li>
   </ul>
 </footer>
 
