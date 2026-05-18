@@ -6,12 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Osobista strona profesjonalna Pawła Mamcarza — konsultant procurement / SAP Ariba w regionie CEE.
 Statyczny HTML (bez frameworka), dwie wersje językowe: PL (root) i EN (`en/`).
 
+Każda zmiana w tym pliku musi trafić też do `AGENTS.md` (verbatim kopia dla narzędzi szukających `AGENTS.md`).
+
 ## Hosting & Deploy
 - **Cloudflare Pages** (NIE Vercel). Projekt: `mamcarz-com`.
 - Strona: `wrangler pages deploy . --project-name mamcarz-com --branch main --commit-dirty=true`
   - lub `./deploy.sh` (najpierw `git push`, potem deploy do Pages)
 - Worker czatowy w `worker/` deployuje się osobno: `cd worker && wrangler deploy` (osobny `wrangler.toml`, binding `AI` = Workers AI).
 - CF Pages config: `_headers` (security headers + cache-control), `_redirects` (apex redirect z `www`).
+- Lokalny preview: `wrangler pages dev .` (lub dowolny statyczny serwer, np. `npx serve`). Worker lokalnie: `cd worker && wrangler dev`.
 
 ## Struktura
 ```
@@ -27,6 +30,7 @@ assets/img/             # Zoptymalizowane obrazy (webp/jpg, multi-resolution)
 worker/index.js         # Cloudflare Worker — chat API (Workers AI, Llama 3.3 70B)
 scripts/optimize-images.js  # node scripts/optimize-images.js — generuje warianty 480/960/1920 webp+jpg
 404.html, sitemap.xml, robots.txt, llms.txt, llms-full.txt
+procurement-2026/, diagrams/, infographic_procurement_2026_EN.html  # strony pomocnicze/landing — NIE objęte bilingual rule
 ```
 
 Brak frameworka, brak buildu — pliki HTML serwowane bezpośrednio. Jedyny krok offline to opcjonalna optymalizacja obrazów (`npm run optimize:images`, wymaga `sharp`).
@@ -51,11 +55,14 @@ Każda zmiana treściowa musi trafić do **obu wersji** — PL (`index.html`, `u
 
 Mid-page CTA po Process i po Cases. CTA ghost button prowadzi do "Rezultaty" (case studies), nie do CV. Hero benefit-oriented (nie self-focused).
 
+Identyczna kolejność i numeracja sekcji obowiązuje również w `en/index.html`.
+
 ## Fakty i ton (KRYTYCZNE)
 - **Polpharma NIE jest klientem** — nie dodawać do trust bara (była w systemie prompcie workera; jeśli edytujesz `worker/index.js` zostaw na liście „inni" jeśli nie jesteś pewny, ale na stronie głównej — nigdy).
 - Stat: **"25+ lat doświadczenia"** (nie 20+).
 - Ton: premium, profesjonalny, wiarygodny — **nigdy prostacki ani nachalny**.
 - Worker chat: model `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, system prompt zawiera kompletne CV — przy zmianach faktów na stronie zsynchronizuj `worker/index.js`.
+- Frontend wywołuje worker pod stałym URL-em `https://mamcarz-chat-api.pawel-767.workers.dev` (hardcoded w `assets/js/main.js:146`). Przy zmianie nazwy workera (`worker/wrangler.toml: name`) zsynchronizuj również ten URL.
 
 ## SEO / metadata
 - Każda strona ma `<link rel="canonical">`, `hreflang` (pl / en / x-default), Open Graph i Schema.org (`Person` na home, `Service`/`Article` na podstronach gdzie ma sens).
