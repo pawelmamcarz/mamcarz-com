@@ -3,3 +3,6 @@
 *.docx
 .wrangler/
 deploy.sh
+node_modules/
+.claude/settings.local.json
+infografika procurement 2026.png
