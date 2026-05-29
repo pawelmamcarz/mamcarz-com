@@ -1063,20 +1063,23 @@
   .footer-links a:hover { color: var(--gold); }
 
 
-  /* SCROLL REVEAL */
+  /* SCROLL REVEAL — only hidden once JS confirms it can reveal (.js-reveal on <html>) */
   .reveal {
-    opacity: 0;
-    transform: translateY(16px);
     transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
   }
 
-  .reveal.visible {
+  .js-reveal .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .js-reveal .reveal.visible {
     opacity: 1;
     transform: translateY(0);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .reveal {
+    .js-reveal .reveal {
       opacity: 1;
       transform: none;
       transition: none;

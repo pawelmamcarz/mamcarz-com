@@ -70,7 +70,9 @@ if (backToTop) {
 
 // Scroll reveal for .reveal elements
 const revealEls = document.querySelectorAll('.reveal');
-if (revealEls.length > 0) {
+if (revealEls.length > 0 && 'IntersectionObserver' in window) {
+  // Hide .reveal elements only now that we know JS + IO can reveal them again.
+  document.documentElement.classList.add('js-reveal');
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -78,7 +80,7 @@ if (revealEls.length > 0) {
         revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
 
   revealEls.forEach(el => revealObserver.observe(el));
 }
