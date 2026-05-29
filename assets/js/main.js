@@ -118,7 +118,7 @@ if (sections.length > 3) {
           lastCurrent = current;
           navAnchors.forEach(a => {
             const href = a.getAttribute('href');
-            a.style.color = (href === `#${current}` || href === `/#${current}`) ? 'var(--gold)' : '';
+            a.classList.toggle('active', href === `#${current}` || href === `/#${current}`);
           });
         }
         scrollTicking = false;
@@ -133,7 +133,7 @@ const currentPath = window.location.pathname;
 navAnchors.forEach(a => {
   const href = a.getAttribute('href');
   if (href !== '/' && currentPath.startsWith(href)) {
-    a.style.color = 'var(--gold)';
+    a.classList.add('active');
   }
 });
 

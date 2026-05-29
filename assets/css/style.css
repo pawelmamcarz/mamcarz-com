@@ -71,7 +71,8 @@
     font-weight: 400;
   }
 
-  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover,
+  .nav-links a.active { color: var(--gold); }
 
   .nav-lang {
     font-family: 'DM Mono', monospace;
@@ -230,7 +231,9 @@
 
   .btn-ghost:hover {
     border-color: var(--gold);
-    background: rgba(200,169,110,0.05);
+    background: rgba(200,169,110,0.12);
+    color: var(--gold-light);
+    transform: translateY(-2px);
   }
 
   .hero-stats {
@@ -703,6 +706,14 @@
     transform: scale(1.04);
   }
 
+  .pcard__bg--1 { background: linear-gradient(135deg,#0d1a2e 0%,#1a2d4a 60%,#0a1220 100%); }
+  .pcard__bg--2 { background: linear-gradient(135deg,#1a1008 0%,#2e1a06 60%,#120c04 100%); }
+  .pcard__bg--3 { background: linear-gradient(135deg,#0a1a14 0%,#122e22 60%,#081410 100%); }
+  .pcard__bg--4 { background: linear-gradient(135deg,#0a1428 0%,#162240 60%,#080e1c 100%); }
+  .pcard__bg--5 { background: linear-gradient(135deg,#0c0f1a 0%,#1a1040 60%,#080818 100%); }
+  .pcard__bg--6 { background: linear-gradient(135deg,#0a0e1e 0%,#1a1830 60%,#0c0a18 100%); }
+  .pcard__bg--7 { background: linear-gradient(135deg,#1a0a1e 0%,#2e1436 60%,#120818 100%); }
+
   .pcard__deco {
     position: absolute;
     top: 1.5rem;
@@ -730,10 +741,11 @@
 
   .pcard__tag {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--gold-light);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.45);
   }
 
   .pcard__title {
@@ -793,10 +805,10 @@
 
   .case-industry {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--gold-light);
     margin-bottom: 1rem;
   }
 
@@ -817,7 +829,7 @@
   }
 
   .case-results {
-    border-top: 1px solid var(--border);
+    border-top: 2px solid rgba(200,169,110,0.45);
     padding-top: 1.2rem;
     display: flex;
     gap: 1.5rem;
@@ -1053,14 +1065,22 @@
 
   /* SCROLL REVEAL */
   .reveal {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 0;
+    transform: translateY(16px);
     transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
   }
 
   .reveal.visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   /* BACK TO TOP */
@@ -1199,16 +1219,17 @@
     .hero-stats {
       position: static;
       flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1.5rem;
-      margin-top: 2.5rem;
+      flex-wrap: nowrap;
+      justify-content: space-evenly;
+      gap: 1rem;
+      margin-top: 3rem;
+      width: 100%;
       opacity: 1;
       animation: none;
     }
-    .stat { text-align: center; flex: 1 1 calc(50% - 0.75rem); }
-    .stat-num { font-size: 1.8rem; }
-    .stat-label { font-size: 0.6rem; }
+    .stat { text-align: center; flex: 1 1 auto; }
+    .stat-num { font-size: 1.6rem; }
+    .stat-label { font-size: 0.65rem; }
     .nav-links { display: none; }
     .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: rgba(16,19,24,0.98); backdrop-filter: blur(12px); padding: 2rem; gap: 1.5rem; z-index: 101; }
     .nav-hamburger { display: flex; }
@@ -1224,6 +1245,15 @@
     .page-two-col { grid-template-columns: 1fr; gap: 3rem; }
     .service-cards { grid-template-columns: 1fr; }
     .cta-banner { padding: 3rem 2rem; }
+  }
+
+  @media (min-width: 768px) and (max-width: 900px) {
+    .cases-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-stats { flex-wrap: wrap; gap: 1.5rem 1rem; }
+    .stat { flex: 1 1 40%; }
   }
 
   /* TRUST BAR (post-hero) */
@@ -1311,14 +1341,15 @@
 
   /* SKILL OUTCOME LINE */
   .skill-outcome {
-    margin-top: 0.9rem;
+    margin-top: 1.1rem;
     font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+    font-weight: 500;
     color: var(--gold);
-    border-top: 1px solid var(--border);
-    padding-top: 0.9rem;
+    border-top: 2px solid rgba(200,169,110,0.45);
+    padding-top: 1rem;
     line-height: 1.5;
   }
 
@@ -1725,7 +1756,11 @@
     transition: border-color 0.2s;
   }
 
-  .chat-input:focus { border-color: var(--gold); }
+  .chat-input:focus {
+    border-color: var(--gold);
+    background: var(--bg2);
+    box-shadow: 0 0 0 2px rgba(200,169,110,0.15);
+  }
 
   .chat-send {
     background: var(--gold);
