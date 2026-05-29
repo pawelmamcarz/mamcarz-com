@@ -11,7 +11,7 @@ Każda zmiana w tym pliku musi trafić też do `AGENTS.md` (verbatim kopia dla n
 ## Hosting & Deploy
 - **Cloudflare Pages** (NIE Vercel). Projekt: `mamcarz-com`.
 - Strona: `wrangler pages deploy . --project-name mamcarz-com --branch main --commit-dirty=true`
-  - lub `./deploy.sh` (najpierw `git push`, potem deploy do Pages)
+  - lub `./deploy.sh` (najpierw `git push`, potem deploy do Pages) — uwaga: `deploy.sh` jest w `.gitignore` (lokalny, nie w repo); świeży klon używa komendy `wrangler pages deploy` bezpośrednio.
 - Worker czatowy w `worker/` deployuje się osobno: `cd worker && wrangler deploy` (osobny `wrangler.toml`, binding `AI` = Workers AI).
 - CF Pages config: `_headers` (security headers + cache-control), `_redirects` (apex redirect z `www`).
 - Lokalny preview: `wrangler pages dev .` (lub dowolny statyczny serwer, np. `npx serve`). Worker lokalnie: `cd worker && wrangler dev`.
