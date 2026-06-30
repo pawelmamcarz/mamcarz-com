@@ -156,13 +156,13 @@ if (chatMsgs && chatInput && chatSendBtn) {
       thinking: "Zaglądam do notatek…",
       apiError: `Hmm, coś mi się zacięło. Spróbuj jeszcze raz albo napisz wprost do Pawła na ${mail}.`,
       netError: `Nie mogę się teraz połączyć z AI. Najszybszy kontakt to ${mail}, odpowiadam zwykle w ciągu doby.`,
-      greeting: "Cześć! Jestem asystentem Pawła Mamcarza 👋<br>Paweł od 25 lat projektuje procurement dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego <strong>usługi</strong>, <strong>doświadczenie</strong> albo jak się z nim <strong>skontaktować</strong>."
+      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.<br>Paweł od 25 lat projektuje procurement dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego <strong>usługi</strong>, <strong>doświadczenie</strong> albo jak się z nim <strong>skontaktować</strong>."
     },
     en: {
       thinking: "Checking my notes…",
       apiError: `Hmm, something got stuck. Try again, or drop Paweł a line at ${mail}.`,
       netError: `Can't reach the AI right now. Fastest way is ${mail}, Paweł usually replies within a day.`,
-      greeting: "Hi! I'm Paweł Mamcarz's AI assistant 👋<br>Paweł has been shaping procurement for 25+ years at organisations like KGHM, Żabka and PKN ORLEN. Outside work he flies helicopters, plays improv and takes photos. Ask me about his <strong>services</strong>, <strong>experience</strong> or how to <strong>get in touch</strong>."
+      greeting: "Hi! I'm Paweł Mamcarz's assistant.<br>Paweł has been shaping procurement for 25+ years at organisations like KGHM, Żabka and PKN ORLEN. Outside work he flies helicopters, plays improv and takes photos. Ask me about his <strong>services</strong>, <strong>experience</strong> or how to <strong>get in touch</strong>."
     }
   }[lang];
 

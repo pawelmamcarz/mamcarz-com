@@ -7,24 +7,24 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#080C18;color:#E8ECF4;font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:30px 20px}
+body{background:#08090b;color:#f3f0ea;font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:30px 20px}
 h1{font-family:'Space Mono',monospace;font-size:clamp(1.3rem,2.8vw,2rem);text-align:center;background:linear-gradient(135deg,#F97316,#A855F7,#22C55E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-.subtitle{color:#6b7899;font-size:0.8rem;text-align:center;margin-bottom:6px;font-style:italic}
-.brand{color:#4a5575;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;font-family:'Space Mono',monospace;text-align:center;margin-bottom:24px}
+.subtitle{color:#9ea2a6;font-size:0.8rem;text-align:center;margin-bottom:6px;font-style:italic}
+.brand{color:#6f7378;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;font-family:'Space Mono',monospace;text-align:center;margin-bottom:24px}
 .container{display:flex;gap:24px;max-width:1320px;width:100%;align-items:flex-start;flex-wrap:wrap;justify-content:center}
 .diagram-wrap{flex:1;min-width:580px;max-width:700px;position:relative}
 .diagram-wrap svg{width:100%;height:auto}
-.panel{width:360px;background:#111827;border:1px solid #1e293b;border-radius:14px;padding:24px;max-height:620px;overflow-y:auto;flex-shrink:0}
+.panel{width:360px;background:#0f1013;border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:24px;max-height:620px;overflow-y:auto;flex-shrink:0}
 .panel h2{font-family:'Space Mono',monospace;font-size:0.95rem;margin-bottom:6px}
 .tag{display:inline-block;padding:2px 10px;border-radius:4px;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px}
 .tag-s{background:rgba(249,115,22,.15);color:#F97316}.tag-o{background:rgba(59,130,246,.15);color:#3B82F6}
 .tag-ai{background:rgba(168,85,247,.15);color:#A855F7}.tag-r{background:rgba(239,68,68,.15);color:#EF4444}
 .tag-e{background:rgba(34,197,94,.15);color:#22C55E}.tag-d{background:rgba(6,182,212,.15);color:#06B6D4}
-.panel p{font-size:0.8rem;line-height:1.65;color:#8892A8;margin-bottom:8px}
-.panel .section-label{font-size:0.62rem;color:#4a5575;text-transform:uppercase;letter-spacing:1.5px;margin-top:16px;margin-bottom:4px;font-weight:700}
-.panel .pl{font-size:0.72rem;color:#5a6585;font-style:italic;margin-top:12px;padding-top:10px;border-top:1px solid #1a2236}
+.panel p{font-size:0.8rem;line-height:1.65;color:#9ea2a6;margin-bottom:8px}
+.panel .section-label{font-size:0.62rem;color:#6f7378;text-transform:uppercase;letter-spacing:1.5px;margin-top:16px;margin-bottom:4px;font-weight:700}
+.panel .pl{font-size:0.72rem;color:#9ea2a6;font-style:italic;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)}
 .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:20px;justify-content:center}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:#6b7899}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:#9ea2a6}
 .legend-dot{width:10px;height:10px;border-radius:50%}
 /* SVG interaction */
 .seg{cursor:pointer;transition:opacity .25s,filter .25s}
@@ -48,7 +48,7 @@ h1{font-family:'Space Mono',monospace;font-size:clamp(1.3rem,2.8vw,2rem);text-al
 <div class="diagram-wrap">
 <svg viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <radialGradient id="cg" cx="50%" cy="50%"><stop offset="0%" stop-color="#151D30"/><stop offset="100%" stop-color="#080C18"/></radialGradient>
+  <radialGradient id="cg" cx="50%" cy="50%"><stop offset="0%" stop-color="#14161a"/><stop offset="100%" stop-color="#08090b"/></radialGradient>
   <filter id="gl"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 </defs>
 
@@ -122,15 +122,15 @@ h1{font-family:'Space Mono',monospace;font-size:clamp(1.3rem,2.8vw,2rem);text-al
 
 <!-- New layer icons around center -->
 <circle cx="320" cy="228" r="15" fill="rgba(168,85,247,.15)" stroke="rgba(168,85,247,.4)" stroke-width="1" class="seg" data-id="ai-orch"/>
-<text x="320" y="232" text-anchor="middle" font-size="13">🤖</text>
+<text x="320" y="232" text-anchor="middle" font-size="9" font-weight="700" fill="#A855F7">AI</text>
 <circle cx="405" cy="320" r="15" fill="rgba(239,68,68,.15)" stroke="rgba(239,68,68,.4)" stroke-width="1" class="seg" data-id="risk"/>
-<text x="405" y="324" text-anchor="middle" font-size="13">🛡️</text>
+<text x="405" y="324" text-anchor="middle" font-size="9" font-weight="700" fill="#EF4444">RISK</text>
 <circle cx="320" cy="412" r="15" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.4)" stroke-width="1" class="seg" data-id="esg"/>
-<text x="320" y="416" text-anchor="middle" font-size="13">🌱</text>
+<text x="320" y="416" text-anchor="middle" font-size="9" font-weight="700" fill="#22C55E">ESG</text>
 <circle cx="235" cy="320" r="15" fill="rgba(6,182,212,.15)" stroke="rgba(6,182,212,.4)" stroke-width="1" class="seg" data-id="data"/>
-<text x="235" y="324" text-anchor="middle" font-size="13">📊</text>
+<text x="235" y="324" text-anchor="middle" font-size="9" font-weight="700" fill="#06B6D4">DATA</text>
 <circle cx="365" cy="262" r="15" fill="rgba(249,115,22,.15)" stroke="rgba(249,115,22,.4)" stroke-width="1" class="seg" data-id="srm"/>
-<text x="365" y="266" text-anchor="middle" font-size="13">🤝</text>
+<text x="365" y="266" text-anchor="middle" font-size="9" font-weight="700" fill="#F97316">SRM</text>
 
 <!-- Flow arrows -->
 <line x1="30" y1="320" x2="75" y2="320" stroke="rgba(168,85,247,.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
@@ -143,12 +143,12 @@ h1{font-family:'Space Mono',monospace;font-size:clamp(1.3rem,2.8vw,2rem);text-al
 <div class="panel" id="panel">
   <div id="default">
     <h2 style="color:#A855F7">Click any segment</h2>
-    <p style="margin-top:10px;color:#E8ECF4">Interaktywny diagram procesu zakupowego 2026 z <strong>pięcioma nowymi warstwami</strong>:</p>
-    <p><span style="color:#A855F7">🤖 AI & Orchestration</span> · outer intelligence layer</p>
-    <p><span style="color:#EF4444">🛡️ Risk / Resilience</span> · continuous monitoring ring</p>
-    <p><span style="color:#22C55E">🌱 ESG / Sustainability</span> · CSRD/CSDDD compliance</p>
-    <p><span style="color:#06B6D4">📊 Data & Analytics</span> · data as strategic asset</p>
-    <p><span style="color:#F97316">🤝 SRM 2.0</span> · supplier as innovation partner</p>
+    <p style="margin-top:10px;color:#f3f0ea">Interaktywny diagram procesu zakupowego 2026 z <strong>pięcioma nowymi warstwami</strong>:</p>
+    <p><span style="color:#A855F7"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M9.5 2.5v4M14.5 2.5v4M9.5 17.5v4M14.5 17.5v4M2.5 9.5h4M2.5 14.5h4M17.5 9.5h4M17.5 14.5h4"/></svg> AI & Orchestration</span> · outer intelligence layer</p>
+    <p><span style="color:#EF4444"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M12 3l7 3v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6z"/></svg> Risk / Resilience</span> · continuous monitoring ring</p>
+    <p><span style="color:#22C55E"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M11 21C6 21 4 16 4 12c4.5 0 7.5 1 8.5 5.5"/><path d="M11 21c0-7.5 3-12.5 9-13.5 0 6.5-2.5 13.5-9 13.5z"/></svg> ESG / Sustainability</span> · CSRD/CSDDD compliance</p>
+    <p><span style="color:#06B6D4"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M5 21V11M12 21V4M19 21v-7"/><path d="M3 21h18"/></svg> Data & Analytics</span> · data as strategic asset</p>
+    <p><span style="color:#F97316"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2"/><path d="M13 19l1.4 1.4a1.4 1.4 0 0 0 2-2L13 15"/><path d="M21 8l-4-4-5 1-2 2"/><path d="M3 8l4-4 4 1"/><path d="M3 8l5 5a1.4 1.4 0 0 0 2 0l1-1"/></svg> SRM 2.0</span> · supplier as innovation partner</p>
     <div class="section-label" style="margin-top:18px">How to use</div>
     <p>Kliknij dowolny segment koła lub ikonę warstwy, aby zobaczyć szczegółowy opis procesu w kontekście 2026.</p>
   </div>
@@ -220,7 +220,7 @@ document.querySelectorAll('.seg').forEach(el=>{
     document.querySelectorAll('.seg').forEach(s=>s.classList.remove('active'));
     document.querySelectorAll(`[data-id="${id}"]`).forEach(s=>s.classList.add('active'));
     const d=D[id];
-    panel.innerHTML=`<h2 style="color:var(--c)">${d.t}</h2><span class="tag ${tagMap[d.tag]}">${d.tagL}</span><p>${d.d}</p><div class="pl">🇵🇱 ${d.pl}</div>`;
+    panel.innerHTML=`<h2 style="color:var(--c)">${d.t}</h2><span class="tag ${tagMap[d.tag]}">${d.tagL}</span><p>${d.d}</p><div class="pl">PL · ${d.pl}</div>`;
   });
 });
 </script>

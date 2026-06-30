@@ -7,8 +7,8 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#E8E8E8;color:#222;display:flex;justify-content:center;padding:20px;min-width:0}
-.page{width:100%;max-width:1160px;min-height:780px;background:linear-gradient(135deg,#ECECEC 0%,#E0E0E0 100%);border-radius:6px;position:relative;overflow:hidden;display:grid;grid-template-columns:260px 1fr 240px;gap:0;padding:28px 24px 24px 28px}
+body{font-family:'Inter',sans-serif;background:#08090b;color:#f3f0ea;display:flex;justify-content:center;padding:20px;min-width:0}
+.page{width:100%;max-width:1160px;min-height:780px;background:linear-gradient(135deg,#0f1013 0%,#08090b 100%);border-radius:6px;position:relative;overflow:hidden;display:grid;grid-template-columns:260px 1fr 240px;gap:0;padding:28px 24px 24px 28px}
 @media(max-width:900px){
   .page{grid-template-columns:1fr;padding:20px}
   .center{order:-1;height:400px}
@@ -17,14 +17,14 @@ body{font-family:'Inter',sans-serif;background:#E8E8E8;color:#222;display:flex;j
 
 /* LEFT COLUMN */
 .left{display:flex;flex-direction:column;gap:0;z-index:2}
-.main-title{font-size:1.75rem;font-weight:900;line-height:1.15;color:#1a1a1a;margin-bottom:20px}
+.main-title{font-size:1.75rem;font-weight:900;line-height:1.15;color:#f3f0ea;margin-bottom:20px}
 .main-title span{display:block}
-.section-title{font-size:1.05rem;font-weight:800;color:#333;margin-bottom:18px}
+.section-title{font-size:1.05rem;font-weight:800;color:#f3f0ea;margin-bottom:18px}
 .bullet{display:flex;gap:12px;margin-bottom:22px;align-items:flex-start}
 .bullet-arrow{width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid #2196F3;flex-shrink:0;margin-top:3px}
 .bullet-arrow.orange{border-left-color:#F97316}
-.bullet-content h3{font-size:.95rem;font-weight:700;color:#1a1a1a;margin-bottom:4px}
-.bullet-content p{font-size:.82rem;color:#555;line-height:1.55}
+.bullet-content h3{font-size:.95rem;font-weight:700;color:#f3f0ea;margin-bottom:4px}
+.bullet-content p{font-size:.82rem;color:#9ea2a6;line-height:1.55}
 
 /* CENTER: Diagram */
 .center{position:relative;display:flex;align-items:center;justify-content:center}
@@ -33,25 +33,25 @@ body{font-family:'Inter',sans-serif;background:#E8E8E8;color:#222;display:flex;j
 .right{display:flex;flex-direction:column;gap:16px;z-index:2;padding-top:10px}
 
 /* Callout boxes */
-.callout{background:rgba(255,255,255,.65);border-radius:10px;padding:14px 16px;border-left:4px solid #666;position:relative}
+.callout{background:#14161a;border-radius:10px;padding:14px 16px;border-left:4px solid rgba(255,255,255,.16);position:relative}
 .callout.ai{border-left-color:#2196F3}
-.callout.risk{border-left-color:#C62828}
-.callout.esg{border-left-color:#2E7D32}
+.callout.risk{border-left-color:#EF4444}
+.callout.esg{border-left-color:#22C55E}
 .callout h4{font-size:.88rem;font-weight:700;margin-bottom:4px}
-.callout p{font-size:.78rem;color:#555;line-height:1.5}
+.callout p{font-size:.78rem;color:#9ea2a6;line-height:1.5}
 .callout-icon{position:absolute;top:10px;right:12px;font-size:1.3rem;opacity:.5}
 
 /* Comparison table */
 .comp-table{border-collapse:collapse;width:100%;font-size:.78rem;margin-top:auto}
-.comp-table th{padding:8px 10px;font-weight:700;text-align:center;border:1px solid #bbb}
-.comp-table td{padding:8px 10px;border:1px solid #ccc;text-align:center;font-size:.76rem;line-height:1.4}
-.comp-table thead th{background:#4a6741;color:#fff}
-.comp-table thead th:first-child{background:#5a7a50}
-.comp-table thead th:nth-child(2){background:#6a8a60}
-.comp-table thead th:nth-child(3){background:#4a6741}
-.comp-table tbody td:first-child{font-weight:700;background:rgba(255,255,255,.5);text-align:left}
-.comp-table tbody td:nth-child(2){background:rgba(255,255,255,.3);color:#777}
-.comp-table tbody td:nth-child(3){background:rgba(230,245,230,.5);color:#2E7D32;font-weight:600}
+.comp-table th{padding:8px 10px;font-weight:700;text-align:center;border:1px solid rgba(255,255,255,.16)}
+.comp-table td{padding:8px 10px;border:1px solid rgba(255,255,255,.10);text-align:center;font-size:.76rem;line-height:1.4}
+.comp-table thead th{background:#14161a;color:#fff}
+.comp-table thead th:first-child{background:#14161a}
+.comp-table thead th:nth-child(2){background:#14161a}
+.comp-table thead th:nth-child(3){background:#14161a}
+.comp-table tbody td:first-child{font-weight:700;background:#14161a;text-align:left}
+.comp-table tbody td:nth-child(2){background:#0f1013;color:#9ea2a6}
+.comp-table tbody td:nth-child(3){background:rgba(34,197,94,.06);color:#22C55E;font-weight:600}
 .comp-icon{display:block;font-size:1.1rem;margin-bottom:2px}
 
 /* SVG diagram */
@@ -101,8 +101,8 @@ svg text{font-family:'Inter',sans-serif}
 <svg viewBox="0 0 660 700" width="100%" height="auto" style="max-width:580px" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <radialGradient id="ctrGrad" cx="50%" cy="46%">
-      <stop offset="0%" stop-color="#f5f5f5"/>
-      <stop offset="100%" stop-color="#ddd"/>
+      <stop offset="0%" stop-color="#1c1f24"/>
+      <stop offset="100%" stop-color="#14161a"/>
     </radialGradient>
     <!-- Arrowhead for flow -->
     <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
@@ -111,127 +111,127 @@ svg text{font-family:'Inter',sans-serif}
   </defs>
 
   <!-- Outer gray ring (legacy process labels) -->
-  <circle cx="330" cy="330" r="290" fill="none" stroke="#bbb" stroke-width="48" opacity=".25"/>
+  <circle cx="330" cy="330" r="290" fill="none" stroke="#6f7378" stroke-width="48" opacity=".25"/>
 
   <!-- Process step labels on outer ring (clockwise from top) -->
-  <text x="430" y="62" font-size="13" fill="#666" font-weight="600" transform="rotate(18,430,62)">Needs</text>
-  <text x="430" y="76" font-size="13" fill="#666" font-weight="600" transform="rotate(18,430,76)">Definition</text>
+  <text x="430" y="62" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(18,430,62)">Needs</text>
+  <text x="430" y="76" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(18,430,76)">Definition</text>
 
-  <text x="520" y="130" font-size="13" fill="#666" font-weight="600" transform="rotate(40,520,130)">Supplier</text>
-  <text x="520" y="144" font-size="13" fill="#666" font-weight="600" transform="rotate(40,520,144)">Selection</text>
+  <text x="520" y="130" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(40,520,130)">Supplier</text>
+  <text x="520" y="144" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(40,520,144)">Selection</text>
 
-  <text x="590" y="260" font-size="13" fill="#666" font-weight="600" transform="rotate(72,590,260)">Order</text>
+  <text x="590" y="260" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(72,590,260)">Order</text>
 
-  <text x="585" y="410" font-size="13" fill="#666" font-weight="600" transform="rotate(108,585,410)">Goods</text>
-  <text x="585" y="424" font-size="13" fill="#666" font-weight="600" transform="rotate(108,585,424)">Receipt</text>
+  <text x="585" y="410" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(108,585,410)">Goods</text>
+  <text x="585" y="424" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(108,585,424)">Receipt</text>
 
-  <text x="260" y="610" font-size="12" fill="#888" font-weight="500" transform="rotate(-20,260,610)">Siloed e-Sourcing/e-Procurement (2015)</text>
+  <text x="260" y="610" font-size="12" fill="#6f7378" font-weight="500" transform="rotate(-20,260,610)">Siloed e-Sourcing/e-Procurement (2015)</text>
 
-  <text x="105" y="500" font-size="13" fill="#666" font-weight="600" transform="rotate(-108,105,500)">Invoicing</text>
+  <text x="105" y="500" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(-108,105,500)">Invoicing</text>
 
-  <text x="80" y="340" font-size="13" fill="#666" font-weight="600" transform="rotate(-72,80,340)">Matching</text>
+  <text x="80" y="340" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(-72,80,340)">Matching</text>
 
-  <text x="105" y="210" font-size="13" fill="#666" font-weight="600" transform="rotate(-40,105,210)">Payment</text>
+  <text x="105" y="210" font-size="13" fill="#9ea2a6" font-weight="600" transform="rotate(-40,105,210)">Payment</text>
 
   <!-- Blue outer ring: AI & Orchestration -->
-  <circle cx="330" cy="330" r="238" fill="none" stroke="#1976D2" stroke-width="8" opacity=".5"/>
-  <circle cx="330" cy="330" r="230" fill="none" stroke="#1976D2" stroke-width="3" opacity=".25" stroke-dasharray="8,4"/>
+  <circle cx="330" cy="330" r="238" fill="none" stroke="#2196F3" stroke-width="8" opacity=".5"/>
+  <circle cx="330" cy="330" r="230" fill="none" stroke="#2196F3" stroke-width="3" opacity=".25" stroke-dasharray="8,4"/>
 
   <!-- Green ring: ESG -->
-  <path d="M330,105 A225,225 0 0,1 555,330" fill="none" stroke="#2E7D32" stroke-width="6" opacity=".35"/>
-  <path d="M555,330 A225,225 0 0,1 330,555" fill="none" stroke="#2E7D32" stroke-width="6" opacity=".35"/>
-  <path d="M330,555 A225,225 0 0,1 105,330" fill="none" stroke="#2E7D32" stroke-width="6" opacity=".25"/>
-  <path d="M105,330 A225,225 0 0,1 330,105" fill="none" stroke="#2E7D32" stroke-width="6" opacity=".25"/>
+  <path d="M330,105 A225,225 0 0,1 555,330" fill="none" stroke="#22C55E" stroke-width="6" opacity=".35"/>
+  <path d="M555,330 A225,225 0 0,1 330,555" fill="none" stroke="#22C55E" stroke-width="6" opacity=".35"/>
+  <path d="M330,555 A225,225 0 0,1 105,330" fill="none" stroke="#22C55E" stroke-width="6" opacity=".25"/>
+  <path d="M105,330 A225,225 0 0,1 330,105" fill="none" stroke="#22C55E" stroke-width="6" opacity=".25"/>
 
   <!-- Red accent: Risk arc (right side) -->
-  <path d="M500,150 A200,200 0 0,1 530,400" fill="none" stroke="#C62828" stroke-width="5" opacity=".3"/>
+  <path d="M500,150 A200,200 0 0,1 530,400" fill="none" stroke="#EF4444" stroke-width="5" opacity=".3"/>
 
   <!-- Robot icons on the ring (green circles with bot icon) -->
   <g>
     <!-- Top -->
-    <circle cx="330" cy="100" r="18" fill="#2E7D32"/>
-    <text x="330" y="106" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="330" cy="100" r="18" fill="#22C55E"/>
+    <text x="330" y="106" text-anchor="middle" font-size="16" fill="#fff">AI</text>
     <!-- Top-right -->
-    <circle cx="500" cy="145" r="18" fill="#2E7D32"/>
-    <text x="500" y="151" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="500" cy="145" r="18" fill="#22C55E"/>
+    <text x="500" y="151" text-anchor="middle" font-size="16" fill="#fff">AI</text>
     <!-- Right -->
-    <circle cx="565" cy="300" r="18" fill="#2E7D32"/>
-    <text x="565" y="306" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="565" cy="300" r="18" fill="#22C55E"/>
+    <text x="565" y="306" text-anchor="middle" font-size="16" fill="#fff">AI</text>
     <!-- Bottom-right -->
-    <circle cx="530" cy="475" r="18" fill="#2E7D32"/>
-    <text x="530" y="481" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="530" cy="475" r="18" fill="#22C55E"/>
+    <text x="530" y="481" text-anchor="middle" font-size="16" fill="#fff">AI</text>
     <!-- Bottom -->
-    <circle cx="330" cy="565" r="18" fill="#2E7D32"/>
-    <text x="330" y="571" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="330" cy="565" r="18" fill="#22C55E"/>
+    <text x="330" y="571" text-anchor="middle" font-size="16" fill="#fff">AI</text>
     <!-- Bottom-left -->
-    <circle cx="145" cy="485" r="18" fill="#2E7D32"/>
-    <text x="145" y="491" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="145" cy="485" r="18" fill="#22C55E"/>
+    <text x="145" y="491" text-anchor="middle" font-size="16" fill="#fff">AI</text>
     <!-- Left -->
-    <circle cx="98" cy="310" r="18" fill="#2E7D32"/>
-    <text x="98" y="316" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="98" cy="310" r="18" fill="#22C55E"/>
+    <text x="98" y="316" text-anchor="middle" font-size="16" fill="#fff">AI</text>
     <!-- Top-left -->
-    <circle cx="160" cy="155" r="18" fill="#2E7D32"/>
-    <text x="160" y="161" text-anchor="middle" font-size="16" fill="#fff">🤖</text>
+    <circle cx="160" cy="155" r="18" fill="#22C55E"/>
+    <text x="160" y="161" text-anchor="middle" font-size="16" fill="#fff">AI</text>
   </g>
 
   <!-- Inner content areas -->
 
   <!-- Top: AI & Orchestration label -->
-  <text x="380" y="165" font-size="15" font-weight="800" fill="#1565C0">AI &amp; Orchestration</text>
+  <text x="380" y="165" font-size="15" font-weight="800" fill="#2196F3">AI &amp; Orchestration</text>
 
   <!-- Center-left: Orchestration Intake-to-Pay -->
-  <text x="260" y="255" font-size="12.5" font-weight="700" fill="#333" text-anchor="middle">Orchestration</text>
-  <text x="260" y="272" font-size="12.5" font-weight="700" fill="#333" text-anchor="middle">Intake-to-Pay</text>
+  <text x="260" y="255" font-size="12.5" font-weight="700" fill="#f3f0ea" text-anchor="middle">Orchestration</text>
+  <text x="260" y="272" font-size="12.5" font-weight="700" fill="#f3f0ea" text-anchor="middle">Intake-to-Pay</text>
 
   <!-- Center: Data icon + label -->
-  <circle cx="330" cy="330" r="62" fill="url(#ctrGrad)" stroke="#aaa" stroke-width="1"/>
-  <text x="330" y="310" text-anchor="middle" font-size="28">🗄️</text>
-  <text x="330" y="340" text-anchor="middle" font-size="11.5" font-weight="700" fill="#333">Data as a</text>
-  <text x="330" y="355" text-anchor="middle" font-size="11.5" font-weight="700" fill="#333">Strategic Asset</text>
+  <circle cx="330" cy="330" r="62" fill="url(#ctrGrad)" stroke="rgba(255,255,255,.16)" stroke-width="1"/>
+  <text x="330" y="310" text-anchor="middle" font-size="16" font-weight="700" fill="#f3f0ea">DATA</text>
+  <text x="330" y="340" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f3f0ea">Data as a</text>
+  <text x="330" y="355" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f3f0ea">Strategic Asset</text>
 
   <!-- Right of center: Data Fabric -->
-  <text x="420" y="305" font-size="12" font-weight="700" fill="#444">Data</text>
-  <text x="420" y="320" font-size="12" font-weight="700" fill="#444">Fabric</text>
+  <text x="420" y="305" font-size="12" font-weight="700" fill="#9ea2a6">Data</text>
+  <text x="420" y="320" font-size="12" font-weight="700" fill="#9ea2a6">Fabric</text>
 
   <!-- Below center-left: Predictive Analytics -->
-  <text x="260" y="410" font-size="11.5" font-weight="600" fill="#444" text-anchor="middle">Predictive</text>
-  <text x="260" y="425" font-size="11.5" font-weight="600" fill="#444" text-anchor="middle">Analytics</text>
-  <text x="260" y="440" font-size="11.5" font-weight="600" fill="#444" text-anchor="middle">in Real Time</text>
+  <text x="260" y="410" font-size="11.5" font-weight="600" fill="#9ea2a6" text-anchor="middle">Predictive</text>
+  <text x="260" y="425" font-size="11.5" font-weight="600" fill="#9ea2a6" text-anchor="middle">Analytics</text>
+  <text x="260" y="440" font-size="11.5" font-weight="600" fill="#9ea2a6" text-anchor="middle">in Real Time</text>
 
   <!-- RIGHT SIDE: Risk & Resilience -->
-  <circle cx="480" cy="330" r="14" fill="#C62828" opacity=".9"/>
-  <text x="480" y="335" text-anchor="middle" font-size="12" fill="#fff">🛡️</text>
-  <text x="480" y="275" font-size="15" font-weight="800" fill="#B71C1C" text-anchor="middle">Risk &amp;</text>
-  <text x="480" y="293" font-size="15" font-weight="800" fill="#B71C1C" text-anchor="middle">Resilience</text>
-  <text x="480" y="365" font-size="10" fill="#555" text-anchor="middle">Leveraging Geopolitical</text>
-  <text x="480" y="378" font-size="10" fill="#555" text-anchor="middle">and Climate Signals</text>
-  <text x="480" y="391" font-size="10" fill="#555" text-anchor="middle">to Model Disruption</text>
-  <text x="480" y="404" font-size="10" fill="#555" text-anchor="middle">Scenarios</text>
+  <circle cx="480" cy="330" r="14" fill="#EF4444" opacity=".9"/>
+  <text x="480" y="335" text-anchor="middle" font-size="12" fill="#fff">RISK</text>
+  <text x="480" y="275" font-size="15" font-weight="800" fill="#EF4444" text-anchor="middle">Risk &amp;</text>
+  <text x="480" y="293" font-size="15" font-weight="800" fill="#EF4444" text-anchor="middle">Resilience</text>
+  <text x="480" y="365" font-size="10" fill="#9ea2a6" text-anchor="middle">Leveraging Geopolitical</text>
+  <text x="480" y="378" font-size="10" fill="#9ea2a6" text-anchor="middle">and Climate Signals</text>
+  <text x="480" y="391" font-size="10" fill="#9ea2a6" text-anchor="middle">to Model Disruption</text>
+  <text x="480" y="404" font-size="10" fill="#9ea2a6" text-anchor="middle">Scenarios</text>
 
   <!-- BOTTOM: ESG -->
-  <circle cx="390" cy="490" r="18" fill="#2E7D32" opacity=".85"/>
-  <text x="390" y="496" text-anchor="middle" font-size="15" fill="#fff">🌱</text>
-  <text x="390" y="525" font-size="15" font-weight="800" fill="#1B5E20" text-anchor="middle">ESG &amp;</text>
-  <text x="390" y="543" font-size="15" font-weight="800" fill="#1B5E20" text-anchor="middle">Sustainability</text>
+  <circle cx="390" cy="490" r="18" fill="#22C55E" opacity=".85"/>
+  <text x="390" y="496" text-anchor="middle" font-size="15" fill="#fff">ESG</text>
+  <text x="390" y="525" font-size="15" font-weight="800" fill="#22C55E" text-anchor="middle">ESG &amp;</text>
+  <text x="390" y="543" font-size="15" font-weight="800" fill="#22C55E" text-anchor="middle">Sustainability</text>
 
   <!-- CSRD/CSDDD label -->
-  <text x="460" y="470" font-size="11" font-weight="600" fill="#2E7D32">CSRD/</text>
-  <text x="460" y="484" font-size="11" font-weight="600" fill="#2E7D32">CSDDD</text>
+  <text x="460" y="470" font-size="11" font-weight="600" fill="#22C55E">CSRD/</text>
+  <text x="460" y="484" font-size="11" font-weight="600" fill="#22C55E">CSDDD</text>
 
   <!-- Scope 3 callout at bottom -->
-  <text x="330" y="620" font-size="11" fill="#444" text-anchor="middle" font-weight="600">Scope 3 Carbon Footprint Tracking</text>
-  <text x="330" y="636" font-size="11" fill="#444" text-anchor="middle" font-weight="600">at Individual Transaction Level</text>
+  <text x="330" y="620" font-size="11" fill="#9ea2a6" text-anchor="middle" font-weight="600">Scope 3 Carbon Footprint Tracking</text>
+  <text x="330" y="636" font-size="11" fill="#9ea2a6" text-anchor="middle" font-weight="600">at Individual Transaction Level</text>
 
   <!-- Dashed flow arrows (legacy cycle) -->
-  <circle cx="330" cy="330" r="170" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="6,4" opacity=".3"/>
+  <circle cx="330" cy="330" r="170" fill="none" stroke="#6f7378" stroke-width="1.5" stroke-dasharray="6,4" opacity=".3"/>
 </svg>
 </div>
 
 <!-- RIGHT COLUMN -->
 <div class="right">
   <div class="callout ai">
-    <div class="callout-icon">🤖</div>
-    <h4 style="color:#1565C0">AI Agents Autonomously Manage</h4>
+    <div class="callout-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="#2196F3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M9.5 2.5v4M14.5 2.5v4M9.5 17.5v4M14.5 17.5v4M2.5 9.5h4M2.5 14.5h4M17.5 9.5h4M17.5 14.5h4"/></svg></div>
+    <h4 style="color:#2196F3">AI Agents Autonomously Manage</h4>
     <p>Requests for Proposals (RFx) and Contract Negotiations end-to-end</p>
   </div>
 
@@ -248,30 +248,30 @@ svg text{font-family:'Inter',sans-serif}
       <tr>
         <td>Risk</td>
         <td>Absent<br>from model</td>
-        <td><span class="comp-icon">🛡️</span>Continuous monitoring &amp; "Digital Twins"</td>
+        <td><span class="comp-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M12 3l7 3v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6z"/></svg></span>Continuous monitoring &amp; "Digital Twins"</td>
       </tr>
       <tr>
         <td>ESG</td>
         <td>Omitted</td>
-        <td><span class="comp-icon">🌱</span>Full CSRD/CSDDD automation &amp; Scope 3</td>
+        <td><span class="comp-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M11 21C6 21 4 16 4 12c4.5 0 7.5 1 8.5 5.5"/><path d="M11 21c0-7.5 3-12.5 9-13.5 0 6.5-2.5 13.5-9 13.5z"/></svg></span>Full CSRD/CSDDD automation &amp; Scope 3</td>
       </tr>
       <tr>
         <td>Supplier</td>
         <td>Transactional</td>
-        <td><span class="comp-icon">🤝</span>(SRM 2.0) Innovation partner &amp; value co-creator</td>
+        <td><span class="comp-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="#cdac6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M11 17l2 2a1.4 1.4 0 0 0 2-2"/><path d="M13 19l1.4 1.4a1.4 1.4 0 0 0 2-2L13 15"/><path d="M21 8l-4-4-5 1-2 2"/><path d="M3 8l4-4 4 1"/><path d="M3 8l5 5a1.4 1.4 0 0 0 2 0l1-1"/></svg></span>(SRM 2.0) Innovation partner &amp; value co-creator</td>
       </tr>
     </tbody>
   </table>
 
   <div class="callout risk" style="margin-top:auto">
-    <div class="callout-icon">🛡️</div>
-    <h4 style="color:#B71C1C">Continuous Risk Monitoring</h4>
+    <div class="callout-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M12 3l7 3v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6z"/></svg></div>
+    <h4 style="color:#EF4444">Continuous Risk Monitoring</h4>
     <p>Digital twins simulate multi-tier supply disruption scenarios using geopolitical and climate signals</p>
   </div>
 
   <div class="callout esg">
-    <div class="callout-icon">🌱</div>
-    <h4 style="color:#1B5E20">Sustainability Compliance</h4>
+    <div class="callout-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em"><path d="M11 21C6 21 4 16 4 12c4.5 0 7.5 1 8.5 5.5"/><path d="M11 21c0-7.5 3-12.5 9-13.5 0 6.5-2.5 13.5-9 13.5z"/></svg></div>
+    <h4 style="color:#22C55E">Sustainability Compliance</h4>
     <p>CSRD &amp; CSDDD automation with Scope 3 tracking at every transaction level</p>
   </div>
 </div>
