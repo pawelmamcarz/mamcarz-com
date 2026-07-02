@@ -4,7 +4,7 @@
 
 ## About
 
-Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year. His portfolio spans 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania for clients including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, and MOL.
+Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year. His portfolio spans 20+ SAP Ariba, SAP Fieldglass, and SAP S/4HANA implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania for clients including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, and MOL.
 
 Before joining apsolut, he held senior roles at SAP Polska (SAP Ariba Senior Account Executive), PZU (Strategic Project Director), PwC (Vice Director, Advisory), PKP PLK (Board Advisor), PKP Intercity (Program Director), and PKN ORLEN (Procurement Department Head, CONNECT Platform Project Manager).
 
@@ -24,7 +24,7 @@ Languages: Polish (native), English (fluent), German (advanced), Russian (commun
 
 - **ORLEN CONNECT**: Sourcing platform for 15 companies in 4 countries, 60-person team, SAP SRM/MM + Oracle EBS
 - **Żabka Polska**: SAP Ariba Buying & Supplier Risk for 12,000+ store convenience chain
-- **KGHM**: SAP Ariba + Fieldglass + S/4HANA integration for top 3 global copper producer
+- **KGHM**: SAP Ariba + Fieldglass + S/4HANA integration for Europe's largest copper producer
 - **PLL LOT**: SAP Ariba implementation for Poland's national airline
 - **Motor Oil Hellas**: SAP Ariba for Greek energy sector
 

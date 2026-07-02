@@ -4,7 +4,7 @@
 
 ## About
 
-Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year (part of All for One Group SE since March 2026). His portfolio spans 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania.
+Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year (part of All for One Group SE since March 2026). His portfolio spans 20+ SAP Ariba, SAP Fieldglass, and SAP S/4HANA implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania.
 
 Key clients: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, ORLEN (formerly PKN Orlen), PGE, PGNiG, PZU, Orange/TP SA, Adamed, CIECH, Lotte Wedel, Hitachi Energy, Pfleiderer, Bank Millennium, Aeroflot, PKP PLK, PKP Intercity, PKP Energetyka, Elektrownia Puławy, Kopex, BRW.
 
@@ -18,7 +18,7 @@ Total project value: 500M+ EUR across 100+ organisations in energy, heavy indust
 - **2015–2016**: Vice Director Advisory / Procurement Expert, PwC Polska, CAPP methodology, projects for PGE, PGNiG, PKN Orlen, PZU, Aeroflot, Russian Railways
 - **2013–2015**: Board Advisor, PKP PLK, public procurement expert (PZP) for tenders 100M+ PLN, SAP AG framework agreement for PKP group (4 companies)
 - **2014–2015**: Program Director, PKP Intercity, Revenue Management System (JDA/RPO), 30+ person team, integration with sales channels
-- **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN, largest sourcing platform in Poland (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
+- **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN, largest sourcing platform of its kind in Poland (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
 - **2006–2008**: Head of General Procurement, PKN ORLEN, 30-person department, 500M PLN/year portfolio, SAP SRM implementation, 1800 fuel stations
 - **2004–2006**: Critical Changes Manager, Telekomunikacja Polska, Oracle EBS for SSC, coordinating 215 team members
 - **2002–2004**: Buyer / IT/Telco Stream Lead, Bank Millennium, IT procurement centralisation, contract renegotiations
@@ -45,7 +45,7 @@ End-to-end deployment of SAP Ariba modules across CEE:
 - SAP S/4HANA Procurement: integration with MM, local fiscal requirements (KSeF Poland, NAV Hungary, e-Factura Romania)
 - Also experienced with: Oracle EBS, SAP SRM, Marketplanet, Ivalua, Basware
 
-apsolut Group is among the world's leading SAP Ariba integration partners with 450+ clients globally.
+apsolut Group is a consultancy focused exclusively on SAP Procurement: an SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year.
 
 ### Procurement Transformation
 - Procurement maturity assessment and diagnostics
@@ -70,20 +70,20 @@ apsolut Group is among the world's leading SAP Ariba integration partners with 4
 ### ORLEN CONNECT
 - **Client**: ORLEN Group (formerly PKN ORLEN; 15 subsidiaries at programme peak)
 - **Scope**: Central sourcing platform across 4 countries (PL, CZ, DE, LT)
-- **Scale**: 60-person delivery team, 50,000+ suppliers in master data, largest sourcing platform in Poland
+- **Scale**: 60-person delivery team, largest sourcing platform of its kind in Poland
 - **Technology**: SAP SRM/MM + Oracle EBS
 - **Modules**: RFx, e-auctions, contracts, central category tree, supplier database
 
 ### Żabka Polska
-- **Client**: Żabka Polska (12,000+ convenience stores, largest chain in Europe)
+- **Client**: Żabka Polska (12,000+ convenience stores, Poland's largest convenience chain)
 - **Scope**: Digitisation of procurement processes and supplier risk management for indirect categories
-- **Scale**: 3 months to core go-live; engagement ongoing with additional modules on the roadmap
+- **Scale**: Engagement ongoing, with additional modules on the roadmap
 - **Technology**: SAP Ariba Buying, SAP Ariba Supplier Risk
 
 ### KGHM
-- **Client**: KGHM Polska Miedź (top 3 global copper and silver producer)
+- **Client**: KGHM Polska Miedź (Europe's largest copper producer, one of the world's top silver producers)
 - **Scope**: SAP Ariba Sourcing implementation and run-state operations; integration with SAP S/4HANA
-- **Scale**: 200+ buyers on the system; **largest SAP Ariba Sourcing customer in Europe**
+- **Scale**: Three SAP platforms (Ariba, Fieldglass, S/4HANA) in one integrated architecture
 - **Technology**: SAP Ariba Sourcing + SAP Fieldglass + SAP S/4HANA
 
 ### PLL LOT
@@ -112,7 +112,7 @@ Available for: conferences, corporate events, universities (guest lectures, seme
 
 ## Beyond Procurement
 
-Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with aerobatics rating. Owner of WarsawFlightSafety (aerobatic flight school), former display pilot for Diverse Extreme Team (2013). Press photographer for Forum Agency since 2003: air-to-air photography, video production for TVP and Greek island municipalities.
+Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with aerobatics rating. Owner of WarsawFlightSafety (aerobatic flight school), former display pilot for Diverse Extreme Team (2013). Press photographer for Forum Agency: air-to-air photography, video production for TVP and Greek island municipalities.
 
 Improv performer at Resort Komedii: live improvised comedy shows at Resort Komedii in Warsaw (resortkomedii.pl).
 
