@@ -5,7 +5,7 @@ Kim jest Paweł Mamcarz:
 - 25+ lat doświadczenia w zakupach strategicznych, sourcingu i transformacji cyfrowej
 - Portfel ponad 500 mln PLN rocznie, projekty o łącznej wartości ponad 500 mln EUR dla ponad 100 organizacji
 - Buduje region CEE od podstaw: 20+ wdrożeń SAP Ariba, SAP Fieldglass i SAP S/4HANA w Polsce, Czechach, Słowacji, Węgrzech i Rumunii
-- Klienci: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PKN Orlen, PGE, PGNIG, PZU, Orange, PKP PLK, PKP Intercity, Adamed, CIECH, Lotte Wedel, Bank Millennium, Pfleiderer, Aeroflot, Hitachi Energy i inni
+- Klienci: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PKN Orlen, PGE, PGNiG, PZU, Orange, PKP PLK, PKP Intercity, Adamed, CIECH, Lotte Wedel, Bank Millennium, Pfleiderer, Aeroflot, Hitachi Energy i inni
 
 Kariera:
 - apsolut Group / All for One (od 07.2021), Associate Partner CEE
@@ -20,21 +20,22 @@ Kariera:
 - Bank Millennium (2002–2004), Buyer / Lider IT/Telco
 - Elektrim / Bank Austria Creditanstalt Wiedeń (1999–2002), Financial Controller
 
-Wykształcenie: SGH Warszawa (Finanse i Bankowość / Metody Statystyczne i Systemy Informacyjne), CEMS Master Wirtschaftsuniversität Wien, Warsaw Executive MBA (Univ. of Minnesota / SGH), APMP PMI
+Wykształcenie: SGH Warszawa (Finanse i Bankowość / Metody Statystyczne i Systemy Informacyjne), CEMS Master Wirtschaftsuniversität Wien, Warsaw Executive MBA (Univ. of Minnesota / SGH), PMP (PMI, 2008)
 Języki: polski, angielski, niemiecki, rosyjski
 
 Usługi:
 - Transformacja zakupów: strategia procurement, optymalizacja procesów
 - Wdrożenia SAP: SAP Ariba, SAP Fieldglass, SAP S/4HANA
-- Doradztwo strategiczne: M&A, due diligence, zarządzanie zmianą
+- Doradztwo strategiczne: model operacyjny zakupów, strategie kategoriowe, analiza wydatków i zarządzanie zmianą
 - Mentoring i warsztaty: dla zespołów procurement i CPO
+- Tworzenie aplikacji operacyjnych dla procurement, field service management i aviation: discovery, model danych, workflow, analityka i działające wdrożenie
 
 Poza pracą:
 - Licencja pilota śmigłowcowego PPL(H) i samolotowego PPL(A) z uprawnieniami do akrobacji
 - Właściciel WarsawFlightSafety, szkoła akrobacji lotniczej
 - Pilot pokazowy Diverse Extreme Team (2013)
 - Fotograf prasowy agencji Forum: sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios)
-- Projekty własne: akrobacja.com, filmolot.pl, czympojade.pl, przypominamy.com
+- Projekty własne: akrobacja.com, filmolot.pl, czympojade.pl, przypominamy.com, procuracost.com, silence-tax.com
 - Z Internetem związany od 1993: pierwsza strona WWW na VAX UMCS w Lublinie
 
 Kontakt:

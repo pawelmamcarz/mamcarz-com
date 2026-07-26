@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Paweł Mamcarz · Procurement Expert & SAP Ariba | Associate Partner CEE</title>
 <meta name="description" content="SAP Ariba implementations and procurement transformation for the largest organisations in CEE. 25+ years in procurement, 20+ deployments, 100+ clients, EUR 500M+ in delivered projects.">
-<meta name="keywords" content="Paweł Mamcarz, procurement, SAP Ariba, SAP Fieldglass, strategic procurement, Associate Partner, apsolut Group, All for One, CEE, digital transformation, S/4HANA">
+<meta name="keywords" content="Paweł Mamcarz, procurement, SAP Ariba, SAP Fieldglass, strategic procurement, procurement applications, field service management, aviation software, Associate Partner, apsolut Group, All for One, CEE, digital transformation, S/4HANA">
 <meta name="author" content="Paweł Mamcarz">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://mamcarz.com/en/">
@@ -50,7 +50,7 @@
     }
   },
   "description": "Procurement that creates real value. SAP Ariba implementations and procurement transformation for the largest organisations in CEE. 25+ years, 100+ clients, EUR 500M+ in delivered projects.",
-  "knowsAbout": ["SAP Ariba", "SAP Fieldglass", "SAP S/4HANA", "Procurement", "Strategic Sourcing", "Digital Transformation", "Public Procurement (PZP)"],
+  "knowsAbout": ["SAP Ariba", "SAP Fieldglass", "SAP S/4HANA", "Procurement", "Strategic Sourcing", "Digital Transformation", "Public Procurement (PZP)", "Application Development", "Field Service Management", "Aviation Software"],
   "alumniOf": [
     {"@type": "EducationalOrganization", "name": "SGH Warsaw School of Economics"},
     {"@type": "EducationalOrganization", "name": "Wirtschaftsuniversität Wien"},
@@ -93,9 +93,9 @@
 <link rel="icon" type="image/png" sizes="any" href="/logo.png">
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/playfair-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/playfair-latext.woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=d18107c8">
+<link rel="stylesheet" href="/assets/css/style.css?v=20260727b">
 </head>
-<body>
+<body class="home-page">
 
 <a href="#main" class="skip-link">Skip to main content</a>
 
@@ -110,7 +110,7 @@
     <li><a href="/en/#contact">Contact</a></li>
   </ul>
   <a href="/" class="nav-lang">PL</a>
-  <button class="nav-hamburger" id="navHamburger" aria-label="Navigation menu">
+  <button class="nav-hamburger" id="navHamburger" aria-label="Navigation menu" aria-controls="navLinks" aria-expanded="false">
     <span></span>
     <span></span>
     <span></span>
@@ -123,37 +123,28 @@
 <main id="main" tabindex="-1">
 <!-- HERO -->
 <section id="hero">
-  <div class="hero-bg"></div>
-  <svg class="hero-plot" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-    <defs>
-      <linearGradient id="plotLine" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="rgba(243,240,234,0.06)"/>
-        <stop offset="0.5" stop-color="rgba(243,240,234,0.22)"/>
-        <stop offset="1" stop-color="#cdac6b"/>
-      </linearGradient>
-      <linearGradient id="plotArea" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="rgba(205,172,107,0.18)"/>
-        <stop offset="1" stop-color="rgba(205,172,107,0)"/>
-      </linearGradient>
-    </defs>
-    <g class="hero-plot-axis">
-      <line x1="0" y1="600" x2="1200" y2="600"/>
-      <line x1="0" y1="440" x2="1200" y2="440"/>
-      <line x1="0" y1="280" x2="1200" y2="280"/>
-    </g>
-    <path class="hero-plot-area" d="M-40,700 L520,700 L520,600 L660,600 L660,500 L800,500 L800,400 L900,400 L900,300 L980,300 L980,760 L-40,760 Z"/>
-    <path class="hero-plot-line" d="M-40,700 L520,700 L520,600 L660,600 L660,500 L800,500 L800,400 L900,400 L900,300 L980,300"/>
-    <circle class="hero-plot-node-glow" cx="980" cy="300" r="30"/>
-    <circle class="hero-plot-node" cx="980" cy="300" r="7"/>
-  </svg>
-  <div class="hero-content">
-    <p class="hero-tag">Associate Partner CEE · apsolut Group / All for One · SAP Procurement</p>
-    <h1 class="hero-name">Paweł<br><em>Mamcarz</em></h1>
-    <p class="hero-desc"><strong>Procurement is the biggest untapped P&amp;L in your company.</strong> For 25 years I've been turning spend into value: SAP Ariba implementations and procurement rebuilds for the largest organisations in CEE.</p>
-    <div class="hero-cta">
-      <a href="#contact" class="btn-primary">Let's talk</a>
-      <a href="#cases" class="btn-ghost">Results</a>
+  <div class="hero-grid">
+    <div class="hero-content">
+      <p class="hero-tag">Paweł Mamcarz · Procurement systems &amp; transformation · CEE</p>
+      <h1 class="hero-name">Procurement<br>that <em>works.</em></h1>
+      <p class="hero-desc">I combine 25+ years in procurement with SAP delivery and hands-on product development. From boardroom decisions, through process and data, to a system people actually use.</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn-primary">Let's talk</a>
+        <a href="#cases" class="btn-ghost">See the results</a>
+      </div>
     </div>
+    <figure class="hero-portrait">
+      <picture>
+        <source type="image/webp" srcset="/assets/img/IMG_3284-960.webp?v=2 960w, /assets/img/IMG_3284-1920.webp?v=2 1920w" sizes="(max-width: 900px) 100vw, 38vw">
+        <img src="/assets/img/IMG_3284-960.jpg?v=2" srcset="/assets/img/IMG_3284-960.jpg?v=2 960w, /assets/img/IMG_3284-1920.jpg?v=2 1920w" sizes="(max-width: 900px) 100vw, 38vw" alt="Paweł Mamcarz in an aircraft cockpit" width="960" height="1280" decoding="async">
+      </picture>
+      <div class="hero-domains" aria-label="Application specialisms">
+        <span>01 / Procurement</span>
+        <span>02 / Field service</span>
+        <span>03 / Aviation</span>
+      </div>
+      <figcaption>Systems practitioner. Pilot. Builder.</figcaption>
+    </figure>
   </div>
   <div class="hero-stats">
     <div class="stat">
@@ -173,10 +164,10 @@
       <div class="stat-label">PLN of managed spend</div>
     </div>
   </div>
-  <div class="scroll-indicator">
+  <a href="#process" class="scroll-indicator" aria-label="Go to How I work">
     <div class="scroll-line"></div>
     <span>Scroll</span>
-  </div>
+  </a>
 </section>
 
 <!-- TRUST BAR -->
@@ -243,19 +234,19 @@
     <div class="case-card">
       <div class="case-industry">Energy · Multi-country</div>
       <div class="case-title">CONNECT sourcing platform, ORLEN Group</div>
-      <div class="case-desc">One central procurement platform for 15 ORLEN Group entities across 4 countries (PL, CZ, DE, LT). To this day the largest project of its kind in Poland. RFx, e-auctions, contracts and the supplier database in a single SAP SRM/MM environment. I led the 60-person delivery team.</div>
+      <div class="case-desc">One central procurement platform for 15 ORLEN Group entities across 4 countries (PL, CZ, DE, LT). RFx, e-auctions, contracts and the supplier database in a single SAP SRM/MM environment. I led the 60-person delivery team.</div>
       <div class="case-results">
         <div class="case-metric">
           <div class="case-metric-num">15</div>
-          <div class="case-metric-label">entities · 4 countries</div>
+          <div class="case-metric-label">group entities</div>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-num">4</div>
+          <div class="case-metric-label">countries</div>
         </div>
         <div class="case-metric">
           <div class="case-metric-num">60</div>
           <div class="case-metric-label">people on the delivery team</div>
-        </div>
-        <div class="case-metric">
-          <div class="case-metric-num">#1</div>
-          <div class="case-metric-label">sourcing platform in PL</div>
         </div>
       </div>
     </div>
@@ -265,8 +256,8 @@
       <div class="case-desc">SAP Ariba Buying, Supplier Risk and sourcing for Poland's largest convenience chain, an organisation that opens several new stores every day. Indirect procurement and supplier risk in one system, at the pace the network grows. Engagement ongoing, additional modules on the roadmap.</div>
       <div class="case-results">
         <div class="case-metric">
-          <div class="case-metric-num">12,000+</div>
-          <div class="case-metric-label">stores</div>
+          <div class="case-metric-num">12,800+</div>
+          <div class="case-metric-label">Żabka stores · 06.2026</div>
         </div>
         <div class="case-metric">
           <div class="case-metric-num">#1</div>
@@ -281,11 +272,11 @@
     <div class="case-card">
       <div class="case-industry">Mining & resources</div>
       <div class="case-title">SAP Ariba Sourcing & Fieldglass · KGHM</div>
-      <div class="case-desc">SAP Ariba Sourcing and SAP Fieldglass deployment and run for <strong>Europe's largest copper producer</strong> and one of the world's top silver producers. Sourcing, external suppliers and contract services in a model fully integrated with SAP S/4HANA.</div>
+      <div class="case-desc">SAP Ariba Sourcing and SAP Fieldglass deployment and run for <strong>Europe's largest producer of mined copper</strong> and one of the world's top silver producers. Sourcing, external suppliers and contract services in a model fully integrated with SAP S/4HANA.</div>
       <div class="case-results">
         <div class="case-metric">
           <div class="case-metric-num">#1</div>
-          <div class="case-metric-label">copper producer in Europe</div>
+          <div class="case-metric-label">producer of mined copper in Europe</div>
         </div>
         <div class="case-metric">
           <div class="case-metric-num">SAP</div>
@@ -333,7 +324,7 @@
       <p class="section-label">About me</p>
       <h2 class="section-title">Who<br><em>I am</em></h2>
       <p>I have been working in procurement for over 25 years. I started in financial analytics, bought IT for Bank Millennium, ran General Procurement at PKN Orlen, then built the SAP Ariba market in Poland and CEE. Today, as <strong class="gold-link">Associate Partner at apsolut Group</strong> (SAP Gold Partner, multiple-time SAP Ariba MEE Partner of the Year, part of All for One Group since March 2026), I lead the CEE practice: 20+ implementations across Poland, Czechia, Slovakia, Hungary and Romania.</p>
-      <p>Total project value delivered: over EUR 500 million for 100+ organisations including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas and MOL. The largest engagement was CONNECT for ORLEN Group: 15 entities, 4 countries, a 60-strong team, and the biggest sourcing platform of its kind in Poland. Earlier clients include PGE, PGNiG, Aeroflot, PKP PLK and PKP Intercity.</p>
+      <p>Total project value delivered: over EUR 500 million for 100+ organisations including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas and MOL. The most complex engagement was CONNECT for ORLEN Group: 15 entities, 4 countries and a 60-strong team. Earlier clients include PGE, PGNiG, Aeroflot, PKP PLK and PKP Intercity.</p>
       <p>Between 2008 and 2012 I stepped away from the corporate world to build my own ventures: <strong>RMS sp. z o.o.</strong> (an EU-funded start-up under the POIG 8.1 programme), <strong>Przypominamy.com</strong>, and a dozen consulting projects. I know what it takes to build a product from scratch, sell it yourself, and report on an EU grant.</p>
       <p class="about-highlight">Outside work: I hold a helicopter pilot licence <strong>PPL(H)</strong> and an aeroplane licence <strong>PPL(A) with an aerobatics rating</strong>. Owner of WarsawFlightSafety, display pilot for the Diverse Extreme Team (2013). Press photographer with Forum Agency: air-to-air shoots, video and drone production for TVP and Greek island municipalities (Samos, Chios). Improv performer at Resort Komedii in Warsaw.</p>
       <p class="about-aside">In tech since 1993: first website hosted on a VAX at UMCS Lublin, network administrator at SGH. Back then SUN, SGI Indigo, IBM AIX; today Cloudflare, React and personal web projects.</p>
@@ -346,15 +337,6 @@
         <div class="expertise-item"><div class="expertise-dot"></div>Energy, industrial & pharma sectors</div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- WHY -->
-<section id="why">
-  <div class="container why-container">
-    <p class="section-label">Why I do this</p>
-    <h2 class="section-title why-title">Why<br><em>I do this</em></h2>
-    <p class="why-body">Good transformations start with an honest conversation in the boardroom and end with a measurable business result. Data and the right people in the team take care of the rest.</p>
   </div>
 </section>
 
@@ -450,7 +432,7 @@
         <div class="timeline-year">03.2012 – 09.2014</div>
         <div class="timeline-company">PKN ORLEN S.A.</div>
         <div class="timeline-role">Project Manager, CONNECT Platform</div>
-        <p class="timeline-desc">Led the deployment of the CONNECT sourcing platform for 15 ORLEN Group entities across 4 countries (PL, CZ, DE, LT). The largest implementation of its kind in Poland. 60 people, SAP SRM/MM + Oracle EBS. Modules: RFx, e-auctions, contracts, central category tree, supplier database.</p>
+        <p class="timeline-desc">Led the deployment of the CONNECT sourcing platform for 15 ORLEN Group entities across 4 countries (PL, CZ, DE, LT). A 60-person team, SAP SRM/MM + Oracle EBS. Modules: RFx, e-auctions, contracts, central category tree, supplier database.</p>
       </div>
 
       <div class="timeline-item">
@@ -493,7 +475,7 @@
 <section id="skills">
   <div class="container reveal">
   <p class="section-label">Competencies</p>
-  <h2 class="section-title">Areas of<br><em>expertise</em></h2>
+  <h2 class="section-title">How I can<br><em>help you</em></h2>
   </div>
   <div class="skills-grid">
     <div class="skill-card">
@@ -505,7 +487,7 @@
     <a href="/procurement-2026/" class="skill-card">
       <div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.3"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></div>
       <div class="skill-name">Strategic procurement</div>
-      <p class="skill-desc">25 years of experience. EUR 500M+ project value for 100+ organisations. From category strategy to SAP Ariba implementation.</p>
+      <p class="skill-desc">25+ years of experience. EUR 500M+ project value for 100+ organisations. From category strategy to SAP Ariba implementation.</p>
       <p class="skill-outcome">→ Measurable savings and full spend visibility</p>
       <div class="skill-card__link-label">Procurement 2026 →</div>
     </a>
@@ -527,17 +509,12 @@
       <p class="skill-desc">Expert in Polish public procurement (PZP): PKP PLK, tenders exceeding PLN 100 million. Procurement strategies for PGNiG SA under PZP regulations. SAP AG framework agreement negotiations for the PKP group.</p>
       <p class="skill-outcome">→ PLN 100M+ tenders run fully PZP-compliant and on schedule</p>
     </div>
-    <a href="https://silence-tax.com/" class="skill-card" target="_blank" rel="noopener">
-      <div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 5h16v10h-9l-4 3.5V15H4V5Z"/><path d="M9 13 15.5 7"/></svg></div>
-      <div class="skill-name">Silence Tax</div>
-      <p class="skill-desc">Interactive calculator quantifying the financial cost of low psychological safety. Model based on Ipsos 2026 report (n=1,000) and Williamson's Transaction Cost Economics. 10 cost modules, a linear-programming solver and a Polish benchmark.</p>
-      <div class="skill-card__link-label">silence-tax.com →</div>
-    </a>
-    <div class="skill-card">
+    <div class="skill-card skill-card--applications">
       <div class="skill-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M8 7 3 12 8 17"/><path d="M16 7 21 12 16 17"/><path d="M13.5 4.5 10.5 19.5"/></svg></div>
-      <div class="skill-name">Web product builder</div>
-      <p class="skill-desc">20+ years building digital products: from my first website on a VAX (UMCS Lublin, 1993) to SaaS apps, web calculators and consumer services. Apps: <a href="https://onephoto.net" target="_blank" rel="noopener" class="gold-link">onephoto.net</a>, <a href="https://przypominamy.com" target="_blank" rel="noopener" class="gold-link">przypominamy.com</a>, <a href="https://czympojade.pl" target="_blank" rel="noopener" class="gold-link">czympojade.pl</a>, <a href="https://akrobacja.com" target="_blank" rel="noopener" class="gold-link">akrobacja.com</a>, <a href="https://filmolot.pl" target="_blank" rel="noopener" class="gold-link">filmolot.pl</a>, <a href="https://silence-tax.com" target="_blank" rel="noopener" class="gold-link">silence-tax.com</a>, <a href="https://procuracost.com" target="_blank" rel="noopener" class="gold-link">procuracost.com</a> and more.</p>
-      <p class="skill-outcome">→ I understand both the tech and the business side</p>
+      <div class="skill-name">Operational apps · procurement, field service, aviation</div>
+      <p class="skill-desc">I design and build tools around the work of a specific industry — from discovery and data modelling to a working deployment. Procurement: calculators, workflows and cost analytics. Field service management: work orders, technician dispatch, SLAs and asset history. Aviation: bookings, documents, operations and settlement.</p>
+      <div class="skill-domains" aria-label="Application domains"><span>Procurement</span><span>Field service</span><span>Aviation</span></div>
+      <p class="skill-outcome">→ A working system fitted to the real process, not a demo deck</p>
     </div>
   </div>
 
@@ -695,11 +672,6 @@
   </div>
 </section>
 
-<!-- BEYOND WORK -->
-<section class="beyond-work" aria-label="Beyond work">
-  <p>Beyond work: aerobatic pilot PPL(A)/PPL(H), press photographer with <a href="https://www.forum.com.pl/" target="_blank" rel="noopener">Forum Agency</a>, improv performer at <a href="https://resortkomedii.pl" target="_blank" rel="noopener">Resort Komedii</a> in Warsaw.</p>
-</section>
-
 <!-- CONTACT -->
 <section id="contact">
   <div class="contact-inner">
@@ -757,7 +729,7 @@
   </ul>
 </footer>
 
-<script src="/assets/js/main.js?v=0af462c0" defer></script>
+<script src="/assets/js/main.js?v=20260727b" defer></script>
 
 </body>
 </html>

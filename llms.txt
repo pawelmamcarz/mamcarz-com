@@ -8,7 +8,7 @@ Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. H
 
 Before joining apsolut, he held senior roles at SAP Polska (SAP Ariba Senior Account Executive), PZU (Strategic Project Director), PwC (Vice Director, Advisory), PKP PLK (Board Advisor), PKP Intercity (Program Director), and PKN ORLEN (Procurement Department Head, CONNECT Platform Project Manager).
 
-He managed a 500M PLN/year procurement portfolio at PKN ORLEN and led the CONNECT sourcing platform, the largest of its kind in Poland (15 companies, 4 countries, 60-person team).
+He managed a 500M PLN/year procurement portfolio at PKN ORLEN and led the CONNECT sourcing platform across 15 companies and 4 countries with a 60-person delivery team.
 
 Education: SGH Warsaw (Finance & Banking), WU Wien (CEMS Master), Warsaw Executive MBA (Univ. of Minnesota / SGH), PMP (PMI).
 
@@ -19,12 +19,13 @@ Languages: Polish (native), English (fluent), German (advanced), Russian (commun
 - **SAP Ariba Implementation**: End-to-end deployment of SAP Ariba (Sourcing, Contracts, Buying, SLP, Supplier Risk), SAP Fieldglass, and SAP S/4HANA Procurement across CEE
 - **Procurement Transformation**: Maturity assessment, Target Operating Model design, category strategies, spend analytics, process redesign, change management
 - **Public Procurement Advisory (PZP)**: Expert advisory for large public sector tenders (100M+ PLN), framework agreement negotiation, e-procurement platform audit
+- **Operational Application Development**: Purpose-built applications for procurement, field service management, and aviation — from discovery and data modelling to deployment
 
 ## Key Projects
 
 - **ORLEN CONNECT**: Sourcing platform for 15 companies in 4 countries, 60-person team, SAP SRM/MM + Oracle EBS
-- **Żabka Polska**: SAP Ariba Buying & Supplier Risk for 12,000+ store convenience chain
-- **KGHM**: SAP Ariba + Fieldglass + S/4HANA integration for Europe's largest copper producer
+- **Żabka Polska**: SAP Ariba Buying & Supplier Risk for 12,800+ Żabka-store convenience chain (12,823 as of 30 June 2026)
+- **KGHM**: SAP Ariba + Fieldglass + S/4HANA integration for Europe's largest producer of mined copper
 - **PLL LOT**: SAP Ariba implementation for Poland's national airline
 - **Motor Oil Hellas**: SAP Ariba for Greek energy sector
 
@@ -46,4 +47,4 @@ Languages: Polish (native), English (fluent), German (advanced), Russian (commun
 
 ## PL
 
-Paweł Mamcarz · ekspert zakupowy, konsultant ds. wdrożeń systemów zakupowych (SAP Ariba, Fieldglass, S/4HANA). Associate Partner CEE w apsolut Group / All for One Group. 25+ lat w zakupach strategicznych, transformacji zakupów i zamówieniach publicznych (PZP). Ponad 100 organizacji w portfolio: ORLEN, KGHM, Żabka, LOT, PGE, PZU, MOL, Motor Oil Hellas. Konsulting zakupowy, doradztwo zakupowe, audyt zakupów, platforma zakupowa, e-procurement.
+Paweł Mamcarz · ekspert zakupowy, konsultant ds. wdrożeń systemów zakupowych (SAP Ariba, Fieldglass, S/4HANA) i twórca aplikacji operacyjnych dla procurement, field service management oraz aviation. Associate Partner CEE w apsolut Group / All for One Group. 25+ lat w zakupach strategicznych, transformacji zakupów i zamówieniach publicznych (PZP). Ponad 100 organizacji w portfolio: ORLEN, KGHM, Żabka, LOT, PGE, PZU, MOL, Motor Oil Hellas.

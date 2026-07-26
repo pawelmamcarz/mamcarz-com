@@ -18,7 +18,7 @@ Total project value: 500M+ EUR across 100+ organisations in energy, heavy indust
 - **2015–2016**: Vice Director Advisory / Procurement Expert, PwC Polska, CAPP methodology, projects for PGE, PGNiG, PKN Orlen, PZU, Aeroflot, Russian Railways
 - **2013–2015**: Board Advisor, PKP PLK, public procurement expert (PZP) for tenders 100M+ PLN, SAP AG framework agreement for PKP group (4 companies)
 - **2014–2015**: Program Director, PKP Intercity, Revenue Management System (JDA/RPO), 30+ person team, integration with sales channels
-- **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN, largest sourcing platform of its kind in Poland (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
+- **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
 - **2006–2008**: Head of General Procurement, PKN ORLEN, 30-person department, 500M PLN/year portfolio, SAP SRM implementation, 1800 fuel stations
 - **2004–2006**: Critical Changes Manager, Telekomunikacja Polska, Oracle EBS for SSC, coordinating 215 team members
 - **2002–2004**: Buyer / IT/Telco Stream Lead, Bank Millennium, IT procurement centralisation, contract renegotiations
@@ -65,23 +65,30 @@ apsolut Group is a consultancy focused exclusively on SAP Procurement: an SAP Go
 - IT procurement specialisation (software, hardware, maintenance, SLA)
 - KIO (National Appeals Chamber) support
 
+### Operational Application Development
+- Purpose-built applications for procurement, field service management, and aviation
+- Procurement: calculators, approval workflows, cost analytics, and decision-support tools
+- Field service management: work orders, technician dispatch, SLAs, and asset history
+- Aviation: booking, document, operations, and settlement workflows
+- Delivery from discovery and data modelling through to a working deployment
+
 ## Key Projects (Case Studies)
 
 ### ORLEN CONNECT
 - **Client**: ORLEN Group (formerly PKN ORLEN; 15 subsidiaries at programme peak)
 - **Scope**: Central sourcing platform across 4 countries (PL, CZ, DE, LT)
-- **Scale**: 60-person delivery team, largest sourcing platform of its kind in Poland
+- **Scale**: 15 entities across 4 countries, 60-person delivery team
 - **Technology**: SAP SRM/MM + Oracle EBS
 - **Modules**: RFx, e-auctions, contracts, central category tree, supplier database
 
 ### Żabka Polska
-- **Client**: Żabka Polska (12,000+ convenience stores, Poland's largest convenience chain)
+- **Client**: Żabka Polska (12,800+ Żabka stores; 12,823 as of 30 June 2026, Poland's largest convenience chain)
 - **Scope**: Digitisation of procurement processes and supplier risk management for indirect categories
 - **Scale**: Engagement ongoing, with additional modules on the roadmap
 - **Technology**: SAP Ariba Buying, SAP Ariba Supplier Risk
 
 ### KGHM
-- **Client**: KGHM Polska Miedź (Europe's largest copper producer, one of the world's top silver producers)
+- **Client**: KGHM Polska Miedź (Europe's largest producer of mined copper, one of the world's top silver producers)
 - **Scope**: SAP Ariba Sourcing implementation and run-state operations; integration with SAP S/4HANA
 - **Scale**: Three SAP platforms (Ariba, Fieldglass, S/4HANA) in one integrated architecture
 - **Technology**: SAP Ariba Sourcing + SAP Fieldglass + SAP S/4HANA
@@ -116,7 +123,7 @@ Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with 
 
 Improv performer at Resort Komedii: live improvised comedy shows at Resort Komedii in Warsaw (resortkomedii.pl).
 
-Websites: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (transport app), przypominamy.com (SMS/MMS SaaS platform).
+Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (transport app), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator).
 
 Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX; currently Cloudflare, React, and custom web projects.
 
