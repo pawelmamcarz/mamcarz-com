@@ -11,20 +11,30 @@ document.querySelectorAll('.js-email').forEach(el => {
 });
 
 // Hamburger menu + overlay
-const hamburger = document.getElementById('navHamburger');
-const navLinks = document.getElementById('navLinks');
+const pageLang = (document.documentElement.lang || 'pl').toLowerCase().startsWith('en') ? 'en' : 'pl';
+const navLinks = document.querySelector(`.nav-links[data-lang="${pageLang}"]`) || document.getElementById('navLinks');
+const hamburger = document.querySelector(`.nav-hamburger[data-lang="${pageLang}"]`) || document.getElementById('navHamburger');
 const navOverlay = document.getElementById('navOverlay');
 
 function closeMenu() {
   hamburger.classList.remove('active');
   navLinks.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
   if (navOverlay) navOverlay.classList.remove('open');
 }
 
 hamburger.addEventListener('click', () => {
   const isOpen = navLinks.classList.toggle('open');
   hamburger.classList.toggle('active');
+  hamburger.setAttribute('aria-expanded', String(isOpen));
   if (navOverlay) navOverlay.classList.toggle('open', isOpen);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && navLinks.classList.contains('open')) {
+    closeMenu();
+    hamburger.focus();
+  }
 });
 
 navLinks.querySelectorAll('a').forEach(link => {
@@ -156,7 +166,7 @@ if (chatMsgs && chatInput && chatSendBtn) {
       thinking: "Zaglądam do notatek…",
       apiError: `Hmm, coś mi się zacięło. Spróbuj jeszcze raz albo napisz wprost do Pawła na ${mail}.`,
       netError: `Nie mogę się teraz połączyć z AI. Najszybszy kontakt to ${mail}, odpowiadam zwykle w ciągu doby.`,
-      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.<br>Paweł od 25 lat projektuje procurement dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego <strong>usługi</strong>, <strong>doświadczenie</strong> albo jak się z nim <strong>skontaktować</strong>."
+      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.<br>Paweł od ponad 25 lat projektuje procesy i systemy zakupowe dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego <strong>usługi</strong>, <strong>doświadczenie</strong> albo jak się z nim <strong>skontaktować</strong>."
     },
     en: {
       thinking: "Checking my notes…",
@@ -223,5 +233,3 @@ if (chatMsgs && chatInput && chatSendBtn) {
 
   setTimeout(() => addMsg(t.greeting, false), 300);
 }
-
-

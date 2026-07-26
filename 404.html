@@ -10,7 +10,7 @@
 <link rel="icon" type="image/png" sizes="any" href="/logo.png">
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/playfair-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/playfair-latext.woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=d18107c8">
+<link rel="stylesheet" href="/assets/css/style.css?v=20260727b">
 
 <style>
 html[lang="en"] [data-lang="pl"],
@@ -47,7 +47,7 @@ html[lang="pl"] [data-lang="en"] { display: none !important; }
     <li><a href="/case-studies">Case studies</a></li>
     <li><a href="/#contact">Kontakt</a></li>
   </ul>
-  <ul class="nav-links" data-lang="en">
+  <ul class="nav-links" id="navLinksEn" data-lang="en">
     <li><a href="/en/#about">About</a></li>
     <li><a href="/en/#resume">Experience</a></li>
     <li><a href="/en/uslugi/wdrozenie-sap-ariba">Services</a></li>
@@ -56,10 +56,10 @@ html[lang="pl"] [data-lang="en"] { display: none !important; }
   </ul>
   <a href="/en/" class="nav-lang" data-lang="pl">EN</a>
   <a href="/" class="nav-lang" data-lang="en">PL</a>
-  <button class="nav-hamburger" id="navHamburger" data-lang="pl" aria-label="Menu nawigacyjne">
+  <button class="nav-hamburger" id="navHamburger" data-lang="pl" aria-label="Menu nawigacyjne" aria-controls="navLinks" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
-  <button class="nav-hamburger" data-lang="en" aria-label="Navigation menu">
+  <button class="nav-hamburger" id="navHamburgerEn" data-lang="en" aria-label="Navigation menu" aria-controls="navLinksEn" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </nav>
@@ -107,6 +107,6 @@ html[lang="pl"] [data-lang="en"] { display: none !important; }
   </ul>
 </footer>
 
-<script src="/assets/js/main.js?v=0af462c0" defer></script>
+<script src="/assets/js/main.js?v=20260727b" defer></script>
 </body>
 </html>
