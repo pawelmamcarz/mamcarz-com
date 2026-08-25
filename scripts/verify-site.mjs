@@ -59,6 +59,94 @@ function renderedText(html) {
     .replace(/&amp;/gi, "&"));
 }
 
+function stripHtmlComments(html) {
+  return html.replace(/<!--[\s\S]*?-->/g, " ");
+}
+
+function attributeValue(openingTag, name) {
+  const match = new RegExp(`\\b${escapeRegExp(name)}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, "i").exec(openingTag);
+  return match?.[1] ?? match?.[2] ?? match?.[3] ?? null;
+}
+
+function hasClass(openingTag, className) {
+  return (attributeValue(openingTag, "class") ?? "").split(/\s+/).includes(className);
+}
+
+function openingTags(html, tagName) {
+  return [...html.matchAll(new RegExp(`<${tagName}\\b[^>]*>`, "gi"))].map((match) => match[0]);
+}
+
+function tagBlocks(html, tagName) {
+  const blocks = [];
+  const stack = [];
+  const tags = new RegExp(`<(/?)${tagName}\\b[^>]*>`, "gi");
+  for (const match of html.matchAll(tags)) {
+    if (match[1] === "") {
+      stack.push({ opening: match[0], contentStart: match.index + match[0].length });
+    } else {
+      const opening = stack.pop();
+      if (opening) {
+        blocks.push({
+          opening: opening.opening,
+          content: html.slice(opening.contentStart, match.index),
+          full: html.slice(opening.contentStart - opening.opening.length, match.index + match[0].length)
+        });
+      }
+    }
+  }
+  return blocks;
+}
+
+function stripJsComments(source) {
+  let output = "";
+  let quote = null;
+  let escaped = false;
+  let lineComment = false;
+  let blockComment = false;
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    const next = source[index + 1];
+    if (lineComment) {
+      if (character === "\n") {
+        lineComment = false;
+        output += "\n";
+      }
+      continue;
+    }
+    if (blockComment) {
+      if (character === "*" && next === "/") {
+        blockComment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (quote !== null) {
+      output += character;
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === "'" || character === '"' || character === "`") {
+      quote = character;
+      output += character;
+      continue;
+    }
+    if (character === "/" && next === "/") {
+      lineComment = true;
+      index += 1;
+      continue;
+    }
+    if (character === "/" && next === "*") {
+      blockComment = true;
+      index += 1;
+      continue;
+    }
+    output += character;
+  }
+  return output;
+}
+
 async function read(context, relativePath) {
   try {
     return await readFile(resolve(context.root, relativePath), "utf8");
@@ -652,8 +740,123 @@ function contrastRatio(first, second) {
   return (Math.max(firstLuminance, secondLuminance) + 0.05) / (Math.min(firstLuminance, secondLuminance) + 0.05);
 }
 
+function verifyHomepageNavigation(html, page, errors) {
+  const activeHtml = stripHtmlComments(html).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
+  const allNavBlocks = tagBlocks(activeHtml, "nav");
+  const navBlocks = allNavBlocks.filter((block) => hasClass(block.opening, "site-nav"));
+  if (navBlocks.length !== 1) {
+    error(errors, "nav-structure", page.path, "expected exactly one nav.site-nav");
+  }
+  const siteNav = navBlocks[0] ?? allNavBlocks.find((block) => !hasClass(block.opening, "breadcrumb"));
+  if (!siteNav) return;
+  const ids = openingTags(activeHtml, "[a-z][a-z0-9:-]*")
+    .map((tag) => attributeValue(tag, "id"))
+    .filter(nonEmptyString);
+  for (const id of ["nav-menu", "nav-toggle", "nav-overlay"]) {
+    const count = ids.filter((candidate) => candidate === id).length;
+    if (count !== 1) error(errors, "nav-id", page.path, `expected id ${id} exactly once; found ${count}`);
+  }
+
+  const menu = openingTags(siteNav.full, "ul").filter((tag) => attributeValue(tag, "id") === "nav-menu" && hasClass(tag, "nav-list"));
+  const toggle = openingTags(siteNav.full, "button").filter((tag) => attributeValue(tag, "id") === "nav-toggle" && hasClass(tag, "nav-toggle"));
+  const overlay = openingTags(activeHtml, "div").filter((tag) => attributeValue(tag, "id") === "nav-overlay" && hasClass(tag, "nav-overlay"));
+  if (menu.length !== 1 || toggle.length !== 1 || attributeValue(toggle[0] ?? "", "aria-controls") !== "nav-menu" || attributeValue(toggle[0] ?? "", "aria-expanded") !== "false" || overlay.length !== 1) {
+    error(errors, "nav-structure", page.path, "navigation requires a linked nav-list, nav-toggle and nav-overlay");
+  }
+
+  const config = page.lang === "pl" ? {
+    routes: ["/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact"],
+    pairedHomepage: "/en/",
+    summary: "Doradztwo",
+    submenu: [
+      ["/uslugi/transformacja-zakupow/", "Transformacja zakupów"],
+      ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"],
+      ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]
+    ]
+  } : {
+    routes: ["/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact"],
+    pairedHomepage: "/",
+    summary: "Advisory",
+    submenu: [
+      ["/en/uslugi/transformacja-zakupow/", "Procurement transformation"],
+      ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"],
+      ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]
+    ]
+  };
+
+  const navLinks = tagBlocks(siteNav.full, "a").map((block) => ({
+    href: attributeValue(block.opening, "href"),
+    text: renderedText(block.content),
+    opening: block.opening
+  }));
+  let previousRouteIndex = -1;
+  for (const route of config.routes) {
+    const routeIndexes = navLinks.flatMap((link, index) => link.href === route ? [index] : []);
+    if (routeIndexes.length !== 1 || routeIndexes[0] <= previousRouteIndex) {
+      error(errors, "nav-route", page.path, `missing, duplicate or out-of-order route ${route}`);
+    }
+    if (routeIndexes.length === 1) previousRouteIndex = routeIndexes[0];
+  }
+
+  const groups = tagBlocks(siteNav.full, "details").filter((block) => hasClass(block.opening, "nav-group"));
+  const summaries = groups.length === 1 ? tagBlocks(groups[0].full, "summary") : [];
+  const submenus = groups.length === 1 ? tagBlocks(groups[0].full, "ul").filter((block) => hasClass(block.opening, "nav-submenu")) : [];
+  const submenuLinks = submenus.length === 1 ? tagBlocks(submenus[0].full, "a").map((block) => [attributeValue(block.opening, "href"), renderedText(block.content)]) : [];
+  const validSubmenu = submenuLinks.length === config.submenu.length && config.submenu.every(([href, text], index) => submenuLinks[index]?.[0] === href && submenuLinks[index]?.[1] === normalize(text));
+  if (groups.length !== 1 || summaries.length !== 1 || renderedText(summaries[0]?.content ?? "") !== normalize(config.summary) || submenus.length !== 1 || !validSubmenu) {
+    error(errors, "nav-advisory", page.path, "expected one native advisory details group with the exact localized submenu");
+  }
+
+  const languageLinks = navLinks.filter((link) => hasClass(link.opening, "nav-lang"));
+  if (languageLinks.length !== 1 || languageLinks[0].href !== config.pairedHomepage) {
+    error(errors, "nav-language", page.path, `language link must target ${config.pairedHomepage}`);
+  }
+
+  const chatInputs = openingTags(activeHtml, "input").filter((tag) => attributeValue(tag, "id") === "chat-input");
+  if (chatInputs.length !== 1 || attributeValue(chatInputs[0], "maxlength") !== "2000") {
+    error(errors, "chat-maxlength", page.path, "chat input requires maxlength 2000");
+  }
+  const contactLinks = openingTags(activeHtml, "a").filter((tag) => attributeValue(tag, "href") === "mailto:pawel@mamcarz.com");
+  if (contactLinks.length === 0) error(errors, "contact-link", page.path, "homepage requires a usable mailto link without JavaScript");
+}
+
+function verifyBrowserScript(js, errors) {
+  const path = "assets/js/main.js";
+  const activeJs = stripJsComments(js);
+  for (const initializer of ["initNavigation", "initBackToTop", "initChat"]) {
+    const definition = new RegExp(`\\bfunction\\s+${initializer}\\s*\\(`).test(activeJs);
+    const invocation = new RegExp(`\\b${initializer}\\s*\\(\\s*\\)\\s*;`).test(activeJs);
+    if (!definition || !invocation) error(errors, "js-initializer", path, `${initializer} must be declared and invoked`);
+  }
+  if (/\.innerHTML\s*=/.test(activeJs)) error(errors, "js-inner-html", path, "innerHTML assignment is forbidden");
+  const workerUrl = "https://mamcarz-chat-api.pawel-767.workers.dev";
+  if ((activeJs.match(new RegExp(escapeRegExp(workerUrl), "g")) ?? []).length !== 1) {
+    error(errors, "js-chat-api", path, "expected the unchanged chat Worker URL exactly once");
+  }
+  if (/(?:\.reveal|\.timeline-item|js-reveal)/.test(activeJs)) {
+    error(errors, "js-animation", path, "reveal and timeline animation behavior must remain removed");
+  }
+  const guards = [
+    /if\s*\(\s*!toggle\s*\|\|\s*!menu\s*\)\s*return\s*;/,
+    /if\s*\(\s*!backToTop\s*\)\s*return\s*;/,
+    /if\s*\(\s*!chatMessages\s*\|\|\s*!chatInput\s*\|\|\s*!chatSendButton\s*\)\s*return\s*;/
+  ];
+  if (guards.some((guard) => !guard.test(activeJs))) error(errors, "js-guard", path, "component lookups require initializer-local null guards");
+  const safeMessage = /function\s+addChatMessage\s*\(\s*text\s*,\s*role\s*\)[\s\S]*?message\.textContent\s*=\s*text\s*;/.test(activeJs);
+  const domMailLink = /document\.createElement\(\s*["']a["']\s*\)/.test(activeJs)
+    && /\.href\s*=\s*["']mailto:pawel@mamcarz\.com["']\s*;/.test(activeJs);
+  if (!safeMessage || !domMailLink) error(errors, "js-chat-dom", path, "chat messages and fallback email link require safe DOM construction");
+}
+
 async function verifyFoundation(context) {
-  const [css, js] = await Promise.all([read(context, "assets/css/style.css"), read(context, "assets/js/main.js")]);
+  const [css, js, plHome, enHome] = await Promise.all([
+    read(context, "assets/css/style.css"),
+    read(context, "assets/js/main.js"),
+    read(context, "index.html"),
+    read(context, "en/index.html")
+  ]);
+  if (plHome !== null) verifyHomepageNavigation(plHome, { path: "index.html", lang: "pl" }, context.errors);
+  if (enHome !== null) verifyHomepageNavigation(enHome, { path: "en/index.html", lang: "en" }, context.errors);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
   if (css !== null) {
     const commentScan = stripCssComments(css);
@@ -868,6 +1071,7 @@ async function verifyFoundation(context) {
     }
   }
   if (js !== null && js.length === 0) error(context.errors, "foundation-js", "assets/js/main.js", "browser script is empty");
+  if (js !== null && js.length > 0) verifyBrowserScript(js, context.errors);
 }
 
 function candidates(fact, language) {

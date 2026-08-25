@@ -100,24 +100,35 @@
 <a href="#main" class="skip-link">Przejdź do treści</a>
 
 <!-- NAV -->
-<nav aria-label="Main navigation">
+<nav class="site-nav" aria-label="Nawigacja główna">
   <a href="/" class="nav-logo"><b>PM</b> · Mamcarz.com</a>
-  <ul class="nav-links" id="navLinks">
+  <ul class="nav-list" id="nav-menu">
+    <li>
+      <details class="nav-group">
+        <summary>Doradztwo</summary>
+        <ul class="nav-submenu">
+          <li><a href="/uslugi/transformacja-zakupow/">Transformacja zakupów</a></li>
+          <li><a href="/uslugi/wdrozenie-sap-ariba/">Wdrożenie SAP Ariba</a></li>
+          <li><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></li>
+        </ul>
+      </details>
+    </li>
+    <li><a href="/aplikacje-operacyjne/">Aplikacje operacyjne</a></li>
+    <li><a href="/lotnictwo/">Lotnictwo</a></li>
+    <li><a href="/case-studies/">Case studies</a></li>
+    <li><a href="/wiedza/">Wiedza</a></li>
     <li><a href="/#about">O mnie</a></li>
-    <li><a href="/#resume">Doświadczenie</a></li>
-    <li><a href="/uslugi/wdrozenie-sap-ariba">Usługi</a></li>
-    <li><a href="/case-studies">Case studies</a></li>
     <li><a href="/#contact">Kontakt</a></li>
   </ul>
   <a href="/en/" class="nav-lang">EN</a>
-  <button class="nav-hamburger" id="navHamburger" aria-label="Menu nawigacyjne" aria-controls="navLinks" aria-expanded="false">
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu nawigacyjne" aria-controls="nav-menu" aria-expanded="false">
     <span></span>
     <span></span>
     <span></span>
   </button>
 </nav>
 
-<div class="nav-overlay" id="navOverlay"></div>
+<div class="nav-overlay" id="nav-overlay"></div>
 <button class="back-to-top" id="backToTop" aria-label="Wróć na górę">↑</button>
 
 <main id="main" tabindex="-1">
@@ -681,7 +692,7 @@
       <div class="contact-availability" role="status">Aktualnie przyjmuję nowe projekty w regionie CEE</div>
       <p>Szukasz wsparcia w transformacji zakupów, wdrożeniu SAP Ariba lub budowie strategii procurement? Napisz, chętnie porozmawiam o Twoim projekcie.</p>
       <div class="contact-details">
-        <a href="#" class="contact-detail js-email" data-user="pawel" data-domain="mamcarz.com">
+        <a href="mailto:pawel@mamcarz.com" class="contact-detail js-email" data-user="pawel" data-domain="mamcarz.com">
           <div class="contact-detail-icon" aria-hidden="true"><svg class="icon-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg></div>
           <span class="js-email-text">pawel [małpa] mamcarz.com</span>
         </a>
@@ -703,7 +714,7 @@
         </div>
         <div id="chat-messages" class="chat-messages" aria-live="polite" aria-atomic="false" aria-relevant="additions"></div>
         <div class="chat-input-row">
-          <input id="chat-input" class="chat-input" type="text" placeholder="Napisz wiadomość..." aria-label="Wiadomość do asystenta AI">
+          <input id="chat-input" class="chat-input" type="text" maxlength="2000" placeholder="Napisz wiadomość..." aria-label="Wiadomość do asystenta AI">
           <button id="chat-send" class="chat-send" aria-label="Wyślij wiadomość">WYŚLIJ</button>
         </div>
       </div>

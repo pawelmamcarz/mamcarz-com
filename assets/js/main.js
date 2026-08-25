@@ -1,235 +1,193 @@
-// Email obfuscation: build real mailto: from data-attributes at runtime so the
-// address isn't sitting in plain text for scrapers in the rendered HTML.
-document.querySelectorAll('.js-email').forEach(el => {
-  const user = el.dataset.user;
-  const domain = el.dataset.domain;
+document.documentElement.classList.add("js");
+
+// Build contact links from data attributes so the address is not plain text in
+// visible homepage markup. This loop is safe on pages without email links.
+document.querySelectorAll(".js-email").forEach((element) => {
+  const user = element.dataset.user;
+  const domain = element.dataset.domain;
   if (!user || !domain) return;
-  const addr = user + '@' + domain;
-  el.href = 'mailto:' + addr;
-  const slot = el.querySelector('.js-email-text');
-  if (slot) slot.textContent = addr;
+  const address = `${user}@${domain}`;
+  element.href = `mailto:${address}`;
+  const textSlot = element.querySelector(".js-email-text");
+  if (textSlot) textSlot.textContent = address;
 });
 
-// Hamburger menu + overlay
-const pageLang = (document.documentElement.lang || 'pl').toLowerCase().startsWith('en') ? 'en' : 'pl';
-const navLinks = document.querySelector(`.nav-links[data-lang="${pageLang}"]`) || document.getElementById('navLinks');
-const hamburger = document.querySelector(`.nav-hamburger[data-lang="${pageLang}"]`) || document.getElementById('navHamburger');
-const navOverlay = document.getElementById('navOverlay');
+function initNavigation() {
+  const toggle = document.getElementById("nav-toggle");
+  const menu = document.getElementById("nav-menu");
+  const overlay = document.getElementById("nav-overlay");
+  if (!toggle || !menu) return;
 
-function closeMenu() {
-  hamburger.classList.remove('active');
-  navLinks.classList.remove('open');
-  hamburger.setAttribute('aria-expanded', 'false');
-  if (navOverlay) navOverlay.classList.remove('open');
-}
+  const close = () => {
+    menu.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+    overlay?.classList.remove("is-open");
+  };
 
-hamburger.addEventListener('click', () => {
-  const isOpen = navLinks.classList.toggle('open');
-  hamburger.classList.toggle('active');
-  hamburger.setAttribute('aria-expanded', String(isOpen));
-  if (navOverlay) navOverlay.classList.toggle('open', isOpen);
-});
+  toggle.addEventListener("click", () => {
+    const open = !menu.classList.contains("is-open");
+    menu.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    overlay?.classList.toggle("is-open", open);
+  });
 
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && navLinks.classList.contains('open')) {
-    closeMenu();
-    hamburger.focus();
-  }
-});
-
-navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', closeMenu);
-});
-
-if (navOverlay) {
-  navOverlay.addEventListener('click', closeMenu);
-}
-
-// Nav scroll state
-const nav = document.querySelector('nav');
-let navTicking = false;
-
-window.addEventListener('scroll', () => {
-  if (!navTicking) {
-    requestAnimationFrame(() => {
-      nav.classList.toggle('nav-scrolled', window.scrollY > 80);
-      navTicking = false;
-    });
-    navTicking = true;
-  }
-}, { passive: true });
-
-// Back to top button
-const backToTop = document.getElementById('backToTop');
-if (backToTop) {
-  let bttTicking = false;
-  window.addEventListener('scroll', () => {
-    if (!bttTicking) {
-      requestAnimationFrame(() => {
-        backToTop.classList.toggle('visible', window.scrollY > 600);
-        bttTicking = false;
-      });
-      bttTicking = true;
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu.classList.contains("is-open")) {
+      close();
+      toggle.focus();
     }
-  }, { passive: true });
+  });
 
-  backToTop.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
+  overlay?.addEventListener("click", close);
+
+  const siteNav = document.querySelector(".site-nav");
+  if (siteNav) {
+    let navTicking = false;
+    window.addEventListener("scroll", () => {
+      if (navTicking) return;
+      navTicking = true;
+      requestAnimationFrame(() => {
+        siteNav.classList.toggle("nav-scrolled", window.scrollY > 80);
+        navTicking = false;
+      });
+    }, { passive: true });
+  }
+
+  const currentPath = window.location.pathname;
+  menu.querySelectorAll("a").forEach((link) => {
+    const href = link.getAttribute("href");
+    if (href && href !== "/" && href !== "/en/" && !href.includes("#") && currentPath.startsWith(href)) {
+      link.classList.add("active");
+    }
   });
 }
 
-// Scroll reveal for .reveal elements
-const revealEls = document.querySelectorAll('.reveal');
-if (revealEls.length > 0 && 'IntersectionObserver' in window) {
-  // Hide .reveal elements only now that we know JS + IO can reveal them again.
-  document.documentElement.classList.add('js-reveal');
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        revealObserver.unobserve(entry.target);
-      }
+function initBackToTop() {
+  const backToTop = document.getElementById("backToTop");
+  if (!backToTop) return;
+
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      backToTop.classList.toggle("visible", window.scrollY > 600);
+      ticking = false;
     });
-  }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
-
-  revealEls.forEach(el => revealObserver.observe(el));
-}
-
-// Scroll animation for timeline items: unobserve after reveal
-const timelineItems = document.querySelectorAll('.timeline-item');
-if (timelineItems.length > 0) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const idx = Array.prototype.indexOf.call(timelineItems, entry.target);
-        setTimeout(() => entry.target.classList.add('visible'), idx * 120);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15 });
-
-  timelineItems.forEach(el => observer.observe(el));
-}
-
-// Smooth nav highlight: only on homepage (anchor-based nav)
-const sections = document.querySelectorAll('section[id]');
-const navAnchors = document.querySelectorAll('.nav-links a');
-
-if (sections.length > 3) {
-  let lastCurrent = '';
-  let scrollTicking = false;
-
-  window.addEventListener('scroll', () => {
-    if (!scrollTicking) {
-      requestAnimationFrame(() => {
-        let current = '';
-        sections.forEach(s => {
-          if (window.scrollY >= s.offsetTop - 200) current = s.id;
-        });
-        if (current !== lastCurrent) {
-          lastCurrent = current;
-          navAnchors.forEach(a => {
-            const href = a.getAttribute('href');
-            a.classList.toggle('active', href === `#${current}` || href === `/#${current}`);
-          });
-        }
-        scrollTicking = false;
-      });
-      scrollTicking = true;
-    }
   }, { passive: true });
+
+  backToTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 }
 
-// Active nav link on subpages
-const currentPath = window.location.pathname;
-navAnchors.forEach(a => {
-  const href = a.getAttribute('href');
-  if (href !== '/' && currentPath.startsWith(href)) {
-    a.classList.add('active');
-  }
-});
+function initChat() {
+  const chatMessages = document.getElementById("chat-messages");
+  const chatInput = document.getElementById("chat-input");
+  const chatSendButton = document.getElementById("chat-send");
+  if (!chatMessages || !chatInput || !chatSendButton) return;
 
-// AI Chat: Llama 3.3 via Cloudflare Worker
-const chatMsgs = document.getElementById("chat-messages");
-const chatInput = document.getElementById("chat-input");
-const chatSendBtn = document.getElementById("chat-send");
-
-if (chatMsgs && chatInput && chatSendBtn) {
   const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
   const chatHistory = [];
   let chatBusy = false;
 
-  const lang = (document.documentElement.lang || "pl").toLowerCase().startsWith("en") ? "en" : "pl";
-  const mail = '<a href="mailto:pawel@mamcarz.com" class="gold-link">pawel@mamcarz.com</a>';
-  const t = {
+  const language = (document.documentElement.lang || "pl").toLowerCase().startsWith("en") ? "en" : "pl";
+  const copy = {
     pl: {
       thinking: "Zaglądam do notatek…",
-      apiError: `Hmm, coś mi się zacięło. Spróbuj jeszcze raz albo napisz wprost do Pawła na ${mail}.`,
-      netError: `Nie mogę się teraz połączyć z AI. Najszybszy kontakt to ${mail}, odpowiadam zwykle w ciągu doby.`,
-      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.<br>Paweł od ponad 25 lat projektuje procesy i systemy zakupowe dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego <strong>usługi</strong>, <strong>doświadczenie</strong> albo jak się z nim <strong>skontaktować</strong>."
+      apiErrorBefore: "Hmm, coś mi się zacięło. Spróbuj jeszcze raz albo napisz wprost do Pawła na",
+      apiErrorAfter: ".",
+      netErrorBefore: "Nie mogę się teraz połączyć z AI. Najszybszy kontakt to",
+      netErrorAfter: ", odpowiadam zwykle w ciągu doby.",
+      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.\nPaweł od ponad 25 lat projektuje procesy i systemy zakupowe dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego usługi, doświadczenie albo jak się z nim skontaktować."
     },
     en: {
       thinking: "Checking my notes…",
-      apiError: `Hmm, something got stuck. Try again, or drop Paweł a line at ${mail}.`,
-      netError: `Can't reach the AI right now. Fastest way is ${mail}, Paweł usually replies within a day.`,
-      greeting: "Hi! I'm Paweł Mamcarz's assistant.<br>Paweł has been shaping procurement for 25+ years at organisations like KGHM, Żabka and PKN ORLEN. Outside work he flies helicopters, plays improv and takes photos. Ask me about his <strong>services</strong>, <strong>experience</strong> or how to <strong>get in touch</strong>."
+      apiErrorBefore: "Hmm, something got stuck. Try again, or drop Paweł a line at",
+      apiErrorAfter: ".",
+      netErrorBefore: "Can't reach the AI right now. Fastest way is",
+      netErrorAfter: ", Paweł usually replies within a day.",
+      greeting: "Hi! I'm Paweł Mamcarz's assistant.\nPaweł has been shaping procurement for 25+ years at organisations like KGHM, Żabka and PKN ORLEN. Outside work he flies helicopters, plays improv and takes photos. Ask me about his services, experience or how to get in touch."
     }
-  }[lang];
+  }[language];
 
-  function addMsg(text, isUser) {
-    const el = document.createElement("div");
-    el.className = isUser ? "chat-msg chat-msg--user" : "chat-msg chat-msg--bot";
-    el.innerHTML = text;
-    chatMsgs.appendChild(el);
-    chatMsgs.scrollTop = chatMsgs.scrollHeight;
-    return el;
+  function addChatMessage(text, role) {
+    const message = document.createElement("div");
+    message.className = `chat-msg chat-msg--${role}`;
+    message.textContent = text;
+    chatMessages.append(message);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return message;
+  }
+
+  function showFallback(message, before, after) {
+    const contactLink = document.createElement("a");
+    contactLink.href = "mailto:pawel@mamcarz.com";
+    contactLink.className = "gold-link";
+    contactLink.textContent = "pawel@mamcarz.com";
+    message.replaceChildren(
+      document.createTextNode(`${before} `),
+      contactLink,
+      document.createTextNode(after)
+    );
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   function setChatBusy(busy) {
     chatBusy = busy;
-    chatSendBtn.disabled = busy;
+    chatSendButton.disabled = busy;
     chatInput.disabled = busy;
   }
 
-  async function sendMsg() {
+  async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text || chatBusy) return;
-    addMsg(text, true);
+
+    addChatMessage(text, "user");
     chatInput.value = "";
     setChatBusy(true);
 
     chatHistory.push({ role: "user", content: text });
     if (chatHistory.length > 20) chatHistory.splice(0, chatHistory.length - 20);
 
-    const thinking = addMsg('<span role="status" class="chat-thinking">' + t.thinking + '</span>', false);
+    const thinking = addChatMessage("", "bot");
+    const status = document.createElement("span");
+    status.setAttribute("role", "status");
+    status.className = "chat-thinking";
+    status.textContent = copy.thinking;
+    thinking.append(status);
 
     try {
-      const res = await fetch(CHAT_API, {
+      const response = await fetch(CHAT_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: chatHistory }),
+        body: JSON.stringify({ messages: chatHistory })
       });
+      const data = await response.json();
 
-      const data = await res.json();
-
-      if (data.reply) {
-        thinking.innerHTML = data.reply.replace(/\n/g, "<br>");
+      if (typeof data.reply === "string" && data.reply.trim()) {
+        thinking.textContent = data.reply;
         chatHistory.push({ role: "assistant", content: data.reply });
       } else {
-        thinking.innerHTML = t.apiError;
+        showFallback(thinking, copy.apiErrorBefore, copy.apiErrorAfter);
       }
-    } catch (err) {
-      thinking.innerHTML = t.netError;
+    } catch {
+      showFallback(thinking, copy.netErrorBefore, copy.netErrorAfter);
     } finally {
       setChatBusy(false);
       chatInput.focus();
     }
   }
 
-  chatSendBtn.addEventListener("click", sendMsg);
-  chatInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMsg();
+  chatSendButton.addEventListener("click", sendMessage);
+  chatInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") sendMessage();
   });
 
-  setTimeout(() => addMsg(t.greeting, false), 300);
+  setTimeout(() => addChatMessage(copy.greeting, "bot"), 300);
 }
+
+initNavigation();
+initBackToTop();
+initChat();

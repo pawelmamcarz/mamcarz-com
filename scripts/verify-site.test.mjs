@@ -12,6 +12,92 @@ const execFileAsync = promisify(execFile);
 const modulePath = resolve("scripts/verify-site.mjs");
 const foundationCss = await readFile(resolve("assets/css/style.css"), "utf8");
 
+const navigationFixture = {
+  pl: `
+    <nav class="site-nav" aria-label="Nawigacja główna">
+      <a href="/" class="nav-logo">PM</a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Otwórz menu" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-list" id="nav-menu">
+        <li><details class="nav-group"><summary>Doradztwo</summary><ul class="nav-submenu">
+          <li><a href="/uslugi/transformacja-zakupow/">Transformacja zakupów</a></li>
+          <li><a href="/uslugi/wdrozenie-sap-ariba/">Wdrożenie SAP Ariba</a></li>
+          <li><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></li>
+        </ul></details></li>
+        <li><a href="/aplikacje-operacyjne/">Aplikacje operacyjne</a></li>
+        <li><a href="/lotnictwo/">Lotnictwo</a></li>
+        <li><a href="/case-studies/">Case studies</a></li>
+        <li><a href="/wiedza/">Wiedza</a></li>
+        <li><a href="/#about">O mnie</a></li>
+        <li><a href="/#contact">Kontakt</a></li>
+      </ul>
+      <a href="/en/" class="nav-lang">EN</a>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>`,
+  en: `
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/en/" class="nav-logo">PM</a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-list" id="nav-menu">
+        <li><details class="nav-group"><summary>Advisory</summary><ul class="nav-submenu">
+          <li><a href="/en/uslugi/transformacja-zakupow/">Procurement transformation</a></li>
+          <li><a href="/en/uslugi/wdrozenie-sap-ariba/">SAP Ariba implementation</a></li>
+          <li><a href="/en/uslugi/doradztwo-zamowienia-publiczne/">Public procurement</a></li>
+        </ul></details></li>
+        <li><a href="/en/aplikacje-operacyjne/">Operational applications</a></li>
+        <li><a href="/en/lotnictwo/">Aviation</a></li>
+        <li><a href="/en/case-studies/">Case studies</a></li>
+        <li><a href="/en/wiedza/">Insights</a></li>
+        <li><a href="/en/#about">About</a></li>
+        <li><a href="/en/#contact">Contact</a></li>
+      </ul>
+      <a href="/" class="nav-lang">PL</a>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>`
+};
+
+const validBrowserScript = `
+document.documentElement.classList.add("js");
+function initNavigation() {
+  const toggle = document.getElementById("nav-toggle");
+  const menu = document.getElementById("nav-menu");
+  const overlay = document.getElementById("nav-overlay");
+  if (!toggle || !menu) return;
+  toggle.addEventListener("click", () => menu.classList.toggle("is-open"));
+  overlay?.addEventListener("click", () => menu.classList.remove("is-open"));
+}
+function initBackToTop() {
+  const backToTop = document.getElementById("backToTop");
+  if (!backToTop) return;
+  backToTop.addEventListener("click", () => window.scrollTo({ top: 0 }));
+}
+function initChat() {
+  const chatMessages = document.getElementById("chat-messages");
+  const chatInput = document.getElementById("chat-input");
+  const chatSendButton = document.getElementById("chat-send");
+  if (!chatMessages || !chatInput || !chatSendButton) return;
+  const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
+  function addChatMessage(text, role) {
+    const message = document.createElement("div");
+    message.className = \`chat-msg chat-msg--\${role}\`;
+    message.textContent = text;
+    chatMessages.append(message);
+    return message;
+  }
+  const message = document.createElement("div");
+  const fallbackLink = document.createElement("a");
+  fallbackLink.href = "mailto:pawel@mamcarz.com";
+  fallbackLink.textContent = "pawel@mamcarz.com";
+  message.append(fallbackLink);
+  addChatMessage(CHAT_API, "bot");
+}
+initNavigation();
+initBackToTop();
+initChat();`;
+
+function homepageFixture(lang, content) {
+  return `${navigationFixture[lang]}<main><h1>${lang.toUpperCase()}</h1>${content}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></main><input id="chat-input" maxlength="2000">`;
+}
+
 function fact(overrides = {}) {
   return {
     id: "brand.promise",
@@ -39,7 +125,7 @@ function blockedClaim(overrides = {}) {
   };
 }
 
-async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", css = "body{}", js = "void 0;", extraFiles = {} } = {}) {
+async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", plHtml, enHtml, css = "body{}", js = validBrowserScript, extraFiles = {} } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-test-"));
   await Promise.all([
     mkdir(resolve(root, "content"), { recursive: true }),
@@ -50,8 +136,8 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
   ]);
   await Promise.all([
     writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, facts, blocked_claims })),
-    writeFile(resolve(root, "index.html"), `<h1>PL</h1>${pl}`),
-    writeFile(resolve(root, "en/index.html"), `<h1>EN</h1>${en}`),
+    writeFile(resolve(root, "index.html"), plHtml ?? homepageFixture("pl", pl)),
+    writeFile(resolve(root, "en/index.html"), enHtml ?? homepageFixture("en", en)),
     writeFile(resolve(root, "assets/css/style.css"), css),
     writeFile(resolve(root, "assets/js/main.js"), js),
     writeFile(resolve(root, "llms.txt"), ""),
@@ -159,6 +245,140 @@ test("missing fixture files report standardized file-read errors", async () => {
   assert.ok(home.errors.some((error) => error.startsWith("ERROR file-read index.html:")));
   assert.ok(facts.errors.some((error) => error.startsWith("ERROR facts-json content/site-facts.json:")));
   assert.ok(facts.errors.some((error) => error.startsWith("ERROR file-read worker/index.js:")));
+});
+
+const navigationMutations = {
+  pl: {
+    missingRoute: (html) => html.replace('href="/lotnictwo/"', 'href="/usunieta-trasa/"').concat('<!-- <a href="/lotnictwo/">Lotnictwo</a> --><a href="/lotnictwo/">poza nawigacją</a>'),
+    outOfOrder: (html) => html
+      .replace('<li><a href="/aplikacje-operacyjne/">Aplikacje operacyjne</a></li>', "__OPERATIONS__")
+      .replace('<li><a href="/lotnictwo/">Lotnictwo</a></li>', '<li><a href="/aplikacje-operacyjne/">Aplikacje operacyjne</a></li>')
+      .replace("__OPERATIONS__", '<li><a href="/lotnictwo/">Lotnictwo</a></li>'),
+    wrongLanguage: (html) => html.replace('<a href="/en/" class="nav-lang">', '<a href="/" class="nav-lang">')
+  },
+  en: {
+    missingRoute: (html) => html.replace('href="/en/lotnictwo/"', 'href="/en/removed-route/"').concat('<!-- <a href="/en/lotnictwo/">Aviation</a> --><a href="/en/lotnictwo/">outside navigation</a>'),
+    outOfOrder: (html) => html
+      .replace('<li><a href="/en/aplikacje-operacyjne/">Operational applications</a></li>', "__OPERATIONS__")
+      .replace('<li><a href="/en/lotnictwo/">Aviation</a></li>', '<li><a href="/en/aplikacje-operacyjne/">Operational applications</a></li>')
+      .replace("__OPERATIONS__", '<li><a href="/en/lotnictwo/">Aviation</a></li>'),
+    wrongLanguage: (html) => html.replace('<a href="/" class="nav-lang">', '<a href="/en/" class="nav-lang">')
+  }
+};
+
+for (const lang of ["pl", "en"]) {
+  test(`foundation catches a missing ${lang} route only inside the actual navigation`, async () => {
+    const html = navigationMutations[lang].missingRoute(homepageFixture(lang, lang === "pl" ? "Marka" : "Brand"));
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-route"));
+  });
+
+  test(`foundation catches an out-of-order ${lang} navigation route`, async () => {
+    const html = navigationMutations[lang].outOfOrder(homepageFixture(lang, lang === "pl" ? "Marka" : "Brand"));
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-route"));
+  });
+
+  test(`foundation catches a duplicate ${lang} navigation id outside comments`, async () => {
+    const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand").concat('<div id="nav-menu"></div><!-- <div id="nav-toggle"></div> -->');
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-id"));
+    assert.equal(result.errors.filter((entry) => entry.includes("nav-toggle")).length, 0);
+  });
+
+  test(`foundation catches the wrong paired-language homepage on ${lang}`, async () => {
+    const html = navigationMutations[lang].wrongLanguage(homepageFixture(lang, lang === "pl" ? "Marka" : "Brand"));
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-language"));
+  });
+
+  test(`foundation requires maxlength 2000 on the ${lang} homepage chat input`, async () => {
+    const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand").replace(' maxlength="2000"', "");
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("chat-maxlength"));
+  });
+
+  test(`foundation keeps a usable no-JS email link on the ${lang} homepage`, async () => {
+    const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand").replace('href="mailto:pawel@mamcarz.com"', 'href="#"');
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("contact-link"));
+  });
+}
+
+test("foundation requires the advisory group to use native details markup", async () => {
+  const html = homepageFixture("pl", "Marka")
+    .replace('<details class="nav-group">', '<div class="nav-group">')
+    .replace("</details>", "</div>");
+  const root = await fixture({ plHtml: html, css: foundationCss });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("nav-advisory"));
+});
+
+test("foundation requires the exact localized advisory submenu", async () => {
+  const html = homepageFixture("en", "Brand")
+    .replace('href="/en/uslugi/doradztwo-zamowienia-publiczne/"', 'href="/en/uslugi/other/"')
+    .replace("Public procurement", "Other advisory");
+  const root = await fixture({ enHtml: html, css: foundationCss });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("nav-advisory"));
+});
+
+test("foundation requires each defensive initializer and invocation", async () => {
+  for (const initializer of ["initNavigation", "initBackToTop", "initChat"]) {
+    const js = validBrowserScript.replaceAll(initializer, `removed${initializer}`);
+    const root = await fixture({ css: foundationCss, js });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-initializer"), initializer);
+  }
+});
+
+test("foundation rejects unsafe innerHTML assignment in the browser script", async () => {
+  const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\nmessage.innerHTML = data.reply;` });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("foundation requires text-only chat messages and a DOM-built fallback email link", async () => {
+  const js = validBrowserScript
+    .replace("message.textContent = text;", "message.innerText = text;")
+    .replace('fallbackLink.href = "mailto:pawel@mamcarz.com";', 'fallbackLink.href = "#";');
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-chat-dom"));
+});
+
+test("foundation keeps the exact chat Worker URL", async () => {
+  const js = validBrowserScript.replace("https://mamcarz-chat-api.pawel-767.workers.dev", "https://example.invalid");
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-chat-api"));
+});
+
+test("foundation rejects restored reveal or timeline animation behavior", async () => {
+  const js = `${validBrowserScript}\ndocument.querySelectorAll(".reveal");\ndocument.querySelectorAll(".timeline-item");`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-animation"));
+});
+
+test("foundation requires null guards even when the missing guard survives in a comment", async () => {
+  const mutations = [
+    ['if (!toggle || !menu) return;', "// if (!toggle || !menu) return;"],
+    ['if (!backToTop) return;', "// if (!backToTop) return;"],
+    ['if (!chatMessages || !chatInput || !chatSendButton) return;', "// if (!chatMessages || !chatInput || !chatSendButton) return;"]
+  ];
+  for (const [guard, comment] of mutations) {
+    const js = validBrowserScript.replace(guard, "").concat("\n", comment);
+    const root = await fixture({ css: foundationCss, js });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-guard"), guard);
+  }
 });
 
 test("foundation rejects a required selector that survives only in a comment", async () => {
