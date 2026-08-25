@@ -191,11 +191,13 @@ function stripCssComments(css) {
   let quote = null;
   let escaped = false;
   let inComment = false;
+  let commentStart = -1;
   for (let index = 0; index < css.length; index += 1) {
     const character = css[index];
     if (inComment) {
       if (character === "*" && css[index + 1] === "/") {
         inComment = false;
+        commentStart = -1;
         index += 1;
       }
       continue;
@@ -220,12 +222,13 @@ function stripCssComments(css) {
     if (character === "/" && css[index + 1] === "*") {
       stripped += " ";
       inComment = true;
+      commentStart = index;
       index += 1;
       continue;
     }
     stripped += character;
   }
-  return stripped;
+  return { css: stripped, unterminatedCommentAt: commentStart };
 }
 
 function matchingBrace(source, openingIndex) {
@@ -415,14 +418,14 @@ export function parseCssRules(source, media = [], rules = []) {
   return rules;
 }
 
-function selectorTargetsHtmlBody(selector) {
-  const decoded = decodeCssEscapes(selector);
+function rightmostSelectorCompound(selector) {
+  let start = 0;
   let quote = null;
   let escaped = false;
   let brackets = 0;
   let parentheses = 0;
-  for (let index = 0; index < decoded.length; index += 1) {
-    const character = decoded[index];
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index];
     if (quote !== null) {
       if (escaped) escaped = false;
       else if (character === "\\") escaped = true;
@@ -431,6 +434,10 @@ function selectorTargetsHtmlBody(selector) {
     }
     if (character === "'" || character === '"') {
       quote = character;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
       continue;
     }
     if (character === "[") {
@@ -450,15 +457,144 @@ function selectorTargetsHtmlBody(selector) {
       parentheses -= 1;
       continue;
     }
-    if (parentheses > 0 || !/[a-z_-]/i.test(character)) continue;
-    let end = index + 1;
-    while (end < decoded.length && /[a-z0-9_-]/i.test(decoded[end])) end += 1;
-    const identifier = decoded.slice(index, end).toLowerCase();
-    const boundary = index === 0 || /[\s>+~,(|]/.test(decoded[index - 1]);
-    if (identifier === "body" && boundary) return true;
-    index = end - 1;
+    if (parentheses > 0) continue;
+    if (/\s/.test(character) || character === ">" || character === "+" || character === "~") start = index + 1;
+    else if (character === "|" && selector[index + 1] === "|") {
+      start = index + 2;
+      index += 1;
+    }
+  }
+  return selector.slice(start).trim();
+}
+
+function selectorSubjectIsPseudoElement(compound) {
+  let quote = null;
+  let escaped = false;
+  let brackets = 0;
+  let parentheses = 0;
+  for (let index = 0; index < compound.length; index += 1) {
+    const character = compound[index];
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "[") brackets += 1;
+    else if (character === "]" && brackets > 0) brackets -= 1;
+    else if (brackets === 0 && character === "(") parentheses += 1;
+    else if (brackets === 0 && character === ")" && parentheses > 0) parentheses -= 1;
+    else if (brackets === 0 && parentheses === 0 && character === ":") {
+      if (compound[index + 1] === ":") return true;
+      const legacyPseudoElement = /^:([a-z-]+)/i.exec(compound.slice(index));
+      if (["before", "after", "first-letter", "first-line"].includes(legacyPseudoElement?.[1].toLowerCase())) return true;
+    }
   }
   return false;
+}
+
+function matchingParenthesis(source, openingIndex) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  let brackets = 0;
+  for (let index = openingIndex; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "[") brackets += 1;
+    else if (character === "]" && brackets > 0) brackets -= 1;
+    else if (brackets === 0 && character === "(") depth += 1;
+    else if (brackets === 0 && character === ")") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return -1;
+}
+
+function functionalSelectorTargetsHtmlBody(compound) {
+  let quote = null;
+  let escaped = false;
+  let brackets = 0;
+  for (let index = 0; index < compound.length; index += 1) {
+    const character = compound[index];
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "[") {
+      brackets += 1;
+      continue;
+    }
+    if (character === "]" && brackets > 0) {
+      brackets -= 1;
+      continue;
+    }
+    if (brackets > 0 || character !== ":" || compound[index + 1] === ":") continue;
+    const functionalPseudo = /^:([a-z-]+)\(/i.exec(compound.slice(index));
+    if (functionalPseudo === null) continue;
+    const opening = index + functionalPseudo[0].length - 1;
+    const closing = matchingParenthesis(compound, opening);
+    if (closing === -1) return false;
+    if (["is", "where"].includes(functionalPseudo[1].toLowerCase())) {
+      const argumentsText = compound.slice(opening + 1, closing);
+      if (splitCssTopLevel(argumentsText, ",").some((argument) => selectorTargetsHtmlBody(argument.trim()))) return true;
+    }
+    index = closing;
+  }
+  return false;
+}
+
+function selectorTargetsHtmlBody(selector) {
+  const compound = rightmostSelectorCompound(decodeCssEscapes(selector));
+  if (selectorSubjectIsPseudoElement(compound)) return false;
+  const typeSelector = /^(?:(?:\*|[a-z_-][a-z0-9_-]*)?\|)?(\*|[a-z_-][a-z0-9_-]*)/i.exec(compound)?.[1].toLowerCase() ?? null;
+  if (typeSelector === "body") return true;
+  if (typeSelector !== null && typeSelector !== "*") return false;
+  return functionalSelectorTargetsHtmlBody(compound);
 }
 
 function rulesForSelector(rules, selector, media = []) {
@@ -500,7 +636,11 @@ async function verifyFoundation(context) {
   const [css, js] = await Promise.all([read(context, "assets/css/style.css"), read(context, "assets/js/main.js")]);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
   if (css !== null) {
-    const activeCss = stripCssComments(css);
+    const commentScan = stripCssComments(css);
+    const activeCss = commentScan.css;
+    if (commentScan.unterminatedCommentAt !== -1) {
+      error(context.errors, "css-syntax", "assets/css/style.css", `unterminated comment at offset ${commentScan.unterminatedCommentAt}`);
+    }
     const rules = parseCssRules(activeCss);
     const baseRules = rules.filter((rule) => rule.media.length === 0);
     const rootRules = rulesForSelector(rules, ":root");

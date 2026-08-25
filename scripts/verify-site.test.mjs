@@ -236,12 +236,48 @@ test("foundation parses mixed-case media at-rules before auditing body typograph
   assert.ok(errorIds(result).includes("css-body-contract"));
 });
 
-test("foundation finds the body type in descendant and compound selectors", async () => {
-  for (const selector of ["html body", "body.some-class"]) {
+test("foundation finds the body type when it is the selector subject", async () => {
+  for (const selector of ["body", "html body", "html > body", "body.some-class", "BODY:hover"]) {
     const css = `${foundationCss}\n${selector} { font: inherit; }`;
     const result = await verifyFixtureCss(css);
     assert.ok(errorIds(result).includes("css-body-contract"), selector);
   }
+});
+
+test("foundation allows body ancestors, siblings, pseudo-elements, attributes and classes", async () => {
+  for (const selector of [
+    "body .probe",
+    "body > .probe",
+    "body + .probe",
+    ".shell body .probe",
+    "body::before",
+    "body::after",
+    '[data-target="body"]',
+    ".body"
+  ]) {
+    const css = `${foundationCss}\n${selector} { font-size: 10px; }`;
+    const result = await verifyFixtureCss(css);
+    assert.ok(!errorIds(result).includes("css-body-contract"), selector);
+  }
+});
+
+test("foundation rejects functional body selector subjects", async () => {
+  for (const selector of [":is(body)", ":where(body.some-class)"]) {
+    const css = `${foundationCss}\n${selector} { font-weight: 900; }`;
+    const result = await verifyFixtureCss(css);
+    assert.ok(errorIds(result).includes("css-body-contract"), selector);
+  }
+});
+
+test("foundation rejects a protected override when any selector-list branch targets body", async () => {
+  const css = `${foundationCss}\n[data-list="safe,body"], body .safe, html body { line-height: 1; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation parser splits selector lists only at top-level commas", () => {
+  const rules = parseCssRules('[data-list="one,two"], :is(.one, .two), body::before { color: red; }');
+  assert.deepEqual(rules[0].selectors, ['[data-list="one,two"]', ":is(.one, .two)", "body::before"]);
 });
 
 test("foundation rejects responsive body font-size overrides", async () => {
@@ -263,9 +299,15 @@ test("foundation rejects important italic values regardless of case and spacing"
 });
 
 test("foundation preserves quoted comment markers as valid declaration content", async () => {
-  const css = `${foundationCss}\n.comment-content::before { content: "prefix \\\" /* literal */ suffix"; color: red; }`;
+  const css = `${foundationCss}\n.comment-content::before { --open-marker: "/*"; content: "prefix \\\" /* literal */ suffix"; color: red; }`;
   const result = await verifyFixtureCss(css);
   assert.deepEqual(result.errors, []);
+});
+
+test("foundation reports an unterminated real CSS comment", async () => {
+  const css = `${foundationCss}\n/* unterminated verifier probe`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(result.errors.some((entry) => entry.startsWith("ERROR css-syntax assets/css/style.css:")), result.errors.join("\n"));
 });
 
 test("foundation does not confuse body text in an attribute selector with the body type", async () => {
