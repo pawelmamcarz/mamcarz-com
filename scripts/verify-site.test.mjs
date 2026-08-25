@@ -25,7 +25,7 @@ const navigationFixture = {
         </ul></details></li>
         <li><a href="/aplikacje-operacyjne/">Aplikacje operacyjne</a></li>
         <li><a href="/lotnictwo/">Lotnictwo</a></li>
-        <li><a href="/case-studies/">Case studies</a></li>
+        <li><a href="/case-studies/">Projekty</a></li>
         <li><a href="/wiedza/">Wiedza</a></li>
         <li><a href="/#about">O mnie</a></li>
         <li><a href="/#contact">Kontakt</a></li>
@@ -103,9 +103,9 @@ initChat();`;
 
 function homepageFixture(lang, content) {
   return `${navigationFixture[lang]}<main>
-    <section id="hero"><h1>${lang.toUpperCase()}</h1>${content}</section>
+    <section id="hero"><h1 data-fact-id="brand.promise">${content}</h1></section>
     <section data-section="trust"></section>
-    <section id="process"></section>
+    <section id="process"><article class="route-sequence__step"></article><article class="route-sequence__step"></article><article class="route-sequence__step"></article><article class="route-sequence__step"></article></section>
     <aside data-cta-after="process"></aside>
     <section id="cases"></section>
     <aside data-cta-after="cases"></aside>
@@ -116,7 +116,7 @@ function homepageFixture(lang, content) {
     <section id="portfolio"></section>
     <section id="clients"></section>
     <section id="contact"><a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
-  </main><input id="chat-input" maxlength="2000">`;
+  </main><footer><a href="/case-studies">${lang === "pl" ? "Projekty" : "Case studies"}</a></footer><input id="chat-input" maxlength="2000">`;
 }
 
 function fact(overrides = {}) {
@@ -727,6 +727,121 @@ test("home scope does not accept a required section marker inside a script", asy
   const root = await fixture({ plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-section-order"));
+});
+
+test("home scope rejects a fact-bearing item with a missing annotation", async () => {
+  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item">Acme</div></section>');
+  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-annotation"));
+});
+
+test("home scope rejects an unknown fact id annotation", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.unknown">Unknown Client</div></section>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-unknown"));
+});
+
+for (const status of ["review", "retired"]) {
+  test(`home scope rejects a ${status} fact id annotation`, async () => {
+    const client = fact({ id: `client.${status}`, value: status, display_pl: status, display_en: status, status });
+    const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', `<section id="clients"><div class="client-item" data-fact-id="client.${status}">${status}</div></section>`);
+    const root = await fixture({ facts: [fact(), client], plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-fact-status"));
+  });
+}
+
+test("home scope rejects an approved fact annotation with the wrong localized value", async () => {
+  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Wrong client</div></section>');
+  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-value"));
+});
+
+const unannotatedHomeClaims = [
+  ["resume", '<p class="timeline-role">Unregistered role</p>'],
+  ["portfolio", '<div class="pcard__title">Unregistered project</div>'],
+  ["clients", '<div class="client-item">Unregistered client</div>'],
+  ["cases", "<dl><div><dt>Zakres</dt><dd>Unregistered project scope</dd></div></dl>"]
+];
+
+for (const [sectionId, claim] of unannotatedHomeClaims) {
+  test(`home scope rejects an unannotated injected ${sectionId} claim`, async () => {
+    const html = homepageFixture("pl", "Marka").replace(`<section id="${sectionId}"></section>`, `<section id="${sectionId}">${claim}</section>`);
+    const root = await fixture({ plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-fact-annotation"));
+  });
+}
+
+test("home scope rejects an unmatched Process article closing tag", async () => {
+  const process = '<section id="process"><article class="route-sequence__step"></article><article class="route-sequence__step"></article><article class="route-sequence__step"></article></article><article class="route-sequence__step"></article></section>';
+  const html = homepageFixture("pl", "Marka").replace(/<section id="process">[\s\S]*?<\/section>/, process);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-process-structure"));
+});
+
+test("home scope rejects a duplicate public-procurement possible-result row", async () => {
+  const skills = '<section id="skills"><article><h3><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></h3><dl><div><dt>Możliwy wynik</dt><dd>One</dd></div><div><dt>Możliwy wynik</dt><dd>Two</dd></div></dl></article></section>';
+  const html = homepageFixture("pl", "Marka").replace('<section id="skills"></section>', skills);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects the generic skill-card pattern", async () => {
+  const skills = '<section id="skills"><article class="skill-card"><h3>Generic area</h3></article></section>';
+  const html = homepageFixture("pl", "Marka").replace('<section id="skills"></section>', skills);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+for (const surface of ["navigation", "footer"]) {
+  test(`home scope requires the Polish Projekty label in the ${surface}`, async () => {
+    const valid = homepageFixture("pl", "Marka");
+    const html = surface === "navigation"
+      ? valid.replace('<a href="/case-studies/">Projekty</a>', '<a href="/case-studies/">Case studies</a>')
+      : valid.replace('<a href="/case-studies">Projekty</a>', '<a href="/case-studies">Case studies</a>');
+    const root = await fixture({ plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-pl-ia"));
+  });
+}
+
+test("facts scope rejects an undated or stale akrobacja.com current status", async () => {
+  const currentStatus = fact({
+    id: "portfolio.akrobacja_com.current_status",
+    value: "current aviation venture",
+    display_pl: "Aktualna marka działalności lotniczej",
+    display_en: "Current aviation venture",
+    kind: "constant",
+    as_of: null,
+    source_label: "Owner correction, 2026-08-25",
+    surfaces: ["index.html", "en/index.html"]
+  });
+  const root = await fixture({ facts: [fact(), currentStatus] });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(errorIds(result).includes("fact-current-contract"));
+});
+
+test("facts scope requires the 2026-08-26 owner correction on retired WarsawFlightSafety wording", async () => {
+  const retired = fact({
+    id: "aviation.warsaw_flight_safety",
+    value: "retired wording",
+    display_pl: "Właściciel WarsawFlightSafety",
+    display_en: "Owner of WarsawFlightSafety",
+    source_label: "Owner correction, 2026-08-25",
+    status: "retired"
+  });
+  const root = await fixture({ facts: [fact(), retired] });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(errorIds(result).includes("fact-current-contract"));
 });
 
 const heroes = [

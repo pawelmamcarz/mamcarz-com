@@ -90,8 +90,103 @@ const homepageMarkers = [
 
 const forbiddenHomepageCopy = ["—", "nie tylko", "kompleksow", "innowacyjn", "realnie", "#1", "największ", "Polpharma"];
 
+const homeFactTags = ["a", "dd", "div", "h1", "h3", "p", "span", "strong"];
+
+const homeFactPatterns = [
+  { section: "hero", tag: "h1", prefix: "brand." },
+  { section: "hero", tag: "div", className: "stat-num", prefix: "hero." },
+  { sectionAttribute: ["data-section", "trust"], tag: "span", className: "trust-bar-name", prefix: "client." },
+  { section: "cases", tag: "h3", className: "evidence-row__title", prefix: "client." },
+  { section: "cases", tag: "dd", prefix: "project." },
+  { section: "education", tag: "div", className: "resume-edu-year", prefix: "education." },
+  { section: "education", tag: "strong", prefix: "education." },
+  { section: "education", tag: "span", prefix: "education." },
+  { section: "resume", tag: "div", className: "timeline-year", prefix: "career." },
+  { section: "resume", tag: "div", className: "timeline-company", prefix: "career." },
+  { section: "resume", tag: "p", className: "timeline-role", prefix: "career." },
+  { section: "resume", tag: "p", className: "timeline-desc", prefix: "career." },
+  { section: "portfolio", tag: "div", className: "pcard__tag", prefix: "portfolio." },
+  { section: "portfolio", tag: "div", className: "pcard__title", prefix: "portfolio." },
+  { section: "portfolio", tag: "div", className: "pcard__desc", prefix: "portfolio." },
+  { section: "portfolio", tag: "p", className: "evidence-row__context", prefix: "portfolio." },
+  { section: "portfolio", tag: "h3", className: "evidence-row__title", prefix: "portfolio." },
+  { section: "portfolio", tag: "dd", prefix: "portfolio." },
+  { section: "clients", tag: "div", className: "client-item", prefix: "client." }
+];
+
+function activeHomepageBody(body) {
+  return stripHtmlComments(body).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
+}
+
+function sectionBlock(activeBody, pattern) {
+  return tagBlocks(activeBody, "section").find((block) => pattern.section
+    ? attributeValue(block.opening, "id") === pattern.section
+    : attributeValue(block.opening, pattern.sectionAttribute[0]) === pattern.sectionAttribute[1]);
+}
+
+function homeFactElements(activeBody) {
+  return homeFactTags.flatMap((tag) => tagBlocks(activeBody, tag)
+    .filter((block) => attributeValue(block.opening, "data-fact-id") !== null)
+    .map((block) => ({ ...block, tag })));
+}
+
+function withoutAnnotatedHomeFacts(activeBody) {
+  let remaining = activeBody;
+  for (const tag of homeFactTags) {
+    const pattern = new RegExp(`<${tag}\\b(?=[^>]*\\bdata-fact-id\\s*=)[^>]*>[\\s\\S]*?<\\/${tag}>`, "gi");
+    remaining = remaining.replace(pattern, " ");
+  }
+  return remaining;
+}
+
+function verifyHomeFactPatterns(activeBody, page, errors) {
+  for (const pattern of homeFactPatterns) {
+    const section = sectionBlock(activeBody, pattern);
+    if (!section) continue;
+    const blocks = tagBlocks(section.full, pattern.tag).filter((block) => !pattern.className || hasClass(block.opening, pattern.className));
+    for (const block of blocks) {
+      const factId = attributeValue(block.opening, "data-fact-id");
+      if (factId === null || !factId.startsWith(pattern.prefix)) {
+        error(errors, "home-fact-annotation", page.path, `${pattern.section ?? pattern.sectionAttribute[1]} ${pattern.tag}${pattern.className ? `.${pattern.className}` : ""} requires a ${pattern.prefix} data-fact-id`);
+      }
+    }
+  }
+}
+
+function verifyHomeStructures(activeBody, page, errors) {
+  const process = sectionBlock(activeBody, { section: "process" });
+  if (process) {
+    const routeSteps = openingTags(process.full, "article").filter((tag) => hasClass(tag, "route-sequence__step")).length;
+    const articleClosings = (process.full.match(/<\/article\s*>/gi) ?? []).length;
+    if (routeSteps !== 4 || articleClosings !== 4) {
+      error(errors, "home-process-structure", page.path, `Process requires four matched route steps; found ${routeSteps} openings and ${articleClosings} closings`);
+    }
+  }
+
+  const skills = sectionBlock(activeBody, { section: "skills" });
+  if (skills) {
+    const genericCards = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => hasClass(tag, "skill-card"));
+    if (genericCards.length > 0) error(errors, "home-skills-structure", page.path, "Skills must use the route/evidence system instead of skill-card");
+    const publicProcurement = tagBlocks(skills.full, "article").find((block) => block.full.includes("/uslugi/doradztwo-zamowienia-publiczne/"));
+    if (publicProcurement) {
+      const possibleResults = tagBlocks(publicProcurement.full, "dt").filter((block) => renderedText(block.content) === normalize("Możliwy wynik")).length;
+      if (possibleResults !== 1) error(errors, "home-skills-structure", page.path, `Zamówienia publiczne requires one Możliwy wynik row; found ${possibleResults}`);
+    }
+  }
+
+  if (page.lang === "pl") {
+    const navigation = tagBlocks(activeBody, "nav").find((block) => hasClass(block.opening, "site-nav"));
+    const footer = tagBlocks(activeBody, "footer")[0];
+    const navProjects = navigation ? tagBlocks(navigation.full, "a").filter((block) => attributeValue(block.opening, "href") === "/case-studies/") : [];
+    const footerProjects = footer ? tagBlocks(footer.full, "a").filter((block) => attributeValue(block.opening, "href") === "/case-studies") : [];
+    const validNavLabel = navProjects.length === 1 && renderedText(navProjects[0].content) === normalize("Projekty");
+    const validFooterLabel = footerProjects.length === 1 && renderedText(footerProjects[0].content) === normalize("Projekty");
+    if (!validNavLabel || !validFooterLabel) error(errors, "home-pl-ia", page.path, "Polish navigation and footer must label /case-studies as Projekty");
+  }
+}
+
 function verifyHomepageContent(body, page, errors) {
-  const activeBody = stripHtmlComments(body).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
+  const activeBody = activeHomepageBody(body);
   let previousIndex = -1;
   for (const marker of homepageMarkers) {
     const index = activeBody.indexOf(marker);
@@ -244,6 +339,24 @@ function verifyAliases(fact, index, errors) {
   }
 }
 
+function verifyPinnedFactContract(fact, errors) {
+  const path = "content/site-facts.json";
+  if (fact.id === "portfolio.akrobacja_com.current_status") {
+    const valid = fact.kind === "dated"
+      && fact.as_of === "2026-08-26"
+      && fact.source_type === "owner_verified"
+      && fact.status === "approved"
+      && fact.source_label?.includes("2026-08-26");
+    if (!valid) error(errors, "fact-current-contract", path, "akrobacja.com current status requires approved dated owner evidence from 2026-08-26");
+  }
+  if (fact.id === "aviation.warsaw_flight_safety") {
+    const valid = fact.source_type === "owner_verified"
+      && fact.status === "retired"
+      && fact.source_label?.includes("Owner correction, 2026-08-26");
+    if (!valid) error(errors, "fact-current-contract", path, "WarsawFlightSafety wording must remain retired under the 2026-08-26 owner correction");
+  }
+}
+
 function verifyFactSchema(factData, errors) {
   const path = "content/site-facts.json";
   if (factData.version !== 1) error(errors, "facts-version", path, "expected version 1");
@@ -277,6 +390,7 @@ function verifyFactSchema(factData, errors) {
     if (!Array.isArray(fact.surfaces) || fact.surfaces.length === 0 || !fact.surfaces.every(nonEmptyString)) error(errors, "fact-surfaces", path, `facts[${index}] surfaces must be a non-empty string array`);
     if (!statuses.has(fact.status)) error(errors, "fact-status", path, `facts[${index}] status is invalid`);
     verifyAliases(fact, index, errors);
+    verifyPinnedFactContract(fact, errors);
   }
   return ids;
 }
@@ -1185,11 +1299,44 @@ async function verifyHome(factData, context) {
     const html = await read(context, page.path);
     if (html === null) continue;
     if ((html.match(/<h1\b/gi) ?? []).length !== 1) error(context.errors, "home-h1", page.path, "expected exactly one h1");
-    const visible = verifyHomepageContent(homepageBody(html), page, context.errors);
+    const body = homepageBody(html);
+    const activeBody = activeHomepageBody(body);
+    const visible = verifyHomepageContent(body, page, context.errors);
+    verifyHomeStructures(activeBody, page, context.errors);
+    verifyHomeFactPatterns(activeBody, page, context.errors);
     const records = Array.isArray(factData.facts) ? factData.facts : [];
+    const byId = new Map(records.filter((fact) => nonEmptyString(fact?.id)).map((fact) => [fact.id, fact]));
+    const correctlyAnnotated = new Set();
+    for (const element of homeFactElements(activeBody)) {
+      const factId = attributeValue(element.opening, "data-fact-id");
+      const fact = byId.get(factId);
+      if (!fact) {
+        error(context.errors, "home-fact-unknown", page.path, `unknown data-fact-id ${factId}`);
+        continue;
+      }
+      if (!Array.isArray(fact.surfaces) || !fact.surfaces.includes(page.path)) {
+        error(context.errors, "home-fact-surface", page.path, `${factId} is not approved for this surface`);
+        continue;
+      }
+      if (fact.status !== "approved") {
+        error(context.errors, "home-fact-status", page.path, `${factId} has status ${fact.status}`);
+        continue;
+      }
+      const elementText = renderedText(element.content);
+      if (!candidates(fact, page.lang).some((candidate) => elementText.includes(candidate))) {
+        error(context.errors, "home-fact-value", page.path, `${factId} does not contain its localized display or alias`);
+        continue;
+      }
+      correctlyAnnotated.add(factId);
+    }
+
+    const unannotatedVisible = renderedText(withoutAnnotatedHomeFacts(activeBody));
     for (const fact of records.filter((item) => Array.isArray(item?.surfaces) && item.surfaces.includes(page.path))) {
       const published = candidates(fact, page.lang).some((candidate) => visible.includes(candidate));
-      if (fact.status === "approved" && !published) error(context.errors, `fact-${fact.id}`, page.path, `missing approved display: ${page.lang === "pl" ? fact.display_pl : fact.display_en}`);
+      if (fact.status === "approved" && !correctlyAnnotated.has(fact.id)) error(context.errors, `fact-${fact.id}`, page.path, `missing approved annotated display: ${page.lang === "pl" ? fact.display_pl : fact.display_en}`);
+      if (fact.status === "approved" && candidates(fact, page.lang).some((candidate) => unannotatedVisible.includes(candidate))) {
+        error(context.errors, "home-fact-annotation", page.path, `${fact.id} is also published without data-fact-id`);
+      }
       if (fact.status !== "approved" && published) error(context.errors, `fact-${fact.id}`, page.path, "non-approved fact is still published");
     }
   }
