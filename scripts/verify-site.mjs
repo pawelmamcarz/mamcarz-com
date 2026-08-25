@@ -189,6 +189,20 @@ async function verifyBlockedSurfaces(factData, context) {
 async function verifyFoundation(context) {
   const [css, js] = await Promise.all([read(context, "assets/css/style.css"), read(context, "assets/js/main.js")]);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
+  if (css !== null) {
+    for (const token of [
+      "--sky-paper: #E9EDEF",
+      "--runway-ink: #102831",
+      "--signal: #D94B2B",
+      "--panel: #193D49",
+      "--boundary: #8E9CA1",
+      "--white: #F7F9F8",
+      "--muted: #52707A"
+    ]) {
+      if (!css.includes(token)) error(context.errors, "flight-token", "assets/css/style.css", `missing ${token}`);
+    }
+    if (!css.includes("font-family: 'Barlow Semi Condensed'")) error(context.errors, "display-font", "assets/css/style.css", "Barlow face missing");
+  }
   if (js !== null && js.length === 0) error(context.errors, "foundation-js", "assets/js/main.js", "browser script is empty");
 }
 
