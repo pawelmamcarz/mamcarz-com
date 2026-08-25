@@ -1,5 +1,3 @@
-document.documentElement.classList.add("js");
-
 // Build contact links from data attributes so the address is not plain text in
 // visible homepage markup. This loop is safe on pages without email links.
 document.querySelectorAll(".js-email").forEach((element) => {
@@ -17,6 +15,7 @@ function initNavigation() {
   const menu = document.getElementById("nav-menu");
   const overlay = document.getElementById("nav-overlay");
   if (!toggle || !menu) return;
+  document.documentElement.classList.add("js");
 
   const close = () => {
     menu.classList.remove("is-open");

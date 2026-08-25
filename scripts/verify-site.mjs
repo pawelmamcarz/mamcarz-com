@@ -147,6 +147,19 @@ function stripJsComments(source) {
   return output;
 }
 
+function namedFunctionBody(source, functionName) {
+  const declaration = new RegExp(`\\bfunction\\s+${escapeRegExp(functionName)}\\s*\\([^)]*\\)\\s*\\{`).exec(source);
+  if (!declaration) return null;
+  const openingBrace = source.indexOf("{", declaration.index);
+  const closingBrace = matchingBrace(source, openingBrace);
+  if (closingBrace === -1) return null;
+  return {
+    body: source.slice(openingBrace + 1, closingBrace),
+    start: declaration.index,
+    end: closingBrace + 1
+  };
+}
+
 async function read(context, relativePath) {
   try {
     return await readFile(resolve(context.root, relativePath), "utf8");
@@ -820,6 +833,18 @@ function verifyHomepageNavigation(html, page, errors) {
   if (contactLinks.length === 0) error(errors, "contact-link", page.path, "homepage requires a usable mailto link without JavaScript");
 }
 
+function verifyLegacyNavigation(html, path, errors) {
+  const activeHtml = stripHtmlComments(html).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
+  const nav = tagBlocks(activeHtml, "nav").find((block) => !hasClass(block.opening, "breadcrumb"));
+  const menus = nav ? openingTags(nav.full, "ul").filter((tag) => hasClass(tag, "nav-links")) : [];
+  const toggles = nav ? openingTags(nav.full, "button").filter((tag) => hasClass(tag, "nav-hamburger")) : [];
+  const hasNewComponent = ["nav-menu", "nav-toggle"].some((id) => openingTags(activeHtml, "[a-z][a-z0-9:-]*")
+    .some((tag) => attributeValue(tag, "id") === id));
+  if (!nav || menus.length === 0 || toggles.length === 0 || hasNewComponent) {
+    error(errors, "legacy-nav", path, "expected legacy nav-links and nav-hamburger without the new navigation component IDs");
+  }
+}
+
 function verifyBrowserScript(js, errors) {
   const path = "assets/js/main.js";
   const activeJs = stripJsComments(js);
@@ -842,6 +867,14 @@ function verifyBrowserScript(js, errors) {
     /if\s*\(\s*!chatMessages\s*\|\|\s*!chatInput\s*\|\|\s*!chatSendButton\s*\)\s*return\s*;/
   ];
   if (guards.some((guard) => !guard.test(activeJs))) error(errors, "js-guard", path, "component lookups require initializer-local null guards");
+  const navigation = namedFunctionBody(activeJs, "initNavigation");
+  const markerPattern = /document\.documentElement\.classList\.add\(\s*["']js["']\s*\)\s*;/g;
+  const markerCount = [...activeJs.matchAll(markerPattern)].length;
+  const navigationMarker = navigation?.body.search(new RegExp(markerPattern.source));
+  const navigationGuard = navigation?.body.search(/if\s*\(\s*!toggle\s*\|\|\s*!menu\s*\)\s*return\s*;/);
+  if (!navigation || markerCount !== 1 || navigationMarker === undefined || navigationMarker === -1 || navigationGuard === undefined || navigationGuard === -1 || navigationMarker <= navigationGuard) {
+    error(errors, "js-navigation-marker", path, "the only js marker must be inside initNavigation after its new-component guard");
+  }
   const safeMessage = /function\s+addChatMessage\s*\(\s*text\s*,\s*role\s*\)[\s\S]*?message\.textContent\s*=\s*text\s*;/.test(activeJs);
   const domMailLink = /document\.createElement\(\s*["']a["']\s*\)/.test(activeJs)
     && /\.href\s*=\s*["']mailto:pawel@mamcarz\.com["']\s*;/.test(activeJs);
@@ -849,14 +882,18 @@ function verifyBrowserScript(js, errors) {
 }
 
 async function verifyFoundation(context) {
-  const [css, js, plHome, enHome] = await Promise.all([
+  const [css, js, plHome, enHome, legacyService, notFound] = await Promise.all([
     read(context, "assets/css/style.css"),
     read(context, "assets/js/main.js"),
     read(context, "index.html"),
-    read(context, "en/index.html")
+    read(context, "en/index.html"),
+    read(context, "uslugi/wdrozenie-sap-ariba/index.html"),
+    read(context, "404.html")
   ]);
   if (plHome !== null) verifyHomepageNavigation(plHome, { path: "index.html", lang: "pl" }, context.errors);
   if (enHome !== null) verifyHomepageNavigation(enHome, { path: "en/index.html", lang: "en" }, context.errors);
+  if (legacyService !== null) verifyLegacyNavigation(legacyService, "uslugi/wdrozenie-sap-ariba/index.html", context.errors);
+  if (notFound !== null) verifyLegacyNavigation(notFound, "404.html", context.errors);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
   if (css !== null) {
     const commentScan = stripCssComments(css);
@@ -1010,6 +1047,18 @@ async function verifyFoundation(context) {
     for (const [media, selector, property, value] of responsiveContracts) {
       if (propertyValue(rules, selector, property, media) !== value) {
         error(context.errors, "css-responsive", "assets/css/style.css", `missing ${selector} ${property}: ${value} in ${media[0] ?? "base scope"}`);
+      }
+    }
+
+    const legacyNavFallbackContracts = [
+      [".nav-links", "display", "block"],
+      [".nav-hamburger", "display", "none"],
+      ["html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb)", "position", "relative"],
+      ["html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) .nav-links", "position", "static"]
+    ];
+    for (const [selector, property, value] of legacyNavFallbackContracts) {
+      if (propertyValue(rules, selector, property, media759) !== value) {
+        error(context.errors, "css-legacy-nav-fallback", "assets/css/style.css", `legacy mobile fallback requires ${selector} ${property}: ${value}`);
       }
     }
 

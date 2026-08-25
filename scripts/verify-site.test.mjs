@@ -55,13 +55,20 @@ const navigationFixture = {
     <div class="nav-overlay" id="nav-overlay"></div>`
 };
 
+const legacyNavigationFixture = `
+  <nav aria-label="Main navigation">
+    <a href="/" class="nav-logo">PM</a>
+    <ul class="nav-links" id="navLinks"><li><a href="/#about">About</a></li></ul>
+    <button class="nav-hamburger" id="navHamburger" aria-controls="navLinks" aria-expanded="false"><span></span><span></span><span></span></button>
+  </nav>`;
+
 const validBrowserScript = `
-document.documentElement.classList.add("js");
 function initNavigation() {
   const toggle = document.getElementById("nav-toggle");
   const menu = document.getElementById("nav-menu");
   const overlay = document.getElementById("nav-overlay");
   if (!toggle || !menu) return;
+  document.documentElement.classList.add("js");
   toggle.addEventListener("click", () => menu.classList.toggle("is-open"));
   overlay?.addEventListener("click", () => menu.classList.remove("is-open"));
 }
@@ -125,19 +132,22 @@ function blockedClaim(overrides = {}) {
   };
 }
 
-async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", plHtml, enHtml, css = "body{}", js = validBrowserScript, extraFiles = {} } = {}) {
+async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = legacyNavigationFixture, css = "body{}", js = validBrowserScript, extraFiles = {} } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-test-"));
   await Promise.all([
     mkdir(resolve(root, "content"), { recursive: true }),
     mkdir(resolve(root, "assets/css"), { recursive: true }),
     mkdir(resolve(root, "assets/js"), { recursive: true }),
     mkdir(resolve(root, "en"), { recursive: true }),
+    mkdir(resolve(root, "uslugi/wdrozenie-sap-ariba"), { recursive: true }),
     mkdir(resolve(root, "worker"), { recursive: true })
   ]);
   await Promise.all([
     writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, facts, blocked_claims })),
     writeFile(resolve(root, "index.html"), plHtml ?? homepageFixture("pl", pl)),
     writeFile(resolve(root, "en/index.html"), enHtml ?? homepageFixture("en", en)),
+    writeFile(resolve(root, "uslugi/wdrozenie-sap-ariba/index.html"), serviceHtml),
+    writeFile(resolve(root, "404.html"), notFoundHtml),
     writeFile(resolve(root, "assets/css/style.css"), css),
     writeFile(resolve(root, "assets/js/main.js"), js),
     writeFile(resolve(root, "llms.txt"), ""),
@@ -335,6 +345,48 @@ test("foundation requires each defensive initializer and invocation", async () =
     const root = await fixture({ css: foundationCss, js });
     const result = await runVerification({ root, scope: "foundation" });
     assert.ok(errorIds(result).includes("js-initializer"), initializer);
+  }
+});
+
+test("foundation requires the navigation guard before the only JS marker", async () => {
+  const marker = 'document.documentElement.classList.add("js");';
+  const js = `${marker}\n${validBrowserScript.replace(marker, "")}\n// ${marker}`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-navigation-marker"));
+});
+
+for (const [option, path] of [["serviceHtml", "uslugi/wdrozenie-sap-ariba/index.html"], ["notFoundHtml", "404.html"]]) {
+  test(`foundation requires legacy in-flow navigation markup on ${path}`, async () => {
+    const html = legacyNavigationFixture.replace('class="nav-links"', 'class="removed-nav-links"');
+    const root = await fixture({ [option]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(result.errors.some((entry) => entry.startsWith(`ERROR legacy-nav ${path}:`)));
+  });
+}
+
+test("foundation protects every existing mobile legacy navigation fallback branch", async () => {
+  const visibleLinks = foundationCss.replace(
+    /(@media \(max-width: 759px\) \{[\s\S]*?\.nav-list,\s*\.nav-links \{[\s\S]*?)display: block;/,
+    "$1display: none;"
+  );
+  const mutations = [
+    ["containing nav relative", foundationCss.replace(
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) {\n    position: relative;",
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) {\n    position: absolute;"
+    )],
+    ["legacy list static", foundationCss.replace(
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) .nav-links {\n    position: static;",
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) .nav-links {\n    position: absolute;"
+    )],
+    ["legacy list visible", visibleLinks],
+    ["legacy toggle hidden", foundationCss.replace(".nav-hamburger { display: none; }", ".nav-hamburger { display: inline-flex; }")]
+  ];
+  for (const [label, css] of mutations) {
+    assert.notEqual(css, foundationCss, label);
+    const root = await fixture({ css });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("css-legacy-nav-fallback"), label);
   }
 });
 
