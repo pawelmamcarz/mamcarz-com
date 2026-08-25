@@ -90,7 +90,7 @@ const homepageMarkers = [
 
 const forbiddenHomepageCopy = ["—", "nie tylko", "kompleksow", "innowacyjn", "realnie", "#1", "największ", "Polpharma"];
 
-const homeFactTags = ["a", "dd", "div", "h1", "h3", "p", "span", "strong"];
+const homeFactTags = ["a", "dd", "div", "h1", "h3", "li", "p", "span", "strong"];
 
 const homeFactPatterns = [
   { section: "hero", tag: "h1", prefix: "brand." },
@@ -98,6 +98,7 @@ const homeFactPatterns = [
   { sectionAttribute: ["data-section", "trust"], tag: "span", className: "trust-bar-name", prefix: "client." },
   { section: "cases", tag: "h3", className: "evidence-row__title", prefix: "client." },
   { section: "cases", tag: "dd", prefix: "project." },
+  { section: "about", tag: "li", prefix: "aviation." },
   { section: "education", tag: "div", className: "resume-edu-year", prefix: "education." },
   { section: "education", tag: "strong", prefix: "education." },
   { section: "education", tag: "span", prefix: "education." },
@@ -167,22 +168,40 @@ function verifyHomeStructures(activeBody, page, errors) {
   if (skills) {
     const genericCards = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => hasClass(tag, "skill-card"));
     if (genericCards.length > 0) error(errors, "home-skills-structure", page.path, "Skills must use the route/evidence system instead of skill-card");
-    const publicProcurement = tagBlocks(skills.full, "article").find((block) => block.full.includes("/uslugi/doradztwo-zamowienia-publiczne/"));
-    if (publicProcurement) {
-      const possibleResults = tagBlocks(publicProcurement.full, "dt").filter((block) => renderedText(block.content) === normalize("Możliwy wynik")).length;
-      if (possibleResults !== 1) error(errors, "home-skills-structure", page.path, `Zamówienia publiczne requires one Możliwy wynik row; found ${possibleResults}`);
+    const localized = page.lang === "pl"
+      ? { path: "/uslugi/doradztwo-zamowienia-publiczne/", otherPath: "/en/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Możliwy wynik", otherOutcome: "Possible outcome", name: "Zamówienia publiczne" }
+      : { path: "/en/uslugi/doradztwo-zamowienia-publiczne/", otherPath: "/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Possible outcome", otherOutcome: "Możliwy wynik", name: "Public procurement" };
+    const procurementArticles = tagBlocks(skills.full, "article").filter((block) => {
+      const hrefs = openingTags(block.full, "a").map((tag) => attributeValue(tag, "href"));
+      return hrefs.includes(localized.path) || hrefs.includes(localized.otherPath);
+    });
+    if (procurementArticles.length > 0) {
+      const matchingArticles = procurementArticles.filter((block) => openingTags(block.full, "a").some((tag) => attributeValue(tag, "href") === localized.path));
+      const mixedPathArticles = procurementArticles.filter((block) => openingTags(block.full, "a").some((tag) => attributeValue(tag, "href") === localized.otherPath));
+      if (matchingArticles.length !== 1 || mixedPathArticles.length > 0) {
+        error(errors, "home-skills-structure", page.path, `${localized.name} must use the localized ${localized.path} route`);
+      }
+      for (const article of matchingArticles) {
+        const labels = tagBlocks(article.full, "dt").map((block) => renderedText(block.content));
+        const possibleResults = labels.filter((label) => label === normalize(localized.outcome)).length;
+        const mixedResults = labels.filter((label) => label === normalize(localized.otherOutcome)).length;
+        if (possibleResults !== 1 || mixedResults > 0) {
+          error(errors, "home-skills-structure", page.path, `${localized.name} requires one ${localized.outcome} row; found ${possibleResults}`);
+        }
+      }
     }
   }
 
-  if (page.lang === "pl") {
-    const navigation = tagBlocks(activeBody, "nav").find((block) => hasClass(block.opening, "site-nav"));
-    const footer = tagBlocks(activeBody, "footer")[0];
-    const navProjects = navigation ? tagBlocks(navigation.full, "a").filter((block) => attributeValue(block.opening, "href") === "/case-studies/") : [];
-    const footerProjects = footer ? tagBlocks(footer.full, "a").filter((block) => attributeValue(block.opening, "href") === "/case-studies") : [];
-    const validNavLabel = navProjects.length === 1 && renderedText(navProjects[0].content) === normalize("Projekty");
-    const validFooterLabel = footerProjects.length === 1 && renderedText(footerProjects[0].content) === normalize("Projekty");
-    if (!validNavLabel || !validFooterLabel) error(errors, "home-pl-ia", page.path, "Polish navigation and footer must label /case-studies as Projekty");
-  }
+  const projects = page.lang === "pl"
+    ? { navPath: "/case-studies/", footerPath: "/case-studies", label: "Projekty", errorId: "home-pl-ia", language: "Polish" }
+    : { navPath: "/en/case-studies/", footerPath: "/en/case-studies", label: "Projects", errorId: "home-en-ia", language: "English" };
+  const navigation = tagBlocks(activeBody, "nav").find((block) => hasClass(block.opening, "site-nav"));
+  const footer = tagBlocks(activeBody, "footer")[0];
+  const navProjects = navigation ? tagBlocks(navigation.full, "a").filter((block) => attributeValue(block.opening, "href") === projects.navPath) : [];
+  const footerProjects = footer ? tagBlocks(footer.full, "a").filter((block) => attributeValue(block.opening, "href") === projects.footerPath) : [];
+  const validNavLabel = navProjects.length === 1 && renderedText(navProjects[0].content) === normalize(projects.label);
+  const validFooterLabel = footerProjects.length === 1 && renderedText(footerProjects[0].content) === normalize(projects.label);
+  if (!validNavLabel || !validFooterLabel) error(errors, projects.errorId, page.path, `${projects.language} navigation and footer must label the case-studies route as ${projects.label}`);
 }
 
 function verifyHomepageContent(body, page, errors) {
@@ -1323,8 +1342,8 @@ async function verifyHome(factData, context) {
         continue;
       }
       const elementText = renderedText(element.content);
-      if (!candidates(fact, page.lang).some((candidate) => elementText.includes(candidate))) {
-        error(context.errors, "home-fact-value", page.path, `${factId} does not contain its localized display or alias`);
+      if (!candidates(fact, page.lang).some((candidate) => elementText === candidate)) {
+        error(context.errors, "home-fact-value", page.path, `${factId} must equal its localized display or alias`);
         continue;
       }
       correctlyAnnotated.add(factId);
