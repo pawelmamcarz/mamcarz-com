@@ -237,11 +237,38 @@ test("foundation parses mixed-case media at-rules before auditing body typograph
 });
 
 test("foundation finds the body type when it is the selector subject", async () => {
-  for (const selector of ["body", "html body", "html > body", "body.some-class", "BODY:hover"]) {
+  for (const selector of ["body", "html body", "html > body", "html + body", "html ~ body", "html || body", "body.some-class", "BODY:hover", "b\\6f dy"]) {
     const css = `${foundationCss}\n${selector} { font: inherit; }`;
     const result = await verifyFixtureCss(css);
     assert.ok(errorIds(result).includes("css-body-contract"), selector);
   }
+});
+
+test("foundation preserves escaped CSS selector atoms before subject decoding", async () => {
+  const cases = [
+    ["escaped child combinator", ".foo\\>body"],
+    ["escaped adjacent-sibling combinator", ".foo\\+body"],
+    ["escaped general-sibling combinator", ".foo\\~body"],
+    ["escaped column combinator", ".foo\\|\\|body"],
+    ["escaped whitespace", ".foo\\ body"],
+    ["hex escape with whitespace terminator", ".foo\\3E body"],
+    ["escaped newline", ".foo\\\nbody"]
+  ];
+  const outcomes = [];
+  for (const [label, selector] of cases) {
+    const css = foundationCss.concat("\n", selector, " { font-size: 10px; }");
+    const result = await verifyFixtureCss(css);
+    outcomes.push([label, errorIds(result).includes("css-body-contract")]);
+  }
+  assert.deepEqual(outcomes, [
+    ["escaped child combinator", false],
+    ["escaped adjacent-sibling combinator", false],
+    ["escaped general-sibling combinator", false],
+    ["escaped column combinator", false],
+    ["escaped whitespace", false],
+    ["hex escape with whitespace terminator", false],
+    ["escaped newline", false]
+  ]);
 });
 
 test("foundation allows body ancestors, siblings, pseudo-elements, attributes and classes", async () => {

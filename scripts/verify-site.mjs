@@ -418,6 +418,26 @@ export function parseCssRules(source, media = [], rules = []) {
   return rules;
 }
 
+function cssEscapeAtomEnd(source, openingIndex) {
+  let cursor = openingIndex + 1;
+  if (cursor >= source.length) return cursor;
+
+  if (/[0-9a-f]/i.test(source[cursor])) {
+    let hexadecimalDigits = 0;
+    while (cursor < source.length && hexadecimalDigits < 6 && /[0-9a-f]/i.test(source[cursor])) {
+      cursor += 1;
+      hexadecimalDigits += 1;
+    }
+    if (source[cursor] === "\r" && source[cursor + 1] === "\n") return cursor + 2;
+    if (/[\t\n\f\r ]/.test(source[cursor] ?? "")) return cursor + 1;
+    return cursor;
+  }
+
+  if (source[cursor] === "\r" && source[cursor + 1] === "\n") return cursor + 2;
+  const escapedCodePoint = source.codePointAt(cursor);
+  return cursor + (escapedCodePoint !== undefined && escapedCodePoint > 0xFFFF ? 2 : 1);
+}
+
 function rightmostSelectorCompound(selector) {
   let start = 0;
   let quote = null;
@@ -437,7 +457,7 @@ function rightmostSelectorCompound(selector) {
       continue;
     }
     if (character === "\\") {
-      escaped = true;
+      index = cssEscapeAtomEnd(selector, index) - 1;
       continue;
     }
     if (character === "[") {
@@ -589,7 +609,7 @@ function functionalSelectorTargetsHtmlBody(compound) {
 }
 
 function selectorTargetsHtmlBody(selector) {
-  const compound = rightmostSelectorCompound(decodeCssEscapes(selector));
+  const compound = decodeCssEscapes(rightmostSelectorCompound(selector));
   if (selectorSubjectIsPseudoElement(compound)) return false;
   const typeSelector = /^(?:(?:\*|[a-z_-][a-z0-9_-]*)?\|)?(\*|[a-z_-][a-z0-9_-]*)/i.exec(compound)?.[1].toLowerCase() ?? null;
   if (typeSelector === "body") return true;
