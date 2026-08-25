@@ -5,7 +5,11 @@
   "type": "module",
   "description": "Static site for mamcarz.com. The worker/ subfolder holds the Cloudflare Worker for the AI chat.",
   "scripts": {
-    "optimize:images": "node scripts/optimize-images.js"
+    "optimize:images": "node scripts/optimize-images.js",
+    "verify:site": "node scripts/verify-site.mjs --scope=all",
+    "verify:facts": "node scripts/verify-site.mjs --scope=facts",
+    "verify:foundation": "node scripts/verify-site.mjs --scope=foundation",
+    "verify:home": "node scripts/verify-site.mjs --scope=home"
   },
   "devDependencies": {
     "sharp": "^0.33.5"
