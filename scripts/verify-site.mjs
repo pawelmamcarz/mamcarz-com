@@ -18,6 +18,10 @@ function nonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function validFactValue(value) {
+  return nonEmptyString(value) || (typeof value === "number" && Number.isFinite(value));
+}
+
 function isPlainObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -108,7 +112,7 @@ function verifyFactSchema(factData, errors) {
     if (!nonEmptyString(fact.id)) error(errors, "fact-id", path, `facts[${index}] id must be a non-empty string`);
     else if (ids.has(fact.id)) error(errors, "fact-duplicate-id", path, `duplicate fact id ${fact.id}`);
     else ids.add(fact.id);
-    if (!nonEmptyString(fact.value)) error(errors, "fact-value", path, `facts[${index}] value must be a non-empty string`);
+    if (!validFactValue(fact.value)) error(errors, "fact-value", path, `facts[${index}] value must be a non-empty string or finite number`);
     if (!nonEmptyString(fact.display_pl)) error(errors, "fact-display-pl", path, `facts[${index}] display_pl must be a non-empty string`);
     if (!nonEmptyString(fact.display_en)) error(errors, "fact-display-en", path, `facts[${index}] display_en must be a non-empty string`);
     if (!kinds.has(fact.kind)) error(errors, "fact-kind", path, `facts[${index}] kind must be constant or dated`);
@@ -164,20 +168,19 @@ function verifyBlockedSchema(factData, factIds, errors) {
   }
 }
 
-function isExplicitPolpharmaNegation(text, matchIndex) {
-  const window = text.slice(Math.max(0, matchIndex - 120), matchIndex + 160);
-  return /polpharma\s+(?:is\s+)?not\s+(?:a\s+)?client|polpharma\s+nie\s+jest\s+klientem|(?:not\s+(?:a\s+)?client|nie\s+jest\s+klientem)\s+(?:of\s+)?polpharma/i.test(window);
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-async function verifyBlockedSurfaces(context) {
+async function verifyBlockedSurfaces(factData, context) {
+  const claims = Array.isArray(factData.blocked_claims) ? factData.blocked_claims.filter((claim) => isPlainObject(claim) && nonEmptyString(claim.id) && nonEmptyString(claim.pattern)) : [];
   for (const surface of publicClaimSurfaces) {
     const text = await read(context, surface);
     if (text === null) continue;
-    const matches = text.matchAll(/\bpolpharma\b/gi);
-    for (const match of matches) {
-      if (!isExplicitPolpharmaNegation(text, match.index ?? 0)) {
-        error(context.errors, "blocked-client.polpharma", surface, "Polpharma appears without an explicit not-a-client negation");
-        break;
+    for (const claim of claims) {
+      if (new RegExp(escapeRegExp(claim.pattern), "i").test(text)) {
+        const contexts = Array.isArray(claim.forbidden_contexts) ? claim.forbidden_contexts.filter(nonEmptyString).join(", ") : "invalid contexts";
+        error(context.errors, `blocked-${claim.id}`, surface, `blocked pattern ${claim.pattern} appears on a public claim surface (declared contexts: ${contexts})`);
       }
     }
   }
@@ -219,7 +222,7 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   if (scope === "facts" || scope === "all") {
     const factIds = verifyFactSchema(facts, errors);
     verifyBlockedSchema(facts, factIds, errors);
-    await verifyBlockedSurfaces(context);
+    await verifyBlockedSurfaces(facts, context);
   }
   if (scope === "foundation" || scope === "all") await verifyFoundation(context);
   if (scope === "home" || scope === "all") await verifyHome(facts, context);

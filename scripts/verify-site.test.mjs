@@ -84,10 +84,16 @@ test("module import has no CLI output or nonzero exit side effect", async () => 
 
 test("facts scope rejects invalid record types and enums", async () => {
   const root = await fixture({
-    facts: [fact({ id: "", value: 42, kind: "claim", as_of: "not-a-date", source_type: "owner_provided_cv", source_label: "", source_url: "ftp://invalid", surfaces: [], status: "published" })]
+    facts: [fact({ id: "", value: {}, kind: "claim", as_of: "not-a-date", source_type: "owner_provided_cv", source_label: "", source_url: "ftp://invalid", surfaces: [], status: "published" })]
   });
   const result = await runVerification({ root, scope: "facts" });
   assert.deepEqual(new Set(errorIds(result)), new Set(["fact-id", "fact-value", "fact-kind", "fact-as-of", "fact-source-type", "fact-source-label", "fact-source-url", "fact-surfaces", "fact-status"]));
+});
+
+test("facts scope accepts a finite numeric FactRecord value", async () => {
+  const root = await fixture({ facts: [fact({ value: 42 })] });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(!errorIds(result).includes("fact-value"));
 });
 
 test("facts scope rejects duplicate facts, malformed blocked records, and fact collisions", async () => {
@@ -116,10 +122,25 @@ test("facts scope treats an unnegated Polpharma mention as a blocked client clai
   assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.polpharma llms.txt:")));
 });
 
-test("facts scope permits an explicit Polpharma not-a-client negation", async () => {
+test("facts scope rejects a standalone negated Polpharma mention", async () => {
   const root = await fixture({ extraFiles: { "llms.txt": "Polpharma is not a client.", "llms-full.txt": "", "worker/index.js": "" } });
   const result = await runVerification({ root, scope: "facts" });
-  assert.ok(!errorIds(result).includes("blocked-client.polpharma"));
+  assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.polpharma llms.txt:")));
+});
+
+test("facts scope rejects a later Polpharma client claim after a negation", async () => {
+  const root = await fixture({ extraFiles: { "llms.txt": "Polpharma is not a client. Worked for: Polpharma.", "llms-full.txt": "", "worker/index.js": "" } });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.polpharma llms.txt:")));
+});
+
+test("facts scope enforces every blocked pattern, not only Polpharma", async () => {
+  const root = await fixture({
+    blocked_claims: [blockedClaim(), blockedClaim({ id: "client.acme", pattern: "Acme", forbidden_contexts: ["clients"], reason: "Acme is blocked for this fixture" })],
+    extraFiles: { "llms.txt": "Worked for: Acme", "llms-full.txt": "", "worker/index.js": "" }
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.acme llms.txt:")));
 });
 
 test("missing fixture files report standardized file-read errors", async () => {
