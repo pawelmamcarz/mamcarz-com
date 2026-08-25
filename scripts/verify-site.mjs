@@ -115,6 +115,32 @@ const homeFactPatterns = [
   { section: "clients", tag: "div", className: "client-item", prefix: "client." }
 ];
 
+const aboutCopyContracts = {
+  pl: {
+    label: "O mnie",
+    narratives: [
+      ["decision-before-tool", "Zaczynam od ustalenia, kto podejmuje decyzję, na jakich danych i w jakich ograniczeniach. Dopiero potem wybieram proces, technologię i sposób wdrożenia."],
+      ["responsibility-across-domains", "W zakupach pracuję z odpowiedzialnością za pieniądze, ryzyko i interesariuszy. W aplikacjach przekładam te decyzje na przepływ pracy, dane i kontrolę. Lotnictwo wnosi dyscyplinę procedur oraz jasny podział odpowiedzialności."]
+    ]
+  },
+  en: {
+    label: "About me",
+    narratives: [
+      ["decision-before-tool", "I begin by establishing who makes the decision, what data they use and what constraints apply. Only then do I choose the process, technology and implementation approach."],
+      ["responsibility-across-domains", "In procurement, I take responsibility for money, risk and stakeholders. In applications, I translate those decisions into workflows, data and controls. Aviation brings procedural discipline and a clear division of responsibility."]
+    ]
+  }
+};
+
+const aboutAviationFactOrder = [
+  "aviation.ppl_h",
+  "aviation.ppl_a",
+  "aviation.aerobatics_rating",
+  "aviation.diverse_extreme_team",
+  "aviation.forum_photographer",
+  "aviation.air_to_air_media"
+];
+
 function activeHomepageBody(body) {
   return stripHtmlComments(body).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
 }
@@ -154,7 +180,63 @@ function verifyHomeFactPatterns(activeBody, page, errors) {
   }
 }
 
+function verifyAboutStructure(activeBody, page, errors) {
+  const about = sectionBlock(activeBody, { section: "about" });
+  if (!about) return;
+  const aboutTexts = tagBlocks(about.full, "div").filter((block) => hasClass(block.opening, "about-text"));
+  const hasControlledEnglishCopy = page.lang === "en" && aboutTexts.some((block) => block.full.includes("data-about-copy=") || openingTags(block.full, "[a-z][a-z0-9:-]*").some((tag) => hasClass(tag, "about-facts")));
+  if (page.lang === "en" && !hasControlledEnglishCopy) return;
+
+  const problems = [];
+  if (aboutTexts.length !== 1) problems.push(`expected one .about-text; found ${aboutTexts.length}`);
+  const aboutText = aboutTexts[0];
+  if (!aboutText) {
+    error(errors, "home-about-structure", page.path, problems.join("; "));
+    return;
+  }
+
+  const contract = aboutCopyContracts[page.lang];
+  const paragraphs = tagBlocks(aboutText.full, "p");
+  if (paragraphs.length !== 3) problems.push(`expected section label plus two narrative paragraphs; found ${paragraphs.length}`);
+  const label = paragraphs[0];
+  if (!label || (attributeValue(label.opening, "class") ?? "").trim() !== "section-label" || attributeValue(label.opening, "data-about-copy") !== null || renderedText(label.content) !== normalize(contract.label)) {
+    problems.push("section label must be the exact localized controlled paragraph");
+  }
+  for (const [index, [copyId, copy]] of contract.narratives.entries()) {
+    const paragraph = paragraphs[index + 1];
+    if (!paragraph || attributeValue(paragraph.opening, "data-about-copy") !== copyId || renderedText(paragraph.content) !== normalize(copy)) {
+      problems.push(`narrative ${copyId} must be exact and ordered`);
+    }
+  }
+
+  if (tagBlocks(aboutText.full, "span").length > 0) problems.push("unsupported span inside .about-text");
+
+  const allOpeningTags = openingTags(aboutText.full, "[a-z][a-z0-9:-]*");
+  const aboutFactTags = allOpeningTags.filter((tag) => hasClass(tag, "about-fact"));
+  if (aboutFactTags.some((tag) => !/^<li\b/i.test(tag) || attributeValue(tag, "data-fact-id") === null)) {
+    problems.push("every .about-fact must be an annotated li");
+  }
+
+  const aboutFactContainers = allOpeningTags.filter((tag) => hasClass(tag, "about-facts"));
+  const aboutFactLists = tagBlocks(aboutText.full, "ul").filter((block) => hasClass(block.opening, "about-facts"));
+  if (aboutFactContainers.length !== 1 || aboutFactLists.length !== 1) {
+    problems.push(`expected one ul.about-facts; found ${aboutFactContainers.length}`);
+  } else {
+    const items = tagBlocks(aboutFactLists[0].full, "li");
+    if (items.length !== aboutAviationFactOrder.length) problems.push(`expected ${aboutAviationFactOrder.length} About facts; found ${items.length}`);
+    for (const [index, factId] of aboutAviationFactOrder.entries()) {
+      const item = items[index];
+      if (!item || !hasClass(item.opening, "about-fact") || attributeValue(item.opening, "data-fact-id") !== factId) {
+        problems.push(`About fact ${index + 1} must be ${factId}`);
+      }
+    }
+  }
+
+  if (problems.length > 0) error(errors, "home-about-structure", page.path, problems.join("; "));
+}
+
 function verifyHomeStructures(activeBody, page, errors) {
+  verifyAboutStructure(activeBody, page, errors);
   const process = sectionBlock(activeBody, { section: "process" });
   if (process) {
     const routeSteps = openingTags(process.full, "article").filter((tag) => hasClass(tag, "route-sequence__step")).length;
@@ -169,25 +251,20 @@ function verifyHomeStructures(activeBody, page, errors) {
     const genericCards = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => hasClass(tag, "skill-card"));
     if (genericCards.length > 0) error(errors, "home-skills-structure", page.path, "Skills must use the route/evidence system instead of skill-card");
     const localized = page.lang === "pl"
-      ? { path: "/uslugi/doradztwo-zamowienia-publiczne/", otherPath: "/en/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Możliwy wynik", otherOutcome: "Possible outcome", name: "Zamówienia publiczne" }
-      : { path: "/en/uslugi/doradztwo-zamowienia-publiczne/", otherPath: "/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Possible outcome", otherOutcome: "Możliwy wynik", name: "Public procurement" };
-    const procurementArticles = tagBlocks(skills.full, "article").filter((block) => {
-      const hrefs = openingTags(block.full, "a").map((tag) => attributeValue(tag, "href"));
-      return hrefs.includes(localized.path) || hrefs.includes(localized.otherPath);
-    });
-    if (procurementArticles.length > 0) {
-      const matchingArticles = procurementArticles.filter((block) => openingTags(block.full, "a").some((tag) => attributeValue(tag, "href") === localized.path));
-      const mixedPathArticles = procurementArticles.filter((block) => openingTags(block.full, "a").some((tag) => attributeValue(tag, "href") === localized.otherPath));
-      if (matchingArticles.length !== 1 || mixedPathArticles.length > 0) {
-        error(errors, "home-skills-structure", page.path, `${localized.name} must use the localized ${localized.path} route`);
-      }
-      for (const article of matchingArticles) {
-        const labels = tagBlocks(article.full, "dt").map((block) => renderedText(block.content));
-        const possibleResults = labels.filter((label) => label === normalize(localized.outcome)).length;
-        const mixedResults = labels.filter((label) => label === normalize(localized.otherOutcome)).length;
-        if (possibleResults !== 1 || mixedResults > 0) {
-          error(errors, "home-skills-structure", page.path, `${localized.name} requires one ${localized.outcome} row; found ${possibleResults}`);
-        }
+      ? { path: "/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Możliwy wynik", name: "Zamówienia publiczne" }
+      : { path: "/en/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Possible outcome", name: "Public procurement" };
+    const serviceMarkers = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => attributeValue(tag, "data-service") === "public-procurement");
+    const serviceArticles = tagBlocks(skills.full, "article").filter((block) => attributeValue(block.opening, "data-service") === "public-procurement");
+    if (serviceMarkers.length !== 1 || serviceArticles.length !== 1) {
+      error(errors, "home-skills-structure", page.path, `${localized.name} requires exactly one article[data-service=public-procurement]; found ${serviceMarkers.length} markers and ${serviceArticles.length} articles`);
+    } else {
+      const links = tagBlocks(serviceArticles[0].full, "a");
+      const exactRoute = links.length === 1 && attributeValue(links[0].opening, "href") === localized.path;
+      if (!exactRoute) error(errors, "home-skills-structure", page.path, `${localized.name} must use the exact localized ${localized.path} route`);
+      const labels = tagBlocks(serviceArticles[0].full, "dt").map((block) => renderedText(block.content));
+      const possibleResults = labels.filter((label) => label === normalize(localized.outcome)).length;
+      if (possibleResults !== 1) {
+        error(errors, "home-skills-structure", page.path, `${localized.name} requires one exact ${localized.outcome} row; found ${possibleResults}`);
       }
     }
   }

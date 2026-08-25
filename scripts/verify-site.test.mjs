@@ -101,6 +101,57 @@ initNavigation();
 initBackToTop();
 initChat();`;
 
+const controlledAboutCopy = {
+  pl: {
+    label: "O mnie",
+    narratives: [
+      ["decision-before-tool", "Zaczynam od ustalenia, kto podejmuje decyzję, na jakich danych i w jakich ograniczeniach. Dopiero potem wybieram proces, technologię i sposób wdrożenia."],
+      ["responsibility-across-domains", "W zakupach pracuję z odpowiedzialnością za pieniądze, ryzyko i interesariuszy. W aplikacjach przekładam te decyzje na przepływ pracy, dane i kontrolę. Lotnictwo wnosi dyscyplinę procedur oraz jasny podział odpowiedzialności."]
+    ]
+  },
+  en: {
+    label: "About me",
+    narratives: [
+      ["decision-before-tool", "I begin by establishing who makes the decision, what data they use and what constraints apply. Only then do I choose the process, technology and implementation approach."],
+      ["responsibility-across-domains", "In procurement, I take responsibility for money, risk and stakeholders. In applications, I translate those decisions into workflows, data and controls. Aviation brings procedural discipline and a clear division of responsibility."]
+    ]
+  }
+};
+
+const controlledAboutFacts = [
+  ["aviation.ppl_h", "PPL(H)", "PPL(H)"],
+  ["aviation.ppl_a", "PPL(A)", "PPL(A)"],
+  ["aviation.aerobatics_rating", "uprawnienia do akrobacji", "aerobatics rating"],
+  ["aviation.diverse_extreme_team", "pilot pokazowy Diverse Extreme Team (2013)", "display pilot for the Diverse Extreme Team (2013)"],
+  ["aviation.forum_photographer", "fotograf prasowy agencji Forum", "Press photographer with Forum Agency"],
+  ["aviation.air_to_air_media", "sesje air-to-air, realizacje wideo i dronem", "air-to-air shoots, video and drone production"]
+];
+
+function controlledAboutFixture(lang) {
+  const copy = controlledAboutCopy[lang];
+  const factItems = controlledAboutFacts.map(([id, displayPl, displayEn]) => `
+        <li class="about-fact" data-fact-id="${id}">${lang === "pl" ? displayPl : displayEn}</li>`).join("");
+  return `<div class="about-text">
+      <p class="section-label">${copy.label}</p>
+      <h2>Controlled About</h2>
+      ${copy.narratives.map(([id, text]) => `<p data-about-copy="${id}">${text}</p>`).join("\n      ")}
+      <ul class="about-facts">${factItems}
+      </ul>
+      <div class="expertise-list"><div class="expertise-item">Decision</div><div class="expertise-item">Process</div><div class="expertise-item">Delivery</div></div>
+    </div>`;
+}
+
+function publicProcurementSkillsFixture(lang, { href, outcome } = {}) {
+  const localized = lang === "pl"
+    ? { href: "/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Możliwy wynik", title: "Zamówienia publiczne" }
+    : { href: "/en/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Possible outcome", title: "Public procurement" };
+  return `<article data-service="public-procurement"><h3><a href="${href ?? localized.href}">${localized.title}</a></h3><dl><div><dt>${outcome ?? localized.outcome}</dt><dd>One</dd></div></dl></article>`;
+}
+
+function replaceHomepageSection(html, sectionId, replacement) {
+  return html.replace(new RegExp(`<section id="${sectionId}">[\\s\\S]*?<\\/section>`), replacement);
+}
+
 function homepageFixture(lang, content) {
   const projectsHref = lang === "pl" ? "/case-studies" : "/en/case-studies";
   const projectsLabel = lang === "pl" ? "Projekty" : "Projects";
@@ -111,10 +162,10 @@ function homepageFixture(lang, content) {
     <aside data-cta-after="process"></aside>
     <section id="cases"></section>
     <aside data-cta-after="cases"></aside>
-    <section id="about"></section>
+    <section id="about">${controlledAboutFixture(lang)}</section>
     <section id="education"></section>
     <section id="resume"></section>
-    <section id="skills"></section>
+    <section id="skills">${publicProcurementSkillsFixture(lang)}</section>
     <section id="portfolio"></section>
     <section id="clients"></section>
     <section id="contact"><a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
@@ -150,6 +201,12 @@ function blockedClaim(overrides = {}) {
 
 async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = legacyNavigationFixture, css = "body{}", js = validBrowserScript, extraFiles = {} } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-test-"));
+  const fixtureFacts = [...facts];
+  for (const [id, displayPl, displayEn] of controlledAboutFacts) {
+    if (!fixtureFacts.some((record) => record.id === id)) {
+      fixtureFacts.push(fact({ id, value: displayEn, display_pl: displayPl, display_en: displayEn }));
+    }
+  }
   await Promise.all([
     mkdir(resolve(root, "content"), { recursive: true }),
     mkdir(resolve(root, "assets/css"), { recursive: true }),
@@ -159,7 +216,7 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
     mkdir(resolve(root, "worker"), { recursive: true })
   ]);
   await Promise.all([
-    writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, facts, blocked_claims })),
+    writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, facts: fixtureFacts, blocked_claims })),
     writeFile(resolve(root, "index.html"), plHtml ?? homepageFixture("pl", pl)),
     writeFile(resolve(root, "en/index.html"), enHtml ?? homepageFixture("en", en)),
     writeFile(resolve(root, "uslugi/wdrozenie-sap-ariba/index.html"), serviceHtml),
@@ -226,7 +283,7 @@ test("registry keeps responsibility facts atomic and Polish-English meanings ali
     "career.pkp_intercity.responsibility": ["Prowadziłem wdrożenie Revenue Management System (JDA/RPO).", "I led the Revenue Management System (JDA/RPO) implementation."],
     "career.orlen_connect.responsibility": ["Kierowałem wdrożeniem centralnej platformy sourcingowej CONNECT.", "I led the implementation of the central CONNECT sourcing platform."],
     "career.orlen_general.responsibility": ["Odpowiadałem za wdrożenie SAP SRM.", "I was responsible for the SAP SRM implementation."],
-    "career.tp.responsibility": ["Prowadziłem wdrożenie Oracle EBS dla centrum SSC w Lublinie.", "I led the Oracle EBS implementation for the shared-services centre in Lublin."],
+    "career.tp.responsibility": ["Koordynowałem krytyczne zmiany w programie wdrożenia Oracle EBS dla centrum SSC w Lublinie.", "I coordinated critical changes in the Oracle EBS implementation programme for the shared-services centre in Lublin."],
     "career.millennium.responsibility": ["Prowadziłem centralizację zakupów IT.", "I led the centralisation of IT procurement."],
     "career.elektrim.responsibility": ["Analizowałem rynki CEE w Wiedniu.", "I analysed CEE markets in Vienna."]
   };
@@ -823,10 +880,75 @@ test("home scope rejects an approved fact followed by an invented assertion in t
 });
 
 test("home scope rejects an unannotated injected About aviation fact", async () => {
-  const html = homepageFixture("pl", "Marka").replace('<section id="about"></section>', '<section id="about"><ul class="about-facts"><li>Niepotwierdzone uprawnienie lotnicze</li></ul></section>');
+  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"><li>Niepotwierdzone uprawnienie lotnicze</li>');
   const root = await fixture({ plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-fact-annotation"));
+});
+
+for (const [element, injected] of [
+  ["paragraph", '<p class="about-fact">Niepotwierdzona informacja</p>'],
+  ["span", "<span>Niepotwierdzona informacja</span>"]
+]) {
+  test(`home scope rejects an unsupported About ${element}`, async () => {
+    const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', `${injected}<ul class="about-facts">`);
+    const root = await fixture({ plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-about-structure"));
+  });
+}
+
+test("home scope requires exact controlled About narrative copy", async () => {
+  const html = homepageFixture("pl", "Marka").replace(controlledAboutCopy.pl.narratives[0][1], "Niepotwierdzona narracja.");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope requires the exact controlled About section label", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<p class="section-label">O mnie</p>', '<p class="section-label">Profil</p>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope requires stable About narrative IDs", async () => {
+  const html = homepageFixture("pl", "Marka").replace(' data-about-copy="decision-before-tool"', "");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope requires exactly one About aviation facts list", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"></ul><ul class="about-facts">');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects a missing About aviation fact item", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', "");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects reordered About aviation fact items", async () => {
+  const valid = homepageFixture("pl", "Marka");
+  const first = '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>';
+  const second = '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>';
+  const html = valid.replace(`${first}\n        ${second}`, `${second}\n        ${first}`);
+  assert.notEqual(html, valid);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects an extra annotated About aviation fact item", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"><li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
 });
 
 const unannotatedHomeClaims = [
@@ -854,32 +976,67 @@ test("home scope rejects an unmatched Process article closing tag", async () => 
 });
 
 test("home scope rejects a duplicate public-procurement possible-result row", async () => {
-  const skills = '<section id="skills"><article><h3><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></h3><dl><div><dt>Możliwy wynik</dt><dd>One</dd></div><div><dt>Możliwy wynik</dt><dd>Two</dd></div></dl></article></section>';
-  const html = homepageFixture("pl", "Marka").replace('<section id="skills"></section>', skills);
+  const skills = '<section id="skills"><article data-service="public-procurement"><h3><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></h3><dl><div><dt>Możliwy wynik</dt><dd>One</dd></div><div><dt>Możliwy wynik</dt><dd>Two</dd></div></dl></article></section>';
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
   const root = await fixture({ plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-skills-structure"));
 });
 
 test("home scope accepts the localized English public-procurement Skills structure", async () => {
-  const skills = '<section id="skills"><article><h3><a href="/en/uslugi/doradztwo-zamowienia-publiczne/">Public procurement</a></h3><dl><div><dt>Possible outcome</dt><dd>One</dd></div></dl></article></section>';
-  const html = homepageFixture("en", "Brand").replace('<section id="skills"></section>', skills);
+  const skills = `<section id="skills">${publicProcurementSkillsFixture("en")}</section>`;
+  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
   const root = await fixture({ enHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(!errorIds(result).includes("home-skills-structure"));
 });
 
-test("home scope rejects Polish Skills path and outcome label on the English homepage", async () => {
-  const skills = '<section id="skills"><article><h3><a href="/uslugi/doradztwo-zamowienia-publiczne/">Public procurement</a></h3><dl><div><dt>Możliwy wynik</dt><dd>One</dd></div></dl></article></section>';
-  const html = homepageFixture("en", "Brand").replace('<section id="skills"></section>', skills);
+test("home scope rejects a missing public-procurement service item", async () => {
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", '<section id="skills"></section>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects a public-procurement service item without its marker", async () => {
+  const html = homepageFixture("pl", "Marka").replace(' data-service="public-procurement"', "");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects an unknown English public-procurement href", async () => {
+  const skills = `<section id="skills">${publicProcurementSkillsFixture("en", { href: "/en/uslugi/typo/" })}</section>`;
+  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
   const root = await fixture({ enHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(errorIds(result).includes("home-skills-structure"));
 });
 
+test("home scope rejects a duplicate public-procurement service marker on another route", async () => {
+  const skills = `<section id="skills">${publicProcurementSkillsFixture("pl")}<article data-service="public-procurement"><a href="/uslugi/typo/">Other</a></article></section>`;
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+for (const [variant, options] of [
+  ["Polish path", { href: "/uslugi/doradztwo-zamowienia-publiczne/" }],
+  ["Polish outcome label", { outcome: "Możliwy wynik" }]
+]) {
+  test(`home scope rejects the ${variant} on the English homepage`, async () => {
+    const skills = `<section id="skills">${publicProcurementSkillsFixture("en", options)}</section>`;
+    const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
+    const root = await fixture({ enHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(errorIds(result).includes("home-skills-structure"));
+  });
+}
+
 test("home scope rejects the generic skill-card pattern", async () => {
   const skills = '<section id="skills"><article class="skill-card"><h3>Generic area</h3></article></section>';
-  const html = homepageFixture("pl", "Marka").replace('<section id="skills"></section>', skills);
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
   const root = await fixture({ plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-skills-structure"));
@@ -962,7 +1119,7 @@ for (const [id, display_pl, display_en, pl, en] of heroes) {
         aliases: lang === "pl" ? { pl: [], en: ["500M EUR", "50B PLN"] } : { pl: ["500M EUR", "50 mld PLN"], en: ["500M EUR", "50B PLN"] }
       });
       const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand")
-        .replace('<section id="about"></section>', `<section id="about"><p>${page}</p></section>`);
+        .replace('<section id="contact"><a', `<section id="contact"><p>${page}</p><a`);
       const root = await fixture({ facts: [fact(), review], [`${lang}Html`]: html });
       const result = await runVerification({ root, scope: "home", lang });
       assert.deepEqual(errorIds(result), [`fact-${id}`]);
