@@ -190,6 +190,10 @@ async function verifyFoundation(context) {
   const [css, js] = await Promise.all([read(context, "assets/css/style.css"), read(context, "assets/js/main.js")]);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
   if (css !== null) {
+    if ((css.match(/:root\s*\{/g) ?? []).length !== 1) error(context.errors, "css-root", "assets/css/style.css", "expected one :root block");
+    if (css.includes("OPERATIONS DOSSIER")) error(context.errors, "css-layer", "assets/css/style.css", "old override layer remains");
+    if (css.includes("Playfair Display")) error(context.errors, "css-playfair", "assets/css/style.css", "Playfair remains active");
+    if (css.includes(".hero-plot")) error(context.errors, "css-dead-hero", "assets/css/style.css", "decorative plot selectors remain");
     for (const token of [
       "--sky-paper: #E9EDEF",
       "--runway-ink: #102831",
@@ -202,21 +206,59 @@ async function verifyFoundation(context) {
       if (!css.includes(token)) error(context.errors, "flight-token", "assets/css/style.css", `missing ${token}`);
     }
     if (!css.includes("font-family: 'Barlow Semi Condensed'")) error(context.errors, "display-font", "assets/css/style.css", "Barlow face missing");
-    for (const token of [
-      "--bg: #f2efe7",
-      "--bg2: #e7e1d5",
-      "--bg3: #d8d0c1",
-      "--gold: #a83f2a",
-      "--gold-light: #d95d40",
-      "--text: #171915",
-      "--text-secondary: #494d46",
-      "--border: rgba(23,25,21,0.15)",
-      "--border-strong: rgba(23,25,21,0.34)",
-      "--accent: #183f4c",
-      "--paper: #f7f3ea",
-      "--night: #121714"
+    const sectionComments = [
+      "/* 01 Fonts and tokens */",
+      "/* 02 Reset and document */",
+      "/* 03 Layout primitives */",
+      "/* 04 Navigation */",
+      "/* 05 Buttons and links */",
+      "/* 06 Homepage: hero through contact */",
+      "/* 07 Shared subpage compatibility */",
+      "/* 08 Chat and footer */",
+      "/* 09 Accessibility and reduced motion */",
+      "/* 10 Responsive: <=1179, <=759, <=359 */"
+    ];
+    let previousSection = -1;
+    for (const comment of sectionComments) {
+      const index = css.indexOf(comment);
+      if (index === -1 || index <= previousSection) error(context.errors, "css-order", "assets/css/style.css", `missing or out-of-order ${comment}`);
+      previousSection = index;
+    }
+    for (const selector of [
+      ".site-nav", ".nav-list", ".nav-group", ".section-shell", ".section-index",
+      ".route-sequence", ".evidence-row", ".status-tag", ".btn-primary", ".btn-ghost", ".site-footer",
+      ".page-hero", ".page-hero-content", ".page-title", ".page-subtitle", ".page-content",
+      ".page-two-col", ".service-cards", ".service-card", ".related-links", ".related-link", ".cta-banner", ".breadcrumb"
     ]) {
-      if (!css.includes(token)) error(context.errors, "legacy-token", "assets/css/style.css", `missing temporary compatibility token ${token}`);
+      if (!css.includes(selector)) error(context.errors, "css-interface", "assets/css/style.css", `missing ${selector}`);
+    }
+    for (const literal of [
+      "--bg:", "--bg2:", "--bg3:", "--gold:", "--gold-light:", "--text:", "--text-secondary:",
+      "--border:", "--border-strong:", "--accent:", "--paper:", "--night:",
+      "linear-gradient", "radial-gradient", "backdrop-filter", "box-shadow", "font-style: italic"
+    ]) {
+      if (css.includes(literal)) error(context.errors, "css-banned", "assets/css/style.css", `banned literal ${literal}`);
+    }
+    const definedProperties = new Set([...css.matchAll(/^[ \t]*(--[a-z0-9-]+)\s*:/gim)].map((match) => match[1]));
+    for (const match of css.matchAll(/var\((--[a-z0-9-]+)/gi)) {
+      if (!definedProperties.has(match[1])) error(context.errors, "css-undefined-property", "assets/css/style.css", `undefined ${match[1]}`);
+    }
+    const openingBraces = css.match(/\{/g)?.length ?? 0;
+    const closingBraces = css.match(/\}/g)?.length ?? 0;
+    if (openingBraces !== closingBraces) error(context.errors, "css-delimiters", "assets/css/style.css", `${openingBraces} opening braces and ${closingBraces} closing braces`);
+    for (const contract of [
+      "grid-template-columns: repeat(12, minmax(0, 1fr))",
+      "grid-template-columns: repeat(8, minmax(0, 1fr))",
+      "@media (max-width: 759px)",
+      "@media (max-width: 359px)",
+      ".js .nav-list",
+      ".js .nav-toggle",
+      ".js .nav-list.is-open",
+      "min-height: 44px",
+      ":focus-visible",
+      "@media (prefers-reduced-motion: reduce)"
+    ]) {
+      if (!css.includes(contract)) error(context.errors, "css-responsive", "assets/css/style.css", `missing ${contract}`);
     }
   }
   if (js !== null && js.length === 0) error(context.errors, "foundation-js", "assets/js/main.js", "browser script is empty");
