@@ -50,13 +50,64 @@ function normalize(text) {
     .toLocaleLowerCase("en-US");
 }
 
+function decodeHtmlEntities(text) {
+  return text
+    .replace(/&#(x[0-9a-f]+|\d+);/gi, (_match, entity) => {
+      const codePoint = Number.parseInt(entity.slice(0, 1).toLowerCase() === "x" ? entity.slice(1) : entity, entity.slice(0, 1).toLowerCase() === "x" ? 16 : 10);
+      return codePoint > 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "�";
+    })
+    .replace(/&mdash;/gi, "—")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&");
+}
+
 function renderedText(html) {
-  return normalize(html
+  return normalize(decodeHtmlEntities(html
     .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&"));
+    .replace(/<[^>]+>/g, " ")));
+}
+
+function homepageBody(html) {
+  return /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html)?.[1] ?? html;
+}
+
+const homepageMarkers = [
+  'id="hero"',
+  'data-section="trust"',
+  'id="process"',
+  'data-cta-after="process"',
+  'id="cases"',
+  'data-cta-after="cases"',
+  'id="about"',
+  'id="education"',
+  'id="resume"',
+  'id="skills"',
+  'id="portfolio"',
+  'id="clients"',
+  'id="contact"'
+];
+
+const forbiddenHomepageCopy = ["—", "nie tylko", "kompleksow", "innowacyjn", "realnie", "#1", "największ", "Polpharma"];
+
+function verifyHomepageContent(body, page, errors) {
+  const activeBody = stripHtmlComments(body).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
+  let previousIndex = -1;
+  for (const marker of homepageMarkers) {
+    const index = activeBody.indexOf(marker);
+    if (index === -1) {
+      error(errors, "home-section-order", page.path, `missing marker ${marker}`);
+      continue;
+    }
+    if (index <= previousIndex) error(errors, "home-section-order", page.path, `marker ${marker} is out of order`);
+    previousIndex = index;
+  }
+
+  const visible = renderedText(activeBody);
+  for (const pattern of forbiddenHomepageCopy) {
+    if (visible.includes(normalize(pattern))) error(errors, "home-forbidden-copy", page.path, `visible copy contains ${pattern}`);
+  }
+  return visible;
 }
 
 function stripHtmlComments(html) {
@@ -1134,7 +1185,7 @@ async function verifyHome(factData, context) {
     const html = await read(context, page.path);
     if (html === null) continue;
     if ((html.match(/<h1\b/gi) ?? []).length !== 1) error(context.errors, "home-h1", page.path, "expected exactly one h1");
-    const visible = renderedText(html);
+    const visible = verifyHomepageContent(homepageBody(html), page, context.errors);
     const records = Array.isArray(factData.facts) ? factData.facts : [];
     for (const fact of records.filter((item) => Array.isArray(item?.surfaces) && item.surfaces.includes(page.path))) {
       const published = candidates(fact, page.lang).some((candidate) => visible.includes(candidate));

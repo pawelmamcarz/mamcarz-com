@@ -102,7 +102,21 @@ initBackToTop();
 initChat();`;
 
 function homepageFixture(lang, content) {
-  return `${navigationFixture[lang]}<main><h1>${lang.toUpperCase()}</h1>${content}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></main><input id="chat-input" maxlength="2000">`;
+  return `${navigationFixture[lang]}<main>
+    <section id="hero"><h1>${lang.toUpperCase()}</h1>${content}</section>
+    <section data-section="trust"></section>
+    <section id="process"></section>
+    <aside data-cta-after="process"></aside>
+    <section id="cases"></section>
+    <aside data-cta-after="cases"></aside>
+    <section id="about"></section>
+    <section id="education"></section>
+    <section id="resume"></section>
+    <section id="skills"></section>
+    <section id="portfolio"></section>
+    <section id="clients"></section>
+    <section id="contact"><a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
+  </main><input id="chat-input" maxlength="2000">`;
 }
 
 function fact(overrides = {}) {
@@ -700,6 +714,19 @@ test("home scope honors the requested language", async () => {
   const en = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(errorIds(pl).includes("fact-review.only-pl"));
   assert.ok(!errorIds(en).includes("fact-review.only-pl"));
+});
+
+test("home scope rejects a visible em dash encoded as an HTML entity", async () => {
+  const root = await fixture({ plHtml: homepageFixture("pl", "Marka &mdash; treść") });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-forbidden-copy"));
+});
+
+test("home scope does not accept a required section marker inside a script", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<script>const fake = \'<section id="clients"></section>\';</script>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-section-order"));
 });
 
 const heroes = [
