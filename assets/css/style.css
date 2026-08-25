@@ -84,6 +84,19 @@
     --font-display: 'Barlow Semi Condensed', sans-serif;
     --font-body: 'DM Sans', sans-serif;
     --font-mono: 'DM Mono', monospace;
+    /* Temporary compatibility variables; retain until Task 3 migrates all consumers. */
+    --bg: #f2efe7;
+    --bg2: #e7e1d5;
+    --bg3: #d8d0c1;
+    --gold: #a83f2a;
+    --gold-light: #d95d40;
+    --text: #171915;
+    --text-secondary: #494d46;
+    --border: rgba(23,25,21,0.15);
+    --border-strong: rgba(23,25,21,0.34);
+    --accent: #183f4c;
+    --paper: #f7f3ea;
+    --night: #121714;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }

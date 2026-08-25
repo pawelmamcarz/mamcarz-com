@@ -202,6 +202,22 @@ async function verifyFoundation(context) {
       if (!css.includes(token)) error(context.errors, "flight-token", "assets/css/style.css", `missing ${token}`);
     }
     if (!css.includes("font-family: 'Barlow Semi Condensed'")) error(context.errors, "display-font", "assets/css/style.css", "Barlow face missing");
+    for (const token of [
+      "--bg: #f2efe7",
+      "--bg2: #e7e1d5",
+      "--bg3: #d8d0c1",
+      "--gold: #a83f2a",
+      "--gold-light: #d95d40",
+      "--text: #171915",
+      "--text-secondary: #494d46",
+      "--border: rgba(23,25,21,0.15)",
+      "--border-strong: rgba(23,25,21,0.34)",
+      "--accent: #183f4c",
+      "--paper: #f7f3ea",
+      "--night: #121714"
+    ]) {
+      if (!css.includes(token)) error(context.errors, "legacy-token", "assets/css/style.css", `missing temporary compatibility token ${token}`);
+    }
   }
   if (js !== null && js.length === 0) error(context.errors, "foundation-js", "assets/js/main.js", "browser script is empty");
 }
