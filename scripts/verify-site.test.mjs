@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { promisify } from "node:util";
 import test from "node:test";
 
-import { readFacts, runVerification } from "./verify-site.mjs";
+import { parseCssRules, readFacts, runVerification } from "./verify-site.mjs";
 
 const execFileAsync = promisify(execFile);
 const modulePath = resolve("scripts/verify-site.mjs");
@@ -216,6 +216,53 @@ test("foundation rejects a later body font shorthand that resets the document co
   );
   const result = await verifyFixtureCss(css);
   assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation rejects body typography resets inside responsive media", async () => {
+  const css = `${foundationCss}\n@media (max-width: 1179px) { body { font-family: serif; line-height: normal; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation treats an uppercase HTML body selector as the same typography target", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { BODY { font: 16px serif; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation rejects case-obfuscated banned gradient functions", async () => {
+  const css = `${foundationCss}\n.case-probe { background: Linear-Gradient(#fff, #000); }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation rejects CSS-escaped banned gradient functions", async () => {
+  const css = `${foundationCss}\n.escape-probe { background: l\\69near-gradient(#fff, #000); }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation does not treat a gradient name inside a quoted value as an active function", async () => {
+  const css = `${foundationCss}\n.string-probe::before { content: "Linear-Gradient(; l\\69near-gradient("; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(!errorIds(result).includes("css-banned"));
+});
+
+test("foundation requires the back-to-top dual-contrast focus treatment", async () => {
+  const css = foundationCss
+    .replace(/(\.back-to-top \{[\s\S]*?)border: 3px solid var\(--signal-dark\);/, "$1border: 1px solid var(--signal-dark);")
+    .replaceAll(".back-to-top:focus-visible", ".back-to-top.removed-focus");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-focus"));
+});
+
+test("foundation parser preserves quoted and functional semicolons before later properties", () => {
+  const rules = parseCssRules('.probe { content: "alpha;{beta}:gamma"; --payload: fn(alpha; { beta }); color: red; min-height: 44px; }');
+  assert.equal(rules.length, 1);
+  assert.equal(rules[0].declarations.get("content"), '"alpha;{beta}:gamma"');
+  assert.equal(rules[0].declarations.get("--payload"), "fn(alpha; { beta })");
+  assert.equal(rules[0].declarations.get("color"), "red");
+  assert.equal(rules[0].declarations.get("min-height"), "44px");
 });
 
 test("foundation rejects low-contrast derivative tokens and component surfaces", async () => {

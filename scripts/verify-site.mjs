@@ -192,6 +192,8 @@ function stripCssComments(css) {
 
 function matchingBrace(source, openingIndex) {
   let depth = 0;
+  let parentheses = 0;
+  let brackets = 0;
   let quote = null;
   let escaped = false;
   for (let index = openingIndex; index < source.length; index += 1) {
@@ -202,10 +204,23 @@ function matchingBrace(source, openingIndex) {
       else if (character === quote) quote = null;
       continue;
     }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
     if (character === "'" || character === '"') {
       quote = character;
       continue;
     }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "(") parentheses += 1;
+    else if (character === ")" && parentheses > 0) parentheses -= 1;
+    else if (character === "[") brackets += 1;
+    else if (character === "]" && brackets > 0) brackets -= 1;
+    if (parentheses > 0 || brackets > 0) continue;
     if (character === "{") depth += 1;
     if (character === "}") {
       depth -= 1;
@@ -215,10 +230,62 @@ function matchingBrace(source, openingIndex) {
   return -1;
 }
 
+function cssDelimiterIndex(source, delimiter) {
+  let quote = null;
+  let escaped = false;
+  let parentheses = 0;
+  let brackets = 0;
+  let braces = 0;
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "(") parentheses += 1;
+    else if (character === ")" && parentheses > 0) parentheses -= 1;
+    else if (character === "[") brackets += 1;
+    else if (character === "]" && brackets > 0) brackets -= 1;
+    else if (character === "{") braces += 1;
+    else if (character === "}" && braces > 0) braces -= 1;
+    else if (character === delimiter && parentheses === 0 && brackets === 0 && braces === 0) return index;
+  }
+  return -1;
+}
+
+function splitCssDeclarations(body) {
+  const candidates = [];
+  let remainder = body;
+  while (remainder.length > 0) {
+    const delimiter = cssDelimiterIndex(remainder, ";");
+    if (delimiter === -1) {
+      candidates.push(remainder);
+      break;
+    }
+    candidates.push(remainder.slice(0, delimiter));
+    remainder = remainder.slice(delimiter + 1);
+  }
+  return candidates;
+}
+
 function parseDeclarations(body) {
   const declarations = new Map();
-  for (const candidate of body.split(";")) {
-    const colon = candidate.indexOf(":");
+  for (const candidate of splitCssDeclarations(body)) {
+    const colon = cssDelimiterIndex(candidate, ":");
     if (colon === -1) continue;
     const property = candidate.slice(0, colon).trim().toLowerCase();
     const value = candidate.slice(colon + 1).trim().replace(/\s+/g, " ");
@@ -227,7 +294,67 @@ function parseDeclarations(body) {
   return declarations;
 }
 
-function parseCssRules(source, media = [], rules = []) {
+function decodeCssEscapes(source) {
+  let decoded = "";
+  let quote = null;
+  let escaped = false;
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote !== null) {
+      decoded += character;
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      decoded += character;
+      continue;
+    }
+    if (character !== "\\") {
+      decoded += character;
+      continue;
+    }
+    const hexadecimal = /^([0-9a-f]{1,6})(?:\r\n|[\t\n\f\r ])?/i.exec(source.slice(index + 1));
+    if (hexadecimal !== null) {
+      const codePoint = Number.parseInt(hexadecimal[1], 16);
+      decoded += codePoint === 0 || codePoint > 0x10FFFF ? "�" : String.fromCodePoint(codePoint);
+      index += hexadecimal[0].length;
+      continue;
+    }
+    const escapedCharacter = source[index + 1];
+    if (escapedCharacter !== undefined && !/[\r\n\f]/.test(escapedCharacter)) {
+      decoded += escapedCharacter;
+      index += 1;
+    }
+  }
+  return decoded;
+}
+
+function textOutsideCssStrings(source) {
+  let outside = "";
+  let quote = null;
+  let escaped = false;
+  for (const character of source) {
+    if (quote !== null) {
+      outside += " ";
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      outside += " ";
+    } else {
+      outside += character;
+    }
+  }
+  return outside;
+}
+
+export function parseCssRules(source, media = [], rules = []) {
   let cursor = 0;
   while (cursor < source.length) {
     const opening = source.indexOf("{", cursor);
@@ -371,10 +498,20 @@ async function verifyFoundation(context) {
       }
     }
 
-    for (const literal of [
-      "linear-gradient", "radial-gradient", "backdrop-filter", "box-shadow", "font-style: italic"
-    ]) {
-      if (activeCss.includes(literal)) error(context.errors, "css-banned", "assets/css/style.css", `banned literal ${literal}`);
+    const decodedRules = parseCssRules(decodeCssEscapes(activeCss));
+    const bannedConstructs = new Set();
+    for (const rule of decodedRules) {
+      for (const [property, rawValue] of rule.declarations) {
+        const value = textOutsideCssStrings(rawValue).toLowerCase();
+        if (/(?:^|[^a-z-])linear-gradient\s*\(/.test(value)) bannedConstructs.add("linear-gradient");
+        if (/(?:^|[^a-z-])radial-gradient\s*\(/.test(value)) bannedConstructs.add("radial-gradient");
+        if (property === "backdrop-filter" || property.endsWith("-backdrop-filter")) bannedConstructs.add("backdrop-filter");
+        if (property === "box-shadow") bannedConstructs.add("box-shadow");
+        if (property === "font-style" && value === "italic") bannedConstructs.add("font-style: italic");
+      }
+    }
+    for (const literal of bannedConstructs) {
+      error(context.errors, "css-banned", "assets/css/style.css", `banned literal ${literal}`);
     }
 
     const definedProperties = new Set(rules.flatMap((rule) => [...rule.declarations.keys()].filter((property) => property.startsWith("--"))));
@@ -388,10 +525,15 @@ async function verifyFoundation(context) {
     const closingBraces = activeCss.match(/\}/g)?.length ?? 0;
     if (openingBraces !== closingBraces) error(context.errors, "css-delimiters", "assets/css/style.css", `${openingBraces} opening braces and ${closingBraces} closing braces`);
 
-    const bodyRules = rulesForSelector(rules, "body");
     const bodyContract = new Map([["margin", "0"], ["overflow-x", "clip"], ["background", "var(--sky-paper)"], ["color", "var(--runway-ink)"], ["font-family", "var(--font-body)"], ["font-size", "1rem"], ["font-weight", "400"], ["line-height", "1.65"]]);
-    const bodyHasReset = bodyRules.some((rule) => rule.declarations.has("font"));
-    if (bodyHasReset || [...bodyContract].some(([property, value]) => propertyValue(rules, "body", property) !== value)) {
+    const targetsHtmlBody = (rule) => rule.selectors.some((selector) => selector.toLowerCase() === "body");
+    const canonicalBodyRuleIndex = rules.findIndex((rule) => rule.media.length === 0
+      && targetsHtmlBody(rule)
+      && [...bodyContract].every(([property, value]) => rule.declarations.get(property) === value));
+    const prohibitedBodyTypography = new Set(["font", "font-family", "line-height"]);
+    const laterBodyReset = canonicalBodyRuleIndex !== -1 && rules.slice(canonicalBodyRuleIndex + 1).some((rule) => targetsHtmlBody(rule)
+      && [...prohibitedBodyTypography].some((property) => rule.declarations.has(property)));
+    if (canonicalBodyRuleIndex === -1 || laterBodyReset || [...bodyContract].some(([property, value]) => propertyValue(rules, "body", property) !== value)) {
       error(context.errors, "css-body-contract", "assets/css/style.css", "body typography or document contract is overridden");
     }
 
@@ -450,7 +592,8 @@ async function verifyFoundation(context) {
       ["--signal-dark", "--white", 4.5], ["--signal-dark", "--sky-paper", 4.5], ["--signal-dark", "--sky-band", 4.5],
       ["--ink-secondary", "--white", 4.5], ["--ink-secondary", "--sky-paper", 4.5], ["--ink-secondary", "--sky-band", 4.5],
       ["--signal-light", "--panel", 4.5], ["--signal-light", "--panel-deep", 4.5],
-      ["--focus-dark", "--signal-dark", 3], ["--white", "--panel", 3], ["--white", "--panel-deep", 3]
+      ["--focus-dark", "--signal-dark", 3], ["--focus-dark", "--sky-paper", 3], ["--focus-dark", "--sky-band", 3], ["--focus-dark", "--white", 3],
+      ["--white", "--signal-dark", 4.5], ["--white", "--panel", 3], ["--white", "--panel-deep", 3]
     ];
     for (const [foreground, background, minimum] of contrastPairs) {
       const ratio = contrastRatio(rootDeclarations.get(foreground), rootDeclarations.get(background));
@@ -468,7 +611,10 @@ async function verifyFoundation(context) {
       ["footer :focus-visible", "outline-color", "var(--white)"],
       [".site-footer :focus-visible", "outline-color", "var(--white)"],
       [".home-cta :focus-visible", "outline-color", "var(--focus-dark)"],
-      [".cta-banner :focus-visible", "outline-color", "var(--focus-dark)"]
+      [".cta-banner :focus-visible", "outline-color", "var(--focus-dark)"],
+      [".back-to-top", "border", "3px solid var(--signal-dark)"],
+      [".back-to-top:focus-visible", "border-color", "var(--white)"],
+      [".back-to-top:focus-visible", "outline", "3px solid var(--focus-dark)"]
     ];
     for (const [selector, property, value] of focusContracts) {
       if (propertyValue(rules, selector, property) !== value) error(context.errors, "css-focus", "assets/css/style.css", `${selector} must use ${property}: ${value}`);

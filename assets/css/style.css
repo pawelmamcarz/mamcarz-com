@@ -1677,7 +1677,7 @@ footer {
   width: 48px;
   height: 48px;
   place-items: center;
-  border: 1px solid var(--signal-dark);
+  border: 3px solid var(--signal-dark);
   border-radius: 1px;
   background: var(--signal-dark);
   color: var(--white);
@@ -1692,6 +1692,11 @@ footer {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+.back-to-top:focus-visible {
+  border-color: var(--white);
+  outline: 3px solid var(--focus-dark);
 }
 
 /* 09 Accessibility and reduced motion */
