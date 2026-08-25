@@ -187,7 +187,45 @@ async function verifyBlockedSurfaces(factData, context) {
 }
 
 function stripCssComments(css) {
-  return css.replace(/\/\*[\s\S]*?\*\//g, "");
+  let stripped = "";
+  let quote = null;
+  let escaped = false;
+  let inComment = false;
+  for (let index = 0; index < css.length; index += 1) {
+    const character = css[index];
+    if (inComment) {
+      if (character === "*" && css[index + 1] === "/") {
+        inComment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (quote !== null) {
+      stripped += character;
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      stripped += character;
+      continue;
+    }
+    if (character === "\\" && css[index + 1] !== undefined) {
+      stripped += character + css[index + 1];
+      index += 1;
+      continue;
+    }
+    if (character === "/" && css[index + 1] === "*") {
+      stripped += " ";
+      inComment = true;
+      index += 1;
+      continue;
+    }
+    stripped += character;
+  }
+  return stripped;
 }
 
 function matchingBrace(source, openingIndex) {
@@ -267,24 +305,24 @@ function cssDelimiterIndex(source, delimiter) {
   return -1;
 }
 
-function splitCssDeclarations(body) {
-  const candidates = [];
-  let remainder = body;
+function splitCssTopLevel(source, delimiterCharacter) {
+  const parts = [];
+  let remainder = source;
   while (remainder.length > 0) {
-    const delimiter = cssDelimiterIndex(remainder, ";");
+    const delimiter = cssDelimiterIndex(remainder, delimiterCharacter);
     if (delimiter === -1) {
-      candidates.push(remainder);
+      parts.push(remainder);
       break;
     }
-    candidates.push(remainder.slice(0, delimiter));
+    parts.push(remainder.slice(0, delimiter));
     remainder = remainder.slice(delimiter + 1);
   }
-  return candidates;
+  return parts;
 }
 
 function parseDeclarations(body) {
   const declarations = new Map();
-  for (const candidate of splitCssDeclarations(body)) {
+  for (const candidate of splitCssTopLevel(body, ";")) {
     const colon = cssDelimiterIndex(candidate, ":");
     if (colon === -1) continue;
     const property = candidate.slice(0, colon).trim().toLowerCase();
@@ -363,15 +401,64 @@ export function parseCssRules(source, media = [], rules = []) {
     const closing = matchingBrace(source, opening);
     if (closing === -1) break;
     const body = source.slice(opening + 1, closing);
-    if (prelude.startsWith("@media")) {
-      parseCssRules(body, [...media, prelude.replace(/\s+/g, " ")], rules);
+    const normalizedPrelude = prelude.replace(/\s+/g, " ");
+    const atRule = /^@([a-z-]+)/i.exec(normalizedPrelude);
+    if (atRule?.[1].toLowerCase() === "media") {
+      const mediaPrelude = `@media${normalizedPrelude.slice(atRule[0].length)}`;
+      parseCssRules(body, [...media, mediaPrelude], rules);
     } else {
-      const selectors = prelude.startsWith("@") ? [] : prelude.split(",").map((selector) => selector.trim().replace(/\s+/g, " ")).filter(Boolean);
-      rules.push({ prelude: prelude.replace(/\s+/g, " "), selectors, declarations: parseDeclarations(body), media });
+      const selectors = prelude.startsWith("@") ? [] : splitCssTopLevel(prelude, ",").map((selector) => selector.trim().replace(/\s+/g, " ")).filter(Boolean);
+      rules.push({ prelude: normalizedPrelude, selectors, declarations: parseDeclarations(body), media });
     }
     cursor = closing + 1;
   }
   return rules;
+}
+
+function selectorTargetsHtmlBody(selector) {
+  const decoded = decodeCssEscapes(selector);
+  let quote = null;
+  let escaped = false;
+  let brackets = 0;
+  let parentheses = 0;
+  for (let index = 0; index < decoded.length; index += 1) {
+    const character = decoded[index];
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (character === "[") {
+      brackets += 1;
+      continue;
+    }
+    if (character === "]" && brackets > 0) {
+      brackets -= 1;
+      continue;
+    }
+    if (brackets > 0) continue;
+    if (character === "(") {
+      parentheses += 1;
+      continue;
+    }
+    if (character === ")" && parentheses > 0) {
+      parentheses -= 1;
+      continue;
+    }
+    if (parentheses > 0 || !/[a-z_-]/i.test(character)) continue;
+    let end = index + 1;
+    while (end < decoded.length && /[a-z0-9_-]/i.test(decoded[end])) end += 1;
+    const identifier = decoded.slice(index, end).toLowerCase();
+    const boundary = index === 0 || /[\s>+~,(|]/.test(decoded[index - 1]);
+    if (identifier === "body" && boundary) return true;
+    index = end - 1;
+  }
+  return false;
 }
 
 function rulesForSelector(rules, selector, media = []) {
@@ -502,7 +589,7 @@ async function verifyFoundation(context) {
     const bannedConstructs = new Set();
     for (const rule of decodedRules) {
       for (const [property, rawValue] of rule.declarations) {
-        const value = textOutsideCssStrings(rawValue).toLowerCase();
+        const value = textOutsideCssStrings(rawValue).replace(/\s*!\s*important\s*$/i, "").trim().toLowerCase();
         if (/(?:^|[^a-z-])linear-gradient\s*\(/.test(value)) bannedConstructs.add("linear-gradient");
         if (/(?:^|[^a-z-])radial-gradient\s*\(/.test(value)) bannedConstructs.add("radial-gradient");
         if (property === "backdrop-filter" || property.endsWith("-backdrop-filter")) bannedConstructs.add("backdrop-filter");
@@ -526,11 +613,11 @@ async function verifyFoundation(context) {
     if (openingBraces !== closingBraces) error(context.errors, "css-delimiters", "assets/css/style.css", `${openingBraces} opening braces and ${closingBraces} closing braces`);
 
     const bodyContract = new Map([["margin", "0"], ["overflow-x", "clip"], ["background", "var(--sky-paper)"], ["color", "var(--runway-ink)"], ["font-family", "var(--font-body)"], ["font-size", "1rem"], ["font-weight", "400"], ["line-height", "1.65"]]);
-    const targetsHtmlBody = (rule) => rule.selectors.some((selector) => selector.toLowerCase() === "body");
+    const targetsHtmlBody = (rule) => rule.selectors.some(selectorTargetsHtmlBody);
     const canonicalBodyRuleIndex = rules.findIndex((rule) => rule.media.length === 0
       && targetsHtmlBody(rule)
       && [...bodyContract].every(([property, value]) => rule.declarations.get(property) === value));
-    const prohibitedBodyTypography = new Set(["font", "font-family", "line-height"]);
+    const prohibitedBodyTypography = new Set(["font", "font-family", "font-size", "font-weight", "line-height"]);
     const laterBodyReset = canonicalBodyRuleIndex !== -1 && rules.slice(canonicalBodyRuleIndex + 1).some((rule) => targetsHtmlBody(rule)
       && [...prohibitedBodyTypography].some((property) => rule.declarations.has(property)));
     if (canonicalBodyRuleIndex === -1 || laterBodyReset || [...bodyContract].some(([property, value]) => propertyValue(rules, "body", property) !== value)) {

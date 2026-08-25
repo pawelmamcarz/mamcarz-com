@@ -230,6 +230,56 @@ test("foundation treats an uppercase HTML body selector as the same typography t
   assert.ok(errorIds(result).includes("css-body-contract"));
 });
 
+test("foundation parses mixed-case media at-rules before auditing body typography", async () => {
+  const css = `${foundationCss}\n@MeDiA (max-width: 759px) { BODY { font: inherit; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation finds the body type in descendant and compound selectors", async () => {
+  for (const selector of ["html body", "body.some-class"]) {
+    const css = `${foundationCss}\n${selector} { font: inherit; }`;
+    const result = await verifyFixtureCss(css);
+    assert.ok(errorIds(result).includes("css-body-contract"), selector);
+  }
+});
+
+test("foundation rejects responsive body font-size overrides", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { body { font-size: 10px; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation cannot hide an active gradient between quoted comment markers", async () => {
+  const css = `${foundationCss}\n.comment-probe { --open: "/*"; background: linear-gradient(#fff, #000); --close: "*/"; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation rejects important italic values regardless of case and spacing", async () => {
+  const css = `${foundationCss}\n.italic-probe { FONT-STYLE : ItAlIc ! IMPORTANT; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation preserves quoted comment markers as valid declaration content", async () => {
+  const css = `${foundationCss}\n.comment-content::before { content: "prefix \\\" /* literal */ suffix"; color: red; }`;
+  const result = await verifyFixtureCss(css);
+  assert.deepEqual(result.errors, []);
+});
+
+test("foundation does not confuse body text in an attribute selector with the body type", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { [data-target="body"] { font: inherit; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(!errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation allows safe responsive body overflow wrapping", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { body { overflow-wrap: anywhere; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(!errorIds(result).includes("css-body-contract"));
+});
+
 test("foundation rejects case-obfuscated banned gradient functions", async () => {
   const css = `${foundationCss}\n.case-probe { background: Linear-Gradient(#fff, #000); }`;
   const result = await verifyFixtureCss(css);
