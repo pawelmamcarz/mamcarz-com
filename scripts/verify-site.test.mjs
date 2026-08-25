@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
@@ -10,6 +10,7 @@ import { readFacts, runVerification } from "./verify-site.mjs";
 
 const execFileAsync = promisify(execFile);
 const modulePath = resolve("scripts/verify-site.mjs");
+const foundationCss = await readFile(resolve("assets/css/style.css"), "utf8");
 
 function fact(overrides = {}) {
   return {
@@ -67,6 +68,11 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
 
 function errorIds(result) {
   return result.errors.map((error) => error.split(" ")[1]);
+}
+
+async function verifyFixtureCss(css) {
+  const root = await fixture({ css });
+  return runVerification({ root, scope: "foundation" });
 }
 
 test("readFacts reads fixtures without starting CLI verification", async () => {
@@ -153,6 +159,100 @@ test("missing fixture files report standardized file-read errors", async () => {
   assert.ok(home.errors.some((error) => error.startsWith("ERROR file-read index.html:")));
   assert.ok(facts.errors.some((error) => error.startsWith("ERROR facts-json content/site-facts.json:")));
   assert.ok(facts.errors.some((error) => error.startsWith("ERROR file-read worker/index.js:")));
+});
+
+test("foundation rejects a required selector that survives only in a comment", async () => {
+  const css = `${foundationCss.replaceAll(".status-tag", ".removed-status-tag")}\n/* .status-tag { display: block; } */`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation distinguishes an exact selector from plural and prefixed selectors", async () => {
+  const css = foundationCss
+    .replaceAll(".service-card {", ".service-card-detail {")
+    .replaceAll(".service-card:hover", ".service-card-detail:hover");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation rejects an empty required declaration block", async () => {
+  const css = foundationCss.replace(/\.breadcrumb \{[\s\S]*?\n\}/, ".breadcrumb {}");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation requires responsive contracts inside the intended media scope", async () => {
+  const css = `${foundationCss.replace("@media (max-width: 759px) {", "@media (max-width: 758px) {")}\n/* @media (max-width: 759px) { .js .nav-list { display: none; } .js .nav-toggle { display: inline-flex; } .js .nav-list.is-open { display: block; } } */`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-responsive"));
+});
+
+test("foundation does not accept responsive declarations hidden in a nested media scope", async () => {
+  const css = `${foundationCss.replace("@media (max-width: 759px) {", "@media (max-width: 758px) {")}
+@media (max-width: 1179px) { @media (max-width: 759px) { .js .nav-list { display: none; } .js .nav-toggle { display: inline-flex; } .js .nav-list.is-open { display: block; } } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-responsive"));
+});
+
+test("foundation parser ignores structural characters inside quoted strings", async () => {
+  const css = `${foundationCss}\n.string-probe::before { content: "{;:}"; }`;
+  const result = await verifyFixtureCss(css);
+  assert.deepEqual(result.errors, []);
+});
+
+test("foundation validates every display font face as a complete tuple", async () => {
+  const css = foundationCss.replace(
+    "src: url('/assets/fonts/barlow-semi-condensed-latin-700-normal.woff2') format('woff2');",
+    "src: url('/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2') format('woff2');"
+  );
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("display-font"));
+});
+
+test("foundation rejects a later body font shorthand that resets the document contract", async () => {
+  const css = foundationCss.replace(
+    /(?:body,\s*)?button, input, textarea, select \{\s*font: inherit;\s*\}/,
+    "body, button, input, textarea, select { font: inherit; }"
+  );
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation rejects low-contrast derivative tokens and component surfaces", async () => {
+  const css = foundationCss
+    .replace(/--signal-dark:\s*#[0-9A-Fa-f]{6}/, "--signal-dark: #D94B2B")
+    .replace(/--ink-secondary:\s*#[0-9A-Fa-f]{6}/, "--ink-secondary: #52707A");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-contrast"));
+});
+
+test("foundation rejects the core signal behind normal white control text", async () => {
+  const css = foundationCss.replace(
+    /(\.chat-send \{[\s\S]*?background: )var\(--signal-dark\)/,
+    "$1var(--signal)"
+  );
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-contrast"));
+});
+
+test("foundation requires explicit focus contrast on dark and signal surfaces", async () => {
+  const css = foundationCss
+    .replaceAll("#about :focus-visible", "#about .removed-focus")
+    .replaceAll(".home-cta :focus-visible", ".home-cta .removed-focus");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-focus"));
+});
+
+test("foundation requires a tokenized bridge for the inline diagram border", async () => {
+  const css = foundationCss.replaceAll(".diag-frame", ".removed-diag-frame");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation requires 44 by 44 targets outside mobile media queries", async () => {
+  const css = foundationCss.replace(/(\.breadcrumb a \{[\s\S]*?)\s*min-width: 44px;/, "$1");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-target"));
 });
 
 test("home scope honors the requested language", async () => {

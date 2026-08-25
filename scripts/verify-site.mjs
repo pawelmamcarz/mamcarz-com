@@ -186,26 +186,152 @@ async function verifyBlockedSurfaces(factData, context) {
   }
 }
 
+function stripCssComments(css) {
+  return css.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+function matchingBrace(source, openingIndex) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  for (let index = openingIndex; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (character === "{") depth += 1;
+    if (character === "}") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return -1;
+}
+
+function parseDeclarations(body) {
+  const declarations = new Map();
+  for (const candidate of body.split(";")) {
+    const colon = candidate.indexOf(":");
+    if (colon === -1) continue;
+    const property = candidate.slice(0, colon).trim().toLowerCase();
+    const value = candidate.slice(colon + 1).trim().replace(/\s+/g, " ");
+    if (property) declarations.set(property, value);
+  }
+  return declarations;
+}
+
+function parseCssRules(source, media = [], rules = []) {
+  let cursor = 0;
+  while (cursor < source.length) {
+    const opening = source.indexOf("{", cursor);
+    if (opening === -1) break;
+    const prelude = source.slice(cursor, opening).trim();
+    const closing = matchingBrace(source, opening);
+    if (closing === -1) break;
+    const body = source.slice(opening + 1, closing);
+    if (prelude.startsWith("@media")) {
+      parseCssRules(body, [...media, prelude.replace(/\s+/g, " ")], rules);
+    } else {
+      const selectors = prelude.startsWith("@") ? [] : prelude.split(",").map((selector) => selector.trim().replace(/\s+/g, " ")).filter(Boolean);
+      rules.push({ prelude: prelude.replace(/\s+/g, " "), selectors, declarations: parseDeclarations(body), media });
+    }
+    cursor = closing + 1;
+  }
+  return rules;
+}
+
+function rulesForSelector(rules, selector, media = []) {
+  const normalizedSelector = selector.replace(/\s+/g, " ");
+  return rules.filter((rule) => rule.selectors.includes(normalizedSelector)
+    && rule.media.length === media.length
+    && rule.media.every((query, index) => query === media[index]));
+}
+
+function propertyValue(rules, selector, property, media = []) {
+  let value;
+  for (const rule of rulesForSelector(rules, selector, media)) {
+    if (rule.declarations.has(property)) value = rule.declarations.get(property);
+  }
+  return value;
+}
+
+function hexRgb(value) {
+  const match = /^#([0-9a-f]{6})$/i.exec(value ?? "");
+  if (!match) return null;
+  return match[1].match(/.{2}/g).map((component) => Number.parseInt(component, 16) / 255);
+}
+
+function relativeLuminance(value) {
+  const rgb = hexRgb(value);
+  if (rgb === null) return null;
+  const linear = rgb.map((component) => component <= 0.04045 ? component / 12.92 : ((component + 0.055) / 1.055) ** 2.4);
+  return (0.2126 * linear[0]) + (0.7152 * linear[1]) + (0.0722 * linear[2]);
+}
+
+function contrastRatio(first, second) {
+  const firstLuminance = relativeLuminance(first);
+  const secondLuminance = relativeLuminance(second);
+  if (firstLuminance === null || secondLuminance === null) return 0;
+  return (Math.max(firstLuminance, secondLuminance) + 0.05) / (Math.min(firstLuminance, secondLuminance) + 0.05);
+}
+
 async function verifyFoundation(context) {
   const [css, js] = await Promise.all([read(context, "assets/css/style.css"), read(context, "assets/js/main.js")]);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
   if (css !== null) {
-    if ((css.match(/:root\s*\{/g) ?? []).length !== 1) error(context.errors, "css-root", "assets/css/style.css", "expected one :root block");
+    const activeCss = stripCssComments(css);
+    const rules = parseCssRules(activeCss);
+    const baseRules = rules.filter((rule) => rule.media.length === 0);
+    const rootRules = rulesForSelector(rules, ":root");
+    if (rootRules.length !== 1) error(context.errors, "css-root", "assets/css/style.css", "expected one :root block");
     if (css.includes("OPERATIONS DOSSIER")) error(context.errors, "css-layer", "assets/css/style.css", "old override layer remains");
-    if (css.includes("Playfair Display")) error(context.errors, "css-playfair", "assets/css/style.css", "Playfair remains active");
-    if (css.includes(".hero-plot")) error(context.errors, "css-dead-hero", "assets/css/style.css", "decorative plot selectors remain");
-    for (const token of [
-      "--sky-paper: #E9EDEF",
-      "--runway-ink: #102831",
-      "--signal: #D94B2B",
-      "--panel: #193D49",
-      "--boundary: #8E9CA1",
-      "--white: #F7F9F8",
-      "--muted: #52707A"
-    ]) {
-      if (!css.includes(token)) error(context.errors, "flight-token", "assets/css/style.css", `missing ${token}`);
+    if (activeCss.includes("Playfair Display")) error(context.errors, "css-playfair", "assets/css/style.css", "Playfair remains active");
+    if (rules.some((rule) => rule.selectors.some((selector) => selector.startsWith(".hero-plot")))) error(context.errors, "css-dead-hero", "assets/css/style.css", "decorative plot selectors remain");
+
+    const rootDeclarations = rootRules[0]?.declarations ?? new Map();
+    const requiredTokens = new Map([
+      ["--sky-paper", "#E9EDEF"],
+      ["--runway-ink", "#102831"],
+      ["--signal", "#D94B2B"],
+      ["--panel", "#193D49"],
+      ["--boundary", "#8E9CA1"],
+      ["--white", "#F7F9F8"],
+      ["--muted", "#52707A"]
+    ]);
+    for (const [property, value] of requiredTokens) {
+      if (rootDeclarations.get(property) !== value) error(context.errors, "flight-token", "assets/css/style.css", `missing ${property}: ${value}`);
     }
-    if (!css.includes("font-family: 'Barlow Semi Condensed'")) error(context.errors, "display-font", "assets/css/style.css", "Barlow face missing");
+
+    const expectedFontFaces = [
+      ["'Barlow Semi Condensed'", "normal", "500", "url('/assets/fonts/barlow-semi-condensed-latin-500-normal.woff2') format('woff2')", "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+20AC"],
+      ["'Barlow Semi Condensed'", "normal", "500", "url('/assets/fonts/barlow-semi-condensed-latin-ext-500-normal.woff2') format('woff2')", "U+0100-024F, U+1E00-1EFF, U+20A0-20AB"],
+      ["'Barlow Semi Condensed'", "normal", "600", "url('/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2') format('woff2')", "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+20AC"],
+      ["'Barlow Semi Condensed'", "normal", "600", "url('/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2') format('woff2')", "U+0100-024F, U+1E00-1EFF, U+20A0-20AB"],
+      ["'Barlow Semi Condensed'", "normal", "700", "url('/assets/fonts/barlow-semi-condensed-latin-700-normal.woff2') format('woff2')", "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+20AC"],
+      ["'Barlow Semi Condensed'", "normal", "700", "url('/assets/fonts/barlow-semi-condensed-latin-ext-700-normal.woff2') format('woff2')", "U+0100-024F, U+1E00-1EFF, U+20A0-20AB"],
+      ["'DM Sans'", "normal", "300 500", "url('/assets/fonts/dmsans-latin.woff2') format('woff2')", "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD"],
+      ["'DM Sans'", "normal", "300 500", "url('/assets/fonts/dmsans-latext.woff2') format('woff2')", "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF"],
+      ["'DM Mono'", "normal", "400", "url('/assets/fonts/dmmono-latin.woff2') format('woff2')", "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD"],
+      ["'DM Mono'", "normal", "400", "url('/assets/fonts/dmmono-latext.woff2') format('woff2')", "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF"]
+    ].map((tuple) => tuple.join("|"));
+    const actualFontFaces = rules.filter((rule) => rule.prelude === "@font-face").map((rule) => [
+      rule.declarations.get("font-family"),
+      rule.declarations.get("font-style"),
+      rule.declarations.get("font-weight"),
+      rule.declarations.get("src"),
+      rule.declarations.get("unicode-range")
+    ].join("|"));
+    if (actualFontFaces.length !== expectedFontFaces.length || expectedFontFaces.some((tuple) => !actualFontFaces.includes(tuple))) {
+      error(context.errors, "display-font", "assets/css/style.css", "font-face family, style, weight, src or unicode tuple is missing or malformed");
+    }
+
     const sectionComments = [
       "/* 01 Fonts and tokens */",
       "/* 02 Reset and document */",
@@ -224,41 +350,128 @@ async function verifyFoundation(context) {
       if (index === -1 || index <= previousSection) error(context.errors, "css-order", "assets/css/style.css", `missing or out-of-order ${comment}`);
       previousSection = index;
     }
-    for (const selector of [
-      ".site-nav", ".nav-list", ".nav-group", ".section-shell", ".section-index",
-      ".route-sequence", ".evidence-row", ".status-tag", ".btn-primary", ".btn-ghost", ".site-footer",
-      ".page-hero", ".page-hero-content", ".page-title", ".page-subtitle", ".page-content",
-      ".page-two-col", ".service-cards", ".service-card", ".related-links", ".related-link", ".cta-banner", ".breadcrumb"
-    ]) {
-      if (!css.includes(selector)) error(context.errors, "css-interface", "assets/css/style.css", `missing ${selector}`);
+
+    const requiredInterfaces = new Map([
+      [".site-nav", ["position", "display"]], [".nav-list", ["display"]], [".nav-group", ["position"]],
+      [".section-shell", ["width"]], [".section-index", ["font-family"]], [".route-sequence", ["position"]],
+      [".evidence-row", ["display", "grid-template-columns"]], [".status-tag", ["display"]],
+      [".btn-primary", ["display", "background"]], [".btn-ghost", ["display", "border"]], [".site-footer", ["display"]],
+      [".page-hero", ["position", "margin-top"]], [".page-hero-content", ["width"]], [".page-title", ["font-size"]],
+      [".page-subtitle", ["color"]], [".page-content", ["width"]], [".page-two-col", ["display"]],
+      [".service-cards", ["display", "grid-template-columns"]], [".service-card", ["padding", "border-right"]],
+      [".related-links", ["display", "grid-template-columns"]], [".related-link", ["display", "min-height"]],
+      [".cta-banner", ["display", "background"]], [".breadcrumb", ["display", "min-height"]],
+      [".diag-frame", ["border"]]
+    ]);
+    for (const [selector, properties] of requiredInterfaces) {
+      const selectorRules = rulesForSelector(rules, selector);
+      const missingProperty = properties.some((property) => propertyValue(rules, selector, property) === undefined);
+      if (selectorRules.length === 0 || selectorRules.every((rule) => rule.declarations.size === 0) || missingProperty) {
+        error(context.errors, "css-interface", "assets/css/style.css", `missing or incomplete ${selector}`);
+      }
     }
+
     for (const literal of [
-      "--bg:", "--bg2:", "--bg3:", "--gold:", "--gold-light:", "--text:", "--text-secondary:",
-      "--border:", "--border-strong:", "--accent:", "--paper:", "--night:",
       "linear-gradient", "radial-gradient", "backdrop-filter", "box-shadow", "font-style: italic"
     ]) {
-      if (css.includes(literal)) error(context.errors, "css-banned", "assets/css/style.css", `banned literal ${literal}`);
+      if (activeCss.includes(literal)) error(context.errors, "css-banned", "assets/css/style.css", `banned literal ${literal}`);
     }
-    const definedProperties = new Set([...css.matchAll(/^[ \t]*(--[a-z0-9-]+)\s*:/gim)].map((match) => match[1]));
-    for (const match of css.matchAll(/var\((--[a-z0-9-]+)/gi)) {
+
+    const definedProperties = new Set(rules.flatMap((rule) => [...rule.declarations.keys()].filter((property) => property.startsWith("--"))));
+    for (const legacyProperty of ["--bg", "--bg2", "--bg3", "--gold", "--gold-light", "--text", "--text-secondary", "--border", "--border-strong", "--accent", "--paper", "--night"]) {
+      if (definedProperties.has(legacyProperty)) error(context.errors, "css-banned", "assets/css/style.css", `banned legacy property ${legacyProperty}`);
+    }
+    for (const match of activeCss.matchAll(/var\((--[a-z0-9-]+)/gi)) {
       if (!definedProperties.has(match[1])) error(context.errors, "css-undefined-property", "assets/css/style.css", `undefined ${match[1]}`);
     }
-    const openingBraces = css.match(/\{/g)?.length ?? 0;
-    const closingBraces = css.match(/\}/g)?.length ?? 0;
+    const openingBraces = activeCss.match(/\{/g)?.length ?? 0;
+    const closingBraces = activeCss.match(/\}/g)?.length ?? 0;
     if (openingBraces !== closingBraces) error(context.errors, "css-delimiters", "assets/css/style.css", `${openingBraces} opening braces and ${closingBraces} closing braces`);
-    for (const contract of [
-      "grid-template-columns: repeat(12, minmax(0, 1fr))",
-      "grid-template-columns: repeat(8, minmax(0, 1fr))",
-      "@media (max-width: 759px)",
-      "@media (max-width: 359px)",
-      ".js .nav-list",
-      ".js .nav-toggle",
-      ".js .nav-list.is-open",
-      "min-height: 44px",
-      ":focus-visible",
-      "@media (prefers-reduced-motion: reduce)"
-    ]) {
-      if (!css.includes(contract)) error(context.errors, "css-responsive", "assets/css/style.css", `missing ${contract}`);
+
+    const bodyRules = rulesForSelector(rules, "body");
+    const bodyContract = new Map([["margin", "0"], ["overflow-x", "clip"], ["background", "var(--sky-paper)"], ["color", "var(--runway-ink)"], ["font-family", "var(--font-body)"], ["font-size", "1rem"], ["font-weight", "400"], ["line-height", "1.65"]]);
+    const bodyHasReset = bodyRules.some((rule) => rule.declarations.has("font"));
+    if (bodyHasReset || [...bodyContract].some(([property, value]) => propertyValue(rules, "body", property) !== value)) {
+      error(context.errors, "css-body-contract", "assets/css/style.css", "body typography or document contract is overridden");
+    }
+
+    const media1179 = ["@media (max-width: 1179px)"];
+    const media759 = ["@media (max-width: 759px)"];
+    const media359 = ["@media (max-width: 359px)"];
+    const reducedMotion = ["@media (prefers-reduced-motion: reduce)"];
+    const responsiveContracts = [
+      [[], ".layout-grid", "grid-template-columns", "repeat(12, minmax(0, 1fr))"],
+      [media1179, ".layout-grid", "grid-template-columns", "repeat(8, minmax(0, 1fr))"],
+      [media759, ".nav-list", "display", "block"],
+      [media759, ".nav-toggle", "display", "none"],
+      [media759, ".js .nav-list", "display", "none"],
+      [media759, ".js .nav-toggle", "display", "inline-flex"],
+      [media759, ".js .nav-list.is-open", "display", "block"],
+      [media759, ".evidence-row", "display", "grid"],
+      [media759, ".evidence-row__context", "grid-column", "1"],
+      [media359, "body", "overflow-wrap", "anywhere"],
+      [media359, "a", "min-width", "44px"],
+      [media359, "a", "min-height", "44px"],
+      [reducedMotion, "html", "scroll-behavior", "auto"],
+      [reducedMotion, "*", "transition-duration", "0.01ms !important"]
+    ];
+    for (const [media, selector, property, value] of responsiveContracts) {
+      if (propertyValue(rules, selector, property, media) !== value) {
+        error(context.errors, "css-responsive", "assets/css/style.css", `missing ${selector} ${property}: ${value} in ${media[0] ?? "base scope"}`);
+      }
+    }
+
+    const targetSelectors = [".nav-logo", ".nav-list a", ".nav-links a", ".nav-group > summary", ".nav-lang", ".breadcrumb a", ".footer-links a"];
+    for (const selector of targetSelectors) {
+      if (propertyValue(rules, selector, "min-width") !== "44px" || propertyValue(rules, selector, "min-height") !== "44px") {
+        error(context.errors, "css-target", "assets/css/style.css", `${selector} must be at least 44px by 44px in base scope`);
+      }
+    }
+
+    const componentContrastContracts = [
+      ["::selection", "background", "var(--signal-dark)"],
+      [".btn-primary", "background", "var(--signal-dark)"], [".home-cta", "background", "var(--signal-dark)"],
+      [".cta-banner", "background", "var(--signal-dark)"], ["#why", "background", "var(--signal-dark)"],
+      [".about-badge", "background", "var(--signal-dark)"], [".chat-send", "background", "var(--signal-dark)"],
+      [".back-to-top", "background", "var(--signal-dark)"], [".nav-lang:hover", "background", "var(--signal-dark)"],
+      [".nav-logo b", "color", "var(--signal-dark)"], [".gold-link", "color", "var(--signal-dark)"],
+      [".process-num", "color", "var(--signal-dark)"], [".case-industry", "color", "var(--signal-dark)"],
+      [".resume-edu-year", "color", "var(--signal-dark)"], [".timeline-year", "color", "var(--signal-dark)"],
+      [".skill-outcome", "color", "var(--signal-dark)"], [".skill-card__link-label", "color", "var(--signal-dark)"],
+      [".client-item:hover", "color", "var(--signal-dark)"], [".breadcrumb a", "color", "var(--signal-dark)"],
+      [".service-feat::before", "color", "var(--signal-dark)"], [".service-card-title", "color", "var(--signal-dark)"],
+      [".related-link-label", "color", "var(--signal-dark)"],
+      [".expertise-dot", "background", "var(--signal-light)"],
+      [".skill-card--applications .skill-icon", "color", "var(--signal-light)"],
+      [".contact-detail-icon .icon-line", "color", "var(--signal-light)"],
+      [".contact-availability::before", "background", "var(--signal-light)"]
+    ];
+    const contrastPairs = [
+      ["--signal-dark", "--white", 4.5], ["--signal-dark", "--sky-paper", 4.5], ["--signal-dark", "--sky-band", 4.5],
+      ["--ink-secondary", "--white", 4.5], ["--ink-secondary", "--sky-paper", 4.5], ["--ink-secondary", "--sky-band", 4.5],
+      ["--signal-light", "--panel", 4.5], ["--signal-light", "--panel-deep", 4.5],
+      ["--focus-dark", "--signal-dark", 3], ["--white", "--panel", 3], ["--white", "--panel-deep", 3]
+    ];
+    for (const [foreground, background, minimum] of contrastPairs) {
+      const ratio = contrastRatio(rootDeclarations.get(foreground), rootDeclarations.get(background));
+      if (ratio < minimum) error(context.errors, "css-contrast", "assets/css/style.css", `${foreground} on ${background} is ${ratio.toFixed(2)}:1; expected ${minimum}:1`);
+    }
+    for (const [selector, property, value] of componentContrastContracts) {
+      if (propertyValue(rules, selector, property) !== value) error(context.errors, "css-contrast", "assets/css/style.css", `${selector} must use ${property}: ${value}`);
+    }
+
+    const focusContracts = [
+      [":focus-visible", "outline", "3px solid var(--signal-dark)"],
+      ["#about :focus-visible", "outline-color", "var(--white)"],
+      ["#contact .contact-info :focus-visible", "outline-color", "var(--white)"],
+      ["#contact .chat-widget :focus-visible", "outline-color", "var(--signal-dark)"],
+      ["footer :focus-visible", "outline-color", "var(--white)"],
+      [".site-footer :focus-visible", "outline-color", "var(--white)"],
+      [".home-cta :focus-visible", "outline-color", "var(--focus-dark)"],
+      [".cta-banner :focus-visible", "outline-color", "var(--focus-dark)"]
+    ];
+    for (const [selector, property, value] of focusContracts) {
+      if (propertyValue(rules, selector, property) !== value) error(context.errors, "css-focus", "assets/css/style.css", `${selector} must use ${property}: ${value}`);
     }
   }
   if (js !== null && js.length === 0) error(context.errors, "foundation-js", "assets/js/main.js", "browser script is empty");
