@@ -9,7 +9,8 @@
     "verify:site": "node scripts/verify-site.mjs --scope=all",
     "verify:facts": "node scripts/verify-site.mjs --scope=facts",
     "verify:foundation": "node scripts/verify-site.mjs --scope=foundation",
-    "verify:home": "node scripts/verify-site.mjs --scope=home"
+    "verify:home": "node scripts/verify-site.mjs --scope=home",
+    "test:verify-site": "node --test scripts/verify-site.test.mjs"
   },
   "devDependencies": {
     "sharp": "^0.33.5"
