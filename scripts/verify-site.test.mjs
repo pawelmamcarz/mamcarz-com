@@ -951,6 +951,83 @@ test("Plan 2 Task 1 fix round 3 decodes browser numeric references and CSS escap
   assert.deepEqual(mismatches, [], `visibility mismatches: ${mismatches.join(", ")}`);
 });
 
+test("Plan 2 Task 1 fix round 4 honors exact-case named references in rendered text and inline styles", async () => {
+  const [, , , enRoute] = applicationsPair;
+  const cases = [
+    ["exact whitespace names in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&Tab;EN&NewLine;</a>`), "page-language", false],
+    ["invalid whitespace name case in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&TAB;EN&NEWLINE;</a>`), "page-language", true],
+    ["exact lowercase colon hides the heading", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&colon;none">Aplikacje</h1>'), "page-h1", true],
+    ["invalid uppercase colon leaves the heading visible", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&COLON;none">Aplikacje</h1>'), "page-h1", false],
+    ["exact lowercase bsol exposes a CSS escape", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="d&bsol;69splay:none">Aplikacje</h1>'), "page-h1", true],
+    ["invalid uppercase bsol remains literal", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="d&BSOL;69splay:none">Aplikacje</h1>'), "page-h1", false],
+    ["numeric to named reference stays one pass", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&#38;colon;none">Aplikacje</h1>'), "page-h1", false],
+    ["named to numeric reference stays one pass", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&AMP;#58;none">Aplikacje</h1>'), "page-h1", false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate, expectedId, shouldFail]) => ({
+    label,
+    expectedId,
+    shouldFail,
+    result: await applicationPageMutation({ mutate })
+  })));
+  const mismatches = outcomes
+    .filter(({ expectedId, shouldFail, result }) => errorIds(result).includes(expectedId) !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `named-reference mismatches: ${mismatches.join(", ")}`);
+});
+
+test("Plan 2 Task 1 fix round 4 honors exact-case and one-pass references in href and src", async () => {
+  const body = `
+    <a href="&Tab;&sol;missing-valid-tab/">Exact Tab and sol</a>
+    <a href="&NewLine;&sol;missing-valid-newline/">Exact NewLine and sol</a>
+    <a href="&TAB;&sol;not-local-invalid-tab/">Invalid uppercase Tab</a>
+    <a href="&newline;&sol;not-local-invalid-newline/">Invalid lowercase newline</a>
+    <a href="&#38;sol;not-local-numeric-one-pass/">Numeric to named one pass</a>
+    <a href="&AMP;sol;not-local-named-one-pass/">Uppercase AMP alias one pass</a>
+    <img src="&sol;assets/img/missing-valid-src.webp" alt="">
+    <img src="&SOL;assets/img/not-local-invalid-src.webp" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  const expectedTargets = [
+    "missing-valid-tab/index.html",
+    "missing-valid-newline/index.html",
+    "assets/img/missing-valid-src.webp"
+  ];
+  assert.equal(missing.length, expectedTargets.length, missing.join("\n"));
+  for (const target of expectedTargets) assert.ok(missing.some((entry) => entry.includes(target)), target);
+});
+
+test("Plan 2 Task 1 fix round 4 decodes only exact-case comma references in srcset", async () => {
+  const body = `
+    <img srcset="/assets/css/style.css 1x&comma; /missing-valid-comma.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&COMMA; /not-a-browser-candidate.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&#38;comma; /not-a-one-pass-candidate.webp 2x" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  assert.deepEqual(missing.map((entry) => /missing ([^ ]+)/.exec(entry)?.[1]), ["missing-valid-comma.webp"], missing.join("\n"));
+});
+
+test("Plan 2 Task 1 fix round 4 fails closed on unterminated CSS strings and preserves valid escapes", async () => {
+  const cases = [
+    ["unterminated quoted value with trailing escape", String.raw`style="font-family:'abc\"`, true],
+    ["unterminated quoted value", `style="font-family:'abc"`, true],
+    ["closed quoted value", `style="font-family:'abc'; color:red"`, false],
+    ["escaped quote", String.raw`style="font-family:'abc\'def'; color:red"`, false],
+    ["escaped backslash", String.raw`style="font-family:'abc\\'; color:red"`, false],
+    ["line continuation", `style="font-family:'abc\\\ndef'; color:red"`, false],
+    ["CRLF continuation", `style="font-family:'abc\\\r\ndef'; color:red"`, false],
+    ["quoted comments and declaration separators", `style="font-family:'abc;/*:*/def'; color:red"`, false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje</h1>", `<h1 ${style}>Aplikacje</h1>`) })
+  })));
+  const mismatches = outcomes
+    .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `CSS string mismatches: ${mismatches.join(", ")}`);
+});
+
 test("readFacts reads fixtures without starting CLI verification", async () => {
   const root = await fixture();
   const data = await readFacts({ root });

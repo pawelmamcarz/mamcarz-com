@@ -6,6 +6,7 @@ Branch: `codex/flight-plan-redesign`
 Fix-round 1 base: `f3405ee412807a7964563c75976555160cd5dfb1`
 Fix-round 2 base: `9823c5c601141efd7816ee0ce4b938892f1006ce`
 Fix-round 3 base: `5fc8ebe9d03c041f814d425173ae851851c5516b`
+Fix-round 4 base: `2b355a4a2d84138b6826d5a17b0762e79dea7fa5`
 
 ## Scope delivered
 
@@ -115,6 +116,28 @@ pass 459
 fail 0
 ```
 
+### Independent review fix round 4
+
+Four focused behavioral tests were added before implementation. The exact RED checkpoint was:
+
+```text
+node --test --test-name-pattern="Plan 2 Task 1 fix round 4" scripts/verify-site.test.mjs
+tests 4
+pass 0
+fail 4
+```
+
+The named-reference mutations exposed four rendered-text/style mismatches, seven `href`/`src` local targets instead of the three browser-relevant targets, and three `srcset` local targets instead of one. This reproduced invalid-case `TAB`, `NewLine`, `SOL`, `COLON` and `COMMA` decoding, missing exact lowercase `bsol`, and a numeric-to-named second decode. The CSS mutation separately showed that both an unterminated quoted value and the exact trailing-escape reproduction remained falsely visible. Valid quoted strings, escaped quotes and backslashes, LF/CRLF continuations, comments and declaration separators were positive controls.
+
+The bounded fix replaces chained case-insensitive named replacements with a single-pass scanner plus an exact-case verifier-sensitive HTML5 map. Numeric references retain decimal/hexadecimal and optional-semicolon behavior, while replacement output is never scanned again. The checked CSS escape path now reports an unterminated quote and the inline visibility check fails closed on that lexical uncertainty. The focused checkpoint is 4/4 GREEN. All Task 1 tests are 34/34 GREEN and the complete suite is:
+
+```text
+npm run test:verify-site
+tests 463
+pass 463
+fail 0
+```
+
 Mutation and fixture coverage includes:
 
 - exact manifest membership, every accepted family and invalid-family fail-closed behavior;
@@ -139,6 +162,8 @@ Mutation and fixture coverage includes:
 - complete-attribute `srcset` entity decoding before separator parsing, covering decimal, hexadecimal and named comma/solidus/whitespace references plus once-decoded query and protocol-relative controls.
 - `srcset` URL-token parsing for ordinary, descriptor-free and multi-descriptor candidates, repeated separators, and comma-bearing data, external, protocol-relative and real local URLs;
 - semicolonless decimal/hexadecimal HTML references plus CSS-escaped inline property names and values, including terminator whitespace, mixed/simple escapes, fail-closed malformed escapes, and one-decode/benign-backslash controls.
+- exact-case named references across rendered text, inline styles, `href`, `src` and `srcset`, including lowercase `colon`, `comma`, `sol`, `bsol`, exact `Tab`/`NewLine`, invalid-case controls and numeric/named one-pass controls;
+- unterminated inline CSS quoted values and trailing escapes fail closed, while closed strings, escaped quotes/backslashes, valid LF/CRLF continuation, quoted comments and declaration separators remain accepted.
 
 ## Interfaces and behavior
 
@@ -146,7 +171,7 @@ Mutation and fixture coverage includes:
 
 For a selected family, a missing local target is deferred only when its mapped file is exactly the PL or EN file of a `ROUTE_PAIRS` entry owned by another family and `stat()` reports `ENOENT`. `NOT_FILE`, permission/other filesystem errors, `family=all`, the selected family's own route files, assets and paths outside the manifest remain failures.
 
-Page checks use the existing parsed HTML tree and active/visibility helpers. Each page must have exactly one active root `html` element whose only direct element children are one `head` followed by one `body`; nested, duplicated or misordered document elements fail closed. Canonical and hreflang metadata must be descendants of that direct `head`. Inline hiding and closed disclosures are modeled for visible content. Inline styles receive one HTML-entity decode pass, including browser-relevant semicolonless numeric references; valid CSS comments are removed, declaration property names and values are CSS-escape decoded, and unterminated comments or malformed escapes fail closed. Advisory submenu links remain structurally verifiable as content available when their disclosure opens. Controlled shell resources require exact attribute sets and cache version `v=20260825-flightplan-2`; inactive decoys cannot satisfy the contract.
+Page checks use the existing parsed HTML tree and active/visibility helpers. Each page must have exactly one active root `html` element whose only direct element children are one `head` followed by one `body`; nested, duplicated or misordered document elements fail closed. Canonical and hreflang metadata must be descendants of that direct `head`. Inline hiding and closed disclosures are modeled for visible content. Text and attributes receive exactly one HTML-reference decode pass: decimal/hexadecimal references retain optional-semicolon behavior, and named references use an exact-case bounded HTML5 map for the verifier-sensitive paths. Valid CSS comments are removed, declaration property names and values are CSS-escape decoded, and unterminated comments, malformed escapes or unterminated quoted values fail closed. Advisory submenu links remain structurally verifiable as content available when their disclosure opens. Controlled shell resources require exact attribute sets and cache version `v=20260825-flightplan-2`; inactive decoys cannot satisfy the contract.
 
 Local URL attributes are HTML-entity decoded once and stripped only of surrounding browser ASCII whitespace before root-relative classification. The bounded `srcset` scanner skips leading separators, collects each complete URL token through non-space characters, distinguishes trailing URL separators, and consumes descriptors to the next candidate separator. Encoded separators therefore cannot conceal a target, commas within URL tokens do not create false candidates, and double-encoded values are not reinterpreted. Internal whitespace is preserved. `data-fact-ids` remain HTML-whitespace tokenized, approved-only and now unique within each attribute.
 
@@ -164,8 +189,9 @@ Fresh results on Node.js v26.7.0:
 | fix-round 1 focused tests | PASS, 8/8 |
 | fix-round 2 focused tests | PASS, 3/3 |
 | fix-round 3 focused tests | PASS, 2/2 |
-| all Plan 2 Task 1 focused tests | PASS, 30/30 |
-| `npm run test:verify-site` | PASS, 459/459 |
+| fix-round 4 focused tests | PASS, 4/4 |
+| all Plan 2 Task 1 focused tests | PASS, 34/34 |
+| `npm run test:verify-site` | PASS, 463/463 |
 | `npm run verify:home` | PASS |
 | `npm run verify:facts` | PASS |
 | `npm run verify:foundation` | PASS |
@@ -206,4 +232,6 @@ The six `route-file` errors are the planned PL/EN application, aviation and know
 - The six new hub files remain absent intentionally.
 - Existing pages remain on the legacy shell and cache version until their owning tasks migrate them.
 - Procurement parent and artifact substantive checks remain owned by Tasks 7 and 8.
+- HTML named-reference support is intentionally bounded to references used by verifier-sensitive rendered text, inline style and URL normalization. It is not a complete HTML tokenizer and does not add semicolonless named-reference parsing; numeric references remain semicolon-optional as before.
+- CSS visibility analysis remains limited to statically knowable inline `display` and `visibility` declarations plus lexical fail-closed checks. It does not implement selector matching, cascade, custom-property resolution or a complete CSS grammar.
 - This task does not push, merge, deploy or access production.

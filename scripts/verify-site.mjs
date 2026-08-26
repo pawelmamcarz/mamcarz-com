@@ -74,20 +74,27 @@ function normalize(text) {
     .toLocaleLowerCase("en-US");
 }
 
+const htmlNamedCharacterReferences = new Map([
+  ["AMP", "&"], ["amp", "&"],
+  ["LT", "<"], ["lt", "<"],
+  ["GT", ">"], ["gt", ">"],
+  ["QUOT", '"'], ["quot", '"'],
+  ["apos", "'"],
+  ["mdash", "—"],
+  ["nbsp", "\u00a0"],
+  ["sol", "/"], ["bsol", "\\"],
+  ["Tab", "\t"], ["NewLine", "\n"],
+  ["colon", ":"], ["comma", ","]
+]);
+
 function decodeHtmlEntities(text) {
-  return text
-    .replace(/&#(x[0-9a-f]+|\d+);?/gi, (_match, entity) => {
-      const codePoint = Number.parseInt(entity.slice(0, 1).toLowerCase() === "x" ? entity.slice(1) : entity, entity.slice(0, 1).toLowerCase() === "x" ? 16 : 10);
-      return codePoint > 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "�";
-    })
-    .replace(/&mdash;/gi, "—")
-    .replace(/&nbsp;/gi, "\u00a0")
-    .replace(/&sol;/gi, "/")
-    .replace(/&tab;/gi, "\t")
-    .replace(/&newline;/gi, "\n")
-    .replace(/&colon;/gi, ":")
-    .replace(/&comma;/gi, ",")
-    .replace(/&amp;/gi, "&");
+  return text.replace(/&#(?:[xX][0-9a-fA-F]+|\d+);?|&([A-Za-z][A-Za-z0-9]+);/g, (match, named) => {
+    if (named !== undefined) return htmlNamedCharacterReferences.get(named) ?? match;
+    const entity = match.slice(2).replace(/;$/, "");
+    const hexadecimal = entity[0] === "x" || entity[0] === "X";
+    const codePoint = Number.parseInt(hexadecimal ? entity.slice(1) : entity, hexadecimal ? 16 : 10);
+    return codePoint > 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "�";
+  });
 }
 
 function renderedText(html) {
@@ -276,7 +283,8 @@ function elementHasHiddenInlineStyle(element) {
   if (!nonEmptyString(style)) return false;
   const commentScan = stripCssComments(decodeHtmlEntities(style));
   if (commentScan.unterminatedCommentAt !== -1) return true;
-  if (decodeCssEscapesChecked(commentScan.css).malformedEscapeAt !== -1) return true;
+  const escapeScan = decodeCssEscapesChecked(commentScan.css);
+  if (escapeScan.malformedEscapeAt !== -1 || escapeScan.unterminatedQuoteAt !== -1) return true;
   const declarations = new Map([...parseDeclarations(commentScan.css)].map(([property, value]) => [
     decodeCssEscapes(property).trim().toLowerCase(),
     decodeCssEscapes(value)
@@ -1866,6 +1874,7 @@ function parseDeclarations(body) {
 function decodeCssEscapesChecked(source) {
   let decoded = "";
   let quote = null;
+  let quoteStart = -1;
   let escaped = false;
   let malformedEscapeAt = -1;
   for (let index = 0; index < source.length; index += 1) {
@@ -1879,6 +1888,7 @@ function decodeCssEscapesChecked(source) {
     }
     if (character === "'" || character === '"') {
       quote = character;
+      quoteStart = index;
       decoded += character;
       continue;
     }
@@ -1901,7 +1911,7 @@ function decodeCssEscapesChecked(source) {
       index += 1;
     }
   }
-  return { decoded, malformedEscapeAt };
+  return { decoded, malformedEscapeAt, unterminatedQuoteAt: quote === null ? -1 : quoteStart };
 }
 
 function decodeCssEscapes(source) {
