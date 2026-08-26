@@ -1,136 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diagram 2 · SAP Ariba Module Mapping</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#08090b;color:#f3f0ea;font-family:'DM Sans',sans-serif;min-height:100vh;padding:30px 20px}
-h1{font-family:'Space Mono',monospace;font-size:clamp(1.2rem,2.5vw,1.8rem);text-align:center;color:#F97316;margin-bottom:2px}
-.sub{text-align:center;font-size:.78rem;color:#9ea2a6;margin-bottom:4px;font-style:italic}
-.brand{text-align:center;font-size:.62rem;color:#6f7378;letter-spacing:2px;text-transform:uppercase;font-family:'Space Mono',monospace;margin-bottom:28px}
-
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:1100px;margin:0 auto}
-.section-header{grid-column:1/-1;padding:10px 18px;border-radius:10px;font-family:'Space Mono',monospace;font-size:.82rem;font-weight:700;letter-spacing:1px}
-.sh-s{background:rgba(249,115,22,.1);color:#F97316;border:1px solid rgba(249,115,22,.2)}
-.sh-o{background:rgba(59,130,246,.1);color:#3B82F6;border:1px solid rgba(59,130,246,.2)}
-.sh-n{background:rgba(168,85,247,.1);color:#A855F7;border:1px solid rgba(168,85,247,.2)}
-
-.card{background:#0f1013;border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:18px 20px;transition:border-color .3s,transform .2s}
-.card:hover{border-color:#cdac6b;transform:translateY(-2px)}
-.card-num{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;float:right;line-height:1}
-.card-num.s{color:rgba(249,115,22,.3)}.card-num.o{color:rgba(59,130,246,.3)}.card-num.n{color:rgba(168,85,247,.3)}
-.card h3{font-size:.88rem;font-weight:700;margin-bottom:8px}
-.card h3.s{color:#F97316}.card h3.o{color:#3B82F6}.card h3.n{color:#A855F7}
-.card .desc{font-size:.75rem;color:#9ea2a6;line-height:1.55;margin-bottom:12px}
-.modules{display:flex;flex-wrap:wrap;gap:5px}
-.mod{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:500;transition:background .2s}
-.mod-s{background:rgba(249,115,22,.1);color:#F97316;border:1px solid rgba(249,115,22,.25)}
-.mod-o{background:rgba(59,130,246,.1);color:#3B82F6;border:1px solid rgba(59,130,246,.25)}
-.mod-n{background:rgba(168,85,247,.1);color:#A855F7;border:1px solid rgba(168,85,247,.25)}
-.mod-bn{background:rgba(6,182,212,.1);color:#06B6D4;border:1px solid rgba(6,182,212,.25)}
-.mod-ext{background:rgba(34,197,94,.1);color:#22C55E;border:1px solid rgba(34,197,94,.25)}
-
-.note{font-size:.7rem;color:#6f7378;font-style:italic;margin-top:8px}
-
-.footer{text-align:center;margin-top:28px;padding-top:18px;border-top:1px solid rgba(255,255,255,.10)}
-.footer .legend{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
-.footer .li{display:flex;align-items:center;gap:5px;font-size:.66rem;color:#9ea2a6}
-.footer .ld{width:8px;height:8px;border-radius:3px}
-.footer p{font-size:.68rem;color:#6f7378}
-
-@media(max-width:700px){.grid{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conceptual SAP procurement map</title>
+  <style>
+    @font-face { font-family: "Artifact Display"; src: url("/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+    @font-face { font-family: "Artifact Text"; src: url("/assets/fonts/dmsans-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+    @font-face { font-family: "Artifact Data"; src: url("/assets/fonts/dmmono-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+    :root {
+      --artifact-bg: #102831;
+      --artifact-panel: #193D49;
+      --artifact-paper: #E9EDEF;
+      --artifact-line: #8E9CA1;
+      --artifact-signal: #D94B2B;
+      --artifact-white: #F7F9F8;
+      --artifact-muted: #C5D0D3;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--artifact-bg); }
+    body { margin: 0; background: var(--artifact-bg); color: var(--artifact-paper); font-family: "Artifact Text", Arial, sans-serif; line-height: 1.55; overflow-wrap: anywhere; }
+    .artifact-toolbar { border-bottom: 1px solid var(--artifact-line); padding: 8px clamp(20px, 4vw, 48px); }
+    .artifact-toolbar a { align-items: center; color: var(--artifact-white); display: inline-flex; min-block-size: 44px; padding-inline: 4px; text-underline-offset: 4px; }
+    .artifact-toolbar a:focus-visible { outline: 3px solid var(--artifact-paper); outline-offset: 3px; }
+    .artifact-shell { margin: 0 auto; max-width: 1280px; padding: clamp(24px, 5vw, 64px) clamp(20px, 4vw, 48px) 64px; }
+    .artifact-header { border-bottom: 2px solid var(--artifact-line); display: grid; gap: 8px; padding-bottom: 24px; }
+    .artifact-kicker, .model-cell__marker { color: var(--artifact-muted); font-family: "Artifact Data", monospace; font-size: 0.75rem; letter-spacing: 0.08em; margin: 0; text-transform: uppercase; }
+    h1, h2, h3 { font-family: "Artifact Display", Arial, sans-serif; font-weight: 600; line-height: 1.08; margin: 0; }
+    h1 { font-size: clamp(2.2rem, 7vw, 5rem); max-width: 15ch; }
+    h2 { font-size: clamp(1.5rem, 3vw, 2.3rem); }
+    h3 { font-size: 1.2rem; }
+    .artifact-lead { color: var(--artifact-muted); margin: 0; max-width: 68ch; }
+    .artifact-disclaimer, .artifact-product-disclaimer { margin: 24px 0 0; max-width: 96ch; padding: 16px 18px; }
+    .artifact-disclaimer { background: var(--artifact-paper); border-left: 5px solid var(--artifact-signal); color: var(--artifact-bg); }
+    .artifact-product-disclaimer { border: 1px solid var(--artifact-line); color: var(--artifact-muted); }
+    .model-map { border-bottom: 1px solid var(--artifact-line); margin-top: 40px; }
+    .model-group { border-top: 2px solid var(--artifact-line); display: grid; grid-template-columns: minmax(190px, 0.28fr) minmax(0, 1fr); }
+    .model-group__heading { background: var(--artifact-panel); border-right: 1px solid var(--artifact-line); padding: 20px; }
+    .model-group__heading p { color: var(--artifact-muted); margin: 8px 0 0; }
+    .model-group__cells { min-width: 0; }
+    .model-cell { border-bottom: 1px solid var(--artifact-line); display: grid; gap: 12px; grid-template-columns: 54px minmax(180px, 0.5fr) minmax(220px, 1fr); padding: 18px 20px; }
+    .model-cell:last-child { border-bottom: 0; }
+    .model-cell__marker { color: var(--artifact-paper); font-size: 1rem; }
+    .model-cell__question { color: var(--artifact-muted); margin: 6px 0 0; max-width: 54ch; }
+    .model-vocabulary { align-content: start; display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+    .model-vocabulary__item { border: 1px solid var(--artifact-line); color: var(--artifact-paper); font-size: 0.82rem; padding: 5px 8px; }
+    .model-vocabulary__item[data-product-name] { border-left: 4px solid var(--artifact-signal); }
+    @media (max-width: 760px) {
+      .model-group { grid-template-columns: 1fr; }
+      .model-group__heading { border-bottom: 1px solid var(--artifact-line); border-right: 0; }
+      .model-cell { grid-template-columns: 42px minmax(0, 1fr); padding-inline: 12px; }
+      .model-vocabulary { grid-column: 1 / -1; }
+      .artifact-shell { padding-bottom: 40px; }
+    }
+  </style>
 </head>
-<body>
-
-<h1>SAP Ariba / Platform Module Mapping</h1>
-<div class="sub">Process steps → SAP modules & ecosystem partners · Kontekst apsolut Group</div>
-<div class="brand">apsolut · All for One Group · SAP Gold Partner</div>
-
-<div class="grid" id="grid"></div>
-
-<div class="footer">
-  <div class="legend">
-    <div class="li"><div class="ld" style="background:#F97316"></div>SAP Ariba (Strategic)</div>
-    <div class="li"><div class="ld" style="background:#3B82F6"></div>SAP Ariba (Operational)</div>
-    <div class="li"><div class="ld" style="background:#06B6D4"></div>SAP Business Network</div>
-    <div class="li"><div class="ld" style="background:#A855F7"></div>SAP Platform / AI</div>
-    <div class="li"><div class="ld" style="background:#22C55E"></div>Ecosystem / 3rd Party</div>
-  </div>
-  <p>Module mapping based on SAP Ariba portfolio as of 2026. Ecosystem partners are indicative.</p>
-</div>
-
-<script>
-const data=[
-  {type:'header',cls:'sh-s',text:'STRATEGIC PROCUREMENT MANAGEMENT · Up-Stream / e-Sourcing'},
-  {n:'1',cls:'s',title:'Procurement Planning',
-   desc:'Demand sensing, ML-powered predictive planning, S&OP integration, budget alignment',
-   mods:[{t:'SAP S/4HANA Procurement Planning',c:'mod-s'},{t:'SAP IBP',c:'mod-s'},{t:'Ariba Spend Analysis',c:'mod-s'}]},
-  {n:'2',cls:'s',title:'Market Analysis',
-   desc:'AI market intelligence, commodity monitoring, geopolitical signal scanning, price prediction',
-   mods:[{t:'Ariba Discovery',c:'mod-s'},{t:'Ariba Spend Analysis',c:'mod-s'},{t:'SAP Business AI',c:'mod-n'},{t:'Commodity IQ / external feeds',c:'mod-ext'}]},
-  {n:'3',cls:'s',title:'Category Strategy Definition',
-   desc:'Data-driven strategies with ESG targets, risk appetite frameworks, scenario modelling',
-   mods:[{t:'Ariba Strategic Sourcing Suite',c:'mod-s'},{t:'Ariba Category Management',c:'mod-s'},{t:'SAP Analytics Cloud',c:'mod-n'}]},
-  {n:'4',cls:'s',title:'Sourcing & Supplier Appraisal',
-   desc:'AI-managed RFx, autonomous bid evaluation, ESG + risk qualification, supplier onboarding',
-   mods:[{t:'Ariba Sourcing',c:'mod-s'},{t:'Ariba SLP',c:'mod-s'},{t:'SAP Business Network',c:'mod-bn'},{t:'Joule AI (RFx)',c:'mod-n'},{t:'EcoVadis / IntegrityNext',c:'mod-ext'}]},
-  {n:'5',cls:'s',title:'Contracting & Implementation',
-   desc:'Smart contracts, AI clause negotiation, risk identification, CSDDD due diligence',
-   mods:[{t:'Ariba Contracts',c:'mod-s'},{t:'Ariba Supplier Risk',c:'mod-s'},{t:'SAP Signavio',c:'mod-n'},{t:'DocuSign / Icertis',c:'mod-ext'}]},
-
-  {type:'header',cls:'sh-o',text:'OPERATIONAL PROCUREMENT MANAGEMENT · Down-Stream / e-Procurement'},
-  {n:'6',cls:'o',title:'Product/Service Identification',
-   desc:'Guided buying with AI catalogs, preferred supplier matching, maverick spend detection',
-   mods:[{t:'Ariba Buying & Invoicing',c:'mod-o'},{t:'Ariba Catalog',c:'mod-o'},{t:'Ariba Spot Buy',c:'mod-o'},{t:'Amazon Business / Mercateo',c:'mod-ext'}]},
-  {n:'7',cls:'o',title:'PR & Authorization',
-   desc:'Intake management, smart approval routing, auto-approve low-risk, budget validation',
-   mods:[{t:'Ariba Buying',c:'mod-o'},{t:'Ariba Intake Management',c:'mod-o'},{t:'Joule AI (approvals)',c:'mod-n'}]},
-  {n:'8',cls:'o',title:'Purchase Order',
-   desc:'Touchless PO at 90%+ automation, dynamic creation from contracts/catalogs, real-time confirmation',
-   mods:[{t:'Ariba Buying',c:'mod-o'},{t:'SAP Business Network',c:'mod-bn'},{t:'SAP S/4HANA MM',c:'mod-o'}]},
-  {n:'9',cls:'o',title:'Order Delivery Monitoring',
-   desc:'Digital twin shipment tracking, predictive risk scoring, auto-escalation, carbon per shipment',
-   mods:[{t:'SAP Business Network',c:'mod-bn'},{t:'Ariba Supply Chain Collaboration',c:'mod-o'},{t:'SAP TM / SAP BTP',c:'mod-n'},{t:'FourKites / project44',c:'mod-ext'}]},
-  {n:'10',cls:'o',title:'Invoicing & Payment',
-   desc:'Touchless invoices, AI 3-way matching, dynamic discounting, SCF, working capital optimization',
-   mods:[{t:'Ariba Invoice Management',c:'mod-o'},{t:'Ariba Supply Chain Finance',c:'mod-o'},{t:'SAP Business Network',c:'mod-bn'},{t:'Taulia / CRX Markets',c:'mod-ext'}]},
-
-  {type:'header',cls:'sh-n',text:'NEW LAYERS 2026 · AI, Risk, ESG, Data, SRM 2.0'},
-  {n:'AI',cls:'n',title:'AI & Orchestration Layer',
-   desc:'End-to-end AI orchestration from intake to payment. Agent architects supervise autonomous workflows.',
-   mods:[{t:'Joule AI',c:'mod-n'},{t:'SAP Business AI',c:'mod-n'},{t:'SAP Signavio (Process Intelligence)',c:'mod-n'},{t:'SAP Build Process Automation',c:'mod-n'}]},
-  {n:'R',cls:'n',title:'Risk & Resilience Layer',
-   desc:'Continuous multi-tier monitoring, digital twins for disruption scenarios, geopolitical + climate signals.',
-   mods:[{t:'Ariba Supplier Risk',c:'mod-s'},{t:'SAP BN Risk Insights',c:'mod-bn'},{t:'Resilinc',c:'mod-ext'},{t:'Everstream Analytics',c:'mod-ext'}]},
-  {n:'E',cls:'n',title:'ESG & Sustainability Layer',
-   desc:'Scope 3 tracking per transaction, CSRD/CSDDD compliance automation, circular procurement metrics.',
-   mods:[{t:'Ariba Supplier Risk (ESG)',c:'mod-s'},{t:'SAP Sustainability Control Tower',c:'mod-n'},{t:'SAP Green Ledger',c:'mod-n'},{t:'EcoVadis',c:'mod-ext'}]},
-  {n:'D',cls:'n',title:'Data & Analytics Foundation',
-   desc:'Unified data fabric, master data quality as KPI, spend cubes, supplier 360°, predictive analytics.',
-   mods:[{t:'Ariba Spend Analysis',c:'mod-s'},{t:'SAP Datasphere',c:'mod-n'},{t:'SAP Analytics Cloud',c:'mod-n'},{t:'SAP Master Data Governance',c:'mod-n'}]},
-  {n:'S',cls:'n',title:'SRM 2.0 / Supplier Innovation',
-   desc:'Joint development programs, preferred innovation queues, technology co-creation, ecosystem building.',
-   mods:[{t:'Ariba SLP',c:'mod-s'},{t:'SAP Business Network (Collaboration)',c:'mod-bn'},{t:'SAP Ariba Discovery',c:'mod-s'}]},
-];
-
-const grid=document.getElementById('grid');
-data.forEach(item=>{
-  if(item.type==='header'){
-    const el=document.createElement('div');
-    el.className=`section-header ${item.cls}`;
-    el.textContent=item.text;
-    grid.appendChild(el);
-  } else {
-    const el=document.createElement('div');
-    el.className='card';
-    el.innerHTML=`<div class="card-num ${item.cls}">${item.n}</div><h3 class="${item.cls}">${item.title}</h3><div class="desc">${item.desc}</div><div class="modules">${item.mods.map(m=>`<span class="mod ${m.c}">${m.t}</span>`).join('')}</div>`;
-    grid.appendChild(el);
-  }
-});
-</script>
+<body data-artifact="ariba-map">
+  <nav class="artifact-toolbar" aria-label="Artifact navigation">
+    <a href="/procurement-2026/" target="_top">Back to the Polish Procurement 2026 page</a>
+  </nav>
+  <main class="artifact-shell">
+    <header class="artifact-header">
+      <p class="artifact-kicker">Workshop vocabulary</p>
+      <h1>Conceptual SAP procurement map</h1>
+      <p class="artifact-lead">A static vocabulary for discussing a landscape. Each placement is a workshop hypothesis to verify for the organisation, not an implementation bill of materials or portfolio snapshot.</p>
+    </header>
+    <p class="artifact-disclaimer">This is a conceptual procurement operating model. Capability descriptions and scores are illustrative target-state assumptions, not claims about current product availability, legal compliance or a measured organisation.</p>
+    <p class="artifact-product-disclaimer">Product names are model labels. Verify availability, scope and licensing for the relevant SAP landscape.</p>
+    <div class="model-map">
+      <section class="model-group" data-map-group="strategic">
+        <header class="model-group__heading">
+          <h2>Strategic sequence</h2>
+          <p>Five ordered decision areas before operational buying.</p>
+        </header>
+        <div class="model-group__cells">
+          <article class="model-cell" data-marker="1" data-record-id="s1">
+            <p class="model-cell__marker">1</p>
+            <div><h3>Procurement Planning</h3><p class="model-cell__question">Workshop question: which planning inputs and ownership rules belong in the landscape?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP S/4HANA">SAP S/4HANA</li><li class="model-vocabulary__item" data-model-label="Organisation-specific data">Organisation-specific data</li></ul>
+          </article>
+          <article class="model-cell" data-marker="2" data-record-id="s2">
+            <p class="model-cell__marker">2</p>
+            <div><h3>Market Analysis</h3><p class="model-cell__question">Workshop question: which market and internal inputs support the analysis?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-model-label="External market inputs">External market inputs</li><li class="model-vocabulary__item" data-model-label="Organisation-specific data">Organisation-specific data</li></ul>
+          </article>
+          <article class="model-cell" data-marker="3" data-record-id="s3">
+            <p class="model-cell__marker">3</p>
+            <div><h3>Category Strategy Definition</h3><p class="model-cell__question">Workshop question: which suite scope supports the chosen category workflow?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Strategic Sourcing Suite">SAP Ariba Strategic Sourcing Suite</li></ul>
+          </article>
+          <article class="model-cell" data-marker="4" data-record-id="s4">
+            <p class="model-cell__marker">4</p>
+            <div><h3>Sourcing &amp; Supplier Appraisal</h3><p class="model-cell__question">Workshop question: which sourcing, lifecycle and risk labels require landscape validation?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Sourcing">SAP Ariba Sourcing</li><li class="model-vocabulary__item" data-product-name="SAP Ariba Supplier Lifecycle and Performance">SAP Ariba Supplier Lifecycle and Performance</li><li class="model-vocabulary__item" data-product-name="SAP Ariba Supplier Risk">SAP Ariba Supplier Risk</li></ul>
+          </article>
+          <article class="model-cell" data-marker="5" data-record-id="s5">
+            <p class="model-cell__marker">5</p>
+            <div><h3>Contracting &amp; Implementation</h3><p class="model-cell__question">Workshop question: how are contract records and implementation controls divided?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Contracts">SAP Ariba Contracts</li><li class="model-vocabulary__item" data-model-label="Implementation-specific controls">Implementation-specific controls</li></ul>
+          </article>
+        </div>
+      </section>
+      <section class="model-group" data-map-group="operational">
+        <header class="model-group__heading">
+          <h2>Operational sequence</h2>
+          <p>Five ordered areas from stated need to invoice and payment decisions.</p>
+        </header>
+        <div class="model-group__cells">
+          <article class="model-cell" data-marker="6" data-record-id="o1">
+            <p class="model-cell__marker">6</p>
+            <div><h3>Product or Service Identification</h3><p class="model-cell__question">Workshop question: which channels and catalogue rules guide a stated need?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Buying and Invoicing">SAP Ariba Buying and Invoicing</li><li class="model-vocabulary__item" data-feature-label="guided buying">guided buying</li><li class="model-vocabulary__item" data-feature-label="catalogues">catalogues</li></ul>
+          </article>
+          <article class="model-cell" data-marker="7" data-record-id="o2">
+            <p class="model-cell__marker">7</p>
+            <div><h3>Purchase Requisition &amp; Authorization</h3><p class="model-cell__question">Workshop question: which workflow and budget controls apply to a request?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Buying and Invoicing">SAP Ariba Buying and Invoicing</li><li class="model-vocabulary__item" data-feature-label="approval workflows">approval workflows</li><li class="model-vocabulary__item" data-feature-label="budget checks">budget checks</li></ul>
+          </article>
+          <article class="model-cell" data-marker="8" data-record-id="o3">
+            <p class="model-cell__marker">8</p>
+            <div><h3>Purchase Order</h3><p class="model-cell__question">Workshop question: where do order records and network exchanges sit?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Buying and Invoicing">SAP Ariba Buying and Invoicing</li><li class="model-vocabulary__item" data-product-name="SAP Business Network for Procurement">SAP Business Network for Procurement</li></ul>
+          </article>
+          <article class="model-cell" data-marker="9" data-record-id="o4">
+            <p class="model-cell__marker">9</p>
+            <div><h3>Order Delivery Monitoring</h3><p class="model-cell__question">Workshop question: which exchanges, acknowledgements and integrations are in scope?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Business Network for Procurement">SAP Business Network for Procurement</li><li class="model-vocabulary__item" data-feature-label="network-based collaboration">network-based collaboration</li><li class="model-vocabulary__item" data-model-label="Integration decision">Integration decision</li></ul>
+          </article>
+          <article class="model-cell" data-marker="10" data-record-id="o5">
+            <p class="model-cell__marker">10</p>
+            <div><h3>Invoicing &amp; Payment</h3><p class="model-cell__question">Workshop question: which invoice decisions and exceptions are represented?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Buying and Invoicing">SAP Ariba Buying and Invoicing</li><li class="model-vocabulary__item" data-feature-label="invoice management">invoice management</li></ul>
+          </article>
+        </div>
+      </section>
+      <section class="model-group" data-map-group="lenses">
+        <header class="model-group__heading">
+          <h2>Scenario lenses</h2>
+          <p>Five cross-process questions that require implementation-specific validation.</p>
+        </header>
+        <div class="model-group__cells">
+          <article class="model-cell" data-marker="AI" data-record-id="ai-orch">
+            <p class="model-cell__marker">AI</p>
+            <div><h3>AI &amp; Orchestration</h3><p class="model-cell__question">Workshop question: where is automation appropriate and where is human oversight required?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-model-label="Implementation-specific controls">Implementation-specific controls</li><li class="model-vocabulary__item" data-model-label="Organisation-specific data">Organisation-specific data</li></ul>
+          </article>
+          <article class="model-cell" data-marker="R" data-record-id="risk">
+            <p class="model-cell__marker">R</p>
+            <div><h3>Risk &amp; Resilience</h3><p class="model-cell__question">Workshop question: which internal and external signals enter the risk workflow?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Supplier Risk">SAP Ariba Supplier Risk</li><li class="model-vocabulary__item" data-model-label="External market inputs">External market inputs</li></ul>
+          </article>
+          <article class="model-cell" data-marker="E" data-record-id="esg">
+            <p class="model-cell__marker">E</p>
+            <div><h3>ESG &amp; Sustainability</h3><p class="model-cell__question">Workshop question: which evidence, applicability decisions and controls are required?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-model-label="Organisation-specific data">Organisation-specific data</li><li class="model-vocabulary__item" data-model-label="Implementation-specific controls">Implementation-specific controls</li></ul>
+          </article>
+          <article class="model-cell" data-marker="D" data-record-id="data">
+            <p class="model-cell__marker">D</p>
+            <div><h3>Data &amp; Analytics</h3><p class="model-cell__question">Workshop question: which source owns each data object and reporting rule?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP S/4HANA">SAP S/4HANA</li><li class="model-vocabulary__item" data-model-label="Organisation-specific data">Organisation-specific data</li></ul>
+          </article>
+          <article class="model-cell" data-marker="S" data-record-id="srm">
+            <p class="model-cell__marker">S</p>
+            <div><h3>Supplier Relationship Management</h3><p class="model-cell__question">Workshop question: which governance and collaboration records belong in the landscape?</p></div>
+            <ul class="model-vocabulary"><li class="model-vocabulary__item" data-product-name="SAP Ariba Supplier Lifecycle and Performance">SAP Ariba Supplier Lifecycle and Performance</li><li class="model-vocabulary__item" data-product-name="SAP Business Network for Procurement">SAP Business Network for Procurement</li></ul>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
 </body>
 </html>

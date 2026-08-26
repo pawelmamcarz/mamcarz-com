@@ -29,6 +29,16 @@ const speakingProductHtml = {
   en: await readFile(resolve("en/wystapienia/index.html"), "utf8")
 };
 const procurementParentProductHtml = await readFile(resolve("procurement-2026/index.html"), "utf8");
+const artifactPaths = Object.freeze([
+  "diagrams/diagram1_universal.html",
+  "diagrams/diagram2_ariba.html",
+  "diagrams/diagram3_maturity.html",
+  "diagrams/infographic.html",
+  "infographic_procurement_2026_EN.html"
+]);
+const artifactProductHtml = Object.freeze(Object.fromEntries(await Promise.all(
+  artifactPaths.map(async (path) => [path, await readFile(resolve(path), "utf8")])
+)));
 const serviceProductHtml = Object.freeze({
   transformation: Object.freeze({
     pl: await readFile(resolve("uslugi/transformacja-zakupow/index.html"), "utf8"),
@@ -199,15 +209,13 @@ async function pageArchitectureFixture({ files, facts, public_claim_surfaces, ex
       "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
       "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
       "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
+      "assets/fonts/dmsans-latin.woff2": "fixture-font",
+      "assets/fonts/dmmono-latin.woff2": "fixture-font",
       "assets/img/signature.png": "fixture-image",
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
       "procurement-2026/index.html": procurementParentProductHtml,
-      "diagrams/infographic.html": "<!doctype html><title>Infographic</title>",
-      "diagrams/diagram1_universal.html": "<!doctype html><title>Process</title>",
-      "diagrams/diagram2_ariba.html": "<!doctype html><title>Ariba</title>",
-      "diagrams/diagram3_maturity.html": "<!doctype html><title>Maturity</title>",
-      "infographic_procurement_2026_EN.html": "<!doctype html><html><body>EN resource</body></html>",
+      ...artifactProductHtml,
       ...remaining
     }
   });
@@ -441,6 +449,27 @@ async function currentHomepageMutationFixture(lang, mutate) {
 
 function errorIds(result) {
   return result.errors.map((error) => error.split(" ")[1]);
+}
+
+async function artifactFamilyMutation({ path = null, mutate = (html) => html, overrides = {} } = {}) {
+  const files = { ...artifactProductHtml, ...overrides };
+  if (path !== null) {
+    const current = files[path];
+    assert.equal(typeof current, "string", `${path} must be an artifact fixture`);
+    const mutated = mutate(current);
+    assert.notEqual(mutated, current, `${path} mutation must change the fixture`);
+    files[path] = mutated;
+  }
+  const root = await fixture({
+    extraFiles: {
+      ...files,
+      "procurement-2026/index.html": "<!doctype html><html lang=\"pl\"><head><title>Procurement 2026</title></head><body><h1>Procurement 2026</h1></body></html>",
+      "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
+      "assets/fonts/dmsans-latin.woff2": "fixture-font",
+      "assets/fonts/dmmono-latin.woff2": "fixture-font"
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "artifacts" });
 }
 
 function publicSurfaceOptions(surface, text) {
@@ -947,7 +976,7 @@ test("Plan 2 Task 1 rejects an unsupported family before page verification", asy
 
 test("Plan 2 Task 1 CLI accepts artifacts explicitly and rejects an invalid family", async () => {
   const accepted = await execFileAsync(process.execPath, [modulePath, "--scope=pages", "--family=artifacts"]);
-  assert.match(accepted.stdout, /deferred: artifacts-contract/);
+  assert.match(accepted.stdout, /OK site verification \(pages\)/);
   await assert.rejects(
     execFileAsync(process.execPath, [modulePath, "--scope=pages", "--family=invalid-family"]),
     (cause) => cause.stderr.includes("ERROR cli-family scripts/verify-site.mjs: unsupported family invalid-family")
@@ -984,7 +1013,7 @@ test("Plan 2 Task 1 accepts a complete paired shell and exposes bounded future h
   const root = await pageArchitectureFixture();
   const result = await runVerification({ root, scope: "pages", family: "all" });
   assert.deepEqual(result.errors, []);
-  assert.deepEqual(result.deferred, ["artifacts-contract"]);
+  assert.deepEqual(result.deferred, []);
 });
 
 test("Plan 2 Task 1 counts only active h1 and main elements", async () => {
@@ -5676,4 +5705,120 @@ test("Task 7 foundation fails closed when the budgeted hero image is missing", a
   const root = await fixture({ css: foundationCss, heroImage: null });
   const result = await runVerification({ root, scope: "foundation" });
   assert.ok(errorIds(result).includes("budget-hero-image"));
+});
+
+test("Plan 2 Task 8 accepts the exact five-artifact family without a deferred contract", async () => {
+  const result = await artifactFamilyMutation();
+  assert.deepEqual(result.errors, [], result.errors.join("\n"));
+  assert.deepEqual(result.deferred, []);
+
+  const sixthArtifact = await artifactFamilyMutation({
+    overrides: { "diagrams/unplanned.html": artifactProductHtml["diagrams/infographic.html"] }
+  });
+  assert.ok(errorIds(sixthArtifact).includes("artifact-manifest"), sixthArtifact.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 independently enforces the shared artifact shell, resources, safety and claims", async () => {
+  const cases = [
+    ["artifact identity", "artifact-manifest", "diagrams/diagram1_universal.html", (html) => html.replace('data-artifact="process"', 'data-artifact="process-map"')],
+    ["toolbar destination", "artifact-toolbar", "diagrams/diagram1_universal.html", (html) => html.replace('href="/procurement-2026/" target="_top"', 'href="/" target="_top"')],
+    ["visual token", "artifact-style", "diagrams/diagram1_universal.html", (html) => html.replace('--artifact-signal: #D94B2B;', '--artifact-signal: #D94B2C;')],
+    ["external resource", "artifact-resource", "diagrams/diagram1_universal.html", (html) => html.replace('</style>', '@import url("https://example.com/font.css");</style>')],
+    ["inline style", "artifact-safety", "diagrams/diagram1_universal.html", (html) => html.replace('<main class="artifact-shell">', '<main class="artifact-shell" style="display:block">')],
+    ["unsafe DOM sink", "artifact-safety", "diagrams/diagram1_universal.html", (html) => html.replace('</script>', 'panel.innerHTML = "unsafe";</script>')],
+    ["encoded inactive claim", "artifact-claims", "diagrams/diagram1_universal.html", (html) => html.replace('</body>', '<!-- Reality&#x20;2026 --></body>')],
+    ["common disclaimer drift", "artifact-disclaimer", "diagrams/diagram1_universal.html", (html) => html.replace('This is a conceptual procurement operating model. Capability descriptions and scores are illustrative target-state assumptions, not claims about current product availability, legal compliance or a measured organisation.', 'This model is illustrative.')],
+    ["extra element", "artifact-census", "diagrams/diagram1_universal.html", (html) => html.replace('</main>', '<div>Unowned element</div></main>')]
+  ];
+  for (const [label, expected, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 protects the process record order, geometry mapping and keyboard contract", async () => {
+  const cases = [
+    ["record id", "process-records", (html) => html.replace('data-record-id="s1" data-record-kind="Strategic sequence"', 'data-record-id="s1x" data-record-kind="Strategic sequence"')],
+    ["geometry mapping", "process-geometry", (html) => html.replace('class="process-geometry" data-record-id="ai-orch"', 'class="process-geometry" data-record-id="srm"')],
+    ["panel linkage", "process-controls", (html) => html.replace('aria-controls="process-detail" aria-pressed="true"', 'aria-pressed="true"')],
+    ["Space key", "process-interaction", (html) => html.replace('event.key !== " "', 'event.key !== "Spacebar"')],
+    ["markup-shaped description", "process-records", (html) => html.replace('Demand, budget assumptions, timing and decision ownership.', 'Demand, budget assumptions, timing and decision ownership. &lt;img src=x onerror=alert(1)&gt;')]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: "diagrams/diagram1_universal.html", mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 protects the static SAP workshop map and its bounded vocabulary", async () => {
+  const cases = [
+    ["marker", "ariba-map-model", (html) => html.replace('data-marker="1" data-record-id="s1"', 'data-marker="01" data-record-id="s1"')],
+    ["process title", "ariba-map-model", (html) => html.replace('<h3>Procurement Planning</h3>', '<h3>Predictive Procurement Planning</h3>')],
+    ["unverified product", "ariba-map-taxonomy", (html) => html.replace('</ul>', '<li data-product-name="Joule AI (RFx)">Joule AI (RFx)</li></ul>')],
+    ["fake interaction", "ariba-map-static", (html) => html.replace('<article class="model-cell"', '<article class="model-cell" tabindex="0"')],
+    ["old partner status", "artifact-claims", (html) => html.replace('</main>', '<p>SAP Gold Partner</p></main>')]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: "diagrams/diagram2_ariba.html", mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 protects the maturity model inventory, native controls, guards and formulas", async () => {
+  const cases = [
+    ["initial value", "maturity-model", (html) => html.replace('data-dimension="ai" data-baseline="1" data-target="4"', 'data-dimension="ai" data-baseline="2" data-target="4"')],
+    ["radio range", "maturity-controls", (html) => html.replace('name="ai-baseline" value="5"', 'name="ai-baseline" value="6"')],
+    ["native control type", "maturity-controls", (html) => html.replace('type="radio" name="ai-baseline" value="1"', 'type="checkbox" name="ai-baseline" value="1"')],
+    ["stable tie order", "maturity-formulas", (html) => html.replace('b.gap - a.gap || a.order - b.order', 'b.gap - a.gap || b.order - a.order')],
+    ["dimension allowlist", "maturity-guards", (html) => html.replace('allowedIds.has(id)', 'id.length > 0')]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: "diagrams/diagram3_maturity.html", mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 maturity calculator derives the approved illustrative initial outputs", () => {
+  const html = artifactProductHtml["diagrams/diagram3_maturity.html"];
+  const script = /<script>([\s\S]*?)<\/script>/.exec(html)?.[1];
+  assert.ok(script, "maturity artifact must expose one inline behavior script");
+  const sandbox = {};
+  runInNewContext(script, sandbox);
+  const input = [
+    { id: "ai", label: "AI & Orchestration", baseline: 1, target: 4 },
+    { id: "risk", label: "Risk & Resilience", baseline: 1, target: 4 },
+    { id: "esg", label: "ESG / Sustainability", baseline: 1, target: 3 },
+    { id: "data", label: "Data & Analytics", baseline: 2, target: 4 },
+    { id: "srm", label: "Supplier Relationship Management", baseline: 2, target: 4 },
+    { id: "strat", label: "Strategic Procurement", baseline: 3, target: 5 },
+    { id: "oper", label: "Operational Procurement", baseline: 3, target: 5 },
+    { id: "integ", label: "Platform Integration", baseline: 2, target: 5 }
+  ];
+  const actual = JSON.parse(JSON.stringify(sandbox.procurementMaturityModel.calculateScenario(input)));
+  assert.deepEqual(actual, {
+    baselineAverage: "1.9",
+    targetAverage: "4.3",
+    totalGap: 19,
+    maximumGap: 3,
+    baselineScore: 38,
+    largestGaps: [
+      { id: "ai", label: "AI & Orchestration", gap: 3 },
+      { id: "risk", label: "Risk & Resilience", gap: 3 },
+      { id: "integ", label: "Platform Integration", gap: 3 },
+      { id: "esg", label: "ESG / Sustainability", gap: 2 }
+    ]
+  });
+});
+
+test("Plan 2 Task 8 requires exact infographic byte parity, process order and non-claim notes", async () => {
+  const cases = [
+    ["byte parity", "infographic-parity", "infographic_procurement_2026_EN.html", (html) => html.replace('People and decision rights remain explicit.', 'People and decision rights stay explicit.')],
+    ["stage order", "infographic-model", "diagrams/infographic.html", (html) => html.replace('data-stage="needs">Needs Definition', 'data-stage="needs">Supplier Selection')],
+    ["note contract", "infographic-model", "diagrams/infographic.html", (html) => html.replace('Legal applicability and evidence requirements require separate validation.', 'Legal controls are automatic.')],
+    ["extra active content", "artifact-census", "diagrams/infographic.html", (html) => html.replace('</body>', '<script>globalThis.extra = true;</script></body>')]
+  ];
+  for (const [label, expected, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
 });

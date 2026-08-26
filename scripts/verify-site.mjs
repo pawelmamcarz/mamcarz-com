@@ -1,4 +1,4 @@
-import { readFile, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -6282,9 +6282,499 @@ async function verifyProcurementParent(_factData, context) {
   await verifyLocalLinks(path, parsedRoot, "speaking", context);
 }
 
+const ARTIFACT_FILES = Object.freeze([
+  Object.freeze(["diagrams/diagram1_universal.html", "process"]),
+  Object.freeze(["diagrams/diagram2_ariba.html", "ariba-map"]),
+  Object.freeze(["diagrams/diagram3_maturity.html", "maturity"]),
+  Object.freeze(["diagrams/infographic.html", "infographic"]),
+  Object.freeze(["infographic_procurement_2026_EN.html", "infographic"])
+]);
+const ARTIFACT_COMMON_DISCLAIMER = "This is a conceptual procurement operating model. Capability descriptions and scores are illustrative target-state assumptions, not claims about current product availability, legal compliance or a measured organisation.";
+const ARTIFACT_PRODUCT_DISCLAIMER = "Product names are model labels. Verify availability, scope and licensing for the relevant SAP landscape.";
+const ARTIFACT_TOOLBAR_LABEL = "Back to the Polish Procurement 2026 page";
+const ARTIFACT_TOKENS = Object.freeze({
+  "--artifact-bg": "#102831",
+  "--artifact-panel": "#193D49",
+  "--artifact-paper": "#E9EDEF",
+  "--artifact-line": "#8E9CA1",
+  "--artifact-signal": "#D94B2B"
+});
+const ARTIFACT_FONT_PATHS = new Set([
+  "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2",
+  "/assets/fonts/dmsans-latin.woff2",
+  "/assets/fonts/dmmono-latin.woff2"
+]);
+const PROCESS_RECORDS = Object.freeze([
+  Object.freeze(["s1", "Procurement Planning", "Strategic sequence", "Demand, budget assumptions, timing and decision ownership."]),
+  Object.freeze(["s2", "Market Analysis", "Strategic sequence", "Selected supplier-market, price, capacity and supply-risk inputs."]),
+  Object.freeze(["s3", "Category Strategy Definition", "Strategic sequence", "Spend, supplier, risk and sustainability inputs connected to category choices."]),
+  Object.freeze(["s4", "Sourcing & Supplier Appraisal", "Strategic sequence", "Evaluation criteria, qualification steps, decision rights and sourcing-event controls."]),
+  Object.freeze(["s5", "Contracting & Implementation", "Strategic sequence", "Clauses, obligations, controls, ownership and transition into operation."]),
+  Object.freeze(["o1", "Product or Service Identification", "Operational sequence", "Routing a stated need toward approved channels, catalogues or suppliers."]),
+  Object.freeze(["o2", "Purchase Requisition & Authorization", "Operational sequence", "Request data, budget checks, routing and approval responsibility."]),
+  Object.freeze(["o3", "Purchase Order", "Operational sequence", "Converting an approved request into an order and handling changes and acknowledgements."]),
+  Object.freeze(["o4", "Order Delivery Monitoring", "Operational sequence", "Delivery, acceptance, exceptions and escalation ownership."]),
+  Object.freeze(["o5", "Invoicing & Payment", "Operational sequence", "Matching, exceptions, approval, payment terms and financing options."]),
+  Object.freeze(["ai-orch", "AI & Orchestration", "Scenario lens", "An optional scenario layer whose automation scope and human oversight must be defined per implementation."]),
+  Object.freeze(["risk", "Risk & Resilience", "Scenario lens", "Inputs, thresholds, controls and escalation paths."]),
+  Object.freeze(["esg", "ESG & Sustainability", "Scenario lens", "Sustainability data and decisions; legal applicability and evidence requirements require separate validation."]),
+  Object.freeze(["data", "Data & Analytics", "Scenario lens", "Ownership, quality, lineage and reporting."]),
+  Object.freeze(["srm", "Supplier Relationship Management", "Scenario lens", "Supplier segmentation, governance, performance and collaboration."])
+]);
+const PROCESS_GEOMETRY_ORDER = Object.freeze([
+  "ai-orch", "risk", "esg", "esg", "risk",
+  "s1", "s2", "s3", "s4", "s5",
+  "o1", "o2", "o3", "o4", "o5",
+  "ai-orch", "risk", "esg", "data", "srm"
+]);
+const ARIBA_GROUPS = Object.freeze([
+  Object.freeze(["strategic", Object.freeze(["1", "2", "3", "4", "5"])]),
+  Object.freeze(["operational", Object.freeze(["6", "7", "8", "9", "10"])]),
+  Object.freeze(["lenses", Object.freeze(["AI", "R", "E", "D", "S"])])
+]);
+const ARIBA_EXPECTED_VOCABULARY = Object.freeze({
+  s1: Object.freeze(["SAP S/4HANA", "Organisation-specific data"]),
+  s2: Object.freeze(["External market inputs", "Organisation-specific data"]),
+  s3: Object.freeze(["SAP Ariba Strategic Sourcing Suite"]),
+  s4: Object.freeze(["SAP Ariba Sourcing", "SAP Ariba Supplier Lifecycle and Performance", "SAP Ariba Supplier Risk"]),
+  s5: Object.freeze(["SAP Ariba Contracts", "Implementation-specific controls"]),
+  o1: Object.freeze(["SAP Ariba Buying and Invoicing", "guided buying", "catalogues"]),
+  o2: Object.freeze(["SAP Ariba Buying and Invoicing", "approval workflows", "budget checks"]),
+  o3: Object.freeze(["SAP Ariba Buying and Invoicing", "SAP Business Network for Procurement"]),
+  o4: Object.freeze(["SAP Business Network for Procurement", "network-based collaboration", "Integration decision"]),
+  o5: Object.freeze(["SAP Ariba Buying and Invoicing", "invoice management"]),
+  "ai-orch": Object.freeze(["Implementation-specific controls", "Organisation-specific data"]),
+  risk: Object.freeze(["SAP Ariba Supplier Risk", "External market inputs"]),
+  esg: Object.freeze(["Organisation-specific data", "Implementation-specific controls"]),
+  data: Object.freeze(["SAP S/4HANA", "Organisation-specific data"]),
+  srm: Object.freeze(["SAP Ariba Supplier Lifecycle and Performance", "SAP Business Network for Procurement"])
+});
+const ARIBA_PRODUCT_NAMES = new Set([
+  "SAP Ariba Strategic Sourcing Suite", "SAP Ariba Sourcing", "SAP Ariba Contracts",
+  "SAP Ariba Supplier Lifecycle and Performance", "SAP Ariba Supplier Risk",
+  "SAP Ariba Buying and Invoicing", "SAP Business Network for Procurement",
+  "SAP S/4HANA", "SAP Fieldglass"
+]);
+const ARIBA_FEATURE_LABELS = new Set([
+  "guided buying", "catalogues", "invoice management", "network-based collaboration",
+  "approval workflows", "budget checks"
+]);
+const ARIBA_NEUTRAL_LABELS = new Set([
+  "Organisation-specific data", "Implementation-specific controls", "External market inputs", "Integration decision"
+]);
+const MATURITY_DIMENSIONS = Object.freeze([
+  Object.freeze(["ai", "AI & Orchestration", 1, 4]),
+  Object.freeze(["risk", "Risk & Resilience", 1, 4]),
+  Object.freeze(["esg", "ESG / Sustainability", 1, 3]),
+  Object.freeze(["data", "Data & Analytics", 2, 4]),
+  Object.freeze(["srm", "Supplier Relationship Management", 2, 4]),
+  Object.freeze(["strat", "Strategic Procurement", 3, 5]),
+  Object.freeze(["oper", "Operational Procurement", 3, 5]),
+  Object.freeze(["integ", "Platform Integration", 2, 5])
+]);
+const INFOGRAPHIC_STAGES = Object.freeze([
+  Object.freeze(["needs", "Needs Definition"]),
+  Object.freeze(["supplier", "Supplier Selection"]),
+  Object.freeze(["order", "Order"]),
+  Object.freeze(["receipt", "Goods Receipt"]),
+  Object.freeze(["invoicing", "Invoicing"]),
+  Object.freeze(["matching", "Matching"]),
+  Object.freeze(["payment", "Payment"])
+]);
+const INFOGRAPHIC_NOTES = Object.freeze([
+  "People and decision rights remain explicit.",
+  "Data, automation and controls are implementation choices.",
+  "Legal applicability and evidence requirements require separate validation."
+]);
+
+// Tag and attribute totals are a structural tripwire in addition to the
+// behavior-specific contracts below. Values are filled from the reviewed
+// implementation, never derived from a mutable digest.
+const ARTIFACT_CENSUS = Object.freeze({
+  "diagrams/diagram1_universal.html": Object.freeze({ elements: 73, tags: Object.freeze({ a: 1, body: 1, button: 15, circle: 7, desc: 1, div: 2, figcaption: 1, figure: 1, h1: 1, h2: 2, head: 1, header: 2, html: 1, main: 1, meta: 2, nav: 1, p: 6, path: 14, rect: 1, script: 1, section: 2, style: 1, svg: 1, text: 5, title: 2 }), attributes: Object.freeze({ "aria-controls": 15, "aria-label": 2, "aria-labelledby": 4, "aria-live": 1, "aria-pressed": 15, charset: 1, class: 55, content: 1, cx: 7, cy: 7, d: 14, "data-artifact": 1, "data-description": 15, "data-record-id": 35, "data-record-kind": 15, fill: 22, height: 1, href: 1, id: 6, lang: 1, name: 1, r: 7, role: 2, stroke: 22, "stroke-width": 22, target: 1, "text-anchor": 5, type: 15, viewbox: 1, width: 1, x: 6, xmlns: 1, y: 6 }) }),
+  "diagrams/diagram2_ariba.html": Object.freeze({ elements: 155, tags: Object.freeze({ a: 1, article: 15, body: 1, div: 19, h1: 1, h2: 3, h3: 15, head: 1, header: 4, html: 1, li: 33, main: 1, meta: 2, nav: 1, p: 37, section: 3, style: 1, title: 1, ul: 15 }), attributes: Object.freeze({ "aria-label": 1, charset: 1, class: 110, content: 1, "data-artifact": 1, "data-feature-label": 6, "data-map-group": 3, "data-marker": 15, "data-model-label": 11, "data-product-name": 16, "data-record-id": 15, href: 1, lang: 1, name: 1, target: 1 }) }),
+  "diagrams/diagram3_maturity.html": Object.freeze({ elements: 291, tags: Object.freeze({ a: 1, body: 1, dd: 5, div: 22, dl: 1, dt: 5, fieldset: 16, form: 1, h1: 1, h2: 9, h3: 1, head: 1, header: 1, html: 1, input: 80, label: 80, legend: 16, li: 4, main: 1, meta: 2, nav: 1, ol: 1, output: 8, p: 12, script: 1, section: 9, span: 8, style: 1, title: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 1, "aria-live": 1, charset: 1, checked: 16, class: 130, content: 1, "data-artifact": 1, "data-baseline": 8, "data-dimension": 8, "data-side": 16, "data-target": 8, for: 80, href: 1, id: 87, lang: 1, name: 81, target: 1, type: 80, value: 80 }) }),
+  "diagrams/infographic.html": Object.freeze({ elements: 51, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 1, id: 3, lang: 1, name: 1, scope: 5, target: 1 }) }),
+  "infographic_procurement_2026_EN.html": Object.freeze({ elements: 51, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 1, id: 3, lang: 1, name: 1, scope: 5, target: 1 }) })
+});
+
+function artifactCensus(parsedRoot) {
+  const tags = new Map();
+  const attributes = new Map();
+  const elements = elementDescendants(parsedRoot);
+  for (const element of elements) {
+    tags.set(element.name, (tags.get(element.name) ?? 0) + 1);
+    for (const name of element.attributes.keys()) attributes.set(name, (attributes.get(name) ?? 0) + 1);
+  }
+  return Object.freeze({
+    elements: elements.length,
+    tags: Object.freeze(Object.fromEntries([...tags].sort())),
+    attributes: Object.freeze(Object.fromEntries([...attributes].sort()))
+  });
+}
+
+function artifactSourceCorpus(html) {
+  return normalizeExactHtmlLiteral(decodeHtmlEntities(html))
+    .replace(/\p{Default_Ignorable_Code_Point}+/gu, "")
+    .toLocaleLowerCase("en-US");
+}
+
+function verifyArtifactClaimBoundary(path, html, parsedRoot, errors) {
+  const source = artifactSourceCorpus(html);
+  const compact = source.replace(/[^a-z0-9%+>]+/g, "");
+  const forbidden = [
+    "reality2026", "asof2026", "newlayers2026", "target2027", "currentreadiness",
+    "90%+", ">90%", "fullcsrdcsdddautomation", "everytransaction",
+    "autonomouslymanage", "mostprocurementorganizations", "sapgoldpartner",
+    "apsolutgroup", "allforonegroup", "warsawflightsafety", "polpharma",
+    "autonomousrfx", "autonomousbidevaluation", "autonomouscontractnegotiation",
+    "automaticlegalcompliance", "automaticregulatorycompliance", "guaranteedlegalcompliance",
+    "guaranteedregulatorycompliance", "complianceautomation", "realtimeprediction",
+    "realtimepredictive", "digitaltwin", "touchlessrate"
+  ];
+  if (forbidden.some((claim) => compact.includes(claim))) {
+    error(errors, "artifact-claims", path, "contains an unsupported current-state, capability, partner, compliance or performance claim");
+  }
+  const visible = publishedStaticText(htmlBodyRoot(parsedRoot));
+  const visibleWithoutDisclaimer = normalizeExactLiteral(visible.replace(ARTIFACT_COMMON_DISCLAIMER, ""));
+  if (visibleWithoutDisclaimer.includes("—")
+    || /\b(?:best|leading|ultimate|most)\b/i.test(visibleWithoutDisclaimer)
+    || /\bcurrent\b/i.test(visibleWithoutDisclaimer)
+    || elementDescendants(parsedRoot).some((element) => /(?:^|\s)(?:badge|status)(?:\s|$)/i.test(elementAttribute(element, "class") ?? ""))) {
+    error(errors, "artifact-claims", path, "forbids decorative em dash, superlatives, unqualified current-state wording and status badges");
+  }
+}
+
+async function verifyArtifactResources(path, html, parsedRoot, styleText, context) {
+  const all = elementDescendants(parsedRoot);
+  const forbiddenTags = new Set([
+    "applet", "audio", "base", "embed", "frame", "frameset", "iframe", "img", "link",
+    "object", "picture", "portal", "source", "track", "video"
+  ]);
+  const resourceAttributes = new Set(["action", "background", "cite", "data", "formaction", "manifest", "ping", "poster", "profile", "src", "srcdoc", "srcset", "usemap", "xlink:href"]);
+  const invalidResource = all.some((element) => forbiddenTags.has(element.name)
+    || [...element.attributes].some(([name, value]) => resourceAttributes.has(name) && nonEmptyString(value))
+    || (element.name !== "a" && element.attributes.has("href"))
+    || (element.name === "script" && element.attributes.has("src")));
+  const cssUrls = [...styleText.matchAll(/url\(\s*(["']?)([^"')]+)\1\s*\)/gi)].map((match) => decodeCssEscapes(match[2].trim()));
+  const invalidCss = /@import\b/i.test(styleText)
+    || cssUrls.some((url) => !ARTIFACT_FONT_PATHS.has(url))
+    || /(?:https?:)?\/\//i.test(styleText)
+    || /data\s*:/i.test(styleText);
+  if (invalidResource || invalidCss || /<\s*(?:iframe|embed|object)\b/i.test(html)) {
+    error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests and the parent return link");
+  }
+  for (const fontPath of new Set(cssUrls)) {
+    try {
+      const file = await stat(resolve(context.root, routeToFile(fontPath)));
+      if (!file.isFile()) throw Object.assign(new Error("font target is not a file"), { code: "NOT_FILE" });
+    } catch (cause) {
+      error(context.errors, "artifact-resource", path, `${fontPath} is missing (${cause.code ?? cause.message})`);
+    }
+  }
+}
+
+function verifyArtifactSafety(path, html, parsedRoot, styleText, errors) {
+  const all = elementDescendants(parsedRoot);
+  const duplicateAttributes = all.some((element) => (element.attributes.sourceAttributeCount ?? element.attributes.size) !== element.attributes.size);
+  const ids = all.map((element) => elementAttribute(element, "id")).filter(nonEmptyString);
+  const unsafeElement = all.some((element) => element.attributes.has("style")
+    || element.attributes.has("hidden")
+    || element.attributes.has("inert")
+    || normalize(elementAttribute(element, "aria-hidden") ?? "") === "true"
+    || [...element.attributes.keys()].some((name) => /^on/i.test(name)));
+  const unsafeSource = /\b(?:innerHTML|outerHTML|insertAdjacentHTML|document\s*\.\s*write|eval|DOMParser|createContextualFragment)\b/i.test(decodeHtmlEntities(html));
+  const unsafeCss = /(?:linear|radial|conic)-gradient\s*\(|text-shadow\s*:|box-shadow\s*:|drop-shadow\s*\(|backdrop-filter\s*:|filter\s*:|blur\s*\(|@keyframes\b|animation\s*:|:hover[^{}]*\{[^{}]*transform\s*:[^{}]*(?:scale|translate)/is.test(styleText);
+  if (duplicateAttributes || new Set(ids).size !== ids.length || unsafeElement || unsafeSource || unsafeCss) {
+    error(errors, "artifact-safety", path, "forbids duplicate IDs/attributes, hidden decoys, inline behavior/style, unsafe DOM sinks and prohibited visual effects");
+  }
+}
+
+function verifyArtifactShared(path, html, expectedArtifact, context) {
+  const parsed = parseStaticHtml(html);
+  for (const syntaxError of parsed.errors) error(context.errors, "artifact-html", path, syntaxError);
+  const root = parsed.root;
+  const all = elementDescendants(root);
+  const htmlElements = directElementChildren(root, "html");
+  const htmlElement = htmlElements[0];
+  const heads = htmlElement ? directElementChildren(htmlElement, "head") : [];
+  const bodies = htmlElement ? directElementChildren(htmlElement, "body") : [];
+  const head = heads[0];
+  const body = bodies[0];
+  const titles = head ? directElementChildren(head, "title") : [];
+  const meta = head ? directElementChildren(head, "meta") : [];
+  const charset = meta.filter((item) => normalize(elementAttribute(item, "charset") ?? "") === "utf-8");
+  const viewport = meta.filter((item) => normalize(elementAttribute(item, "name") ?? "") === "viewport"
+    && normalizeExactLiteral(elementAttribute(item, "content") ?? "") === "width=device-width, initial-scale=1.0");
+  const h1s = all.filter((element) => element.name === "h1" && pageElementIsActive(element));
+  if (!/^\s*<!doctype\s+html>/i.test(html)
+    || htmlElements.length !== 1 || elementAttribute(htmlElement, "lang") !== "en"
+    || heads.length !== 1 || bodies.length !== 1
+    || titles.length !== 1 || !nonEmptyString(publishedStaticText(titles[0]))
+    || charset.length !== 1 || viewport.length !== 1 || meta.length !== 2
+    || h1s.length !== 1 || !nonEmptyString(publishedStaticText(h1s[0]))) {
+    error(context.errors, "artifact-document", path, "requires one complete English HTML5 document, title, viewport and visible h1");
+  }
+  if (elementAttribute(body, "data-artifact") !== expectedArtifact
+    || all.filter((element) => element.attributes.has("data-artifact")).length !== 1) {
+    error(context.errors, "artifact-manifest", path, `body must be the sole data-artifact owner with value ${expectedArtifact}`);
+  }
+  const toolbars = all.filter((element) => element.name === "nav" && elementHasClass(element, "artifact-toolbar") && pageElementIsActive(element));
+  const links = toolbars.length === 1 ? directElementChildren(toolbars[0], "a").filter(pageElementIsActive) : [];
+  const allAnchors = all.filter((element) => element.name === "a");
+  if (toolbars.length !== 1
+    || !exactElementAttributes(toolbars[0], { class: "artifact-toolbar", "aria-label": "Artifact navigation" })
+    || links.length !== 1 || allAnchors.length !== 1
+    || !exactElementAttributes(links[0], { href: "/procurement-2026/", target: "_top" })
+    || publishedStaticText(links[0]) !== ARTIFACT_TOOLBAR_LABEL) {
+    error(context.errors, "artifact-toolbar", path, "requires one visible exact return toolbar and honest Polish-parent label");
+  }
+  const disclaimers = all.filter((element) => elementHasClass(element, "artifact-disclaimer") && pageElementIsActive(element));
+  if (disclaimers.length !== 1 || publishedStaticText(disclaimers[0]) !== ARTIFACT_COMMON_DISCLAIMER) {
+    error(context.errors, "artifact-disclaimer", path, "requires the exact visible conceptual-model disclaimer once");
+  }
+  const styles = head ? directElementChildren(head, "style") : [];
+  const styleText = styles.length === 1 ? rawElementText(styles[0]) : "";
+  const rules = parseCssRules(styleText);
+  if (styles.length !== 1 || Object.entries(ARTIFACT_TOKENS).some(([property, value]) => propertyValue(rules, ":root", property) !== value)) {
+    error(context.errors, "artifact-style", path, "requires the exact five local Flight Plan artifact tokens");
+  }
+  verifyArtifactSafety(path, html, root, styleText, context.errors);
+  verifyArtifactClaimBoundary(path, html, root, context.errors);
+  const actualCensus = artifactCensus(root);
+  const expectedCensus = ARTIFACT_CENSUS[path];
+  if (expectedCensus === null || JSON.stringify(actualCensus) !== JSON.stringify(expectedCensus)) {
+    error(context.errors, "artifact-census", path, `requires exact structural element/tag/attribute census; actual ${JSON.stringify(actualCensus)}`);
+  }
+  return { root, all, head, body, styleText };
+}
+
+function verifyProcessArtifact(path, artifact, errors) {
+  const { all, styleText } = artifact;
+  const controls = all.filter((element) => element.name === "button" && elementHasClass(element, "process-control"));
+  const actualRecords = controls.map((control) => [
+    elementAttribute(control, "data-record-id"),
+    publishedStaticText(control),
+    elementAttribute(control, "data-record-kind"),
+    normalizeExactHtmlLiteral(elementAttribute(control, "data-description") ?? "")
+  ]);
+  if (JSON.stringify(actualRecords) !== JSON.stringify(PROCESS_RECORDS)) {
+    error(errors, "process-records", path, "requires the exact 15 ordered logical records and neutral descriptions");
+  }
+  const geometries = all.filter((element) => elementHasClass(element, "process-geometry"));
+  const geometryOrder = geometries.map((element) => elementAttribute(element, "data-record-id"));
+  if (JSON.stringify(geometryOrder) !== JSON.stringify(PROCESS_GEOMETRY_ORDER)
+    || geometries.some((element) => !new Set(["circle", "path"]).has(element.name) || element.attributes.has("tabindex") || element.attributes.has("role"))) {
+    error(errors, "process-geometry", path, "requires the exact 20 pointer geometries mapped to 15 logical records and no geometry tab stops");
+  }
+  const panels = all.filter((element) => elementAttribute(element, "id") === "process-detail");
+  const panelTitle = all.filter((element) => elementAttribute(element, "id") === "process-detail-title");
+  const exactControls = controls.length === 15 && controls.every((control, index) => exactApplicationAttributes(control, {
+    class: "process-control",
+    type: "button",
+    "data-record-id": PROCESS_RECORDS[index][0],
+    "data-record-kind": PROCESS_RECORDS[index][2],
+    "data-description": PROCESS_RECORDS[index][3],
+    "aria-controls": "process-detail",
+    "aria-pressed": index === 0 ? "true" : "false"
+  }, new Set(["data-description"])));
+  if (!exactControls || panels.length !== 1 || panelTitle.length !== 1
+    || !exactElementAttributes(panels[0], { class: "process-detail", id: "process-detail", role: "region", "aria-live": "polite", "aria-labelledby": "process-detail-title" })
+    || !elementIsWithin(panelTitle[0], panels[0])) {
+    error(errors, "process-controls", path, "requires 15 exact logical buttons and one named polite detail region");
+  }
+  const scripts = all.filter((element) => element.name === "script");
+  const script = scripts.length === 1 ? rawElementText(scripts[0]) : "";
+  const interactionFragments = [
+    'event.key !== "Enter" && event.key !== " "',
+    'document.querySelectorAll(".process-geometry")',
+    'document.querySelectorAll(".process-control")',
+    'control.setAttribute("aria-pressed",',
+    "panel.replaceChildren(",
+    ".textContent ="
+  ];
+  if (scripts.length !== 1 || interactionFragments.some((fragment) => !script.includes(fragment))
+    || !/\.addEventListener\("click"/.test(script) || !/\.addEventListener\("keydown"/.test(script)
+    || !/\.process-control\s*\{[^}]*min-block-size:\s*44px;[^}]*min-inline-size:\s*44px;/s.test(styleText)) {
+    error(errors, "process-interaction", path, "requires click plus Enter/Space equivalence, safe panel replacement, pressed state and 44px controls");
+  }
+}
+
+function verifyAribaMapArtifact(path, artifact, errors) {
+  const { all } = artifact;
+  const groups = all.filter((element) => element.name === "section" && elementHasClass(element, "model-group"));
+  const actualGroups = groups.map((group) => [
+    elementAttribute(group, "data-map-group"),
+    elementDescendants(group).filter((element) => element.name === "article" && elementHasClass(element, "model-cell")).map((cell) => elementAttribute(cell, "data-marker"))
+  ]);
+  const cells = groups.flatMap((group) => elementDescendants(group).filter((element) => element.name === "article" && elementHasClass(element, "model-cell")));
+  const titles = cells.map((cell) => publishedStaticText(elementDescendants(cell, "h3")[0]));
+  const expectedTitles = PROCESS_RECORDS.map((record) => record[1]);
+  const recordIds = cells.map((cell) => elementAttribute(cell, "data-record-id"));
+  if (JSON.stringify(actualGroups) !== JSON.stringify(ARIBA_GROUPS)
+    || JSON.stringify(recordIds) !== JSON.stringify(PROCESS_RECORDS.map((record) => record[0]))
+    || JSON.stringify(titles) !== JSON.stringify(expectedTitles)) {
+    error(errors, "ariba-map-model", path, "requires the exact three groups, 15 markers, logical record order and process/lens titles");
+  }
+  let validVocabulary = cells.length === 15;
+  for (const cell of cells) {
+    const id = elementAttribute(cell, "data-record-id");
+    const items = elementDescendants(cell, "li").filter((element) => elementHasClass(element, "model-vocabulary__item"));
+    const labels = items.map((item) => publishedStaticText(item));
+    if (JSON.stringify(labels) !== JSON.stringify(ARIBA_EXPECTED_VOCABULARY[id] ?? [])) validVocabulary = false;
+    for (const item of items) {
+      const product = elementAttribute(item, "data-product-name");
+      const feature = elementAttribute(item, "data-feature-label");
+      const neutral = elementAttribute(item, "data-model-label");
+      const present = [product, feature, neutral].filter(nonEmptyString);
+      if (present.length !== 1 || publishedStaticText(item) !== present[0]
+        || (product && !ARIBA_PRODUCT_NAMES.has(product))
+        || (feature && !ARIBA_FEATURE_LABELS.has(feature))
+        || (neutral && !ARIBA_NEUTRAL_LABELS.has(neutral))) validVocabulary = false;
+    }
+  }
+  const allVocabularyItems = all.filter((element) => element.attributes.has("data-product-name")
+    || element.attributes.has("data-feature-label") || element.attributes.has("data-model-label"));
+  if (allVocabularyItems.length !== Object.values(ARIBA_EXPECTED_VOCABULARY).flat().length
+    || allVocabularyItems.some((item) => !elementHasClass(item, "model-vocabulary__item"))) validVocabulary = false;
+  if (!validVocabulary) error(errors, "ariba-map-taxonomy", path, "requires the exact bounded official-product, official-feature and neutral workshop vocabulary");
+  const productDisclaimers = all.filter((element) => elementHasClass(element, "artifact-product-disclaimer"));
+  if (productDisclaimers.length !== 1 || publishedStaticText(productDisclaimers[0]) !== ARTIFACT_PRODUCT_DISCLAIMER) {
+    error(errors, "artifact-disclaimer", path, "requires the exact SAP product-label disclaimer once");
+  }
+  const scripts = all.filter((element) => element.name === "script");
+  const fakeControls = cells.some((cell) => cell.attributes.has("tabindex") || cell.attributes.has("role"))
+    || all.some((element) => element.name === "button" || element.name === "input")
+    || scripts.length > 0;
+  if (fakeControls) error(errors, "ariba-map-static", path, "must remain complete static HTML without fake card interaction");
+}
+
+function verifyMaturityArtifact(path, artifact, errors) {
+  const { all, styleText } = artifact;
+  const dimensions = all.filter((element) => element.name === "section" && elementHasClass(element, "maturity-dimension"));
+  const actual = dimensions.map((dimension) => {
+    const heading = directElementChildren(dimension, "h2")[0];
+    return [
+      elementAttribute(dimension, "data-dimension"),
+      publishedStaticText(heading),
+      Number(elementAttribute(dimension, "data-baseline")),
+      Number(elementAttribute(dimension, "data-target"))
+    ];
+  });
+  if (JSON.stringify(actual) !== JSON.stringify(MATURITY_DIMENSIONS)) {
+    error(errors, "maturity-model", path, "requires the exact eight ordered illustrative dimensions and initial values");
+  }
+  const fieldsets = dimensions.flatMap((dimension) => directElementChildren(dimension, "fieldset"));
+  const radios = all.filter((element) => element.name === "input" && elementAttribute(element, "type") === "radio");
+  let controlsValid = fieldsets.length === 16 && radios.length === 80;
+  for (const [dimensionIndex, dimension] of dimensions.entries()) {
+    const [id, , baseline, target] = MATURITY_DIMENSIONS[dimensionIndex] ?? [];
+    const groups = directElementChildren(dimension, "fieldset");
+    for (const [sideIndex, group] of groups.entries()) {
+      const side = sideIndex === 0 ? "baseline" : "target";
+      const expected = side === "baseline" ? baseline : target;
+      const legend = directElementChildren(group, "legend");
+      const inputs = elementDescendants(group, "input");
+      const labels = elementDescendants(group, "label");
+      if (elementAttribute(group, "data-side") !== side || legend.length !== 1
+        || publishedStaticText(legend[0]) !== (side === "baseline" ? "Illustrative baseline" : "Scenario target")
+        || inputs.length !== 5 || labels.length !== 5) controlsValid = false;
+      inputs.forEach((input, valueIndex) => {
+        const value = String(valueIndex + 1);
+        const inputId = `${id}-${side}-${value}`;
+        const expectedAttributes = new Set(["id", "type", "name", "value", ...(valueIndex + 1 === expected ? ["checked"] : [])]);
+        if (!elementHasExactAttributeNames(input, expectedAttributes)
+          || elementAttribute(input, "id") !== inputId
+          || elementAttribute(input, "type") !== "radio"
+          || elementAttribute(input, "name") !== `${id}-${side}`
+          || elementAttribute(input, "value") !== value
+          || input.attributes.has("checked") !== (valueIndex + 1 === expected)
+          || elementAttribute(labels[valueIndex], "for") !== inputId) controlsValid = false;
+      });
+    }
+  }
+  if (!controlsValid || !/\.scale-choice\s*\{[^}]*min-block-size:\s*44px;[^}]*min-inline-size:\s*44px;/s.test(styleText)) {
+    error(errors, "maturity-controls", path, "requires 16 native radio groups, 80 values from 1 through 5 and 44px labelled targets");
+  }
+  const scripts = all.filter((element) => element.name === "script");
+  const script = scripts.length === 1 ? rawElementText(scripts[0]) : "";
+  const formulaFragments = [
+    "baselineTotal / dimensions.length",
+    "targetTotal / dimensions.length",
+    "targetTotal - baselineTotal",
+    "Math.max(...gaps.map((dimension) => dimension.gap))",
+    "baselineTotal / 40",
+    "b.gap - a.gap || a.order - b.order",
+    ".slice(0, 4)"
+  ];
+  if (scripts.length !== 1 || formulaFragments.some((fragment) => !script.includes(fragment))) {
+    error(errors, "maturity-formulas", path, "requires exact averages, total/max gap, 40-point score and stable four-gap ordering");
+  }
+  const guardFragments = ["allowedSides.has(side)", "Number.isInteger(value)", "value < 1", "value > 5"];
+  if ((script.match(/allowedIds\.has\(id\)/g) ?? []).length !== 2 || guardFragments.some((fragment) => !script.includes(fragment))) {
+    error(errors, "maturity-guards", path, "requires dimension, side and integer range validation before state changes");
+  }
+  const behaviorFragments = ["replaceChildren(", "textContent =", "globalThis.procurementMaturityModel", 'input.addEventListener("change"'];
+  if (behaviorFragments.some((fragment) => !script.includes(fragment))) {
+    error(errors, "maturity-interaction", path, "requires safely rendered native-control updates and an independently testable calculator");
+  }
+  const visible = publishedStaticText(artifact.body);
+  for (const required of ["Illustrative baseline", "Scenario target", "Scenario score", "Largest scenario gaps", "1.9", "4.3", "+19", "38%"] ) {
+    if (!visible.includes(required)) error(errors, "maturity-output", path, `missing initial illustrative output ${required}`);
+  }
+}
+
+function verifyInfographicArtifact(path, artifact, errors) {
+  const { all, body, styleText } = artifact;
+  const stages = all.filter((element) => element.name === "li" && elementHasClass(element, "process-stage"));
+  const actualStages = stages.map((stage) => [elementAttribute(stage, "data-stage"), publishedStaticText(stage)]);
+  const notes = all.filter((element) => element.name === "li" && elementHasClass(element, "scenario-note")).map((note) => publishedStaticText(note));
+  const tables = all.filter((element) => element.name === "table");
+  const captions = tables.length === 1 ? directElementChildren(tables[0], "caption") : [];
+  const headers = tables.length === 1 ? elementDescendants(tables[0], "th") : [];
+  if (JSON.stringify(actualStages) !== JSON.stringify(INFOGRAPHIC_STAGES)
+    || JSON.stringify(notes) !== JSON.stringify(INFOGRAPHIC_NOTES)
+    || !publishedStaticText(body).includes("Reference model")
+    || !publishedStaticText(body).includes("Illustrative target-state scenario")
+    || tables.length !== 1 || captions.length !== 1 || headers.length !== 5
+    || headers.some((header) => !new Set(["col", "row"]).has(elementAttribute(header, "scope")))) {
+    error(errors, "infographic-model", path, "requires the exact seven-stage reference sequence, scenario framing, notes and semantic comparison table");
+  }
+  if (all.some((element) => element.name === "script" || element.name === "svg")
+    || !/@media\s*\(max-width:\s*760px\)/i.test(styleText)
+    || /overflow\s*:\s*hidden/i.test(styleText)
+    || /min-width\s*:\s*[1-9]\d*px/i.test(styleText)) {
+    error(errors, "infographic-responsive", path, "requires a script-free responsive text infographic without masked overflow or fixed minimum width");
+  }
+}
+
 async function verifyArtifacts(_factData, context) {
-  // Task 8 owns the five artifact files and their substantive contract.
-  addDeferred(context, "artifacts-contract");
+  let diagramFiles = [];
+  try {
+    diagramFiles = (await readdir(resolve(context.root, "diagrams"))).filter((entry) => entry.endsWith(".html")).sort();
+  } catch (cause) {
+    error(context.errors, "artifact-manifest", "diagrams", `unable to enumerate artifact directory: ${cause.code ?? cause.message}`);
+  }
+  if (JSON.stringify(diagramFiles) !== JSON.stringify(["diagram1_universal.html", "diagram2_ariba.html", "diagram3_maturity.html", "infographic.html"])) {
+    error(context.errors, "artifact-manifest", "diagrams", "requires the exact four embedded artifact files and no sixth diagram artifact");
+  }
+  const files = new Map();
+  const parsed = new Map();
+  for (const [path, dataArtifact] of ARTIFACT_FILES) {
+    const html = await readRequired(context, path, "artifact-file");
+    files.set(path, html);
+    const artifact = verifyArtifactShared(path, html, dataArtifact, context);
+    parsed.set(path, artifact);
+    await verifyArtifactResources(path, html, artifact.root, artifact.styleText, context);
+  }
+  verifyProcessArtifact("diagrams/diagram1_universal.html", parsed.get("diagrams/diagram1_universal.html"), context.errors);
+  verifyAribaMapArtifact("diagrams/diagram2_ariba.html", parsed.get("diagrams/diagram2_ariba.html"), context.errors);
+  verifyMaturityArtifact("diagrams/diagram3_maturity.html", parsed.get("diagrams/diagram3_maturity.html"), context.errors);
+  verifyInfographicArtifact("diagrams/infographic.html", parsed.get("diagrams/infographic.html"), context.errors);
+  verifyInfographicArtifact("infographic_procurement_2026_EN.html", parsed.get("infographic_procurement_2026_EN.html"), context.errors);
+  if (files.get("diagrams/infographic.html") !== files.get("infographic_procurement_2026_EN.html")) {
+    error(context.errors, "infographic-parity", "diagrams/infographic.html", "embedded and standalone infographic files must be byte-for-byte identical");
+  }
 }
 
 async function verifyPages(factData, family, context) {
