@@ -560,10 +560,10 @@ const englishHomeContract = {
     ["/en/lotnictwo/", "Aviation"]
   ],
   navigation: [
-    ["/en/aplikacje-operacyjne/", "Operational applications"],
+    ["/en/aplikacje-operacyjne/", "Applications"],
     ["/en/lotnictwo/", "Aviation"],
     ["/en/case-studies/", "Projects"],
-    ["/en/wiedza/", "Knowledge"],
+    ["/en/wiedza/", "Insights"],
     ["/en/#about", "About"],
     ["/en/#contact", "Contact"]
   ]
@@ -724,8 +724,8 @@ function verifyHomeStructures(activeBody, page, errors) {
   }
 
   const projects = page.lang === "pl"
-    ? { navPath: "/case-studies/", footerPath: "/case-studies", label: "Projekty", errorId: "home-pl-ia", language: "Polish" }
-    : { navPath: "/en/case-studies/", footerPath: "/en/case-studies", label: "Projects", errorId: "home-en-ia", language: "English" };
+    ? { navPath: "/case-studies/", footerPath: "/case-studies/", label: "Projekty", errorId: "home-pl-ia", language: "Polish" }
+    : { navPath: "/en/case-studies/", footerPath: "/en/case-studies/", label: "Projects", errorId: "home-en-ia", language: "English" };
   const navigation = tagBlocks(activeBody, "nav").find((block) => hasClass(block.opening, "site-nav"));
   const footer = tagBlocks(activeBody, "footer")[0];
   const navProjects = navigation ? tagBlocks(navigation.full, "a").filter((block) => attributeValue(block.opening, "href") === projects.navPath) : [];
@@ -810,8 +810,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     error(errors, "home-hero-image", page.path, "visible hero requires one visible image with explicit positive width and height plus fetchpriority=high");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-1";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-1";
+  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-2";
+  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-2";
   const stylesheetAttributeNames = new Set(["rel", "href"]);
   const stylesheetNodes = elements.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -2977,7 +2977,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         Object.freeze(["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"])
       ]),
       primary: Object.freeze([
-        Object.freeze(["/aplikacje-operacyjne/", "Aplikacje operacyjne", true]),
+        Object.freeze(["/aplikacje-operacyjne/", "Aplikacje", true]),
         Object.freeze(["/lotnictwo/", "Lotnictwo", false]),
         Object.freeze(["/case-studies/", "Projekty", false]),
         Object.freeze(["/wiedza/", "Wiedza", false]),
@@ -3029,7 +3029,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Kontakt"
+      "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/", "Strona główna"]),
@@ -3037,6 +3037,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]),
       Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]),
+      Object.freeze(["/wiedza/", "Wiedza"]),
       Object.freeze(["/#contact", "Kontakt"])
     ])
   }),
@@ -3055,10 +3056,10 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         Object.freeze(["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"])
       ]),
       primary: Object.freeze([
-        Object.freeze(["/en/aplikacje-operacyjne/", "Operational applications", true]),
+        Object.freeze(["/en/aplikacje-operacyjne/", "Applications", true]),
         Object.freeze(["/en/lotnictwo/", "Aviation", false]),
         Object.freeze(["/en/case-studies/", "Projects", false]),
-        Object.freeze(["/en/wiedza/", "Knowledge", false]),
+        Object.freeze(["/en/wiedza/", "Insights", false]),
         Object.freeze(["/en/#about", "About", false]),
         Object.freeze(["/en/#contact", "Contact", false])
       ]),
@@ -3107,7 +3108,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Contact"
+      "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/en/", "Home"]),
@@ -3115,6 +3116,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]),
       Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]),
+      Object.freeze(["/en/wiedza/", "Insights"]),
       Object.freeze(["/en/#contact", "Contact"])
     ])
   })
@@ -3134,7 +3136,7 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "nav-advisory-0", href: "/uslugi/transformacja-zakupow/", label: "Transformacja zakupów", kind: "text", attributes: { href: "/uslugi/transformacja-zakupow/" } },
     { role: "nav-advisory-1", href: "/uslugi/wdrozenie-sap-ariba/", label: "Wdrożenie SAP Ariba", kind: "text", attributes: { href: "/uslugi/wdrozenie-sap-ariba/" } },
     { role: "nav-advisory-2", href: "/uslugi/doradztwo-zamowienia-publiczne/", label: "Zamówienia publiczne", kind: "text", attributes: { href: "/uslugi/doradztwo-zamowienia-publiczne/" } },
-    { role: "nav-primary-0", href: "/aplikacje-operacyjne/", label: "Aplikacje operacyjne", kind: "text", attributes: { href: "/aplikacje-operacyjne/", "aria-current": "page" } },
+    { role: "nav-primary-0", href: "/aplikacje-operacyjne/", label: "Aplikacje", kind: "text", attributes: { href: "/aplikacje-operacyjne/", "aria-current": "page" } },
     { role: "nav-primary-1", href: "/lotnictwo/", label: "Lotnictwo", kind: "text", attributes: { href: "/lotnictwo/" } },
     { role: "nav-primary-2", href: "/case-studies/", label: "Projekty", kind: "text", attributes: { href: "/case-studies/" } },
     { role: "nav-primary-3", href: "/wiedza/", label: "Wiedza", kind: "text", attributes: { href: "/wiedza/" } },
@@ -3149,7 +3151,8 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "footer-link-2", href: "/aplikacje-operacyjne/", label: "Aplikacje", kind: "text", attributes: { href: "/aplikacje-operacyjne/" } },
     { role: "footer-link-3", href: "/lotnictwo/", label: "Lotnictwo", kind: "text", attributes: { href: "/lotnictwo/" } },
     { role: "footer-link-4", href: "/case-studies/", label: "Projekty", kind: "text", attributes: { href: "/case-studies/" } },
-    { role: "footer-link-5", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } }
+    { role: "footer-link-5", href: "/wiedza/", label: "Wiedza", kind: "text", attributes: { href: "/wiedza/" } },
+    { role: "footer-link-6", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } }
   ]),
   en: freezeApplicationManifest([
     { role: "skip", href: "#main", label: "Skip to content", kind: "text", attributes: { href: "#main", class: "skip-link" } },
@@ -3157,22 +3160,23 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "nav-advisory-0", href: "/en/uslugi/transformacja-zakupow/", label: "Procurement transformation", kind: "text", attributes: { href: "/en/uslugi/transformacja-zakupow/" } },
     { role: "nav-advisory-1", href: "/en/uslugi/wdrozenie-sap-ariba/", label: "SAP Ariba implementation", kind: "text", attributes: { href: "/en/uslugi/wdrozenie-sap-ariba/" } },
     { role: "nav-advisory-2", href: "/en/uslugi/doradztwo-zamowienia-publiczne/", label: "Public procurement", kind: "text", attributes: { href: "/en/uslugi/doradztwo-zamowienia-publiczne/" } },
-    { role: "nav-primary-0", href: "/en/aplikacje-operacyjne/", label: "Operational applications", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/", "aria-current": "page" } },
+    { role: "nav-primary-0", href: "/en/aplikacje-operacyjne/", label: "Applications", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/", "aria-current": "page" } },
     { role: "nav-primary-1", href: "/en/lotnictwo/", label: "Aviation", kind: "text", attributes: { href: "/en/lotnictwo/" } },
     { role: "nav-primary-2", href: "/en/case-studies/", label: "Projects", kind: "text", attributes: { href: "/en/case-studies/" } },
-    { role: "nav-primary-3", href: "/en/wiedza/", label: "Knowledge", kind: "text", attributes: { href: "/en/wiedza/" } },
+    { role: "nav-primary-3", href: "/en/wiedza/", label: "Insights", kind: "text", attributes: { href: "/en/wiedza/" } },
     { role: "nav-primary-4", href: "/en/#about", label: "About", kind: "text", attributes: { href: "/en/#about" } },
     { role: "nav-primary-5", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } },
     { role: "nav-language", href: "/aplikacje-operacyjne/", label: "PL", kind: "text", attributes: { href: "/aplikacje-operacyjne/", class: "nav-lang" } },
     { role: "breadcrumb-home", href: "/en/", label: "Home", kind: "text", attributes: { href: "/en/" } },
     { role: "contact-cta", href: "mailto:pawel@mamcarz.com?subject=Operational%20application", label: "Describe the operational application", kind: "text", attributes: { class: "btn-primary", href: "mailto:pawel@mamcarz.com?subject=Operational%20application" } },
-    { role: "footer-sign", href: "/en/", label: "", kind: "signature", attributes: { class: "footer-sign", href: "/en/", "aria-label": "Paweł Mamcarz, home" } },
+    { role: "footer-sign", href: "/en/", label: "", kind: "signature", attributes: { class: "footer-sign", href: "/en/", "aria-label": "Paweł Mamcarz, homepage" } },
     { role: "footer-link-0", href: "/en/", label: "Home", kind: "text", attributes: { href: "/en/" } },
     { role: "footer-link-1", href: "/en/uslugi/transformacja-zakupow/", label: "Advisory", kind: "text", attributes: { href: "/en/uslugi/transformacja-zakupow/" } },
     { role: "footer-link-2", href: "/en/aplikacje-operacyjne/", label: "Applications", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/" } },
     { role: "footer-link-3", href: "/en/lotnictwo/", label: "Aviation", kind: "text", attributes: { href: "/en/lotnictwo/" } },
     { role: "footer-link-4", href: "/en/case-studies/", label: "Projects", kind: "text", attributes: { href: "/en/case-studies/" } },
-    { role: "footer-link-5", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } }
+    { role: "footer-link-5", href: "/en/wiedza/", label: "Insights", kind: "text", attributes: { href: "/en/wiedza/" } },
+    { role: "footer-link-6", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } }
   ])
 });
 
@@ -3208,7 +3212,7 @@ const APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST = Object.freeze({
     { role: "problem-ledger", tag: "dl", attributes: { "aria-label": "Method domains" } },
     { role: "delivery-route", tag: "div", attributes: { "aria-label": "Route to launch" } },
     { role: "fit-ledger", tag: "dl", attributes: { "aria-label": "Working conditions" } },
-    { role: "footer-sign", tag: "a", attributes: { "aria-label": "Paweł Mamcarz, home" } },
+    { role: "footer-sign", tag: "a", attributes: { "aria-label": "Paweł Mamcarz, homepage" } },
     { role: "footer-signature", tag: "img", attributes: { alt: "" } }
   ])
 });
@@ -3217,8 +3221,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 186, digest: "ec6b2553ef9783694e5bb63de4ea381d66dcac4198797c14606aba48ffd3c792" }),
-  en: Object.freeze({ elementCount: 186, digest: "011554d74762d63cedd9962b75a2cea10cb083f380e5df0f087573dc0c926771" })
+  pl: Object.freeze({ elementCount: 188, digest: "0030be7e27f7fde6f7320dbc86686c01fd4863e5843d574b9ea2fc65577f9446" }),
+  en: Object.freeze({ elementCount: 188, digest: "c5b2ca2065f213a1b086c65c672757876a08cb02aa648b02a594f724594d44d3" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -3539,7 +3543,9 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
       src: "/assets/img/signature.png",
       alt: "",
       width: "160",
-      loading: "lazy"
+      height: "50",
+      loading: "lazy",
+      decoding: "async"
     });
 
   const approvedEvidenceAnchors = applicationApprovedEvidenceAnchors(evidenceRows, factData);
@@ -3606,7 +3612,7 @@ function verifyApplicationDocumentManifest(path, parsedRoot, lang, evidenceRows,
       errors,
       "application-document-manifest",
       path,
-      `requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`
+      `actual-manifest=${lang}:${actual.elementCount}:${actual.digest}; requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`
     );
   }
 }
@@ -3703,9 +3709,11 @@ function validApplicationAnchorLeaf(anchor, expected) {
       && image?.name === "img"
       && exactApplicationAttributes(image, {
         src: "/assets/img/signature.png",
-        alt: "",
-        width: "160",
-        loading: "lazy"
+      alt: "",
+      width: "160",
+      height: "50",
+      loading: "lazy",
+      decoding: "async"
       }, new Set(["alt"]));
   }
   return false;
@@ -4340,13 +4348,13 @@ const AVIATION_NAVIGATION_CONTRACT = Object.freeze({
   pl: Object.freeze({
     ariaLabel: "Nawigacja główna", logoHref: "/", advisory: "Doradztwo",
     submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
-    primary: [["/aplikacje-operacyjne/", "Aplikacje operacyjne", false], ["/lotnictwo/", "Lotnictwo", true], ["/case-studies/", "Projekty", false], ["/wiedza/", "Wiedza", false], ["/#about", "O mnie", false], ["/#contact", "Kontakt", false]],
+    primary: [["/aplikacje-operacyjne/", "Aplikacje", false], ["/lotnictwo/", "Lotnictwo", true], ["/case-studies/", "Projekty", false], ["/wiedza/", "Wiedza", false], ["/#about", "O mnie", false], ["/#contact", "Kontakt", false]],
     languageHref: "/en/lotnictwo/", languageLabel: "EN", toggleLabel: "Menu nawigacyjne"
   }),
   en: Object.freeze({
     ariaLabel: "Main navigation", logoHref: "/en/", advisory: "Advisory",
     submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
-    primary: [["/en/aplikacje-operacyjne/", "Operational applications", false], ["/en/lotnictwo/", "Aviation", true], ["/en/case-studies/", "Projects", false], ["/en/wiedza/", "Knowledge", false], ["/en/#about", "About", false], ["/en/#contact", "Contact", false]],
+    primary: [["/en/aplikacje-operacyjne/", "Applications", false], ["/en/lotnictwo/", "Aviation", true], ["/en/case-studies/", "Projects", false], ["/en/wiedza/", "Insights", false], ["/en/#about", "About", false], ["/en/#contact", "Contact", false]],
     languageHref: "/lotnictwo/", languageLabel: "PL", toggleLabel: "Navigation menu"
   })
 });
@@ -4375,13 +4383,13 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 188, digest: "93d27c7cb2ecb91124170dfcdaa3a77ebff517ee589f39cbf6da22881b449a94" }),
-  en: Object.freeze({ elementCount: 188, digest: "d9dd69eb2611de9324f218e23ec88827232621e1397e7221a35cd142c4a856dc" })
+  pl: Object.freeze({ elementCount: 190, digest: "e14c132c6b5af56bd13909c60fdefb0a37e62604de261b143c68ee2933d03117" }),
+  en: Object.freeze({ elementCount: 190, digest: "6e31b5ca03ae114affc63f534ee6e80550f75339c25430a0e26c87203be20d7a" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
   pl: Object.freeze([
-    "Przejdź do treści", "PM", "· Mamcarz.com", "Doradztwo", "Transformacja zakupów", "Wdrożenie SAP Ariba", "Zamówienia publiczne", "Aplikacje operacyjne", "Lotnictwo", "Projekty", "Wiedza", "O mnie", "Kontakt", "EN", "↑",
+    "Przejdź do treści", "PM", "· Mamcarz.com", "Doradztwo", "Transformacja zakupów", "Wdrożenie SAP Ariba", "Zamówienia publiczne", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "O mnie", "Kontakt", "EN", "↑",
     "Strona główna", "/", "Lotnictwo", "FLIGHT PLAN / CORE ROUTE 03", "Lotnictwo", AVIATION_PAGE_CONTRACT.pl.lead,
     "01", "OPS", "Operacje", "Decyzje zapisane w procedurze.", "Zakres zaczyna się od ról, warunków i punktów decyzyjnych. Ich kolejność wyznacza sposób pracy.", "Licencja", "PPL(H)", "Licencja", "PPL(A)",
     "02", "SAFE", "Szkolenie i bezpieczeństwo", "Standard przed wykonaniem.", "Przygotowanie obejmuje kryteria, komunikację i odpowiedzialność za każdy etap pracy.", "Zakres", "uprawnienia do akrobacji", "Doświadczenie", "pilot pokazowy Diverse Extreme Team (2013)",
@@ -4389,10 +4397,10 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "Proces przeniesiony do narzędzia.", "Software porządkuje dane, kolejne stany i odpowiedzialność. Interfejs wynika z przebiegu pracy.", "WEJŚCIE", "Procedura", "PRZEPŁYW", "Dane i decyzje", "WYJŚCIE", "Ślad działania",
     "05", "LOG", "Projekty", "Rejestr przedsięwzięć lotniczych.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
     "06", "COMMS", "Kontakt", "Ustalmy zakres i odpowiedzialność.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
-    "© Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Kontakt"
+    "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
   ]),
   en: Object.freeze([
-    "Skip to content", "PM", "· Mamcarz.com", "Advisory", "Procurement transformation", "SAP Ariba implementation", "Public procurement", "Operational applications", "Aviation", "Projects", "Knowledge", "About", "Contact", "PL", "↑",
+    "Skip to content", "PM", "· Mamcarz.com", "Advisory", "Procurement transformation", "SAP Ariba implementation", "Public procurement", "Applications", "Aviation", "Projects", "Insights", "About", "Contact", "PL", "↑",
     "Home", "/", "Aviation", "FLIGHT PLAN / CORE ROUTE 03", "Aviation", AVIATION_PAGE_CONTRACT.en.lead,
     "01", "OPS", "Operations", "Decisions recorded in procedure.", "The scope starts with roles, conditions and decision points. Their sequence determines the working method.", "Licence", "PPL(H)", "Licence", "PPL(A)",
     "02", "SAFE", "Training and safety", "The standard comes before execution.", "Preparation covers criteria, communication and responsibility for each stage of work.", "Scope", "aerobatics rating", "Experience", "display pilot for the Diverse Extreme Team (2013)",
@@ -4400,7 +4408,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "The process transferred into a tool.", "Software organises data, consecutive states and responsibility. The interface follows the working process.", "INPUT", "Procedure", "FLOW", "Data and decisions", "OUTPUT", "Action trail",
     "05", "LOG", "Projects", "Aviation venture register.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
     "06", "COMMS", "Contact", "Set the scope and responsibility.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
-    "© Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Contact"
+    "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
   ])
 });
 
@@ -4547,8 +4555,8 @@ function aviationExpectedAnchorHrefs(lang) {
   const navigation = AVIATION_NAVIGATION_CONTRACT[lang];
   const home = navigation.logoHref;
   const footer = lang === "pl"
-    ? ["/", "/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/#contact"]
-    : ["/en/", "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/#contact"];
+    ? ["/", "/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact"]
+    : ["/en/", "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact"];
   return [
     "#main", home,
     ...navigation.submenu.map(([href]) => href),
@@ -4594,7 +4602,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(ventureImage, { src: "/assets/img/portfolio/akrobacja.jpg", alt: lang === "pl" ? "Widok projektu akrobacja.com" : "View of the akrobacja.com project", width: "1400", height: "492", loading: "lazy", decoding: "async" })
     && footerSign !== undefined
     && elementIsWithin(footerSign, footer)
-    && exactApplicationResourceAttributes(signature, { src: "/assets/img/signature.png", alt: "", width: "160", loading: "lazy" });
+    && exactApplicationResourceAttributes(signature, { src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
   const anchors = all.filter((element) => element.name === "a");
   const anchorsValid = JSON.stringify(anchors.map((anchor) => browserNormalizedUrl(elementAttribute(anchor, "href")))) === JSON.stringify(aviationExpectedAnchorHrefs(lang));
   const forbiddenTags = new Set([...APPLICATION_ZERO_RESOURCE_TAGS].filter((name) => name !== "picture" && name !== "source"));
@@ -4766,8 +4774,8 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna", home: "/", logoLabel: "Paweł Mamcarz, strona główna",
     advisory: "Doradztwo", paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
     submenu: Object.freeze([["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]]),
-    primary: Object.freeze([["/aplikacje-operacyjne/", "Aplikacje operacyjne"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]]),
-    footer: Object.freeze([["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/#contact", "Kontakt"]]),
+    primary: Object.freeze([["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]]),
+    footer: Object.freeze([["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"]]),
     resources: Object.freeze([
       Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Model interaktywny", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null }),
       Object.freeze({ href: "/wystapienia/", title: "Wystąpienia i wykłady", type: "Wystąpienia i wykłady", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null })
@@ -4785,8 +4793,8 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation", home: "/en/", logoLabel: "Paweł Mamcarz, homepage",
     advisory: "Advisory", paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", back: "Back to top",
     submenu: Object.freeze([["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]]),
-    primary: Object.freeze([["/en/aplikacje-operacyjne/", "Operational applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Knowledge", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]]),
-    footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/#contact", "Contact"]]),
+    primary: Object.freeze([["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]]),
+    footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"]]),
     resources: Object.freeze([
       Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement 2026: From Traditional Cycle to AI Orchestration", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
       Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
@@ -4802,7 +4810,7 @@ const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
     "/procurement-2026/", "/wystapienia/", "/#contact", "/", "/assets/img/signature.png", "/", "/uslugi/transformacja-zakupow/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/#contact", "/assets/js/main.js?v=20260825-flightplan-2"
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/assets/js/main.js?v=20260825-flightplan-2"
   ]),
   en: Object.freeze([
     "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
@@ -4810,7 +4818,7 @@ const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
     "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
     "/infographic_procurement_2026_EN.html", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
-    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/#contact", "/assets/js/main.js?v=20260825-flightplan-2"
+    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/assets/js/main.js?v=20260825-flightplan-2"
   ])
 });
 
@@ -4854,7 +4862,7 @@ function knowledgeDocumentMarkup(contract, lang) {
   const submenu = contract.submenu.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" loading="lazy"></a><div class="footer-copy">© Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script></body></html>`;
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -5117,6 +5125,10 @@ function knowledgeHasDateBoundaryViolation(parsedRoot) {
     if (node.type === "text" || node.type === "comment") {
       let value = node.value;
       const parent = node.parent;
+      if (node.type === "text" && parent?.type === "element" && elementHasClass(parent, "footer-copy")
+        && publishedStaticText(parent) === "© 2026 Paweł Mamcarz · mamcarz.com") {
+        value = "";
+      }
       if (node.type === "text" && parent?.type === "element" && parent.name === "script"
         && elementAttribute(parent, "type") === "application/ld+json") {
         for (const literal of approvedSchemaLiterals) value = value.split(literal).join("");
@@ -5400,7 +5412,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "709bbf1bd7c34358c7bc99cf828e322196029df2636b2faf4bf332fb3decff1c", en: "db64af7316a8f23ee56079f55a35ab9971e09968a14bae9c04f9a01f9d5ed09e" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "cbc4b44e16583076a70e6abd07a7a61b750ee1ae9584c1935527583d54c9442d", en: "c4625b32670ca06c9c3bb7f9db2c831acadb9951dc9d1a088f028e79037d9754" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -5472,7 +5484,7 @@ function verifyProjectSchema(path, parsedRoot, lang, errors) {
 
 function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const elements = elementDescendants(parsedRoot);
-  const forbidden = new Set(["audio", "base", "embed", "form", "iframe", "img", "object", "picture", "source", "style", "video"]);
+  const forbidden = new Set(["audio", "base", "embed", "form", "iframe", "object", "picture", "source", "style", "video"]);
   const eventOrStyle = elements.some((element) => element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)));
   const scripts = elements.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
@@ -5482,7 +5494,11 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
     return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
   });
-  if (elements.some((element) => forbidden.has(element.name)) || eventOrStyle || !validScripts || invalidAnchors.length > 0) {
+  const images = elements.filter((element) => element.name === "img");
+  const signatureValid = images.length === 1
+    && elementHasClass(images[0].parent, "footer-sign")
+    && exactApplicationResourceAttributes(images[0], { src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
+  if (elements.some((element) => forbidden.has(element.name)) || !signatureValid || eventOrStyle || !validScripts || invalidAnchors.length > 0) {
     error(errors, "project-resource-census", path, "forbids images, external project links, embeds, inline styles or executable drift and allows only the exact schema, shell resources and contextual mail CTA");
   }
 }
@@ -5769,9 +5785,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "82b2912f18ff5358172be88b20c4f18535f35a7fe074d651d5817327b7da0f4f", en: "c8cc4b2b57ba437248dd2ad3d641de4a20230da4e82fad73f04b37296835704f" }),
-  ariba: Object.freeze({ pl: "66bb7d1560b3a9d5b09d5225982ee50757477111e3312cad2edb4f396e9b94ce", en: "056fd02a9d43288efa0a9ed71bf3c99f15e28568c902cb9ba8643dd8eb96c0eb" }),
-  publicProcurement: Object.freeze({ pl: "c7a717d86e6b497341f5d63538fd2080b2804a1984559440c1aa8c58f67a1c54", en: "7450b42747c291217b8a17d300aacbd120aef5ab33d8d3d2e30186f1eadd459e" })
+  transformation: Object.freeze({ pl: "13d5e946545d212ca2763242962f753c316ce5d5ccc5f52ddf515ba0d8da1fde", en: "6d53556149ca00f68fa0c3dd51afcb9b4c8e968d9a00bd04407f2d28a0c907db" }),
+  ariba: Object.freeze({ pl: "a1974b5ba5affc228b38c8afdd277a38cb74d7bdf6e87478f677454c8b9f2f08", en: "2979c9d690e7447d2917d6cfe86b067ca2f5698aa0bccdf3c726e32ac78939ea" }),
+  publicProcurement: Object.freeze({ pl: "2a60ae7c00aef9b6f412fbe35f71c5a65a1162589ae193ad3af532a6ae3dcf25", en: "87e7bc40ed677276c7bf326272c6a9abdb7b4044ff865be6acdf7614346b5b22" })
 });
 
 function serviceKeyForPath(path) {
@@ -6110,7 +6126,7 @@ const SPEAKING_CONTRACT = Object.freeze({
   })
 });
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "b4a32b29d12037ca671437a36a6b46c9cc14d68723517d6e2a66e5eba5374c74", en: "22479b7cb849f2a94179be26b02300875525b77226a7649de7d91dc62b131d04" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "ce016d189592e2f1c7bb5ce6b3bc6c91cd00d0bea2c22d741e215a580b2304ec", en: "7d5c274ba7752fd23eaa9585f4388a407f02d9fae111e6660450245625ea0b5c" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -6172,7 +6188,16 @@ function verifySpeakingClaimBoundary(path, parsedRoot, errors) {
 
 function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const all = elementDescendants(parsedRoot);
-  const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "img", "object", "picture", "source", "style", "video"]);
+  const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "object", "picture", "source", "style", "video"]);
+  const signatureImages = all.filter((element) => element.name === "img" && elementIsWithin(element, all.find((candidate) => elementHasClass(candidate, "footer-sign"))));
+  const validSignature = signatureImages.length === 1 && exactElementAttributes(signatureImages[0], {
+    src: "/assets/img/signature.png",
+    alt: "",
+    width: "160",
+    height: "50",
+    loading: "lazy",
+    decoding: "async"
+  }) && all.filter((element) => element.name === "img").length === 1;
   const invalidAnchor = all.filter((element) => element.name === "a").some((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
     return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
@@ -6181,8 +6206,8 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
     && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
-  if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts) {
-    error(errors, "speaking-resource-census", path, "forbids images, embeds, forms, external URLs, inline styles, extra scripts or controls");
+  if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature) {
+    error(errors, "speaking-resource-census", path, "allows only the exact footer signature image and forbids embeds, forms, external URLs, inline styles, extra scripts or controls");
   }
 }
 
@@ -6245,7 +6270,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity.html", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", null]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "e7b21099ae1ae9feb1bf6a0c0a7a8396eb75da6219712102af11b6c3ae742208";
+const PROCUREMENT_DOCUMENT_MANIFEST = "5e34a84d5953e997a20a6ce0128a8863234e2f8e06b0c9358baab9995edcc080";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -6303,7 +6328,16 @@ async function verifyProcurementParent(_factData, context) {
   const controls = all.filter((element) => (element.name === "a" || element.name === "button")
     && (elementHasClass(element, "btn-primary") || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
   if (controls.length !== 1 || controls[0].name !== "a" || elementAttribute(controls[0], "href") !== PROCUREMENT_PARENT.ctaHref) error(context.errors, "procurement-controls", path, "requires one contextual Procurement mail CTA");
-  const forbiddenTags = new Set(["audio", "base", "embed", "form", "img", "object", "picture", "source", "style", "video"]);
+  const forbiddenTags = new Set(["audio", "base", "embed", "form", "object", "picture", "source", "style", "video"]);
+  const signatureImages = all.filter((element) => element.name === "img" && elementIsWithin(element, all.find((candidate) => elementHasClass(candidate, "footer-sign"))));
+  const validSignature = signatureImages.length === 1 && exactElementAttributes(signatureImages[0], {
+    src: "/assets/img/signature.png",
+    alt: "",
+    width: "160",
+    height: "50",
+    loading: "lazy",
+    decoding: "async"
+  }) && all.filter((element) => element.name === "img").length === 1;
   const invalidAnchor = all.filter((element) => element.name === "a").some((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
     return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== PROCUREMENT_PARENT.ctaHref);
@@ -6313,7 +6347,7 @@ async function verifyProcurementParent(_factData, context) {
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
     && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer")).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)))
-    || invalidAnchor || !validScripts || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames");
+    || invalidAnchor || !validScripts || !validSignature || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames plus the exact footer signature image");
   verifyProcurementSchema(parsedRoot, context.errors);
   const digest = serviceDocumentDigest(parsedRoot);
   if (digest !== PROCUREMENT_DOCUMENT_MANIFEST) error(context.errors, "procurement-document-manifest", path, `requires exact full-document manifest; actual ${digest}`);
@@ -7210,6 +7244,229 @@ async function verifyArtifacts(_factData, context) {
   }
 }
 
+const SITE_SHELL_ENTRIES = Object.freeze([
+  Object.freeze({ path: "index.html", lang: "pl", counterpart: "/en/", active: "logo" }),
+  Object.freeze({ path: "en/index.html", lang: "en", counterpart: "/", active: "logo" }),
+  Object.freeze({ path: "uslugi/transformacja-zakupow/index.html", lang: "pl", counterpart: "/en/uslugi/transformacja-zakupow/", active: "/uslugi/transformacja-zakupow/" }),
+  Object.freeze({ path: "en/uslugi/transformacja-zakupow/index.html", lang: "en", counterpart: "/uslugi/transformacja-zakupow/", active: "/en/uslugi/transformacja-zakupow/" }),
+  Object.freeze({ path: "uslugi/wdrozenie-sap-ariba/index.html", lang: "pl", counterpart: "/en/uslugi/wdrozenie-sap-ariba/", active: "/uslugi/wdrozenie-sap-ariba/" }),
+  Object.freeze({ path: "en/uslugi/wdrozenie-sap-ariba/index.html", lang: "en", counterpart: "/uslugi/wdrozenie-sap-ariba/", active: "/en/uslugi/wdrozenie-sap-ariba/" }),
+  Object.freeze({ path: "uslugi/doradztwo-zamowienia-publiczne/index.html", lang: "pl", counterpart: "/en/uslugi/doradztwo-zamowienia-publiczne/", active: "/uslugi/doradztwo-zamowienia-publiczne/" }),
+  Object.freeze({ path: "en/uslugi/doradztwo-zamowienia-publiczne/index.html", lang: "en", counterpart: "/uslugi/doradztwo-zamowienia-publiczne/", active: "/en/uslugi/doradztwo-zamowienia-publiczne/" }),
+  Object.freeze({ path: "aplikacje-operacyjne/index.html", lang: "pl", counterpart: "/en/aplikacje-operacyjne/", active: "/aplikacje-operacyjne/" }),
+  Object.freeze({ path: "en/aplikacje-operacyjne/index.html", lang: "en", counterpart: "/aplikacje-operacyjne/", active: "/en/aplikacje-operacyjne/" }),
+  Object.freeze({ path: "lotnictwo/index.html", lang: "pl", counterpart: "/en/lotnictwo/", active: "/lotnictwo/" }),
+  Object.freeze({ path: "en/lotnictwo/index.html", lang: "en", counterpart: "/lotnictwo/", active: "/en/lotnictwo/" }),
+  Object.freeze({ path: "case-studies/index.html", lang: "pl", counterpart: "/en/case-studies/", active: "/case-studies/" }),
+  Object.freeze({ path: "en/case-studies/index.html", lang: "en", counterpart: "/case-studies/", active: "/en/case-studies/" }),
+  Object.freeze({ path: "wiedza/index.html", lang: "pl", counterpart: "/en/wiedza/", active: "/wiedza/" }),
+  Object.freeze({ path: "en/wiedza/index.html", lang: "en", counterpart: "/wiedza/", active: "/en/wiedza/" }),
+  Object.freeze({ path: "wystapienia/index.html", lang: "pl", counterpart: "/en/wystapienia/", active: "/wiedza/" }),
+  Object.freeze({ path: "en/wystapienia/index.html", lang: "en", counterpart: "/wystapienia/", active: "/en/wiedza/" }),
+  Object.freeze({ path: "procurement-2026/index.html", lang: "pl", counterpart: "/en/wiedza/", active: "/wiedza/" })
+]);
+
+const SITE_SHELL_COPY = Object.freeze({
+  pl: Object.freeze({
+    navLabel: "Nawigacja główna", home: "/", logoLabel: "Paweł Mamcarz, strona główna", group: "Doradztwo",
+    submenu: Object.freeze([
+      Object.freeze(["/uslugi/transformacja-zakupow/", "Transformacja zakupów"]),
+      Object.freeze(["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"]),
+      Object.freeze(["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"])
+    ]),
+    primary: Object.freeze([
+      Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
+      Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
+      Object.freeze(["/#about", "O mnie"]), Object.freeze(["/#contact", "Kontakt"])
+    ]),
+    language: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
+    footer: Object.freeze([
+      Object.freeze(["/", "Strona główna"]), Object.freeze(["/uslugi/transformacja-zakupow/", "Doradztwo"]),
+      Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
+      Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
+      Object.freeze(["/#contact", "Kontakt"])
+    ])
+  }),
+  en: Object.freeze({
+    navLabel: "Main navigation", home: "/en/", logoLabel: "Paweł Mamcarz, homepage", group: "Advisory",
+    submenu: Object.freeze([
+      Object.freeze(["/en/uslugi/transformacja-zakupow/", "Procurement transformation"]),
+      Object.freeze(["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"]),
+      Object.freeze(["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"])
+    ]),
+    primary: Object.freeze([
+      Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
+      Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
+      Object.freeze(["/en/#about", "About"]), Object.freeze(["/en/#contact", "Contact"])
+    ]),
+    language: "PL", toggle: "Navigation menu", back: "Back to top",
+    footer: Object.freeze([
+      Object.freeze(["/en/", "Home"]), Object.freeze(["/en/uslugi/transformacja-zakupow/", "Advisory"]),
+      Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
+      Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
+      Object.freeze(["/en/#contact", "Contact"])
+    ])
+  })
+});
+
+function exactShellAnchor(anchor, href, label, current = false, className = null) {
+  const attributes = { href };
+  if (className !== null) attributes.class = className;
+  if (current) attributes["aria-current"] = "page";
+  return anchor?.name === "a"
+    && exactApplicationResourceAttributes(anchor, attributes)
+    && normalizeExactHtmlLiteral(rawElementText(anchor)) === label;
+}
+
+function exactShellListLinks(list, expected, active) {
+  const items = directElementChildren(list, "li");
+  if (items.length !== expected.length || items.some((item) => !exactApplicationResourceAttributes(item, {}))) return false;
+  return items.every((item, index) => {
+    const children = directElementChildren(item);
+    const [href, label] = expected[index];
+    return children.length === 1 && exactShellAnchor(children[0], href, label, active === href);
+  });
+}
+
+function shellElementsHaveNoBehaviorDrift(elements) {
+  return elements.every((element) => [...element.attributes.keys()].every((name) => name !== "style" && !name.startsWith("on")));
+}
+
+function verifySiteShellPage(entry, html, parsedRoot, errors) {
+  const copy = SITE_SHELL_COPY[entry.lang];
+  const all = elementDescendants(parsedRoot);
+  const body = htmlBodyRoot(parsedRoot);
+  const navs = all.filter((element) => element.name === "nav" && elementHasClass(element, "site-nav"));
+  const nav = navs[0];
+  const navChildren = directElementChildren(nav);
+  const logo = navChildren[0];
+  const menu = navChildren[1];
+  const language = navChildren[2];
+  const toggle = navChildren[3];
+  let navValid = navs.length === 1
+    && nav?.parent === body
+    && exactApplicationResourceAttributes(nav, { class: "site-nav", "aria-label": copy.navLabel })
+    && navChildren.length === 4
+    && exactShellAnchor(logo, copy.home, "PM · Mamcarz.com", entry.active === "logo", "nav-logo")
+    && menu?.name === "ul"
+    && exactApplicationResourceAttributes(menu, { class: "nav-list", id: "nav-menu" })
+    && exactShellAnchor(language, entry.counterpart, copy.language, false, "nav-lang")
+    && toggle?.name === "button"
+    && exactApplicationResourceAttributes(toggle, {
+      class: "nav-toggle", id: "nav-toggle", "aria-label": copy.toggle,
+      "aria-controls": "nav-menu", "aria-expanded": "false"
+    });
+  const toggleSpans = directElementChildren(toggle, "span");
+  navValid = navValid && toggleSpans.length === 3
+    && toggleSpans.every((span) => exactApplicationResourceAttributes(span, {}) && rawElementText(span).trim() === "");
+  const menuItems = directElementChildren(menu, "li");
+  const disclosure = directElementChildren(menuItems[0]);
+  const details = disclosure[0];
+  const detailsChildren = directElementChildren(details);
+  const summary = detailsChildren[0];
+  const submenu = detailsChildren[1];
+  navValid = navValid
+    && menuItems.length === 7
+    && menuItems.every((item) => exactApplicationResourceAttributes(item, {}))
+    && disclosure.length === 1
+    && details?.name === "details"
+    && exactApplicationResourceAttributes(details, { class: "nav-group" })
+    && detailsChildren.length === 2
+    && summary?.name === "summary"
+    && exactApplicationResourceAttributes(summary, {})
+    && normalizeExactHtmlLiteral(rawElementText(summary)) === copy.group
+    && submenu?.name === "ul"
+    && exactApplicationResourceAttributes(submenu, { class: "nav-submenu" })
+    && exactShellListLinks(submenu, copy.submenu, entry.active)
+    && exactShellListLinks({ children: menuItems.slice(1) }, copy.primary, entry.active);
+  const current = nav ? elementDescendants(nav, "a").filter((anchor) => elementAttribute(anchor, "aria-current") === "page") : [];
+  navValid = navValid && current.length === 1 && elementIsVisibleIfDisclosuresOpen(current[0]);
+  const languageControls = all.filter((element) => element.name === "a" && elementHasClass(element, "nav-lang"));
+  const logos = all.filter((element) => element.name === "a" && elementHasClass(element, "nav-logo"));
+  const menus = all.filter((element) => element.name === "ul" && elementAttribute(element, "id") === "nav-menu");
+  const toggles = all.filter((element) => element.name === "button" && elementAttribute(element, "id") === "nav-toggle");
+  const disclosures = all.filter((element) => element.name === "details" && elementHasClass(element, "nav-group"));
+  navValid = navValid && languageControls.length === 1 && logos.length === 1 && menus.length === 1 && toggles.length === 1 && disclosures.length === 1;
+  if (!navValid) error(errors, "site-shell-nav", entry.path, "requires the exact localized disclosure navigation, route order, labels, ownership and sole current item");
+
+  const overlays = all.filter((element) => elementAttribute(element, "id") === "nav-overlay");
+  const backs = all.filter((element) => elementAttribute(element, "id") === "backToTop");
+  const controlsValid = overlays.length === 1
+    && overlays[0].name === "div"
+    && overlays[0].parent === body
+    && exactApplicationResourceAttributes(overlays[0], { class: "nav-overlay", id: "nav-overlay" })
+    && backs.length === 1
+    && backs[0].name === "button"
+    && backs[0].parent === body
+    && exactApplicationResourceAttributes(backs[0], { class: "back-to-top", id: "backToTop", "aria-label": copy.back })
+    && normalizeExactHtmlLiteral(rawElementText(backs[0])) === "↑";
+  if (!controlsValid) error(errors, "site-shell-controls", entry.path, "requires one exact overlay and back-to-top control");
+
+  const footers = all.filter((element) => element.name === "footer" && elementHasClass(element, "site-footer"));
+  const footer = footers[0];
+  const footerChildren = directElementChildren(footer);
+  const brand = footerChildren[0];
+  const footerList = footerChildren[1];
+  const brandChildren = directElementChildren(brand);
+  const sign = brandChildren[0];
+  const owner = brandChildren[1];
+  const signChildren = directElementChildren(sign);
+  const signature = signChildren[0];
+  const footerValid = footers.length === 1
+    && footer?.parent === body
+    && exactApplicationResourceAttributes(footer, { class: "site-footer" })
+    && footerChildren.length === 2
+    && brand?.name === "div"
+    && exactApplicationResourceAttributes(brand, { class: "footer-brand" })
+    && brandChildren.length === 2
+    && exactApplicationResourceAttributes(sign, { class: "footer-sign", href: copy.home, "aria-label": copy.logoLabel })
+    && signChildren.length === 1
+    && signature?.name === "img"
+    && exactApplicationResourceAttributes(signature, {
+      src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async"
+    })
+    && owner?.name === "div"
+    && exactApplicationResourceAttributes(owner, { class: "footer-copy" })
+    && normalizeExactHtmlLiteral(rawElementText(owner)) === "© 2026 Paweł Mamcarz · mamcarz.com"
+    && footerList?.name === "ul"
+    && exactApplicationResourceAttributes(footerList, { class: "footer-links" })
+    && exactShellListLinks(footerList, copy.footer, null);
+  if (!footerValid) error(errors, "site-shell-footer", entry.path, "requires the exact signature, 2026 owner line and ordered localized seven-link footer");
+
+  const stylesheets = all.filter((element) => element.name === "link" && (
+    elementAttributeTokens(element, "rel").includes("stylesheet")
+    || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")
+  ));
+  const scripts = all.filter((element) => element.name === "script");
+  const sharedScripts = scripts.filter((element) => element.attributes.has("src") || (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
+  const inlineExecutable = scripts.filter((element) => !element.attributes.has("src") && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
+  const resourceValid = stylesheets.length === 1
+    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" })
+    && elementIsActiveResource(stylesheets[0])
+    && sharedScripts.length === 1
+    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260825-flightplan-2", defer: null })
+    && elementIsActiveResource(sharedScripts[0])
+    && rawElementText(sharedScripts[0]).trim() === ""
+    && elementDescendants(parsedRoot, "style").length === 0
+    && inlineExecutable.length === 0;
+  if (!resourceValid) error(errors, "site-shell-resources", entry.path, "requires one exact v2 stylesheet, one exact deferred v2 script and no alternate or inline executable shell resource");
+
+  const shellOwned = [nav, footer, overlays[0], backs[0]].filter(Boolean).flatMap((element) => [element, ...elementDescendants(element)]);
+  const legacy = all.some((element) => ["navLinks", "navHamburger"].includes(elementAttribute(element, "id")))
+    || /\/en\/procurement-2026\//i.test(decodeHtmlEntities(html));
+  if (legacy || !shellElementsHaveNoBehaviorDrift(shellOwned)) {
+    error(errors, "site-shell-safety", entry.path, "forbids legacy IDs, fake English Procurement routing, inline shell styles and event handlers");
+  }
+}
+
+async function verifySiteShellManifest(context) {
+  for (const entry of SITE_SHELL_ENTRIES) {
+    const html = await readRequired(context, entry.path, "site-shell-file");
+    const parsed = parseStaticHtml(html);
+    verifySiteShellPage(entry, html, parsed.root, context.errors);
+  }
+}
+
 async function verifyPages(factData, family, context) {
   const selectedPairs = ROUTE_PAIRS.filter((pair) => family === "all" || pair[4] === family);
   if (family === "services" || family === "all") verifyServiceRegistryInventory(factData, context.errors, { required: true });
@@ -7259,6 +7516,7 @@ async function verifyPages(factData, family, context) {
   if (family === "aviation" || family === "all") await verifyAviationHomepageLinks(context);
   if (family === "speaking" || family === "all") await verifyProcurementParent(factData, context);
   if (family === "artifacts" || family === "all") await verifyArtifacts(factData, context);
+  if (family === "all") await verifySiteShellManifest(context);
 }
 
 function candidates(fact, language) {
