@@ -254,9 +254,11 @@ function elementIsStaticallyVisible(element) {
   return true;
 }
 
-function elementHasNoHiddenAncestor(element) {
+const inactiveResourceAncestors = new Set(["noscript", "template"]);
+
+function elementIsActiveResource(element) {
   for (let current = element; current?.type === "element"; current = current.parent) {
-    if (elementHasHiddenState(current)) return false;
+    if (elementHasHiddenState(current) || inactiveResourceAncestors.has(current.name)) return false;
   }
   return true;
 }
@@ -641,16 +643,19 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
   const expectedJs = "/assets/js/main.js?v=20260825-flightplan-1";
   const activeStylesheets = elements.filter((element) => element.name === "link"
     && elementAttributeTokens(element, "rel").includes("stylesheet")
-    && elementHasNoHiddenAncestor(element));
-  const validStylesheets = activeStylesheets.filter((element) => elementAttribute(element, "href") === expectedCss);
+    && elementIsActiveResource(element));
+  const validStylesheets = activeStylesheets.filter((element) => elementAttribute(element, "href") === expectedCss
+    && !element.attributes.has("media")
+    && !element.attributes.has("disabled"));
   const executableScriptTypes = new Set(["", "text/javascript", "application/javascript", "module"]);
   const executableBrowserScripts = elements.filter((element) => {
-    if (element.name !== "script" || !elementHasNoHiddenAncestor(element)) return false;
+    if (element.name !== "script" || !elementIsActiveResource(element)) return false;
     const type = element.attributes.has("type") ? normalize(elementAttribute(element, "type") ?? "") : "";
     return executableScriptTypes.has(type);
   });
   const validBrowserScripts = executableBrowserScripts.filter((element) => elementAttribute(element, "src") === expectedJs
-    && element.attributes.has("defer"));
+    && element.attributes.has("defer")
+    && !element.attributes.has("nomodule"));
   if (activeStylesheets.length !== 1 || validStylesheets.length !== 1
     || executableBrowserScripts.length !== 1 || validBrowserScripts.length !== 1) {
     error(errors, "home-cache-version", page.path, `homepage requires exactly one active ${expectedCss} stylesheet and one executable deferred ${expectedJs} script`);
@@ -674,7 +679,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
       && normalize(elementAttribute(element, "type") ?? "") === "font/woff2"
       && element.attributes.has("crossorigin")
       && (crossorigin === "" || crossorigin === "anonymous")
-      && elementHasNoHiddenAncestor(element);
+      && !element.attributes.has("media")
+      && elementIsActiveResource(element);
   });
   const actualFontHrefs = new Set(validFontLinks.map((element) => elementAttribute(element, "href")));
   if (fontLinks.length !== 2 || validFontLinks.length !== 2
@@ -929,6 +935,14 @@ const jsPunctuators = [
   ">>>=", "===", "!==", "**=", "<<=", ">>=", "&&=", "||=", "??=", ">>>", "...", "=>", "==", "!=", "<=", ">=", "++", "--", "**", "<<", ">>", "&&", "||", "??", "?.", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^="
 ].sort((first, second) => second.length - first.length);
 
+const regexPrefixKeywords = new Set([
+  "await", "case", "delete", "do", "else", "in", "instanceof", "new", "return", "throw", "typeof", "void", "yield"
+]);
+const regexControlHeadKeywords = new Set(["catch", "for", "if", "switch", "while", "with"]);
+const blockPrefixKeywords = new Set(["do", "else", "finally", "try"]);
+const jsIdentifierStart = /^[$_\p{ID_Start}]$/u;
+const jsIdentifierContinue = /^[$_\u200c\u200d\p{ID_Continue}]$/u;
+
 function readJsEscape(source, index, errors) {
   const escaped = source[index + 1];
   if (escaped === undefined) {
@@ -961,12 +975,46 @@ function readJsEscape(source, index, errors) {
   return { value: escaped, end: index + 2 };
 }
 
+function sourceCodePoint(source, index) {
+  const value = String.fromCodePoint(source.codePointAt(index));
+  return { value, end: index + value.length };
+}
+
+function readJsIdentifier(source, start, errors) {
+  let index = start;
+  let value = "";
+  let first = true;
+  while (index < source.length) {
+    let part;
+    if (source[index] === "\\") {
+      if (source[index + 1] !== "u") {
+        errors.push(`invalid IdentifierName escape at offset ${index}`);
+        return { value, end: Math.min(source.length, index + 2) };
+      }
+      const errorCount = errors.length;
+      part = readJsEscape(source, index, errors);
+      if (errors.length > errorCount || part.value.length === 0) return { value, end: part.end };
+    } else {
+      part = sourceCodePoint(source, index);
+    }
+    const valid = (first ? jsIdentifierStart : jsIdentifierContinue).test(part.value);
+    if (!valid) {
+      if (source[index] === "\\") errors.push(`invalid escaped IdentifierName character at offset ${index}`);
+      break;
+    }
+    value += part.value;
+    index = part.end;
+    first = false;
+  }
+  return { value, end: index };
+}
+
 function tokenizeJavascriptForHtmlSinks(source) {
   const tokens = [];
   const errors = [];
 
-  const push = (type, value) => {
-    const token = { type, value };
+  const push = (type, value, metadata = {}) => {
+    const token = { type, value, ...metadata };
     tokens.push(token);
     return token;
   };
@@ -997,10 +1045,17 @@ function tokenizeJavascriptForHtmlSinks(source) {
 
   const canStartRegex = (previous) => {
     if (!previous) return true;
-    if (previous.type === "identifier") return new Set(["await", "case", "delete", "do", "else", "in", "instanceof", "new", "return", "throw", "typeof", "void", "yield"]).has(previous.value);
+    if (previous.afterControlHead || previous.closesBlock) return true;
+    if (previous.type === "identifier") return regexPrefixKeywords.has(previous.value);
     if (["number", "regex", "string", "template"].includes(previous.type)) return false;
     return ![")", "]", "}", "++", "--"].includes(previous.value);
   };
+
+  const opensStatementBlock = (previous) => !previous
+    || previous.afterControlHead
+    || previous.closesBlock
+    || blockPrefixKeywords.has(previous.value)
+    || [";", "{", "=>", ")"].includes(previous.value);
 
   const readRegex = (start) => {
     let index = start + 1;
@@ -1060,6 +1115,8 @@ function tokenizeJavascriptForHtmlSinks(source) {
     let index = start;
     let braceDepth = 0;
     let previous = null;
+    const parenthesisKinds = [];
+    const braceKinds = [];
     while (index < source.length) {
       const character = source[index];
       const next = source[index + 1];
@@ -1092,10 +1149,11 @@ function tokenizeJavascriptForHtmlSinks(source) {
         previous = tokens.at(-1) ?? null;
         continue;
       }
-      if (/[a-z_$]/i.test(character)) {
-        const match = /^[a-z_$][a-z0-9_$]*/i.exec(source.slice(index));
-        previous = push("identifier", match[0]);
-        index += match[0].length;
+      const codePoint = sourceCodePoint(source, index);
+      if (character === "\\" || jsIdentifierStart.test(codePoint.value)) {
+        const identifier = readJsIdentifier(source, index, errors);
+        previous = push("identifier", identifier.value);
+        index = identifier.end > index ? identifier.end : codePoint.end;
         continue;
       }
       if (/\d/.test(character)) {
@@ -1105,15 +1163,28 @@ function tokenizeJavascriptForHtmlSinks(source) {
         continue;
       }
       if (character === "}" && stopAtTemplateBrace && braceDepth === 0) return { index: index + 1, closed: true };
-      if (character === "{") braceDepth += 1;
-      else if (character === "}" && braceDepth > 0) braceDepth -= 1;
       if (character === "/" && canStartRegex(previous)) {
         index = readRegex(index);
         previous = push("regex", "regex");
         continue;
       }
       const punctuator = jsPunctuators.find((candidate) => source.startsWith(candidate, index)) ?? character;
-      previous = push("punctuator", punctuator);
+      if (punctuator === "(") {
+        parenthesisKinds.push(previous?.type === "identifier" && regexControlHeadKeywords.has(previous.value) ? "control" : "normal");
+        previous = push("punctuator", punctuator);
+      } else if (punctuator === ")") {
+        previous = push("punctuator", punctuator, { afterControlHead: parenthesisKinds.pop() === "control" });
+      } else if (punctuator === "{") {
+        braceDepth += 1;
+        const kind = opensStatementBlock(previous) ? "block" : "expression";
+        braceKinds.push(kind);
+        previous = push("punctuator", punctuator);
+      } else if (punctuator === "}") {
+        if (braceDepth > 0) braceDepth -= 1;
+        previous = push("punctuator", punctuator, { closesBlock: braceKinds.pop() === "block" });
+      } else {
+        previous = push("punctuator", punctuator);
+      }
       index += punctuator.length;
     }
     return { index, closed: !stopAtTemplateBrace };
@@ -1136,13 +1207,29 @@ function htmlSinkAccessAt(tokens, index) {
   return null;
 }
 
+function htmlSinkHasPrefixUpdate(tokens, accessIndex) {
+  let sawReceiver = false;
+  for (let index = accessIndex - 1; index >= 0; index -= 1) {
+    const token = tokens[index];
+    if (token.value === "++" || token.value === "--") return sawReceiver;
+    if (["identifier", "number", "string"].includes(token.type)) {
+      sawReceiver = true;
+      continue;
+    }
+    if ([".", "?.", "[", "]"].includes(token.value)) continue;
+    return false;
+  }
+  return false;
+}
+
 function inspectJavascriptHtmlSinks(source) {
   const lexical = tokenizeJavascriptForHtmlSinks(source);
   for (let index = 0; index < lexical.tokens.length; index += 1) {
     const access = htmlSinkAccessAt(lexical.tokens, index);
     if (!access) continue;
     const after = lexical.tokens[access.end + 1];
-    if ((access.property === "innerHTML" || access.property === "outerHTML") && htmlSinkAssignments.has(after?.value)) {
+    if ((access.property === "innerHTML" || access.property === "outerHTML")
+      && (htmlSinkAssignments.has(after?.value) || htmlSinkHasPrefixUpdate(lexical.tokens, index))) {
       return { unsafe: true, errors: lexical.errors };
     }
     if (access.property === "insertAdjacentHTML"

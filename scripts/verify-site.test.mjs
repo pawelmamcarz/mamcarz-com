@@ -657,6 +657,112 @@ test("Task 7 review fails closed on unterminated JavaScript lexical states", asy
   }
 });
 
+test("Task 7 round 2 rejects Unicode-escaped HTML sink IdentifierNames", async () => {
+  const mutations = [
+    ["escaped middle character", String.raw`node.inn\u0065rHTML = payload;`],
+    ["escaped leading character", String.raw`node.\u0069nnerHTML = payload;`],
+    ["code-point escaped middle character", String.raw`node.out\u{0065}rHTML ||= payload;`]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator accepted escaped sink IdentifierNames: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 2 fails closed on malformed Unicode IdentifierName escapes", async () => {
+  const mutations = [
+    ["out-of-range code point", String.raw`node.inn\u{110000}rHTML = payload;`],
+    ["malformed fixed-width escape", String.raw`node.\u00G0innerHTML = payload;`]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 2 recognizes regex statements after control heads and blocks", async () => {
+  const controls = [
+    ["if control head", "if (safe) /.innerHTML=/.test(value);"],
+    ["while control head", String.raw`while (false) /.insertAdjacentHTML\(/.test(value);`],
+    ["standalone block", "{} /.innerHTML=/.test(value);"]
+  ];
+  const rejected = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator rejected regex statements: ${rejected.join(", ")}`);
+});
+
+test("Task 7 round 2 distinguishes division from regex without masking a later sink", async () => {
+  const safeControls = [
+    "const ratio = total / divisor;",
+    "const prior = total / node.innerHTML;"
+  ];
+  for (const control of safeControls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), control);
+  }
+  const unsafeRoot = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\nconst ratio = total / divisor; node.innerHTML = payload;`
+  });
+  const unsafeResult = await runVerification({ root: unsafeRoot, scope: "foundation" });
+  assert.ok(errorIds(unsafeResult).includes("js-inner-html"));
+});
+
+test("Task 7 round 2 rejects prefix and postfix HTML sink updates", async () => {
+  const mutations = [
+    ["prefix increment", "++node.innerHTML;"],
+    ["prefix decrement", "--node.outerHTML;"],
+    ["postfix increment", "node.innerHTML++;"],
+    ["postfix decrement", "node.outerHTML--;" ]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator accepted sink updates: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 2 probe catches a code-point escaped HTML method", async () => {
+  const root = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\n${String.raw`node.insertAdj\u{61}centHTML("beforeend", payload);`}`
+  });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 2 probe permits regex statements after for and a control block", async () => {
+  const controls = [
+    ["for control head", "for (; false;) /.innerHTML=/.test(value);"],
+    ["completed control block", String.raw`if (safe) {} /.outerHTML\+=/.test(value);`]
+  ];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 2 probe catches a real sink after a control block", async () => {
+  const root = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\nif (safe) {} node.innerHTML = payload;`
+  });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
 test("Task 7 navigation clears an open mobile menu when entering desktop width", async () => {
   const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
   const listeners = { document: {}, toggle: {}, overlay: {}, window: {} };
@@ -1801,6 +1907,82 @@ const task7HomeMutations = [
 for (const lang of ["pl", "en"]) {
   for (const [mutation, expectedError, mutate] of task7HomeMutations) {
     test(`Task 7 home baseline rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+const task7Round2ActiveResourceMutations = [
+  ["stylesheet with inactive media", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1" media="not all">'
+  )],
+  ["disabled stylesheet", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1" disabled>'
+  )],
+  ["latin font preload with inactive media", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin media="not all">'
+  )],
+  ["latin-ext font preload with inactive media", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin media="not all">'
+  )],
+  ["nomodule browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer nomodule>'
+  )],
+  ["stylesheet inside noscript", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1"></noscript>'
+  )],
+  ["latin font preload inside noscript", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></noscript>'
+  )],
+  ["latin-ext font preload inside noscript", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></noscript>'
+  )],
+  ["browser script inside noscript", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script>',
+    '<noscript><script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script></noscript>'
+  )],
+  ["stylesheet inside template", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1"></template>'
+  )],
+  ["latin font preload inside template", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></template>'
+  )],
+  ["latin-ext font preload inside template", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></template>'
+  )],
+  ["browser script inside template", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script>',
+    '<template><script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script></template>'
+  )],
+  ["stylesheet inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1"></div>'
+  )],
+  ["font preload inside hidden ancestor", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<div hidden><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></div>'
+  )],
+  ["browser script inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script>',
+    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script></div>'
+  )]
+];
+
+for (const lang of ["pl", "en"]) {
+  for (const [mutation, expectedError, mutate] of task7Round2ActiveResourceMutations) {
+    test(`Task 7 round 2 active resources rejects ${mutation} on ${lang}`, async () => {
       const result = await task7HomeMutation(lang, mutate);
       assert.ok(errorIds(result).includes(expectedError));
     });
