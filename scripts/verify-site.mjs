@@ -6427,6 +6427,13 @@ const ARTIFACT_FONT_PATHS = new Set([
   "/assets/fonts/dmsans-latin.woff2",
   "/assets/fonts/dmmono-latin.woff2"
 ]);
+const ARTIFACT_INLINE_SCRIPT_HASHES = Object.freeze({
+  "diagrams/diagram1_universal.html": Object.freeze(["b2f9c2b8cb795bb4f09d7a4ba7772a03bba263047d88d2ab8d11f1538ba7ef02"]),
+  "diagrams/diagram2_ariba.html": Object.freeze([]),
+  "diagrams/diagram3_maturity.html": Object.freeze(["9fa92ccde0dc26f042889289a609bd0ccaac9bfcad6ec2d0e78f34ca4f0de3b3"]),
+  "diagrams/infographic.html": Object.freeze([]),
+  "infographic_procurement_2026_EN.html": Object.freeze([])
+});
 const PROCESS_RECORDS = Object.freeze([
   Object.freeze(["s1", "Procurement Planning", "Strategic sequence", "Demand, budget assumptions, timing and decision ownership."]),
   Object.freeze(["s2", "Market Analysis", "Strategic sequence", "Selected supplier-market, price, capacity and supply-risk inputs."]),
@@ -6612,11 +6619,14 @@ async function verifyArtifactResources(path, html, parsedRoot, styleText, contex
     || /(?:https?:)?\/\//i.test(styleText)
     || /data\s*:/i.test(styleText);
   const scriptText = all.filter((element) => element.name === "script").map((script) => rawElementText(script)).join("\n");
+  const scriptHashes = all.filter((element) => element.name === "script")
+    .map((script) => createHash("sha256").update(rawElementText(script)).digest("hex"));
+  const ownsInlineScripts = JSON.stringify(scriptHashes) === JSON.stringify(ARTIFACT_INLINE_SCRIPT_HASHES[path]);
   const normalizedScriptMembers = scriptText.replace(/\[\s*(["'`])([a-z_$][\w$]*)\1\s*\]/gi, ".$2");
   const invalidDynamicScript = /(?:document\s*\.\s*)?createElement\s*\(\s*(["'`])(?:script|iframe|object|embed|img|link|source)\1\s*\)/i.test(normalizedScriptMembers)
     || /["'`](?:https?:)?\/\//i.test(normalizedScriptMembers);
-  if (invalidResource || invalidCss || invalidDynamicScript || /<\s*(?:iframe|embed|object)\b/i.test(html)) {
-    error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests, the exact local favicon and the parent return link");
+  if (invalidResource || invalidCss || invalidDynamicScript || !ownsInlineScripts || /<\s*(?:iframe|embed|object)\b/i.test(html)) {
+    error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests, exact per-path inline scripts, the exact local favicon and the parent return link");
   }
   for (const fontPath of new Set(cssUrls)) {
     try {
@@ -6639,6 +6649,99 @@ function decodedArtifactCssDeclarations(rule) {
     normalize(decodeCssEscapes(property)),
     normalize(decodeCssEscapes(value)).replace(/\s*!\s*important\s*$/, "")
   ]);
+}
+
+function artifactCssOpeningBrace(source, start = 0) {
+  let quote = null;
+  let escaped = false;
+  let parentheses = 0;
+  let brackets = 0;
+  for (let index = start; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (character === "(") parentheses += 1;
+    else if (character === ")" && parentheses > 0) parentheses -= 1;
+    else if (character === "[") brackets += 1;
+    else if (character === "]" && brackets > 0) brackets -= 1;
+    else if (character === "{" && parentheses === 0 && brackets === 0) return index;
+  }
+  return -1;
+}
+
+function artifactCssDeclarationBlockIsValid(body) {
+  if (artifactCssOpeningBrace(body) !== -1) return false;
+  for (const candidate of splitCssTopLevel(body, ";")) {
+    if (candidate.trim() === "") continue;
+    const colon = cssDelimiterIndex(candidate, ":");
+    if (colon <= 0 || candidate.slice(colon + 1).trim() === "") return false;
+    const property = decodeCssEscapesChecked(candidate.slice(0, colon));
+    const value = decodeCssEscapesChecked(candidate.slice(colon + 1));
+    if (property.malformedEscapeAt !== -1 || property.unterminatedQuoteAt !== -1
+      || value.malformedEscapeAt !== -1 || value.unterminatedQuoteAt !== -1) return false;
+  }
+  return true;
+}
+
+function parseArtifactCssStylesheet(source) {
+  const commentScan = stripCssComments(source);
+  const rules = [];
+  if (commentScan.unterminatedCommentAt !== -1 || !cssStructureIsBalanced(source)) return { valid: false, rules };
+
+  const walk = (block, media = [], groupingDepth = 0) => {
+    let cursor = 0;
+    while (cursor < block.length) {
+      while (/\s/.test(block[cursor] ?? "")) cursor += 1;
+      if (cursor === block.length) return true;
+      const opening = artifactCssOpeningBrace(block, cursor);
+      if (opening === -1) return block.slice(cursor).trim() === "";
+      const prelude = block.slice(cursor, opening).trim();
+      const closing = matchingBrace(block, opening);
+      if (prelude === "" || closing === -1 || cssDelimiterIndex(prelude, ";") !== -1) return false;
+      const decodedPrelude = decodeCssEscapesChecked(prelude);
+      if (decodedPrelude.malformedEscapeAt !== -1 || decodedPrelude.unterminatedQuoteAt !== -1) return false;
+      const normalizedPrelude = decodedPrelude.decoded.replace(/\s+/g, " ").trim();
+      const body = block.slice(opening + 1, closing);
+      if (normalizedPrelude.startsWith("@")) {
+        const match = /^@([a-z-]+)(?=\s|\(|$)/i.exec(normalizedPrelude);
+        if (match === null) return false;
+        const name = match[1].toLowerCase();
+        if (name === "media" || name === "supports") {
+          const nestedMedia = name === "media" ? [...media, normalizedPrelude] : media;
+          if (!walk(body, nestedMedia, groupingDepth + 1)) return false;
+        } else if (name === "font-face" && groupingDepth === 0 && artifactCssDeclarationBlockIsValid(body)) {
+          rules.push({ prelude: normalizedPrelude, selectors: [], declarations: parseDeclarations(body), media });
+        } else {
+          return false;
+        }
+      } else {
+        if (!artifactCssDeclarationBlockIsValid(body)) return false;
+        const selectors = splitCssTopLevel(prelude, ",").map((selector) => selector.trim().replace(/\s+/g, " ")).filter(Boolean);
+        if (selectors.length === 0 || selectors.some((selector) => selector.startsWith("@"))) return false;
+        rules.push({ prelude: normalizedPrelude, selectors, declarations: parseDeclarations(body), media });
+      }
+      cursor = closing + 1;
+    }
+    return true;
+  };
+
+  return { valid: walk(commentScan.css), rules };
 }
 
 function verifyArtifactStylesheetVisibility(path, rules, errors) {
@@ -6759,10 +6862,11 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
   }
   const styles = head ? directElementChildren(head, "style") : [];
   const styleText = styles.length === 1 ? rawElementText(styles[0]) : "";
-  const rules = parseCssRules(styleText);
-  if (styles.length !== 1 || !cssStructureIsBalanced(styleText)
+  const stylesheet = parseArtifactCssStylesheet(styleText);
+  const rules = stylesheet.rules;
+  if (styles.length !== 1 || !stylesheet.valid
     || Object.entries(ARTIFACT_TOKENS).some(([property, value]) => propertyValue(rules, ":root", property) !== value)) {
-    error(context.errors, "artifact-style", path, "requires balanced local CSS and the exact five Flight Plan artifact tokens");
+    error(context.errors, "artifact-style", path, "requires reviewed fail-closed local CSS structure and the exact five Flight Plan artifact tokens");
   }
   const leads = all.filter((element) => elementHasClass(element, "artifact-lead") && pageElementIsActive(element));
   if (leads.length !== 1 || publishedStaticText(leads[0]) !== ARTIFACT_LEADS[path]) {
@@ -6777,11 +6881,11 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
   if (expectedCensus === null || JSON.stringify(actualCensus) !== JSON.stringify(expectedCensus)) {
     error(context.errors, "artifact-census", path, `requires exact structural element/tag/attribute census; actual ${JSON.stringify(actualCensus)}`);
   }
-  return { root, all, head, body, styleText };
+  return { root, all, head, body, styleText, rules };
 }
 
 function verifyProcessArtifact(path, artifact, errors) {
-  const { all, styleText } = artifact;
+  const { all, styleText, rules } = artifact;
   const controls = all.filter((element) => element.name === "button" && elementHasClass(element, "process-control"));
   const actualRecords = controls.map((control) => [
     elementAttribute(control, "data-record-id"),
@@ -6798,7 +6902,6 @@ function verifyProcessArtifact(path, artifact, errors) {
     || geometries.some((element) => !new Set(["circle", "path"]).has(element.name) || element.attributes.has("tabindex") || element.attributes.has("role"))) {
     error(errors, "process-geometry", path, "requires the exact 20 pointer geometries mapped to 15 logical records and no geometry tab stops");
   }
-  const rules = parseCssRules(styleText);
   const pointerDeclarationManifest = rules.flatMap((rule) => decodedArtifactCssDeclarations(rule)
     .filter(([property]) => property === "pointer-events")
     .flatMap(([, value]) => rule.selectors.map((selector) => [rule.media, selector, value])));

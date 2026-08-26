@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -39,6 +40,13 @@ const artifactPaths = Object.freeze([
 const artifactProductHtml = Object.freeze(Object.fromEntries(await Promise.all(
   artifactPaths.map(async (path) => [path, await readFile(resolve(path), "utf8")])
 )));
+const approvedArtifactInlineScriptHashes = Object.freeze({
+  "diagrams/diagram1_universal.html": Object.freeze(["b2f9c2b8cb795bb4f09d7a4ba7772a03bba263047d88d2ab8d11f1538ba7ef02"]),
+  "diagrams/diagram2_ariba.html": Object.freeze([]),
+  "diagrams/diagram3_maturity.html": Object.freeze(["9fa92ccde0dc26f042889289a609bd0ccaac9bfcad6ec2d0e78f34ca4f0de3b3"]),
+  "diagrams/infographic.html": Object.freeze([]),
+  "infographic_procurement_2026_EN.html": Object.freeze([])
+});
 const artifactFaviconLink = '<link rel="icon" type="image/svg+xml" href="/favicon.svg">';
 const approvedArtifactSemanticCopy = Object.freeze({
   "diagrams/diagram1_universal.html": {
@@ -141,6 +149,11 @@ function testOwnedArtifactSemanticCopy(path, html) {
     svgText: [...svg.matchAll(/<(title|desc|text)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])]),
     tableText: [...html.matchAll(/<(th|td)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])])
   };
+}
+
+function testOwnedArtifactInlineScriptHashes(html) {
+  return [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+    .map((match) => createHash("sha256").update(match[1]).digest("hex"));
 }
 
 function round2ArtifactHtml(path, html) {
@@ -6066,6 +6079,124 @@ test("Plan 2 Task 8 fix round 3 rejects template-literal and bracket-spelled dyn
     mutate: (html) => html.replace("  </script>", `${payload}\n  </script>`)
   });
   assert.ok(errorIds(result).includes("artifact-resource"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 4 rejects unreviewed grouping at-rules instead of flattening them", async () => {
+  const cases = [
+    ["layer pointer", "@layer review{.process-map svg{pointer-events:none!important}}"],
+    ["layer visibility", "@layer review{.artifact-disclaimer{display:none!important}}"],
+    ["container visibility", "@container review (min-width:1px){.artifact-disclaimer{display:none!important}}"],
+    ["scope pointer", "@scope (.process-map){svg{pointer-events:none!important}}"],
+    ["escaped layer pointer", "@l\\61 yer review{.process-map svg{pointer-events:none!important}}"],
+    ["escaped layer visibility", "@l\\61 yer review{.artifact-disclaimer{display:none!important}}"]
+  ];
+  const actual = [];
+  for (const [label, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    actual.push([label, errorIds(result).includes("artifact-style")]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 rejects native nested selector blocks", async () => {
+  const cases = [
+    ["native nesting pointer", ".process-map{svg{pointer-events:none!important}}"],
+    ["native nesting visibility", ".artifact-shell{.artifact-disclaimer{display:none!important}}"]
+  ];
+  const actual = [];
+  for (const [label, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    actual.push([label, errorIds(result).includes("artifact-style")]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 decodes and recursively inspects escaped conditional at-rules", async () => {
+  const cases = [
+    ["escaped media pointer", "process-pointer-hit", "@m\\65 dia(max-width:9999px){.process-map svg{pointer-events:none!important}}"],
+    ["escaped supports pointer", "process-pointer-hit", "@s\\75 pports(display:grid){.process-map svg{pointer-events:none!important}}"],
+    ["escaped supports visibility", "artifact-visibility", "@s\\75 pports(display:grid){.artifact-disclaimer{display:none!important}}"]
+  ];
+  const actual = [];
+  for (const [label, expected, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    actual.push([label, errorIds(result).includes(expected)]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 accepts safe nested media and supports formatting", async () => {
+  const cases = [
+    ["nested media and supports", "@media(min-width:1px){@supports(display:grid){.artifact-disclaimer{display:block;opacity:1}}}"],
+    ["escaped safe supports", "@s\\75 pports(display:grid){.artifact-disclaimer{display:block;opacity:1}}"]
+  ];
+  for (const [label, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    assert.deepEqual(result.errors, [], `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 4 independently owns the exact per-path inline-script hashes", () => {
+  for (const path of artifactPaths) {
+    assert.deepEqual(
+      testOwnedArtifactInlineScriptHashes(artifactProductHtml[path]),
+      approvedArtifactInlineScriptHashes[path],
+      `${path} independent inline-script manifest`
+    );
+  }
+});
+
+test("Plan 2 Task 8 fix round 4 rejects computed dynamic resource assembly through the script manifest", async () => {
+  const payload = [
+    "    const remote = document[`create`+`Element`](`scr`+`ipt`);",
+    "    remote[`s`+`rc`] = `https:`+`/`+`/example.com/payload.js`;",
+    "    document.head.append(remote);"
+  ].join("\n");
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("  </script>", `${payload}\n  </script>`)
+  });
+  assert.ok(errorIds(result).includes("artifact-resource"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 4 rejects missing extra and changed inline scripts", async () => {
+  const cases = [
+    ["missing approved process script", "diagrams/diagram1_universal.html", (html) => html.replace(/\n  <script>[\s\S]*?<\/script>/, "")],
+    ["extra script on a script-free artifact", "diagrams/diagram2_ariba.html", (html) => html.replace("</body>", "<script>globalThis.extraArtifactCode = true;</script></body>")],
+    ["changed approved maturity script", "diagrams/diagram3_maturity.html", (html) => html.replace("  <script>\n", "  <script>\n    // changed artifact code\n")]
+  ];
+  const actual = [];
+  for (const [label, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate });
+    actual.push([label, errorIds(result).includes("artifact-resource")]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 test-owned hashes kill coordinated product and verifier script drift", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const approvedHash = approvedArtifactInlineScriptHashes[path][0];
+  const coordinatedProductMutation = artifactProductHtml[path].replace("  <script>\n", "  <script>\n    // coordinated artifact code drift\n");
+  const mutatedHashes = testOwnedArtifactInlineScriptHashes(coordinatedProductMutation);
+  const mutatedHash = mutatedHashes[0];
+  const verifierSource = await readFile(modulePath, "utf8");
+  const coordinatedVerifierMutation = verifierSource.replace(approvedHash, mutatedHash);
+  assert.notEqual(coordinatedProductMutation, artifactProductHtml[path], "script product mutation must apply");
+  assert.notEqual(mutatedHash, approvedHash, "script source mutation must change the SHA-256 digest");
+  assert.notEqual(coordinatedVerifierMutation, verifierSource, "script verifier mutation must apply");
+  assert.notDeepEqual(mutatedHashes, approvedArtifactInlineScriptHashes[path], "test-owned manifest must kill coordinated product and verifier drift");
 });
 
 test("Plan 2 Task 8 fix round 3 independently owns the complete static semantic-copy manifest", async () => {
