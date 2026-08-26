@@ -5750,6 +5750,25 @@ test("Plan 2 Task 8 protects the process record order, geometry mapping and keyb
   }
 });
 
+test("Plan 2 Task 8 fix round 1 owns distinct pointer hits for open paths and filled lens circles", async () => {
+  const processPath = "diagrams/diagram1_universal.html";
+  const circleHitRule = "    circle.process-geometry { pointer-events: visiblePainted; }\n";
+  const withoutCircleHitRule = artifactProductHtml[processPath].replace(circleHitRule, "");
+  const missingCircleHit = await artifactFamilyMutation({
+    overrides: { [processPath]: withoutCircleHitRule }
+  });
+  assert.ok(errorIds(missingCircleHit).includes("process-pointer-hit"), `missing painted-circle hit rule:\n${missingCircleHit.errors.join("\n")}`);
+
+  const cases = [
+    ["open paths made fill-sensitive", (html) => html.replace("pointer-events: stroke;", "pointer-events: visiblePainted;")],
+    ["filled lens loses its centre hit", (html) => html.replace('r="18" fill="#193D49"', 'r="18" fill="none"')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: processPath, mutate });
+    assert.ok(errorIds(result).includes("process-pointer-hit"), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
 test("Plan 2 Task 8 protects the static SAP workshop map and its bounded vocabulary", async () => {
   const cases = [
     ["marker", "ariba-map-model", (html) => html.replace('data-marker="1" data-record-id="s1"', 'data-marker="01" data-record-id="s1"')],

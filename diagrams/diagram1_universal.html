@@ -37,6 +37,7 @@
     .process-map svg { border: 1px solid var(--artifact-line); display: block; height: auto; max-width: 720px; width: 100%; }
     .process-map figcaption { color: var(--artifact-muted); font-size: 0.82rem; margin-top: 12px; }
     .process-geometry { cursor: pointer; pointer-events: stroke; transition: opacity 180ms ease, stroke-width 180ms ease; }
+    circle.process-geometry { pointer-events: visiblePainted; }
     .process-geometry:hover { opacity: 0.78; }
     .process-geometry.is-active { stroke: var(--artifact-signal); stroke-width: 34; }
     .map-label { fill: var(--artifact-paper); font-family: "Artifact Data", monospace; font-size: 13px; letter-spacing: 0.04em; pointer-events: none; }

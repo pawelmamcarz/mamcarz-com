@@ -6567,6 +6567,28 @@ function verifyProcessArtifact(path, artifact, errors) {
     || geometries.some((element) => !new Set(["circle", "path"]).has(element.name) || element.attributes.has("tabindex") || element.attributes.has("role"))) {
     error(errors, "process-geometry", path, "requires the exact 20 pointer geometries mapped to 15 logical records and no geometry tab stops");
   }
+  const rules = parseCssRules(styleText);
+  const paths = geometries.filter((element) => element.name === "path");
+  const circles = geometries.filter((element) => element.name === "circle");
+  const lensCircles = circles.filter((element) => elementAttribute(element, "r") === "18");
+  const outerRings = circles.filter((element) => elementAttribute(element, "r") === "282");
+  const hasPaintedStroke = (element) => {
+    const strokeWidth = Number.parseFloat(elementAttribute(element, "stroke-width") ?? "");
+    return elementAttribute(element, "stroke") !== "none" && Number.isFinite(strokeWidth) && strokeWidth > 0;
+  };
+  const ownsSafePointerHits = propertyValue(rules, ".process-geometry", "pointer-events") === "stroke"
+    && propertyValue(rules, "circle.process-geometry", "pointer-events") === "visiblePainted"
+    && paths.length === 14
+    && paths.every((element) => elementAttribute(element, "fill") === "none" && hasPaintedStroke(element))
+    && lensCircles.length === 5
+    && lensCircles.every((element) => elementAttribute(element, "fill") === "#193D49" && hasPaintedStroke(element))
+    && outerRings.length === 1
+    && elementAttribute(outerRings[0], "fill") === "none"
+    && hasPaintedStroke(outerRings[0])
+    && geometries.every((element) => !element.attributes.has("pointer-events"));
+  if (!ownsSafePointerHits) {
+    error(errors, "process-pointer-hit", path, "requires stroke-only hits for open paths and visible painted fill/stroke hits for the five lens circles");
+  }
   const panels = all.filter((element) => elementAttribute(element, "id") === "process-detail");
   const panelTitle = all.filter((element) => elementAttribute(element, "id") === "process-detail-title");
   const exactControls = controls.length === 15 && controls.every((control, index) => exactApplicationAttributes(control, {
