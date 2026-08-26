@@ -2738,7 +2738,7 @@ test("Plan 2 Task 5 rejects section, evidence, CTA, resource, schema and hidden-
     ["second conversion", "ariba", "pl", "service-controls", (html) => html.replace("</main>", '<a class="btn-primary" href="mailto:fake@example.com">Drugi kontakt</a></main>')],
     ["external image", "ariba", "en", "service-resource-census", (html) => html.replace("</main>", '<img src="https://example.com/fake.jpg" alt="KGHM"></main>')],
     ["inline style", "publicProcurement", "pl", "service-resource-census", (html) => html.replace("<h1", '<h1 style="display:block"')],
-    ["schema offer", "publicProcurement", "en", "service-schema", (html) => html.replace('"provider": {', '"offers": {}, "provider": {')],
+    ["schema offer", "publicProcurement", "en", "service-schema", (html) => html.replace('"provider":{', '"offers":{},"provider":{')],
     ["entity hidden unsupported client", "transformation", "pl", "service-claim-boundary", (html) => html.replace("</footer>", '<template>P&#111;lpharma</template></footer>')],
     ["comment old annual portfolio", "transformation", "en", "service-claim-boundary", (html) => html.replace("</footer>", '<!-- PLN 500M per year --></footer>')]
   ];
