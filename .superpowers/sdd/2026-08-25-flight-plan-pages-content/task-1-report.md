@@ -3,6 +3,7 @@
 Date: 2026-08-26
 Base commit: `02ea996c9e81e89a296ec5913cb14af413c5a0d6`
 Branch: `codex/flight-plan-redesign`
+Fix-round base: `f3405ee412807a7964563c75976555160cd5dfb1`
 
 ## Scope delivered
 
@@ -35,12 +36,36 @@ pass 17
 fail 0
 ```
 
-The fresh complete verifier suite retained all 429 pre-existing checks and added 17 focused checks:
+The initial complete verifier suite retained all 429 pre-existing checks and added 17 focused checks:
 
 ```text
 npm run test:verify-site
 tests 446
 pass 446
+fail 0
+```
+
+### Independent review fix round 1
+
+Eight focused tests were added before the review fixes. The batch RED checkpoint was:
+
+```text
+node --test --test-name-pattern="Plan 2 Task 1 fix round 1" scripts/verify-site.test.mjs
+tests 8
+pass 1
+fail 7
+```
+
+The one passing case was an intentional positive control proving that internal URL whitespace remains literal while normalized fragment, mail, external and protocol-relative references remain ignored. The seven failures reproduced the family CLI fail-open, metadata body/head decoys, invisible language label, hidden H1, encoded/whitespace local URL, non-file family target and duplicate fact-ID defects.
+
+During the mutation audit, a bare `--family` argument was added to the CLI table. Its targeted test failed because the option was ignored and the all-family verifier ran; after the parser fix it produces one `cli-family` error and no page output.
+
+The final fix-round focused checkpoint is 8/8 GREEN. The complete suite is now:
+
+```text
+npm run test:verify-site
+tests 454
+pass 454
 fail 0
 ```
 
@@ -56,14 +81,23 @@ Mutation and fixture coverage includes:
 - HTML-whitespace fact-ID tokenization plus unknown, comma-joined, `review` and `retired` rejection;
 - root, trailing-slash and file mapping after query/fragment stripping for `href`, `src` and every `srcset` candidate;
 - aggregation of missing local targets and intentional ignores for fragments, mail, external/protocol-relative URLs, data URLs and the Worker URL.
+- duplicate, empty, bare and complete malformed `--family` values, including real CLI subprocesses that must stop before page hooks;
+- metadata confined to exactly one active `head`, with body, `template`, `noscript`, duplicate-head and malformed-head mutations;
+- exact visible `EN`/`PL` language labels, including hidden and unrelated-text decoys plus a visible inline-markup control;
+- inline `display:none`/`visibility:hidden`, mixed case, hidden ancestors and closed/open disclosure visibility;
+- numeric, hexadecimal and named URL entities plus surrounding browser whitespace across `href`, `src` and `srcset`;
+- `NOT_FILE` rejection for another-family manifest targets, while only `ENOENT` remains deferrable;
+- duplicate whitespace-delimited `data-fact-ids` rejection with a unique-list control.
 
 ## Interfaces and behavior
 
 `readRequired()` converts `ENOENT` into `ERROR route-file <path>: required file is missing` and returns an empty document, so every absent route is reported instead of throwing a raw exception.
 
-For a selected family, a missing local target is deferred only when its mapped file is exactly the PL or EN file of a `ROUTE_PAIRS` entry owned by another family. No such deferral occurs for `family=all`, the selected family's own route files, assets or paths outside the manifest.
+For a selected family, a missing local target is deferred only when its mapped file is exactly the PL or EN file of a `ROUTE_PAIRS` entry owned by another family and `stat()` reports `ENOENT`. `NOT_FILE`, permission/other filesystem errors, `family=all`, the selected family's own route files, assets and paths outside the manifest remain failures.
 
-Page checks use the existing parsed HTML tree and active/visibility helpers. Controlled shell resources require exact attribute sets and cache version `v=20260825-flightplan-2`; inactive decoys cannot satisfy the contract.
+Page checks use the existing parsed HTML tree and active/visibility helpers. Canonical and hreflang metadata must be descendants of exactly one active `head`. Inline hiding and closed disclosures are modeled for visible content; advisory submenu links remain structurally verifiable as content available when their disclosure opens. Controlled shell resources require exact attribute sets and cache version `v=20260825-flightplan-2`; inactive decoys cannot satisfy the contract.
+
+Local URL attributes are HTML-entity decoded and stripped only of surrounding browser ASCII whitespace before root-relative classification. Internal whitespace is preserved. `data-fact-ids` remain HTML-whitespace tokenized, approved-only and now unique within each attribute.
 
 Task 7 and Task 8 substantive contracts are deliberately not claimed here. The call graph contains bounded hooks that expose `procurement-parent-contract` and `artifacts-contract` as deferred. Their future tasks must replace those hooks with the planned failing checks.
 
@@ -75,28 +109,32 @@ Fresh results on Node.js v26.7.0:
 | --- | --- |
 | `node --check scripts/verify-site.mjs` | PASS |
 | `node --check scripts/verify-site.test.mjs` | PASS |
-| focused Plan 2 Task 1 tests | PASS, 17/17 |
-| `npm run test:verify-site` | PASS, 446/446 |
+| original focused Plan 2 Task 1 tests | PASS, 17/17 |
+| fix-round focused tests | PASS, 8/8 |
+| all Plan 2 Task 1 focused tests | PASS, 25/25 |
+| `npm run test:verify-site` | PASS, 454/454 |
 | `npm run verify:home` | PASS |
 | `npm run verify:facts` | PASS |
 | `npm run verify:foundation` | PASS |
 | `npm run verify:site` | PASS |
-| `npm run verify:pages` | EXPECTED FAIL, 121 aggregated contract errors |
+| `npm run verify:pages` | EXPECTED FAIL, 127 aggregated contract errors |
 
 Representative CLI probes:
 
-- `--family=applications`: expected exit 1 with 16 errors, including both missing selected route files.
+- `--family=applications`: expected exit 1 with 18 errors, including both missing selected route files.
 - `--family=home`: expected exit 1 with 8 legacy-shell/local-target errors and no errors from unfinished non-selected route files.
 - `--family=artifacts`: exit 0 with explicit `deferred: artifacts-contract`; it does not claim the Task 8 contract was checked.
 - `--family=invalid-family`: exit 1 with exactly one `cli-family` error and no page verification.
+- duplicate, extra-`=`, empty and bare family probes: exit 1 with exactly one `cli-family` error and no page verification or deferred hook.
 
 ## Intentional pages RED
 
-The isolated final architecture gate exits nonzero by design at this task boundary. It reports 121 errors in one run, not a raw exception:
+The isolated final architecture gate exits nonzero by design at this task boundary. It reports 127 errors in one run, not a raw exception:
 
 | Check | Count |
 | --- | ---: |
 | `route-file` | 6 |
+| `page-head` | 6 |
 | `page-h1` | 6 |
 | `page-main` | 6 |
 | `page-canonical` | 6 |
@@ -105,7 +143,7 @@ The isolated final architecture gate exits nonzero by design at this task bounda
 | `page-script` | 18 |
 | `page-navigation` | 16 |
 | `local-target` | 39 |
-| **Total** | **121** |
+| **Total** | **127** |
 
 The six `route-file` errors are the planned PL/EN application, aviation and knowledge hubs. The remaining errors identify existing version-1/legacy shells, navigation and non-trailing local routes that later Plan 2 tasks must migrate. The run also prints `DEFERRED procurement-parent-contract, artifacts-contract` to make the Task 7/8 boundary explicit.
 

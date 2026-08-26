@@ -432,6 +432,21 @@ async function applicationPageMutation({ lang = "pl", mutate = (html) => html, f
   return runVerification({ root, scope: "pages", family: "applications" });
 }
 
+function movePageMetadata(html, destination) {
+  const metadata = [
+    '<link rel="canonical" href="https://mamcarz.com/aplikacje-operacyjne/">',
+    '<link rel="alternate" hreflang="pl" href="https://mamcarz.com/aplikacje-operacyjne/">',
+    '<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/aplikacje-operacyjne/">',
+    '<link rel="alternate" hreflang="x-default" href="https://mamcarz.com/aplikacje-operacyjne/">'
+  ];
+  let moved = html;
+  for (const tag of metadata) {
+    assert.ok(moved.includes(tag), `fixture must contain ${tag}`);
+    moved = moved.replace(tag, "");
+  }
+  return moved.replace('<body data-page="fixture">', `<body data-page="fixture">${destination(metadata.join(""))}`);
+}
+
 test("Plan 2 Task 1 uses the exact route manifest and accepts every declared family", async () => {
   const root = await pageArchitectureFixture();
   await Promise.all(plan2RoutePairs.flatMap((pair) => pair.slice(0, 2)).map((path) => rm(resolve(root, path), { force: true })));
@@ -644,6 +659,155 @@ test("Plan 2 Task 1 never defers assets or non-manifest local routes", async () 
   assert.ok(missing.some((entry) => entry.includes("unplanned/index.html")));
   assert.ok(missing.some((entry) => entry.includes("assets/img/missing.webp")));
   assert.equal(missing.some((entry) => entry.includes("lotnictwo/index.html")), false);
+});
+
+test("Plan 2 Task 1 fix round 1 rejects repeated, empty and complete malformed family CLI values", async () => {
+  const cases = [
+    ["repeated valid and invalid", ["--scope=pages", "--family=artifacts", "--family=invalid-family"]],
+    ["repeated valid", ["--scope=pages", "--family=artifacts", "--family=artifacts"]],
+    ["complete value after first equals", ["--scope=pages", "--family=artifacts=invalid-family"]],
+    ["missing equals", ["--scope=pages", "--family"]],
+    ["empty value", ["--scope=pages", "--family="]]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, args]) => {
+    try {
+      const result = await execFileAsync(process.execPath, [modulePath, ...args]);
+      return { label, rejected: false, stdout: result.stdout, stderr: result.stderr };
+    } catch (cause) {
+      return { label, rejected: true, stdout: cause.stdout, stderr: cause.stderr };
+    }
+  }));
+  for (const outcome of outcomes) {
+    assert.equal(outcome.rejected, true, `${outcome.label} must exit nonzero`);
+    assert.equal(outcome.stdout, "", `${outcome.label} must not print a success`);
+    const errorLines = outcome.stderr.trim().split("\n").filter((line) => line.startsWith("ERROR "));
+    assert.equal(errorLines.length, 1, `${outcome.label} must stop before page verification`);
+    assert.match(errorLines[0], /^ERROR cli-family scripts\/verify-site\.mjs:/, outcome.label);
+  }
+
+  const root = await pageArchitectureFixture();
+  for (const family of ["", "artifacts=invalid-family"]) {
+    const result = await runVerification({ root, scope: "pages", family });
+    assert.ok(errorIds(result).includes("cli-family"), `direct API must reject ${JSON.stringify(family)}`);
+    assert.equal(result.errors.length, 1, "invalid direct API family must skip pages");
+    assert.deepEqual(result.deferred, [], "invalid direct API family must not run future hooks");
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 requires metadata in exactly one active head", async () => {
+  const mutations = [
+    ["body metadata", ["page-canonical", "page-hreflang"], (html) => movePageMetadata(html, (metadata) => metadata)],
+    ["template metadata", ["page-canonical", "page-hreflang"], (html) => movePageMetadata(html, (metadata) => `<template>${metadata}</template>`)],
+    ["noscript metadata", ["page-canonical", "page-hreflang"], (html) => movePageMetadata(html, (metadata) => `<noscript>${metadata}</noscript>`)],
+    ["duplicate head", ["page-head"], (html) => html.replace("</head>", "</head><head></head>")],
+    ["malformed head", ["page-html-syntax"], (html) => html.replace("</head>", "</hed>")]
+  ];
+  const outcomes = await Promise.all(mutations.map(async ([label, expectedIds, mutate]) => ({
+    label,
+    expectedIds,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, expectedIds, result } of outcomes) {
+    for (const expectedId of expectedIds) assert.ok(errorIds(result).includes(expectedId), `${label}: ${expectedId}`);
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 requires the exact visible paired-language label", async () => {
+  const [, , plRoute, enRoute] = applicationsPair;
+  const cases = [
+    ["wrong PL-page label", "pl", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">FR</a>`), true],
+    ["wrong EN-page label", "en", (html) => html.replace(`<a href="${plRoute}" class="nav-lang">PL</a>`, `<a href="${plRoute}" class="nav-lang">EN</a>`), true],
+    ["hidden label plus unrelated body decoy", "pl", (html) => html
+      .replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang"><span hidden>EN</span></a>`)
+      .replace("</main>", "<span>EN</span></main>"), true],
+    ["visible inline label", "pl", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang"><span>E</span><span>N</span></a>`), false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, lang, mutate, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ lang, mutate })
+  })));
+  for (const { label, shouldFail, result } of outcomes) {
+    assert.equal(errorIds(result).includes("page-language"), shouldFail, label);
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 treats inline CSS and closed details as statically hidden", async () => {
+  const cases = [
+    ["display none", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display:none">Aplikacje</h1>'), true],
+    ["mixed-case important display none", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="  DiSpLaY :  NoNe !IMPORTANT  ">Aplikacje</h1>'), true],
+    ["mixed-case visibility hidden", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style=" VISIBILITY : Hidden ">Aplikacje</h1>'), true],
+    ["hidden ancestor", (html) => html.replace("<h1>Aplikacje</h1>", "<div hidden><h1>Aplikacje</h1></div>"), true],
+    ["aria-hidden ancestor", (html) => html.replace("<h1>Aplikacje</h1>", '<div aria-hidden="true"><h1>Aplikacje</h1></div>'), true],
+    ["closed details", (html) => html.replace("<h1>Aplikacje</h1>", "<details><h1>Aplikacje</h1></details>"), true],
+    ["open details", (html) => html.replace("<h1>Aplikacje</h1>", "<details open><h1>Aplikacje</h1></details>"), false],
+    ["benign inline style", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="color: red">Aplikacje</h1>'), false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, shouldFail, result } of outcomes) {
+    assert.equal(errorIds(result).includes("page-h1"), shouldFail, label);
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 normalizes browser whitespace and HTML entities in local URLs", async () => {
+  const body = `
+    <a href=" \t/missing-leading/ \n">Leading whitespace</a>
+    <a href="&#47;missing-decimal/">Decimal slash</a>
+    <a href="&#x2f;missing-hex/">Hex slash</a>
+    <a href="&sol;missing-named/">Named slash</a>
+    <img src=" \n&#x2f;assets/img/missing-src.webp\t " alt="">
+    <img srcset="&sol;assets/img/missing-srcset.webp&Tab;1x, &#47;assets/img/missing-srcset-2.webp 2x" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  for (const target of [
+    "missing-leading/index.html",
+    "missing-decimal/index.html",
+    "missing-hex/index.html",
+    "missing-named/index.html",
+    "assets/img/missing-src.webp",
+    "assets/img/missing-srcset.webp",
+    "assets/img/missing-srcset-2.webp"
+  ]) {
+    assert.ok(missing.some((entry) => entry.includes(target)), target);
+  }
+  assert.equal(missing.length, 7, missing.join("\n"));
+});
+
+test("Plan 2 Task 1 fix round 1 preserves internal URL whitespace and ignores normalized non-local schemes", async () => {
+  const body = `
+    <a href=" /space target/ ">Internal whitespace</a>
+    <a href=" \t#main \n">Fragment</a>
+    <a href=" mailto:pawel@mamcarz.com ">Mail</a>
+    <a href=" https://example.com/missing ">External</a>
+    <a href=" &sol;&sol;cdn.example.com/missing.png ">Protocol-relative</a>`;
+  const result = await applicationPageMutation({
+    body,
+    extraFiles: { "space target/index.html": "internal-space fixture" }
+  });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 fix round 1 reports another-family manifest targets that are not files", async () => {
+  const files = pagePairFiles(applicationsPair);
+  const root = await pageArchitectureFixture({ files });
+  await mkdir(resolve(root, "lotnictwo/index.html"), { recursive: true });
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.ok(result.errors.some((entry) => entry.startsWith("ERROR local-target aplikacje-operacyjne/index.html:")
+    && entry.includes("lotnictwo/index.html (NOT_FILE)")), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 1 fix round 1 rejects duplicate fact tokens while accepting a unique list", async () => {
+  const [duplicate, unique] = await Promise.all([
+    applicationPageMutation({ body: '<article data-fact-ids="brand.promise\n\tbrand.promise">Duplicate</article>' }),
+    applicationPageMutation({ body: '<article data-fact-ids="brand.promise\n\taviation.ppl_h">Unique</article>' })
+  ]);
+  assert.ok(errorIds(duplicate).includes("page-fact-ids"));
+  assert.equal(errorIds(unique).includes("page-fact-ids"), false);
+  assert.deepEqual(unique.errors, []);
 });
 
 test("readFacts reads fixtures without starting CLI verification", async () => {

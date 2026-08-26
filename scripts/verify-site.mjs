@@ -81,7 +81,10 @@ function decodeHtmlEntities(text) {
       return codePoint > 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "�";
     })
     .replace(/&mdash;/gi, "—")
-    .replace(/&nbsp;/gi, " ")
+    .replace(/&nbsp;/gi, "\u00a0")
+    .replace(/&sol;/gi, "/")
+    .replace(/&tab;/gi, "\t")
+    .replace(/&newline;/gi, "\n")
     .replace(/&amp;/gi, "&");
 }
 
@@ -266,13 +269,34 @@ function elementHasHiddenState(element) {
   return element.attributes.has("hidden") || normalize(elementAttribute(element, "aria-hidden") ?? "") === "true";
 }
 
+function elementHasHiddenInlineStyle(element) {
+  const style = elementAttribute(element, "style");
+  if (!nonEmptyString(style)) return false;
+  const declarations = parseDeclarations(style);
+  const valueWithoutImportant = (property) => normalize(declarations.get(property) ?? "").replace(/\s*!\s*important\s*$/, "");
+  return valueWithoutImportant("display") === "none"
+    || new Set(["hidden", "collapse"]).has(valueWithoutImportant("visibility"));
+}
+
 function elementIsStaticallyHidden(element) {
-  return elementHasHiddenState(element) || staticallyHiddenElements.has(element.name);
+  return elementHasHiddenState(element) || elementHasHiddenInlineStyle(element) || staticallyHiddenElements.has(element.name);
+}
+
+function elementIsVisibleIfDisclosuresOpen(element) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (elementIsStaticallyHidden(current)) return false;
+  }
+  return true;
 }
 
 function elementIsStaticallyVisible(element) {
+  if (!elementIsVisibleIfDisclosuresOpen(element)) return false;
   for (let current = element; current?.type === "element"; current = current.parent) {
-    if (elementIsStaticallyHidden(current)) return false;
+    const parent = current.parent;
+    if (parent?.type === "element" && parent.name === "details" && !parent.attributes.has("open")) {
+      const firstSummary = parent.children.find((child) => child.type === "element" && child.name === "summary");
+      if (current !== firstSummary) return false;
+    }
   }
   return true;
 }
@@ -301,7 +325,7 @@ function staticVisibleText(node) {
       if (!ancestorHidden) text += current.value;
       return;
     }
-    const hidden = ancestorHidden || (current.type === "element" && elementIsStaticallyHidden(current));
+    const hidden = ancestorHidden || (current.type === "element" && !elementIsStaticallyVisible(current));
     const block = current.type === "element" && blockTextElements.has(current.name);
     if (!hidden && block) text += " ";
     for (const child of current.children ?? []) visit(child, hidden);
@@ -2594,6 +2618,10 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
   const elements = elementDescendants(parsed.root);
   const activeElements = elements.filter(pageElementIsActive);
 
+  const heads = activeElements.filter((element) => element.name === "head");
+  if (heads.length !== 1) error(errors, "page-head", path, `expected exactly one active head; found ${heads.length}`);
+  const headLinks = heads.length === 1 ? elementDescendants(heads[0], "link") : [];
+
   const headings = activeElements.filter((element) => element.name === "h1");
   if (headings.length !== 1) error(errors, "page-h1", path, `expected exactly one active h1; found ${headings.length}`);
 
@@ -2603,8 +2631,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
   }
 
   const expectedCanonical = `https://mamcarz.com${route}`;
-  const links = elements.filter((element) => element.name === "link");
-  const canonicalCandidates = links.filter((element) => {
+  const canonicalCandidates = headLinks.filter((element) => {
     const rel = elementAttributeTokens(element, "rel");
     return rel.includes("canonical")
       || (elementAttribute(element, "href") === expectedCanonical && !rel.includes("alternate") && !element.attributes.has("hreflang"));
@@ -2621,7 +2648,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     ["en", `https://mamcarz.com${enRoute}`],
     ["x-default", `https://mamcarz.com${plRoute}`]
   ]);
-  const hreflangCandidates = links.filter((element) => element.attributes.has("hreflang")
+  const hreflangCandidates = headLinks.filter((element) => element.attributes.has("hreflang")
     || elementAttributeTokens(element, "rel").includes("alternate"));
   const validHreflang = hreflangCandidates.filter((element) => {
     const hreflang = normalize(elementAttribute(element, "hreflang") ?? "");
@@ -2637,6 +2664,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
   }
 
   const expectedStylesheet = "/assets/css/style.css?v=20260825-flightplan-2";
+  const links = elements.filter((element) => element.name === "link");
   const stylesheetCandidates = links.filter((element) => elementAttributeTokens(element, "rel").includes("stylesheet")
     || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
   const validStylesheets = stylesheetCandidates.filter((element) => exactActiveLink(element, { rel: "stylesheet", href: expectedStylesheet }));
@@ -2660,7 +2688,8 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
   }
   const nav = siteNavs[0];
   if (nav) {
-    const navLinks = elementDescendants(nav, "a").filter(pageElementIsActive);
+    const navLinks = elementDescendants(nav, "a")
+      .filter((link) => elementIsVisibleIfDisclosuresOpen(link) && elementIsActiveResource(link));
     let previousIndex = -1;
     for (const expectedRoute of expectedPageNavigation(lang)) {
       const indexes = navLinks.flatMap((link, index) => elementAttribute(link, "href") === expectedRoute ? [index] : []);
@@ -2671,8 +2700,11 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
       }
     }
     const languageLinks = navLinks.filter((link) => elementHasClass(link, "nav-lang"));
-    if (languageLinks.length !== 1 || elementAttribute(languageLinks[0], "href") !== pairedRoute) {
-      error(errors, "page-language", path, `language switch must target the exact paired route ${pairedRoute}`);
+    const expectedLanguageLabel = lang === "pl" ? "en" : "pl";
+    if (languageLinks.length !== 1
+      || elementAttribute(languageLinks[0], "href") !== pairedRoute
+      || staticVisibleText(languageLinks[0]) !== expectedLanguageLabel) {
+      error(errors, "page-language", path, `language switch must visibly say ${expectedLanguageLabel.toUpperCase()} and target ${pairedRoute}`);
     }
   }
 
@@ -2690,6 +2722,9 @@ function verifyFactIds(path, parsedRoot, factData, errors) {
       error(errors, "page-fact-ids", path, "data-fact-ids must contain at least one whitespace-delimited fact ID");
       continue;
     }
+    if (new Set(ids).size !== ids.length) {
+      error(errors, "page-fact-ids", path, "data-fact-ids must not repeat a fact ID");
+    }
     for (const factId of ids) {
       const fact = byId.get(factId);
       if (!fact) error(errors, "page-fact-unknown", path, `unknown data-fact-ids token ${factId}`);
@@ -2705,6 +2740,11 @@ function routeToFile(urlPath) {
   return clean.slice(1);
 }
 
+function browserNormalizedUrl(value) {
+  if (typeof value !== "string") return null;
+  return decodeHtmlEntities(value).replace(/^[\u0009-\u000d\u0020]+|[\u0009-\u000d\u0020]+$/g, "");
+}
+
 function rootRelativeReference(value) {
   return nonEmptyString(value) && value.startsWith("/") && !value.startsWith("//");
 }
@@ -2712,13 +2752,13 @@ function rootRelativeReference(value) {
 function elementLocalReferences(element) {
   const references = [];
   for (const attribute of ["href", "src"]) {
-    const value = elementAttribute(element, attribute);
+    const value = browserNormalizedUrl(elementAttribute(element, attribute));
     if (rootRelativeReference(value)) references.push({ attribute, url: value });
   }
   const srcset = elementAttribute(element, "srcset");
   if (nonEmptyString(srcset)) {
     for (const candidate of srcset.split(",")) {
-      const value = candidate.trim().split(/\s+/)[0];
+      const value = browserNormalizedUrl(candidate)?.split(/[\u0009-\u000d\u0020]+/)[0];
       if (rootRelativeReference(value)) references.push({ attribute: "srcset", url: value });
     }
   }
@@ -2749,7 +2789,7 @@ async function verifyLocalLinks(path, parsedRoot, family, context) {
       const targetStat = await stat(targetPath);
       if (!targetStat.isFile()) throw Object.assign(new Error("target is not a file"), { code: "NOT_FILE" });
     } catch (cause) {
-      if (defersMissingRoute(targetFile, family)) continue;
+      if (cause.code === "ENOENT" && defersMissingRoute(targetFile, family)) continue;
       error(context.errors, "local-target", path, `${reference.attribute} ${reference.url} maps to missing ${targetFile} (${cause.code ?? cause.message})`);
     }
   }
@@ -2852,14 +2892,16 @@ async function verifyHome(factData, context) {
   }
 }
 
-export async function runVerification({ root = defaultRoot, scope = "all", lang = "all", family = "all" } = {}) {
+export async function runVerification({ root = defaultRoot, scope = "all", lang = "all", family = "all", familyOptionCount = 1 } = {}) {
   const errors = [];
   const deferred = [];
   const context = { root, scope, lang, family, errors, deferred };
   if (!["all", "pl", "en"].includes(lang)) error(errors, "cli-lang", "scripts/verify-site.mjs", `unsupported language ${lang}`);
   if (!["all", "facts", "foundation", "home", "pages"].includes(scope)) error(errors, "cli-scope", "scripts/verify-site.mjs", `unsupported scope ${scope}`);
-  const validFamily = VALID_FAMILIES.has(family);
-  if (!validFamily) error(errors, "cli-family", "scripts/verify-site.mjs", `unsupported family ${family}`);
+  const repeatedFamilyOption = !Number.isInteger(familyOptionCount) || familyOptionCount < 0 || familyOptionCount > 1;
+  const validFamily = !repeatedFamilyOption && typeof family === "string" && VALID_FAMILIES.has(family);
+  if (repeatedFamilyOption) error(errors, "cli-family", "scripts/verify-site.mjs", `family option must be supplied at most once; found ${familyOptionCount}`);
+  else if (!validFamily) error(errors, "cli-family", "scripts/verify-site.mjs", `unsupported family ${family}`);
   const facts = await readFacts({ root, onError: (id, path, message) => error(errors, id, path, message) });
   if (scope === "facts" || scope === "all") {
     const publicSurfaces = verifyPublicSurfaceInventory(facts, errors);
@@ -2877,8 +2919,10 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
 async function cli() {
   const scope = process.argv.find((arg) => arg.startsWith("--scope="))?.split("=")[1] ?? "all";
   const lang = process.argv.find((arg) => arg.startsWith("--lang="))?.split("=")[1] ?? "all";
-  const family = process.argv.find((arg) => arg.startsWith("--family="))?.split("=")[1] ?? "all";
-  const result = await runVerification({ scope, lang, family });
+  const familyPrefix = "--family=";
+  const familyArgs = process.argv.filter((arg) => arg === "--family" || arg.startsWith(familyPrefix));
+  const family = familyArgs.length === 0 ? "all" : familyArgs[0].startsWith(familyPrefix) ? familyArgs[0].slice(familyPrefix.length) : "";
+  const result = await runVerification({ scope, lang, family, familyOptionCount: familyArgs.length });
   const deferredLabel = result.deferred.length > 0 ? `; deferred: ${result.deferred.join(", ")}` : "";
   if (result.errors.length) {
     console.error(result.errors.join("\n"));
