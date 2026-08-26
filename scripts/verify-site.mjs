@@ -85,6 +85,8 @@ function decodeHtmlEntities(text) {
     .replace(/&sol;/gi, "/")
     .replace(/&tab;/gi, "\t")
     .replace(/&newline;/gi, "\n")
+    .replace(/&colon;/gi, ":")
+    .replace(/&comma;/gi, ",")
     .replace(/&amp;/gi, "&");
 }
 
@@ -272,7 +274,9 @@ function elementHasHiddenState(element) {
 function elementHasHiddenInlineStyle(element) {
   const style = elementAttribute(element, "style");
   if (!nonEmptyString(style)) return false;
-  const declarations = parseDeclarations(style);
+  const commentScan = stripCssComments(decodeHtmlEntities(style));
+  if (commentScan.unterminatedCommentAt !== -1) return true;
+  const declarations = parseDeclarations(commentScan.css);
   const valueWithoutImportant = (property) => normalize(declarations.get(property) ?? "").replace(/\s*!\s*important\s*$/, "");
   return valueWithoutImportant("display") === "none"
     || new Set(["hidden", "collapse"]).has(valueWithoutImportant("visibility"));
@@ -2618,9 +2622,29 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
   const elements = elementDescendants(parsed.root);
   const activeElements = elements.filter(pageElementIsActive);
 
+  const rootElements = parsed.root.children.filter((child) => child.type === "element");
+  const htmlElements = elements.filter((element) => element.name === "html");
+  const headElements = elements.filter((element) => element.name === "head");
+  const bodyElements = elements.filter((element) => element.name === "body");
+  const documentHtml = htmlElements.length === 1 ? htmlElements[0] : null;
+  const directDocumentElements = documentHtml?.children.filter((child) => child.type === "element") ?? [];
+  const validDocumentTopology = rootElements.length === 1
+    && rootElements[0] === documentHtml
+    && pageElementIsActive(documentHtml)
+    && headElements.length === 1
+    && bodyElements.length === 1
+    && directDocumentElements.length === 2
+    && directDocumentElements[0] === headElements[0]
+    && directDocumentElements[1] === bodyElements[0]
+    && pageElementIsActive(headElements[0])
+    && pageElementIsActive(bodyElements[0]);
+  if (!validDocumentTopology) {
+    error(errors, "page-document", path, "requires one active html root with one direct head followed by one direct body");
+  }
+
   const heads = activeElements.filter((element) => element.name === "head");
   if (heads.length !== 1) error(errors, "page-head", path, `expected exactly one active head; found ${heads.length}`);
-  const headLinks = heads.length === 1 ? elementDescendants(heads[0], "link") : [];
+  const headLinks = validDocumentTopology ? elementDescendants(headElements[0], "link") : [];
 
   const headings = activeElements.filter((element) => element.name === "h1");
   if (headings.length !== 1) error(errors, "page-h1", path, `expected exactly one active h1; found ${headings.length}`);
@@ -2740,9 +2764,13 @@ function routeToFile(urlPath) {
   return clean.slice(1);
 }
 
-function browserNormalizedUrl(value) {
+function trimBrowserUrlWhitespace(value) {
   if (typeof value !== "string") return null;
-  return decodeHtmlEntities(value).replace(/^[\u0009-\u000d\u0020]+|[\u0009-\u000d\u0020]+$/g, "");
+  return value.replace(/^[\u0009-\u000d\u0020]+|[\u0009-\u000d\u0020]+$/g, "");
+}
+
+function browserNormalizedUrl(value) {
+  return typeof value === "string" ? trimBrowserUrlWhitespace(decodeHtmlEntities(value)) : null;
 }
 
 function rootRelativeReference(value) {
@@ -2757,8 +2785,8 @@ function elementLocalReferences(element) {
   }
   const srcset = elementAttribute(element, "srcset");
   if (nonEmptyString(srcset)) {
-    for (const candidate of srcset.split(",")) {
-      const value = browserNormalizedUrl(candidate)?.split(/[\u0009-\u000d\u0020]+/)[0];
+    for (const candidate of decodeHtmlEntities(srcset).split(",")) {
+      const value = trimBrowserUrlWhitespace(candidate)?.split(/[\u0009-\u000d\u0020]+/)[0];
       if (rootRelativeReference(value)) references.push({ attribute: "srcset", url: value });
     }
   }

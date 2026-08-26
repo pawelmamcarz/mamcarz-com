@@ -810,6 +810,89 @@ test("Plan 2 Task 1 fix round 1 rejects duplicate fact tokens while accepting a 
   assert.deepEqual(unique.errors, []);
 });
 
+test("Plan 2 Task 1 fix round 2 rejects nested, misordered and duplicate document roots", async () => {
+  const extractBlock = (html, opening, closing) => {
+    const start = html.indexOf(opening);
+    const end = html.indexOf(closing, start) + closing.length;
+    assert.ok(start >= 0 && end >= closing.length, `${opening} fixture block must exist`);
+    return { block: html.slice(start, end), start, end };
+  };
+  const moveHeadIntoBody = (html) => {
+    const head = extractBlock(html, "<head>", "</head>");
+    const withoutHead = html.slice(0, head.start) + html.slice(head.end);
+    return withoutHead.replace('<body data-page="fixture">', `<body data-page="fixture">${head.block}`);
+  };
+  const putBodyBeforeHead = (html) => {
+    const head = extractBlock(html, "<head>", "</head>");
+    const body = extractBlock(html, '<body data-page="fixture">', "</body>");
+    assert.ok(head.end <= body.start, "fixture head must precede body");
+    return html.slice(0, head.start) + body.block + head.block + html.slice(body.end);
+  };
+  const cases = [
+    ["head nested in body", moveHeadIntoBody],
+    ["body before head", putBodyBeforeHead],
+    ["duplicate head", (html) => html.replace("</head>", "</head><head></head>")],
+    ["duplicate body", (html) => html.replace('<body data-page="fixture">', '<body></body><body data-page="fixture">')],
+    ["duplicate html root", (html) => html.replace("</html>", "</html><html></html>")],
+    ["body nested below div", (html) => html
+      .replace('<body data-page="fixture">', '<div><body data-page="fixture">')
+      .replace("</body></html>", "</body></div></html>")],
+    ["missing body element", (html) => html.replace('<body data-page="fixture">', "").replace("</body>", "")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-document"), label);
+  }
+  const valid = await applicationPageMutation();
+  assert.deepEqual(valid.errors, []);
+});
+
+test("Plan 2 Task 1 fix round 2 decodes and comment-normalizes hidden inline styles", async () => {
+  const cases = [
+    ["comment before colon", 'style="display/**/:none"', true],
+    ["comment after colon", 'style="display:/**/none"', true],
+    ["mixed-case comment and whitespace", 'style=" DiSpLaY /**/ : NoNe !IMPORTANT "', true],
+    ["visibility comment", 'style="VISIBILITY/**/: hidden"', true],
+    ["decimal colon", 'style="display&#58;none"', true],
+    ["hex colon", 'style="visibility&#x3A;hidden"', true],
+    ["named colon", 'style="display&colon;none"', true],
+    ["entity-encoded comment", 'style="display&sol;**&sol;&colon;none"', true],
+    ["unterminated comment", 'style="display/*:none"', true],
+    ["benign comment", 'style="color: red /**/"', false],
+    ["quoted comment markers", 'style="font-family: \'/*\'; color: red"', false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje</h1>", `<h1 ${style}>Aplikacje</h1>`) })
+  })));
+  for (const { label, shouldFail, result } of outcomes) {
+    assert.equal(errorIds(result).includes("page-h1"), shouldFail, label);
+  }
+});
+
+test("Plan 2 Task 1 fix round 2 decodes the complete srcset before candidate splitting", async () => {
+  const body = `
+    <img srcset="/assets/css/style.css 1x&#44; /missing-decimal-comma.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&#x2c; &#x2f;missing-hex-comma.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&comma; &sol;missing-named-comma.webp&Tab;2x" alt="">
+    <img src="/assets/css/style.css?first=1&amp;second=2" alt="">
+    <img srcset="&amp;sol;not-root-after-one-decode.webp 1x, &sol;&sol;cdn.example.com/external.webp 2x" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  for (const target of [
+    "missing-decimal-comma.webp",
+    "missing-hex-comma.webp",
+    "missing-named-comma.webp"
+  ]) {
+    assert.ok(missing.some((entry) => entry.includes(target)), target);
+  }
+  assert.equal(missing.length, 3, missing.join("\n"));
+});
+
 test("readFacts reads fixtures without starting CLI verification", async () => {
   const root = await fixture();
   const data = await readFacts({ root });
