@@ -89,6 +89,8 @@ const homepageMarkers = [
 ];
 
 const forbiddenHomepageCopy = ["—", "nie tylko", "kompleksow", "innowacyjn", "realnie", "#1", "największ", "Polpharma"];
+const retiredHomepageAviationName = /(^|[^\p{L}\p{N}_])warsawflightsafety($|[^\p{L}\p{N}_])/u;
+const inlineHomepageTextTags = /<\/?(?:abbr|b|bdi|bdo|cite|code|data|dfn|em|i|kbd|mark|q|ruby|s|samp|small|span|strong|sub|sup|time|u|var|wbr)\b[^>]*>/gi;
 
 const homeFactTags = ["a", "dd", "div", "h1", "h3", "li", "p", "span", "strong"];
 
@@ -377,6 +379,10 @@ function verifyHomepageContent(body, page, errors) {
   for (const pattern of forbiddenHomepageCopy) {
     if (visible.includes(normalize(pattern))) error(errors, "home-forbidden-copy", page.path, `visible copy contains ${pattern}`);
   }
+  const inlineAwareVisible = renderedText(activeBody.replace(inlineHomepageTextTags, ""));
+  if (retiredHomepageAviationName.test(inlineAwareVisible)) {
+    error(errors, "home-retired-aviation-name", page.path, "visible homepage copy must not publish the retired WarsawFlightSafety name");
+  }
   return visible;
 }
 
@@ -450,6 +456,27 @@ function pairedLinkSequence(activeBody) {
     .filter((link) => nonEmptyString(link.href) && !link.href.startsWith("mailto:"));
 }
 
+function verifyEnglishPolishOnlyLink(activeBody, page, errors) {
+  if (page.lang !== "en") return;
+  const procurementAnchors = tagBlocks(activeBody, "a").filter((link) => {
+    const href = attributeValue(link.opening, "href");
+    return href === "/procurement-2026/"
+      || href === "/en/procurement-2026/"
+      || annotatedFactSequence(link.full).includes("portfolio.procurement_process_2026");
+  });
+  if (procurementAnchors.length === 0) return;
+  const validPolishOnly = procurementAnchors.length === 1 && procurementAnchors.every(({ opening, content }) => {
+    const disclosureLabels = tagBlocks(content, "div").filter((block) => hasClass(block.opening, "pcard__link"));
+    return attributeValue(opening, "href") === "/procurement-2026/"
+      && attributeValue(opening, "lang") === "pl"
+      && disclosureLabels.length === 1
+      && renderedText(disclosureLabels[0].content) === normalize("Open project in Polish");
+  });
+  if (!validPolishOnly) {
+    error(errors, "home-en-pl-only-link", page.path, "Procurement 2026 requires the exact Polish route, lang=pl and visible Open project in Polish label on that anchor; a fake English route is forbidden");
+  }
+}
+
 function verifyEnglishHomeContract(activeBody, page, errors) {
   if (page.lang !== "en") return;
   const problems = [];
@@ -496,11 +523,6 @@ function verifyHomepageParity(plBody, enBody, errors) {
     error(errors, "home-parity-links", "en/index.html", "ordered internal routes must use exact /en/ counterparts and external routes must remain unchanged");
   }
 
-  const polishOnly = enLinks.filter(({ href }) => href === "/procurement-2026/");
-  const fakeTranslation = enLinks.some(({ href }) => href === "/en/procurement-2026/");
-  if (fakeTranslation || polishOnly.some(({ opening }) => attributeValue(opening, "lang") !== "pl")) {
-    error(errors, "home-en-pl-only-link", "en/index.html", "Procurement 2026 must link to the Polish route with lang=pl; a fake English route is forbidden");
-  }
 }
 
 function stripHtmlComments(html) {
@@ -1604,6 +1626,7 @@ async function verifyHome(factData, context) {
     const visible = verifyHomepageContent(body, page, context.errors);
     verifyHomeStructures(activeBody, page, context.errors);
     verifyEnglishHomeContract(activeBody, page, context.errors);
+    verifyEnglishPolishOnlyLink(activeBody, page, context.errors);
     verifyHomeFactPatterns(activeBody, page, context.errors);
     const records = Array.isArray(factData.facts) ? factData.facts : [];
     const byId = new Map(records.filter((fact) => nonEmptyString(fact?.id)).map((fact) => [fact.id, fact]));

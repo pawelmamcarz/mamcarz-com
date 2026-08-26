@@ -251,6 +251,23 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
   return root;
 }
 
+async function currentHomepageMutationFixture(lang, mutate) {
+  const [factData, plHtml, enHtml] = await Promise.all([
+    readFacts(),
+    readFile(resolve("index.html"), "utf8"),
+    readFile(resolve("en/index.html"), "utf8")
+  ]);
+  const current = lang === "pl" ? plHtml : enHtml;
+  const mutated = mutate(current);
+  assert.notEqual(mutated, current, `current ${lang} homepage mutation must change the fixture`);
+  return fixture({
+    facts: factData.facts,
+    blocked_claims: factData.blocked_claims,
+    plHtml: lang === "pl" ? mutated : plHtml,
+    enHtml: lang === "en" ? mutated : enHtml
+  });
+}
+
 function errorIds(result) {
   return result.errors.map((error) => error.split(" ")[1]);
 }
@@ -879,6 +896,39 @@ for (const status of ["review", "retired"]) {
   });
 }
 
+for (const [lang, retiredName] of [
+  ["en", "WarsawFlightSafety"],
+  ["en", "(wArSaWfLiGhTsAfEtY)"],
+  ["pl", "WARSAWFLIGHTSAFETY"]
+]) {
+  test(`home review hardening rejects visible retired aviation name on current ${lang} homepage: ${retiredName}`, async () => {
+    const root = await currentHomepageMutationFixture(lang, (html) => html.replace("</main>", `<p>${retiredName}</p></main>`));
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+  });
+}
+
+test("home review hardening ignores retired aviation name outside visible homepage copy", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    "</main>",
+    '<p data-fixture-path="/WarsawFlightSafety/">Fixture path</p><!-- WarsawFlightSafety --><script>const fixturePath = "/WarsawFlightSafety/";</script></main>'
+  ));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+});
+
+test("home review hardening keeps reasonable boundaries around the retired aviation name", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", "<p>WarsawFlightSafetyArchive fixture token</p></main>"));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+});
+
+test("home review hardening rejects the visible retired aviation name split by inline markup", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", "<p>WarsawFlight<span>Safety</span></p></main>"));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+});
+
 test("home scope rejects an approved fact annotation with the wrong localized value", async () => {
   const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
   const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Wrong client</div></section>');
@@ -1285,13 +1335,42 @@ for (const [variant, enHref] of [
 }
 
 test("home parity permits only the labelled Polish-only Procurement 2026 route", async () => {
-  const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/procurement-2026/">Procurement Process 2026</a></section>');
-  const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/procurement-2026/" lang="pl">Procurement Process 2026, Polish-language material</a></section>');
+  const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a class="pcard" href="/procurement-2026/"><div class="pcard__link">Otwórz projekt</div></a></section>');
+  const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', '<section id="portfolio"><a class="pcard" href="/procurement-2026/" lang="pl"><div class="pcard__link">Open project in Polish</div></a></section>');
   const root = await fixture({ plHtml, enHtml });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(!errorIds(result).includes("home-parity-links"));
   assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
 });
+
+test("home review hardening rejects a generic label on the current English Procurement 2026 anchor", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("Open project in Polish", "Open project"));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+});
+
+for (const [location, mutate] of [
+  ["an attribute", (html) => html
+    .replace("Open project in Polish", "Open project")
+    .replace('href="/procurement-2026/" lang="pl"', 'href="/procurement-2026/" lang="pl" aria-label="Open project in Polish"')],
+  ["a comment", (html) => html.replace("Open project in Polish", "Open project<!-- Open project in Polish -->")],
+  ["another element in the target anchor", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<p>Open project in Polish</p><div class="pcard__link">Open project</div>'
+  )],
+  ["a sibling outside the target anchor", (html) => html
+    .replace("Open project in Polish", "Open project")
+    .replace('<a href="/procurement-2026/"', '<p>Open project in Polish</p><a href="/procurement-2026/"')],
+  ["another anchor", (html) => html
+    .replace("Open project in Polish", "Open project")
+    .replace('<div class="pcard__link">Open project</div>', '<div class="pcard__link">Open project in Polish</div>')]
+]) {
+  test(`home review hardening does not accept the Polish disclosure from ${location}`, async () => {
+    const root = await currentHomepageMutationFixture("en", mutate);
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  });
+}
 
 test("home parity preserves the local skip-link target", async () => {
   const plHtml = `<a href="#main">Przejdź do treści</a>${homepageFixture("pl", "Marka")}`;
