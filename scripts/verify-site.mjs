@@ -180,15 +180,62 @@ function scanHtmlTagEnd(html, opening) {
   return -1;
 }
 
+function inspectHtmlStartTagSyntax(source) {
+  const tagName = /^<([a-z][a-z0-9:-]*)/i.exec(source);
+  if (!tagName) return { valid: false, selfClosing: false };
+  let cursor = tagName[0].length;
+  while (cursor < source.length) {
+    const whitespaceStart = cursor;
+    while (/\s/.test(source[cursor] ?? "")) cursor += 1;
+    if (source[cursor] === ">") return { valid: cursor === source.length - 1, selfClosing: false };
+    if (source[cursor] === "/" && source[cursor + 1] === ">") {
+      return { valid: cursor + 2 === source.length, selfClosing: true };
+    }
+    if (cursor === whitespaceStart) return { valid: false, selfClosing: false };
+
+    const nameStart = cursor;
+    while (cursor < source.length && !/[\s"'<>/=]/.test(source[cursor])) cursor += 1;
+    if (cursor === nameStart) return { valid: false, selfClosing: false };
+    while (/\s/.test(source[cursor] ?? "")) cursor += 1;
+    if (source[cursor] !== "=") continue;
+
+    cursor += 1;
+    while (/\s/.test(source[cursor] ?? "")) cursor += 1;
+    const quote = source[cursor];
+    if (quote === "\"" || quote === "'") {
+      cursor += 1;
+      while (cursor < source.length && source[cursor] !== quote) {
+        if (source[cursor] === "<") return { valid: false, selfClosing: false };
+        cursor += 1;
+      }
+      if (source[cursor] !== quote) return { valid: false, selfClosing: false };
+      cursor += 1;
+      continue;
+    }
+
+    const valueStart = cursor;
+    while (cursor < source.length && !/[\s"'`=<>]/.test(source[cursor])) cursor += 1;
+    if (cursor === valueStart) return { valid: false, selfClosing: false };
+  }
+  return { valid: false, selfClosing: false };
+}
+
 function parsedTag(openingTag) {
   const match = /^<\s*(\/?)\s*([a-z][a-z0-9:-]*)\b/i.exec(openingTag);
   if (!match) return null;
   const name = match[2].toLowerCase();
+  const closing = match[1] === "/";
+  const startTagSyntax = closing ? null : inspectHtmlStartTagSyntax(openingTag);
+  const sourceSelfClosing = closing ? /\/\s*>$/.test(openingTag) : startTagSyntax.selfClosing;
+  const isVoid = voidHtmlElements.has(name);
   return {
     name,
-    closing: match[1] === "/",
-    selfClosing: voidHtmlElements.has(name) || (/\/\s*>$/.test(openingTag) && !rawTextElements.has(name)),
-    attributes: match[1] === "/" ? new Map() : openingTagAttributes(openingTag)
+    closing,
+    isVoid,
+    sourceSelfClosing,
+    validSyntax: closing || startTagSyntax.valid,
+    selfClosing: isVoid,
+    attributes: closing ? new Map() : openingTagAttributes(openingTag)
   };
 }
 
@@ -204,10 +251,10 @@ function parseStaticHtml(html) {
   while (cursor < html.length) {
     const opening = html.indexOf("<", cursor);
     if (opening === -1) {
-      if (cursor < html.length) append({ type: "text", value: html.slice(cursor) });
+      if (cursor < html.length) append({ type: "text", value: html.slice(cursor), offset: cursor });
       break;
     }
-    if (opening > cursor) append({ type: "text", value: html.slice(cursor, opening) });
+    if (opening > cursor) append({ type: "text", value: html.slice(cursor, opening), offset: cursor });
     if (html.startsWith("<!--", opening)) {
       const commentEnd = html.indexOf("-->", opening + 4);
       if (commentEnd === -1) {
@@ -215,6 +262,12 @@ function parseStaticHtml(html) {
         cursor = html.length;
         break;
       }
+      append({
+        type: "comment",
+        value: html.slice(opening + 4, commentEnd),
+        source: html.slice(opening, commentEnd + 3),
+        offset: opening
+      });
       cursor = commentEnd + 3;
       continue;
     }
@@ -226,6 +279,7 @@ function parseStaticHtml(html) {
     }
     const source = html.slice(opening, tagEnd + 1);
     if (/^<!doctype\b/i.test(source)) {
+      append({ type: "doctype", source, offset: opening });
       cursor = tagEnd + 1;
       continue;
     }
@@ -236,6 +290,9 @@ function parseStaticHtml(html) {
       continue;
     }
     if (tag.closing) {
+      if (tag.sourceSelfClosing || !/^<\s*\/\s*[a-z][a-z0-9:-]*\s*>$/i.test(source)) {
+        errors.push(`malformed closing tag </${tag.name}> at offset ${opening}`);
+      }
       const current = stack[stack.length - 1];
       if (current.name === tag.name) {
         stack.pop();
@@ -253,7 +310,19 @@ function parseStaticHtml(html) {
       cursor = tagEnd + 1;
       continue;
     }
-    const node = { type: "element", name: tag.name, attributes: tag.attributes, children: [], parent: null };
+    if (!tag.validSyntax) errors.push(`malformed opening tag <${tag.name}> at offset ${opening}`);
+    if (tag.sourceSelfClosing && !tag.isVoid) {
+      errors.push(`non-void element <${tag.name}> cannot use self-closing syntax at offset ${opening}`);
+    }
+    const node = {
+      type: "element",
+      name: tag.name,
+      attributes: tag.attributes,
+      children: [],
+      parent: null,
+      source,
+      offset: opening
+    };
     append(node);
     cursor = tagEnd + 1;
     if (rawTextElements.has(tag.name) && !tag.selfClosing) {
@@ -265,7 +334,7 @@ function parseStaticHtml(html) {
         cursor = html.length;
         break;
       }
-      const rawText = { type: "text", value: html.slice(cursor, match.index), parent: node };
+      const rawText = { type: "text", value: html.slice(cursor, match.index), parent: node, offset: cursor };
       node.children.push(rawText);
       cursor = match.index + match[0].length;
       continue;
@@ -2671,7 +2740,12 @@ function expectedPageNavigation(lang) {
 
 function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
   const parsed = parseStaticHtml(html);
-  for (const syntaxError of parsed.errors) error(errors, "page-html-syntax", path, syntaxError);
+  for (const syntaxError of parsed.errors) {
+    const id = syntaxError.startsWith("non-void element <")
+      ? "page-html-self-closing"
+      : "page-html-syntax";
+    error(errors, id, path, syntaxError);
+  }
   const elements = elementDescendants(parsed.root);
   const activeElements = elements.filter(pageElementIsActive);
 
@@ -3108,6 +3182,36 @@ const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
   pl: Object.freeze({ elementCount: 186, digest: "ec6b2553ef9783694e5bb63de4ea381d66dcac4198797c14606aba48ffd3c792" }),
   en: Object.freeze({ elementCount: 186, digest: "011554d74762d63cedd9962b75a2cea10cb083f380e5df0f087573dc0c926771" })
 });
+const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
+  pl: Object.freeze([
+    Object.freeze({ rel: "canonical", href: "https://mamcarz.com/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "alternate", hreflang: "pl", href: "https://mamcarz.com/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "alternate", hreflang: "en", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "alternate", hreflang: "x-default", href: "https://mamcarz.com/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
+    Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
+    Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" })
+  ]),
+  en: Object.freeze([
+    Object.freeze({ rel: "canonical", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "alternate", hreflang: "pl", href: "https://mamcarz.com/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "alternate", hreflang: "en", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "alternate", hreflang: "x-default", href: "https://mamcarz.com/aplikacje-operacyjne/" }),
+    Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
+    Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
+    Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" })
+  ])
+});
+const APPLICATION_ZERO_RESOURCE_TAGS = new Set([
+  "applet", "audio", "base", "embed", "form", "frame", "frameset", "iframe", "object",
+  "picture", "portal", "source", "track", "video"
+]);
+const APPLICATION_RESOURCE_ATTRIBUTE_NAMES = new Set([
+  "action", "archive", "background", "cite", "codebase", "data", "formaction", "href", "longdesc",
+  "manifest", "ping", "poster", "profile", "src", "srcdoc", "srcset", "usemap", "xlink:href"
+]);
 const APPLICATION_HUMAN_METADATA_FIELDS = new Set([
   "name:description", "name:author", "property:og:title", "property:og:description",
   "property:og:image:alt", "property:og:site_name"
@@ -3115,6 +3219,18 @@ const APPLICATION_HUMAN_METADATA_FIELDS = new Set([
 
 function directElementChildren(node, name = null) {
   return (node?.children ?? []).filter((child) => child.type === "element" && (name === null || child.name === name));
+}
+
+function documentNodeDescendants(node) {
+  const descendants = [];
+  const visit = (current) => {
+    for (const child of current?.children ?? []) {
+      descendants.push(child);
+      visit(child);
+    }
+  };
+  visit(node);
+  return descendants;
 }
 
 function elementIsWithin(element, ancestor) {
@@ -3278,6 +3394,143 @@ function applicationApprovedEvidenceAnchors(evidenceRows, factData) {
     }
   }
   return approved;
+}
+
+function verifyApplicationDocumentBoundary(path, parsedRoot, errors) {
+  const nodes = documentNodeDescendants(parsedRoot);
+  const doctypes = nodes.filter((node) => node.type === "doctype");
+  const significantRootNodes = parsedRoot.children.filter((node) => {
+    if (node.type === "comment") return false;
+    if (node.type === "text") return node.value.trim().length > 0;
+    return true;
+  });
+  const html = significantRootNodes.find((node) => node.type === "element" && node.name === "html");
+  const valid = doctypes.length === 1
+    && doctypes[0].parent === parsedRoot
+    && /^<!doctype\s+html\s*>$/i.test(doctypes[0].source)
+    && significantRootNodes.length === 2
+    && significantRootNodes[0] === doctypes[0]
+    && significantRootNodes[1] === html;
+  if (!valid) {
+    error(errors, "application-document-boundary", path, "requires one HTML5 doctype before the sole html root, with only comments or whitespace outside that boundary");
+  }
+}
+
+function applicationTextHasBlockedContainer(textNode) {
+  const blockedContainers = new Set([
+    "audio", "embed", "form", "iframe", "noscript", "object", "picture", "script", "style", "template", "video"
+  ]);
+  for (let current = textNode.parent; current?.type === "element"; current = current.parent) {
+    if (blockedContainers.has(current.name)
+      || current.attributes.has("hidden")
+      || current.attributes.has("inert")
+      || elementHasHiddenInlineStyle(current)) return true;
+  }
+  return false;
+}
+
+function verifyApplicationDocumentText(path, parsedRoot, body, nav, main, footer, errors) {
+  const all = elementDescendants(parsedRoot);
+  const heads = all.filter((element) => element.name === "head");
+  const titles = all.filter((element) => element.name === "title");
+  const schemaScripts = all.filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
+  const bodyChildren = directElementChildren(body);
+  const skip = bodyChildren.find((element) => element.name === "a" && elementHasClass(element, "skip-link"));
+  const back = bodyChildren.find((element) => element.name === "button" && elementHasClass(element, "back-to-top"));
+  const approvedOwners = new Set([skip, nav, back, main, footer].filter(Boolean));
+  const nonWhitespace = documentNodeDescendants(parsedRoot)
+    .filter((node) => node.type === "text" && node.value.trim().length > 0);
+  const invalid = nonWhitespace.filter((textNode) => {
+    const title = titles.length === 1 ? titles[0] : null;
+    if (title !== null && textNode.parent === title && title.parent === heads[0]) return false;
+    const schema = schemaScripts.length === 1 ? schemaScripts[0] : null;
+    if (schema !== null && textNode.parent === schema && schema.parent === heads[0]) return false;
+    for (const owner of approvedOwners) {
+      if (elementIsWithin(textNode.parent, owner) && !applicationTextHasBlockedContainer(textNode)) return false;
+    }
+    return true;
+  });
+  const externalScripts = directElementChildren(body, "script")
+    .filter((script) => script.attributes.has("src"));
+  const externalScriptBodiesAreEmpty = externalScripts.length === 1
+    && rawElementText(externalScripts[0]).trim() === "";
+  if (invalid.length > 0 || !externalScriptBodiesAreEmpty) {
+    error(
+      errors,
+      "application-document-text",
+      path,
+      `all non-whitespace text must belong to an owned title, schema, shell, navigation, main or footer location; found ${invalid.length} unowned node(s)`
+    );
+  }
+}
+
+function exactApplicationResourceAttributes(element, expected) {
+  return exactElementAttributes(element, expected)
+    && (element.attributes.sourceAttributeCount ?? element.attributes.size) === Object.keys(expected).length;
+}
+
+function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, evidenceRows, factData, errors) {
+  const all = elementDescendants(parsedRoot);
+  const heads = all.filter((element) => element.name === "head");
+  const head = heads.length === 1 ? heads[0] : null;
+  const links = all.filter((element) => element.name === "link");
+  const expectedLinks = APPLICATION_RESOURCE_LINK_MANIFEST[lang];
+  const linksAreExact = links.length === expectedLinks.length
+    && links.every((link, index) => link.parent === head && exactApplicationResourceAttributes(link, expectedLinks[index]));
+
+  const scripts = all.filter((element) => element.name === "script");
+  const schema = scripts[0];
+  const external = scripts[1];
+  const bodyChildren = directElementChildren(body);
+  const scriptsAreExact = scripts.length === 2
+    && schema?.parent === head
+    && exactApplicationResourceAttributes(schema, { type: "application/ld+json" })
+    && external?.parent === body
+    && bodyChildren.at(-1) === external
+    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260825-flightplan-2", defer: null })
+    && rawElementText(external).trim() === "";
+
+  const footerSigns = all.filter((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
+  const images = all.filter((element) => element.name === "img");
+  const imageIsExact = footerSigns.length === 1
+    && footerSigns[0].parent !== null
+    && elementIsWithin(footerSigns[0], footer)
+    && images.length === 1
+    && images[0].parent === footerSigns[0]
+    && exactApplicationResourceAttributes(images[0], {
+      src: "/assets/img/signature.png",
+      alt: "",
+      width: "160",
+      loading: "lazy"
+    });
+
+  const approvedEvidenceAnchors = applicationApprovedEvidenceAnchors(evidenceRows, factData);
+  const externalAnchors = all.filter((element) => element.name === "a" && isHttpUrl(elementAttribute(element, "href")));
+  const externalAnchorsAreApproved = externalAnchors.every((anchor) => approvedEvidenceAnchors.has(anchor));
+  const zeroResourceTags = all.filter((element) => APPLICATION_ZERO_RESOURCE_TAGS.has(element.name));
+  const styleElements = all.filter((element) => element.name === "style");
+  const styleAttributes = all.filter((element) => element.attributes.has("style"));
+  const resourceAttributeOwnersAreExact = all.every((element) => {
+    const resourceAttributes = [...element.attributes.keys()].filter((name) => APPLICATION_RESOURCE_ATTRIBUTE_NAMES.has(name));
+    if (resourceAttributes.length === 0) return true;
+    return element.name === "a" || element.name === "link" || element.name === "script" || element.name === "img";
+  });
+  const valid = linksAreExact
+    && scriptsAreExact
+    && imageIsExact
+    && externalAnchorsAreApproved
+    && zeroResourceTags.length === 0
+    && styleElements.length === 0
+    && styleAttributes.length === 0
+    && resourceAttributeOwnersAreExact;
+  if (!valid) {
+    error(
+      errors,
+      "application-resource-census",
+      path,
+      "requires the exact approved head links, JSON-LD and external script, signature image and evidence URLs, with zero other executable, style, form or resource surfaces"
+    );
+  }
 }
 
 function applicationDocumentManifestDigest(parsedRoot, transparentElements = new Set()) {
@@ -3759,6 +4012,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   const literals = APPLICATION_LITERAL_CONTRACT[lang];
   const all = elementDescendants(parsedRoot);
   const active = all.filter(pageElementIsActive);
+  verifyApplicationDocumentBoundary(path, parsedRoot, errors);
   verifyApplicationMetadata(path, parsedRoot, lang, errors);
   const applicationNav = verifyApplicationNavigation(path, parsedRoot, lang, errors);
   if (active.some((element) => element.attributes.has("style"))) {
@@ -3784,6 +4038,8 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   }
   const applicationFooter = footers.length === 1 ? footers[0] : null;
   const evidenceRows = applicationOwnedEvidenceRows(main);
+  verifyApplicationDocumentText(path, parsedRoot, body, applicationNav, main, applicationFooter, errors);
+  verifyApplicationResourceCensus(path, parsedRoot, lang, body, applicationFooter, evidenceRows, factData, errors);
   verifyApplicationDocumentManifest(path, parsedRoot, lang, evidenceRows, factData, errors);
   verifyApplicationAnchorManifest(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, evidenceRows, errors);
   verifyApplicationSemanticAttributes(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, errors);

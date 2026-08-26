@@ -100,6 +100,24 @@ Focused GREEN:
 - Metadata validation now inventories every `html`, `head`, `body`, `title`, `base`, `meta` and `link` in the parsed document, requires the single exact root nesting and complete 23-element head order, rejects every `base`, and validates all four canonical/hreflang links plus all four approved head assets without slicing.
 - The same document manifest pins both scripts, all stylesheet/font/icon resources and the signature image. Extra style, script, iframe, image, object, embed, source, picture, video, audio and form variants are rejected even inside inactive descendants.
 
+### Fix round 5
+
+Focused RED:
+
+- Command: `node --test --test-name-pattern='Plan 2 Task 2 fix round 5' scripts/verify-site.test.mjs`.
+- Initial result: 4 tests, 0 pass, 4 fail, exit 1. The first examples were exact false greens: a missing doctype returned zero errors, `Available now` before the doctype returned zero errors and the navigation `<span/>` reproduction returned zero errors. An external image produced only the supplemental document-manifest and semantic diagnostics, with no independent resource-census error.
+- The coordinated-drift regression then failed independently: it inserted the same unapproved iframe into PL and EN, obtained each mutated document's real element count and SHA-256 digest from an instrumented temporary verifier, patched both constants in a clean temporary verifier source and received exit 0. This proved that the digest was the only remaining barrier.
+- Two bounded follow-up RED cases closed source-syntax details without widening product scope: `<span / claim>` was rejected only by the digest before raw start-tag syntax validation, and a duplicate stylesheet `href` occurrence was rejected only by the digest before the independent census counted source attributes.
+
+Focused GREEN:
+
+- The complete round 5 focus passes 5 tests, 5 pass, 0 fail, exit 0. The complete Task 2 focus passes 34 tests, 34 pass, 0 fail. Task 1 remains isolated and passes 36 tests, 36 pass, 0 fail.
+- The parser now retains doctype and comment nodes and validates raw start and closing tag syntax. Exactly one case-insensitive HTML5 `<!DOCTYPE html>` is required before the sole `html` element; only formatting whitespace and harmless comments may surround it. Missing, duplicate, moved and legacy or malformed declarations fail.
+- Every non-whitespace text node is inventoried, including text before or after the document, between `head` and `body`, in raw-text elements and in hidden, inert, `template` and `noscript` descendants. Text is allowed only in the already pinned title, Service schema, shell, navigation, main and footer ownership surfaces. The exact external browser script has an empty body.
+- A non-void `/>` token produces the dedicated `page-html-self-closing` error and is parsed with browser-consistent HTML semantics as an open element, not a self-closed element. Regressions cover `span`, `div`, `a`, `p`, `details`, `summary`, `script` and `style`; actual void syntax remains accepted. Stray, mismatched and malformed opening or closing tags fail through `page-html-syntax`.
+- The independent resource census is defined from fixed Task 2 requirements rather than current page bytes or digest values. It requires exactly 8 localized direct-head links, 2 scripts in their exact locations with exact source-attribute counts and bodies, and 1 exact footer signature image. It requires zero `style` elements or `style` attributes and zero instances of 14 unapproved resource or form tag families across active and inactive descendants. HTTP evidence anchors remain allowed only through the exact associated approved registry URL and leaf contract.
+- After both PL and EN document digest constants are recomputed and patched for an injected iframe, the distinct `application-resource-census` error still fails the temporary verifier while `application-document-manifest` is absent. The unchanged approved evidence-link fixture continues to pass.
+
 ## Verification gates
 
 - `npm run verify:pages -- --family=applications`: PASS.
@@ -107,7 +125,7 @@ Focused GREEN:
 - `npm run verify:facts`: PASS.
 - `npm run verify:foundation`: PASS.
 - `npm run verify:site`: PASS.
-- `npm run test:verify-site`: PASS, 494 tests, 494 pass, 0 fail.
+- `npm run test:verify-site`: PASS, 499 tests, 499 pass, 0 fail.
 - `node --check scripts/verify-site.mjs`: PASS.
 - `node --check scripts/verify-site.test.mjs`: PASS.
 - `node --check assets/js/main.js`: PASS.
@@ -125,6 +143,8 @@ Focused GREEN:
 - The browser review was not repeated in fix round 3 because no product or stylesheet file changed.
 - Fix-round 4 diff inspection: the PL/EN product pages, shared CSS, facts registry and browser script remain byte-unchanged from both the original Task 2 product commit `ee98910d3369d7b91c085f844d49cf8c0f9c4273` and the round 4 base `3b9f5b503320b6a13e53513f7478d2d362d63591`; only the verifier, verifier tests and this report changed.
 - The browser review was not repeated in fix round 4 because no product or stylesheet file changed.
+- Fix-round 5 diff inspection: the PL/EN product pages, shared CSS, facts registry and browser script remain byte-unchanged from both the original Task 2 product commit `ee98910d3369d7b91c085f844d49cf8c0f9c4273` and the round 5 base `c98c4962c226756e4df576aa5b96d397696866a3`; only the verifier, verifier tests and this report changed.
+- The browser review was not repeated in fix round 5 because no product, stylesheet, registry or browser-script byte changed.
 
 ## Limitations
 

@@ -1838,6 +1838,191 @@ test("Plan 2 Task 2 fix round 4 owns every document root and metadata element wi
   }
 });
 
+test("Plan 2 Task 2 fix round 5 owns the one legal HTML5 doctype and raw document boundaries", async () => {
+  const cases = [
+    ["missing doctype", (html) => html.replace("<!DOCTYPE html>\n", "")],
+    ["duplicate doctype", (html) => html.replace("<!DOCTYPE html>", "<!DOCTYPE html><!DOCTYPE html>")],
+    ["doctype after html", (html) => html.replace("<!DOCTYPE html>\n", "").replace("</html>", "</html><!DOCTYPE html>")],
+    ["doctype inside body", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body class="applications-page" data-page="applications"><!DOCTYPE html>')],
+    ["legacy public doctype", (html) => html.replace("<!DOCTYPE html>", '<!DOCTYPE html PUBLIC "-//EXAMPLE//DTD claim//EN">')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const harmlessFormatting = await applicationPageMutation({
+    mutate: (html) => `\n<!-- before doctype -->\n${html.replace("<!DOCTYPE html>", "<!doctype html>").replace("<html lang=\"pl\">", '<!-- before html --><html lang="pl"><!-- before head -->').replace("</html>", "</html><!-- after html -->\n")}`
+  });
+  assert.deepEqual(harmlessFormatting.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 5 inventories every non-whitespace document text node", async () => {
+  const cases = [
+    ["before doctype", (html) => `Available now${html}`],
+    ["between doctype and html", (html) => html.replace("<!DOCTYPE html>", "<!DOCTYPE html>Available now")],
+    ["direct head text", (html) => html.replace("<head>", "<head>Available now")],
+    ["between head and body", (html) => html.replace("</head>\n<body", "</head>Available now\n<body")],
+    ["direct body text", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body class="applications-page" data-page="applications">Available now')],
+    ["between body and html", (html) => html.replace("</body>\n</html>", "</body>Available now\n</html>")],
+    ["after html", (html) => html.replace("</html>", "</html>Available now")],
+    ["template text", (html) => html.replace("</footer>", "<template><p>Available now</p></template></footer>")],
+    ["noscript text", (html) => html.replace("</footer>", "<noscript><p>Available now</p></noscript></footer>")],
+    ["hidden text", (html) => html.replace("</footer>", "<div hidden>Available now</div></footer>")],
+    ["inert text", (html) => html.replace("</footer>", "<div inert>Available now</div></footer>")],
+    ["owned main made hidden", (html) => html.replace('<main id="main" tabindex="-1">', '<main id="main" tabindex="-1" hidden>')],
+    ["owned body made inert", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body class="applications-page" data-page="applications" inert>')],
+    ["external script body", (html) => html.replace(" defer></script>", ">Available now</script>")],
+    ["raw inline script", (html) => html.replace("</footer>", "<script>Available now</script></footer>")],
+    ["raw style", (html) => html.replace("</footer>", "<style>Available now</style></footer>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-text"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HTML element", async () => {
+  const cases = [
+    ["span", (html) => html.replace("<span></span>", "<span/>")],
+    ["div", (html) => html.replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay"/>')],
+    ["anchor", (html) => html.replace('<a href="#main" class="skip-link">Przejdź do treści</a>', '<a href="#main" class="skip-link"/>')],
+    ["paragraph", (html) => html.replace('<p class="section-label">01 / Problem</p>', '<p class="section-label"/>')],
+    ["details", (html) => html.replace('<details class="nav-group">', '<details class="nav-group"/>')],
+    ["summary", (html) => html.replace("<summary>Doradztwo</summary>", "<summary/>")],
+    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script>', '<script src="/assets/js/main.js?v=20260825-flightplan-2" defer/>')],
+    ["style", (html) => html.replace("</footer>", "<style/></style></footer>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-html-self-closing"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const voidSyntax = await applicationPageMutation({
+    mutate: (html) => html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8"/>')
+  });
+  assert.deepEqual(voidSyntax.errors, []);
+
+  const malformedCases = [
+    ["attributes on a closing tag", (html) => html.replace("<span></span>", "<span></span claim>")],
+    ["stray closing tag", (html) => html.replace("</footer>", "</claim></footer>")],
+    ["stray opening tag", (html) => html.replace("</footer>", "<span></footer>")],
+    ["closing tag for a void element", (html) => html.replace('loading="lazy">', 'loading="lazy"></img>')],
+    ["mismatched nesting", (html) => html.replace("</footer>", "<div><span></div></span></footer>")],
+    ["slash before stray opening-tag content", (html) => html.replace("<span></span>", "<span / claim></span>")]
+  ];
+  const malformedOutcomes = await Promise.all(malformedCases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of malformedOutcomes) {
+    assert.ok(errorIds(result).includes("page-html-syntax"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {
+  const additions = [
+    ["external image", '<img src="https://example.com/claim.png" alt="">'],
+    ["data image", '<img src="data:image/svg+xml,claim" alt="">'],
+    ["iframe", '<iframe src="https://example.com/claim"></iframe>'],
+    ["javascript iframe", '<iframe src="javascript:globalThis.claim=true"></iframe>'],
+    ["inline script", '<script>globalThis.claim = true</script>'],
+    ["protocol-relative script", '<script src="//example.com/claim.js"></script>'],
+    ["inline style", '<style>.claim{display:block}</style>'],
+    ["external form", '<form action="https://example.com/collect" method="post"></form>'],
+    ["object", '<object data="https://example.com/claim"></object>'],
+    ["embed", '<embed src="https://example.com/claim">'],
+    ["base", '<base href="https://example.com/claim/">'],
+    ["picture source", '<picture><source srcset="https://example.com/claim.webp"><img src="https://example.com/claim.png" alt=""></picture>'],
+    ["video", '<video src="https://example.com/claim.mp4"></video>'],
+    ["audio", '<audio src="https://example.com/claim.mp3"></audio>'],
+    ["inactive iframe", '<template><iframe src="https://example.com/claim"></iframe></template>'],
+    ["inactive script", '<noscript><script>globalThis.claim = true</script></noscript>']
+  ];
+  const outcomes = await Promise.all(additions.map(async ([label, addition]) => ({
+    label,
+    result: await applicationPageMutation({ mutate: (html) => html.replace("</footer>", `${addition}</footer>`) })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-resource-census"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const styleAttribute = await applicationPageMutation({
+    mutate: (html) => html.replace("<dt>Procurement</dt>", '<dt style="display:block">Procurement</dt>')
+  });
+  assert.ok(errorIds(styleAttribute).includes("application-resource-census"), styleAttribute.errors.join("\n"));
+
+  const duplicateStylesheetHref = await applicationPageMutation({
+    mutate: (html) => html.replace(
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2">',
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2" href="/assets/css/style.css?v=20260825-flightplan-2">'
+    )
+  });
+  assert.ok(errorIds(duplicateStylesheetHref).includes("application-resource-census"), duplicateStylesheetHref.errors.join("\n"));
+
+  const externalScriptBody = await applicationPageMutation({
+    mutate: (html) => html.replace(" defer></script>", " defer>globalThis.claim = true</script>")
+  });
+  assert.ok(errorIds(externalScriptBody).includes("application-resource-census"), externalScriptBody.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 fix round 5 resource census survives coordinated PL EN digest drift", async () => {
+  const addition = '<iframe src="https://example.com/coordinated-claim"></iframe>';
+  const mutate = (html) => html.replace("</footer>", `${addition}</footer>`);
+  const root = await pageArchitectureFixture({
+    files: pagePairFiles(applicationsPair, {
+      pl: mutate(applicationPageFixture("pl")),
+      en: mutate(applicationPageFixture("en"))
+    })
+  });
+  const scriptsDirectory = resolve(root, "scripts");
+  const verifierPath = resolve(scriptsDirectory, "verify-site.mjs");
+  await mkdir(scriptsDirectory, { recursive: true });
+  const verifierSource = await readFile(modulePath, "utf8");
+  const manifestMessage = "`requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`";
+  assert.ok(verifierSource.includes(manifestMessage), "digest probe must instrument the manifest diagnostic");
+  const instrumentedSource = verifierSource.replace(
+    manifestMessage,
+    "`actual-manifest=${lang}:${actual.elementCount}:${actual.digest}; requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`"
+  );
+  const runFixtureVerifier = async (source) => {
+    await writeFile(verifierPath, source);
+    const runner = `const { runVerification } = await import(${JSON.stringify(new URL(`file://${verifierPath}`).href)});\nconst result = await runVerification({ root: ${JSON.stringify(root)}, scope: "pages", family: "applications" });\nif (result.errors.length) { console.error(result.errors.join("\\n")); process.exitCode = 1; }`;
+    try {
+      const result = await execFileAsync(process.execPath, ["--input-type=module", "--eval", runner], { cwd: root });
+      return { exitCode: 0, output: `${result.stdout}${result.stderr}` };
+    } catch (cause) {
+      return { exitCode: cause.code ?? 1, output: `${cause.stdout ?? ""}${cause.stderr ?? ""}` };
+    }
+  };
+  const probe = await runFixtureVerifier(instrumentedSource);
+  assert.notEqual(probe.exitCode, 0, `digest probe must observe drift:\n${probe.output}`);
+  const manifests = new Map([...probe.output.matchAll(/actual-manifest=(pl|en):(\d+):([a-f0-9]{64})/g)]
+    .map((match) => [match[1], { elementCount: match[2], digest: match[3] }]));
+  assert.deepEqual([...manifests.keys()].sort(), ["en", "pl"], probe.output);
+
+  let patchedSource = verifierSource;
+  for (const lang of ["pl", "en"]) {
+    const actual = manifests.get(lang);
+    const constant = new RegExp(`(${lang}: Object\\.freeze\\(\\{ elementCount: )\\d+(, digest: ")[a-f0-9]{64}(" \\}\\))`);
+    assert.match(patchedSource, constant, `${lang} manifest constant must be patchable`);
+    patchedSource = patchedSource.replace(constant, `$1${actual.elementCount}$2${actual.digest}$3`);
+  }
+  const result = await runFixtureVerifier(patchedSource);
+  assert.notEqual(result.exitCode, 0, "an independent census must fail after both digest constants are recomputed and patched");
+  assert.match(result.output, /ERROR application-resource-census /, result.output);
+  assert.doesNotMatch(result.output, /ERROR application-document-manifest /, result.output);
+});
+
 test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN product pair", async () => {
   const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
   const result = await runVerification({ root, scope: "pages", family: "applications" });
