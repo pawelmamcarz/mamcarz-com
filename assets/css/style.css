@@ -1907,7 +1907,13 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
   border-bottom: var(--line-strong);
 }
 .speaking-contact p,
-.procurement-contact p { max-width: 56ch; color: var(--ink-secondary); }
+.procurement-contact p { max-width: 56ch; }
+.speaking-contact h2 { color: var(--white); }
+.speaking-contact p:not(.section-label) { color: var(--white); }
+.speaking-contact .section-label { color: var(--signal-light); }
+.procurement-contact h2 { color: var(--white); }
+.procurement-contact p:not(.section-label) { color: var(--white); }
+.procurement-contact .section-label { color: var(--signal-light); }
 .speaking-contact .btn-primary,
 .procurement-contact .btn-primary { margin-top: 1rem; }
 

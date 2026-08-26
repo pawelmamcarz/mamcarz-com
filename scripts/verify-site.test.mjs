@@ -2939,6 +2939,33 @@ test("Plan 2 Task 7 accepts only the exact bilingual Speaking programme and PL-o
   assert.deepEqual(result.errors, []);
 });
 
+test("Plan 2 Task 7 fix round 1 keeps each dark contact foreground independently legible", () => {
+  const rules = parseCssRules(foundationCss);
+  const property = (selector, name) => rules
+    .filter((rule) => rule.media.length === 0 && rule.selectors.includes(selector))
+    .reduce((value, rule) => rule.declarations.get(name) ?? value, undefined);
+  const luminance = (hex) => hex.slice(1).match(/.{2}/g)
+    .map((component) => Number.parseInt(component, 16) / 255)
+    .map((component) => component <= 0.04045 ? component / 12.92 : ((component + 0.055) / 1.055) ** 2.4)
+    .reduce((total, component, index) => total + (component * [0.2126, 0.7152, 0.0722][index]), 0);
+  const contrast = (foreground, background) => {
+    const values = [luminance(foreground), luminance(background)];
+    return (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
+  };
+  const contracts = [
+    ["Speaking heading", ".speaking-contact h2", "var(--white)", "#F7F9F8", "#193D49", 3],
+    ["Speaking body", ".speaking-contact p:not(.section-label)", "var(--white)", "#F7F9F8", "#193D49", 4.5],
+    ["Speaking label", ".speaking-contact .section-label", "var(--signal-light)", "#FF9B7D", "#193D49", 4.5],
+    ["Procurement heading", ".procurement-contact h2", "var(--white)", "#F7F9F8", "#0C252E", 3],
+    ["Procurement body", ".procurement-contact p:not(.section-label)", "var(--white)", "#F7F9F8", "#0C252E", 4.5],
+    ["Procurement label", ".procurement-contact .section-label", "var(--signal-light)", "#FF9B7D", "#0C252E", 4.5]
+  ];
+  for (const [label, selector, token, foreground, background, minimum] of contracts) {
+    assert.equal(property(selector, "color"), token, `${label} must own its foreground token`);
+    assert.ok(contrast(foreground, background) >= minimum, `${label} contrast must be at least ${minimum}:1`);
+  }
+});
+
 test("Plan 2 Task 7 rejects Speaking identity, programme, claims, controls, schema and resources drift", async () => {
   const cases = [
     ["legacy organization count", "pl", "speaking-claim-boundary", (html) => html.replace("</main>", "<!-- ponad 100 organizacji --></main>")],
