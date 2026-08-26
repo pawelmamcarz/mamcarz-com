@@ -20,6 +20,10 @@ const aviationProductHtml = {
   pl: await readFile(resolve("lotnictwo/index.html"), "utf8"),
   en: await readFile(resolve("en/lotnictwo/index.html"), "utf8")
 };
+const projectProductHtml = {
+  pl: await readFile(resolve("case-studies/index.html"), "utf8"),
+  en: await readFile(resolve("en/case-studies/index.html"), "utf8")
+};
 const serviceProductHtml = Object.freeze({
   transformation: Object.freeze({
     pl: await readFile(resolve("uslugi/transformacja-zakupow/index.html"), "utf8"),
@@ -141,6 +145,8 @@ function pagePairFiles(pair, overrides = {}) {
     ? applicationPageFixture("pl")
     : family === "aviation"
       ? aviationProductHtml.pl
+    : family === "projects"
+      ? projectProductHtml.pl
     : family === "knowledge"
       ? knowledgePageFixture("pl")
     : family === "services"
@@ -150,6 +156,8 @@ function pagePairFiles(pair, overrides = {}) {
     ? applicationPageFixture("en")
     : family === "aviation"
       ? aviationProductHtml.en
+    : family === "projects"
+      ? projectProductHtml.en
     : family === "knowledge"
       ? knowledgePageFixture("en")
     : family === "services"
@@ -486,6 +494,8 @@ async function productionRegistryFixture(overrides = {}) {
       "en/aplikacje-operacyjne/index.html": applicationPageFixture("en"),
       "lotnictwo/index.html": aviationProductHtml.pl,
       "en/lotnictwo/index.html": aviationProductHtml.en,
+      "case-studies/index.html": projectProductHtml.pl,
+      "en/case-studies/index.html": projectProductHtml.en,
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
       ...extraFiles
@@ -499,7 +509,7 @@ async function verifyFixtureCss(css) {
 }
 
 const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "applications");
-const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "projects");
+const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "speaking");
 const aviationPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
 const knowledgePair = plan2RoutePairs.find((pair) => pair[4] === "knowledge");
 const servicePairs = plan2RoutePairs.filter((pair) => pair[4] === "services");
@@ -513,6 +523,56 @@ const serviceFactIdFixture = new Set([
   "career.pkp_plk.organization", "career.pkp_plk.dates", "career.pkp_plk.title", "career.pkp_plk.responsibility"
 ]);
 const serviceSurfaceFixture = new Set(servicePairs.flatMap(([plFile, enFile]) => [plFile, enFile]));
+const projectsPair = plan2RoutePairs.find((pair) => pair[4] === "projects");
+
+async function projectPageMutation({ lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
+  const factData = await readFacts();
+  const current = projectProductHtml[lang];
+  const changed = mutate(current);
+  const files = pagePairFiles(projectsPair, {
+    pl: lang === "pl" ? changed : projectProductHtml.pl,
+    en: lang === "en" ? changed : projectProductHtml.en
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    facts: mutateFacts(structuredClone(factData.facts)),
+    public_claim_surfaces: mutateSurfaces(structuredClone(factData.public_claim_surfaces))
+  });
+  return runVerification({ root, scope: "pages", family: "projects" });
+}
+
+const projectFactIdFixture = new Set([
+  "client.orlen", "project.orlen.role", "project.orlen.platform_scope", "project.orlen.connect_scope",
+  "client.zabka_polska", "project.zabka.role", "project.zabka.implementation", "project.zabka.proof",
+  "client.kghm", "project.kghm.role", "project.kghm.scope", "project.kghm.integration",
+  "client.pll_lot", "project.lot.implementation", "client.motor_oil_hellas", "project.motor_oil.implementation",
+  "portfolio.czympojade_pl", "portfolio.czympojade_pl.type", "portfolio.przypominamy_com", "portfolio.przypominamy_com.type",
+  "portfolio.procuracost", "portfolio.procuracost.type", "portfolio.procurement_process_2026", "portfolio.procurement_process_2026.type",
+  "portfolio.silence_tax", "portfolio.silence_tax.type", "portfolio.akrobacja_com", "portfolio.akrobacja_com.current_status",
+  "portfolio.akrobacja_com.type", "portfolio.filmolot_pl", "portfolio.filmolot_pl.type"
+]);
+const projectSurfaceFixture = new Set(["case-studies/index.html", "en/case-studies/index.html"]);
+
+async function projectRegistryMutation({ mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
+  const factData = await readFacts();
+  const facts = mutateFacts(structuredClone(factData.facts));
+  const publicClaimSurfaces = mutateSurfaces(structuredClone(factData.public_claim_surfaces));
+  const roots = await Promise.all([
+    pageArchitectureFixture({ files: pagePairFiles(projectsPair, { pl: projectProductHtml.pl, en: projectProductHtml.en }), facts, public_claim_surfaces: publicClaimSurfaces }),
+    productionRegistryFixture({ facts, public_claim_surfaces: publicClaimSurfaces })
+  ]);
+  const [pages, factsResult, all] = await Promise.all([
+    runVerification({ root: roots[0], scope: "pages", family: "projects" }),
+    runVerification({ root: roots[1], scope: "facts" }),
+    runVerification({ root: roots[1], scope: "all" })
+  ]);
+  return { pages, facts: factsResult, all };
+}
+
+function assertProjectRegistryInventoryErrors(results, label) {
+  const missing = Object.entries(results).filter(([, result]) => !errorIds(result).includes("project-registry-inventory"));
+  assert.deepEqual(missing, [], `${label}: ${missing.map(([scope, result]) => `${scope}: ${result.errors.join("\n") || "no errors"}`).join("\n")}`);
+}
 
 function servicePairKey(pair) {
   return pair[0].includes("transformacja-zakupow")
@@ -2766,6 +2826,72 @@ test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN
   const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
   const result = await runVerification({ root, scope: "pages", family: "applications" });
   assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 6 rejects identity, group, evidence, status, schema, resource and forbidden-claim drift", async () => {
+  const cases = [
+    ["legacy H1", "pl", "project-h1", (html) => html.replace('<h1 class="page-title">Projekty</h1>', '<h1 class="page-title">Case studies</h1>')],
+    ["claim-inflating lead", "en", "project-lead", (html) => html.replace('<p class="page-lead">A register of projects and products built from approved roles, scopes and facts.', '<p class="page-lead">A register of successful projects and products built from approved roles, scopes and facts.')],
+    ["duplicate group", "pl", "project-groups", (html) => html.replace('data-section="applications"', 'data-section="advisory"')],
+    ["reordered project identity", "en", "project-evidence", (html) => html.replace('data-project-id="zabka"', 'data-project-id="orlen"')],
+    ["swapped role fact", "pl", "project-evidence", (html) => html.replace('data-fact-id="project.orlen.role"', 'data-fact-id="project.orlen.platform_scope"')],
+    ["hidden Akrobacja status", "en", "project-evidence", (html) => html.replace('<span data-fact-id="portfolio.akrobacja_com.current_status">', '<span hidden data-fact-id="portfolio.akrobacja_com.current_status">')],
+    ["invented schema result", "pl", "project-schema", (html) => html.replace('"mainEntity":', '"result":"Success","mainEntity":')],
+    ["external project link", "en", "project-resource-census", (html) => html.replace('<h3 data-fact-id="portfolio.procuracost">ProcuraCost</h3>', '<h3 data-fact-id="portfolio.procuracost"><a href="https://example.com/claim">ProcuraCost</a></h3>')],
+    ["project image", "pl", "project-resource-census", (html) => html.replace('</main>', '<img src="/assets/img/claim.jpg" alt="ORLEN"></main>')],
+    ["entity-smuggled retired venture", "en", "project-claim-boundary", (html) => html.replace('</footer>', '<!-- WarsawFlight&#83;afety --></footer>')],
+    ["blocked client", "pl", "project-claim-boundary", (html) => html.replace('</footer>', '<template>Pol<span>pharma</span></template></footer>')],
+    ["review store count", "en", "project-claim-boundary", (html) => html.replace('</footer>', '<!-- 12,823 stores --></footer>')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await projectPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 6 accepts the exact bilingual Projects evidence register", async () => {
+  const result = await projectPageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 6 rejects coordinated page and mutable-registry claim drift", async () => {
+  const fabricated = "Successful CONNECT programme";
+  const result = await projectPageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("Central sourcing platform for the ORLEN Group", fabricated),
+    mutateFacts: (facts) => facts.map((record) => record.id === "project.orlen.platform_scope"
+      ? { ...record, value: fabricated, display_pl: fabricated, display_en: fabricated }
+      : record)
+  });
+  assert.ok(errorIds(result).includes("project-registry-inventory"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 6 rejects reviewed facts promoted onto Projects and exact public-surface drift", async () => {
+  const promoted = await projectRegistryMutation({
+    mutateFacts: (facts) => facts.map((record) => record.id === "project.zabka.store_count"
+      ? { ...record, status: "approved", surfaces: [...record.surfaces, ...projectSurfaceFixture] }
+      : record)
+  });
+  assertProjectRegistryInventoryErrors(promoted, "promoted reviewed fact");
+
+  const surfaces = await projectRegistryMutation({
+    mutateSurfaces: (items) => {
+      const next = [...items];
+      const left = next.indexOf("case-studies/index.html");
+      const right = next.indexOf("en/case-studies/index.html");
+      [next[left], next[right]] = [next[right], next[left]];
+      return next;
+    }
+  });
+  assertProjectRegistryInventoryErrors(surfaces, "reordered project surfaces");
+});
+
+test("Plan 2 Task 6 rejects wholesale removal of all 31 facts and both Projects surfaces", async () => {
+  const results = await projectRegistryMutation({
+    mutateFacts: (facts) => facts.filter((record) => !projectFactIdFixture.has(record.id)),
+    mutateSurfaces: (surfaces) => surfaces.filter((surface) => !projectSurfaceFixture.has(surface))
+  });
+  assertProjectRegistryInventoryErrors(results, "wholesale Projects registry removal");
 });
 
 test("Plan 2 Task 2 accepts a complete mirrored application contract", async () => {

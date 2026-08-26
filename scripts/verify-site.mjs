@@ -11,6 +11,7 @@ const sourceTypes = new Set(["owner_verified", "public_source", "internal_eviden
 const statuses = new Set(["approved", "review", "retired"]);
 const blockedKeys = ["id", "pattern", "forbidden_contexts", "reason"];
 const requiredPublicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"];
+const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 
 const ROUTE_PAIRS = [
   ["index.html", "en/index.html", "/", "/en/", "home"],
@@ -4289,11 +4290,11 @@ const AVIATION_FACT_CONTRACT = Object.freeze([
   Object.freeze({ id: "aviation.diverse_extreme_team", value: "Demonstration pilot, Diverse Extreme Team, 2013", display_pl: "pilot pokazowy Diverse Extreme Team (2013)", display_en: "display pilot for the Diverse Extreme Team (2013)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
   Object.freeze({ id: "aviation.forum_photographer", value: "Press photographer for Forum Agency", display_pl: "fotograf prasowy agencji Forum", display_en: "Press photographer with Forum Agency", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
   Object.freeze({ id: "aviation.air_to_air_media", value: "air-to-air, video and drone production", display_pl: "sesje air-to-air, realizacje wideo i dronem", display_en: "air-to-air shoots, video and drone production", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 aviation history, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES], status: "approved" }),
-  Object.freeze({ id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
-  Object.freeze({ id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
-  Object.freeze({ id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
-  Object.freeze({ id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed portfolio project, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES], status: "approved" }),
-  Object.freeze({ id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES], status: "approved" })
+  Object.freeze({ id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js", ...PROJECT_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js", ...PROJECT_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js", ...PROJECT_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed portfolio project, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" })
 ]);
 
 const AVIATION_NAVIGATION_CONTRACT = Object.freeze({
@@ -5300,6 +5301,251 @@ function verifyKnowledgePage(path, parsedRoot, lang, errors) {
   verifyKnowledgeBoundary(path, parsedRoot, errors);
 }
 
+const PROJECT_GROUP_ORDER = Object.freeze(["advisory", "applications", "aviation"]);
+const PROJECT_STRUCTURE = Object.freeze([
+  Object.freeze({ group: "advisory", projects: Object.freeze([
+    Object.freeze({ id: "orlen", facts: Object.freeze(["client.orlen", "project.orlen.role", "project.orlen.platform_scope", "project.orlen.connect_scope"]) }),
+    Object.freeze({ id: "zabka", facts: Object.freeze(["client.zabka_polska", "project.zabka.role", "project.zabka.implementation", "project.zabka.proof"]) }),
+    Object.freeze({ id: "kghm", facts: Object.freeze(["client.kghm", "project.kghm.role", "project.kghm.scope", "project.kghm.integration"]) }),
+    Object.freeze({ id: "pll-lot", facts: Object.freeze(["client.pll_lot", "project.lot.implementation"]) }),
+    Object.freeze({ id: "motor-oil-hellas", facts: Object.freeze(["client.motor_oil_hellas", "project.motor_oil.implementation"]) })
+  ]) }),
+  Object.freeze({ group: "applications", projects: Object.freeze([
+    Object.freeze({ id: "czympojade", facts: Object.freeze(["portfolio.czympojade_pl", "portfolio.czympojade_pl.type"]) }),
+    Object.freeze({ id: "przypominamy", facts: Object.freeze(["portfolio.przypominamy_com", "portfolio.przypominamy_com.type"]) }),
+    Object.freeze({ id: "procuracost", facts: Object.freeze(["portfolio.procuracost", "portfolio.procuracost.type"]) }),
+    Object.freeze({ id: "procurement-process-2026", facts: Object.freeze(["portfolio.procurement_process_2026", "portfolio.procurement_process_2026.type"]) }),
+    Object.freeze({ id: "silence-tax", facts: Object.freeze(["portfolio.silence_tax", "portfolio.silence_tax.type"]) })
+  ]) }),
+  Object.freeze({ group: "aviation", projects: Object.freeze([
+    Object.freeze({ id: "akrobacja", facts: Object.freeze(["portfolio.akrobacja_com", "portfolio.akrobacja_com.current_status", "portfolio.akrobacja_com.type"]) }),
+    Object.freeze({ id: "filmolot", facts: Object.freeze(["portfolio.filmolot_pl", "portfolio.filmolot_pl.type"]) })
+  ]) })
+]);
+const PROJECT_IDS = Object.freeze(PROJECT_STRUCTURE.flatMap((entry) => entry.projects.map((project) => project.id)));
+const PROJECT_FACT_ORDER = Object.freeze(PROJECT_STRUCTURE.flatMap((entry) => entry.projects.flatMap((project) => project.facts)));
+const PROJECT_FACT_CONTRACT = Object.freeze([
+  Object.freeze({"id":"client.orlen","value":"ORLEN","display_pl":"ORLEN","display_en":"ORLEN","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.orlen.role","value":"CONNECT project manager","display_pl":"Kierownik projektu CONNECT","display_en":"CONNECT Project Manager","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project role, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/transformacja-zakupow/index.html","en/uslugi/transformacja-zakupow/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.orlen.platform_scope","value":"Central sourcing platform for the ORLEN Group","display_pl":"Centralna platforma sourcingowa dla Grupy ORLEN","display_en":"Central sourcing platform for the ORLEN Group","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project scope, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/transformacja-zakupow/index.html","en/uslugi/transformacja-zakupow/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.orlen.connect_scope","value":"CONNECT sourcing platform for 15 ORLEN Group entities in 4 countries with a 60-person delivery team","display_pl":"15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół","display_en":"15 ORLEN Group entities across 4 countries, 60-person team","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","uslugi/transformacja-zakupow/index.html","en/uslugi/transformacja-zakupow/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.zabka_polska","value":"Żabka Polska","display_pl":"Żabka Polska","display_en":"Żabka Polska","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.zabka.role","value":"SAP Ariba implementation-delivery responsibility","display_pl":"Realizacja wdrożenia SAP Ariba","display_en":"Delivery of the SAP Ariba implementation","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.zabka.implementation","value":"Procurement, supplier risk and sourcing functional scope","display_pl":"Zakupy, ryzyko dostawców i sourcing","display_en":"Procurement, supplier risk and sourcing","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 functional scope, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.zabka.proof","value":"SAP Ariba Buying, Supplier Risk and sourcing","display_pl":"SAP Ariba Buying, Supplier Risk i sourcing","display_en":"SAP Ariba Buying, Supplier Risk and sourcing","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 implementation proof, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.kghm","value":"KGHM","display_pl":"KGHM","display_en":"KGHM","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.kghm.role","value":"Implementation and integration delivery","display_pl":"Realizacja wdrożenia i integracji","display_en":"Implementation and integration delivery","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project role, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.kghm.scope","value":"Sourcing and external workforce management","display_pl":"Sourcing i obsługa pracowników zewnętrznych","display_en":"Sourcing and external workforce management","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project scope, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.kghm.integration","value":"SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA","display_pl":"SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA","display_en":"SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.pll_lot","value":"PLL LOT","display_pl":"PLL LOT","display_en":"PLL LOT","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.lot.implementation","value":"SAP Ariba implementation for PLL LOT","display_pl":"Wdrożenie SAP Ariba dla PLL LOT","display_en":"SAP Ariba implementation for PLL LOT","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","worker/index.js","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.motor_oil_hellas","value":"Motor Oil Hellas","display_pl":"Motor Oil Hellas","display_en":"Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.motor_oil.implementation","value":"SAP procurement implementation for Motor Oil Hellas","display_pl":"Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas","display_en":"SAP procurement implementation for Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","worker/index.js","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl transport application","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.czympojade_pl.type","value":"transport connection and timetable application","display_pl":"Aplikacja transportowa do pracy z połączeniami i rozkładami.","display_en":"Transport application for working with connections and timetables.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost.type","value":"procurement procedure cost calculator","display_pl":"Kalkulator kosztów procedur zakupowych.","display_en":"Procurement procedure cost calculator.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procurement_process_2026","value":"Procurement Process 2026 interactive model","display_pl":"Procurement Process 2026","display_en":"Procurement Process 2026","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procurement_process_2026.type","value":"interactive procurement process model","display_pl":"Interaktywny model procesu zakupowego.","display_en":"Interactive procurement process model.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax","value":"silence-tax.com calculator","display_pl":"silence-tax.com","display_en":"silence-tax.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax.type","value":"organisational silence cost calculator","display_pl":"Kalkulator kosztów milczenia w organizacji.","display_en":"Calculator for the cost of silence in an organisation.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.akrobacja_com","value":"akrobacja.com","display_pl":"akrobacja.com","display_en":"akrobacja.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.akrobacja_com.current_status","value":"active aviation venture as of 2026-08-26","display_pl":"Aktualna marka działalności lotniczej","display_en":"Current aviation venture","kind":"dated","as_of":"2026-08-26","source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.akrobacja_com.type","value":"aerobatic-flight voucher sales platform","display_pl":"Platforma sprzedaży voucherów na loty akrobacyjne.","display_en":"Voucher sales platform for aerobatic flights.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.filmolot_pl","value":"FilmoLot.pl aviation photography and video project","display_pl":"FilmoLot.pl","display_en":"FilmoLot.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.filmolot_pl.type","value":"aviation photography and video","display_pl":"Lotnictwo · fotografia i wideo","display_en":"Aviation · photography and video","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"})
+]);
+const PROJECT_PAGE_CONTRACT = Object.freeze({
+  pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
+  en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
+});
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "709bbf1bd7c34358c7bc99cf828e322196029df2636b2faf4bf332fb3decff1c", en: "db64af7316a8f23ee56079f55a35ab9971e09968a14bae9c04f9a01f9d5ed09e" });
+
+function projectExpectedPublicSurfaces() {
+  return SERVICE_PUBLIC_SURFACE_CONTRACT;
+}
+
+function verifyProjectRegistryInventory(factData, errors, { required = false } = {}) {
+  const records = Array.isArray(factData.facts) ? factData.facts : [];
+  const publicSurfaces = Array.isArray(factData.public_claim_surfaces) ? factData.public_claim_surfaces : [];
+  const contractIds = new Set(PROJECT_FACT_ORDER);
+  const ownsProjectState = records.some((record) => contractIds.has(record?.id)
+      || (Array.isArray(record?.surfaces) && record.surfaces.some((surface) => PROJECT_SURFACES.includes(surface))))
+    || publicSurfaces.some((surface) => PROJECT_SURFACES.includes(surface));
+  if (!required && !ownsProjectState) return;
+
+  const failures = [];
+  if (JSON.stringify(publicSurfaces) !== JSON.stringify(projectExpectedPublicSurfaces())) {
+    failures.push("public_claim_surfaces must equal the exact ordered Projects-aware public surface contract");
+  }
+  for (const surface of PROJECT_SURFACES) {
+    const actual = records.filter((record) => Array.isArray(record?.surfaces) && record.surfaces.includes(surface)).map((record) => record.id).sort();
+    const expected = [...PROJECT_FACT_ORDER].sort();
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) failures.push(`${surface} must authorize exactly the 31 immutable Projects facts`);
+  }
+  for (const expected of PROJECT_FACT_CONTRACT) {
+    const matches = records.filter((record) => record?.id === expected.id);
+    if (matches.length !== 1
+      || !["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "status"].every((key) => matches[0][key] === expected[key])
+      || JSON.stringify(matches[0].surfaces) !== JSON.stringify(expected.surfaces)) {
+      failures.push(`${expected.id} must retain its immutable value, localized displays, provenance, approval and exact complete surface inventory`);
+    }
+  }
+  if (failures.length > 0) error(errors, "project-registry-inventory", "content/site-facts.json", failures.join("; "));
+}
+
+async function hasCompleteProjectDocumentContext(root) {
+  const documents = await Promise.all(PROJECT_SURFACES.map(async (path) => {
+    try { return (await stat(resolve(root, path))).isFile(); } catch { return false; }
+  }));
+  return documents.every(Boolean);
+}
+
+function verifyProjectSchema(path, parsedRoot, lang, errors) {
+  const contract = PROJECT_PAGE_CONTRACT[lang];
+  const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
+  let actual = null;
+  try { actual = scripts.length === 1 ? JSON.parse(rawElementText(scripts[0])) : null; } catch { actual = null; }
+  const names = PROJECT_STRUCTURE.flatMap((group) => group.projects.map((project) => {
+    const fact = PROJECT_FACT_CONTRACT.find((record) => record.id === project.facts[0]);
+    return fact[lang === "pl" ? "display_pl" : "display_en"];
+  }));
+  const expected = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: contract.title,
+    url: contract.url,
+    description: contract.lead,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: PROJECT_IDS.map((id, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: names[index],
+        url: `${contract.url}#${id}`
+      }))
+    }
+  };
+  if (!sameJsonContract(actual, expected)) error(errors, "project-schema", path, "requires one exact bounded CollectionPage with a 12-item name, position and local-fragment ItemList only");
+}
+
+function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
+  const elements = elementDescendants(parsedRoot);
+  const forbidden = new Set(["audio", "base", "embed", "form", "iframe", "img", "object", "picture", "source", "style", "video"]);
+  const eventOrStyle = elements.some((element) => element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)));
+  const scripts = elements.filter((element) => element.name === "script");
+  const validScripts = scripts.length === 2
+    && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+  const invalidAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
+    const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
+  });
+  if (elements.some((element) => forbidden.has(element.name)) || eventOrStyle || !validScripts || invalidAnchors.length > 0) {
+    error(errors, "project-resource-census", path, "forbids images, external project links, embeds, inline styles or executable drift and allows only the exact schema, shell resources and contextual mail CTA");
+  }
+}
+
+function verifyProjectClaimBoundary(path, parsedRoot, errors) {
+  const corpus = normalizeExactHtmlLiteral(documentNodeDescendants(parsedRoot).map((node) => {
+    if (node.type === "text" || node.type === "comment") return node.value;
+    if (node.type !== "element") return "";
+    return `${node.name} ${[...node.attributes].map(([name, value]) => `${name} ${value ?? ""}`).join(" ")}`;
+  }).join(" ")).replace(/[^\p{L}\p{N}+#]+/gu, " ").trim();
+  const compact = normalizeExactHtmlLiteral(documentNodeDescendants(parsedRoot)
+    .filter((node) => node.type === "text" || node.type === "comment")
+    .map((node) => node.value)
+    .join(""))
+    .replace(/[^\p{L}\p{N}+#]+/gu, "");
+  const forbidden = [
+    /warsaw\s*flight\s*safety/i, /polpharma/i, /\bmol\b/i,
+    /12\s*(?:823|800)\+?/, /220\s*000/, /\b90\+/, /#1/,
+    /largest|leading|największ|wiodąc|flag\s+carrier|narodow\w*\s+przewoźnik/i,
+    /barrels?\s*(?:per|\/)\s*day|barył\w*\s*(?:dziennie|\/)/i,
+    /market\s*leader|lider\w*\s+rynku/i,
+    /guaranteed|gwarantowan|comprehensive|kompleksow|not\s+just|nie\s+tylko/i
+  ];
+  if (forbidden.some((pattern) => pattern.test(corpus)) || /warsawflightsafety|polpharma/i.test(compact)) {
+    error(errors, "project-claim-boundary", path, "forbids retired brands, blocked clients, review-only numbers, rankings, organization facts, inferred outcomes/status and AI-tell sales copy across active and inactive source");
+  }
+}
+
+function verifyProjectPage(path, parsedRoot, lang, factData, errors) {
+  const contract = PROJECT_PAGE_CONTRACT[lang];
+  const all = elementDescendants(parsedRoot);
+  const body = htmlBodyRoot(parsedRoot);
+  const main = all.find((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  if (elementAttribute(body, "data-page") !== "projects") error(errors, "project-shell", path, 'body must use data-page="projects"');
+  const h1s = all.filter((element) => element.name === "h1" && pageElementIsActive(element));
+  if (h1s.length !== 1 || publishedStaticText(h1s[0]) !== normalizeExactLiteral(contract.title)) error(errors, "project-h1", path, "requires the exact localized Projects H1");
+  const leads = all.filter((element) => elementHasClass(element, "page-lead") && pageElementIsActive(element));
+  if (leads.length !== 1 || publishedStaticText(leads[0]) !== normalizeExactLiteral(contract.lead)) error(errors, "project-lead", path, "requires the exact evidence-policy lead");
+
+  const sections = all.filter((element) => element.attributes.has("data-section"));
+  const directGroups = directElementChildren(main, "section");
+  const groupIds = sections.map((section) => elementAttribute(section, "data-section"));
+  if (JSON.stringify(groupIds) !== JSON.stringify(PROJECT_GROUP_ORDER)
+    || directGroups.length !== 3
+    || !directGroups.every((section, index) => section === sections[index] && elementAttribute(section, "id") === PROJECT_GROUP_ORDER[index] && pageElementIsActive(section))) {
+    error(errors, "project-groups", path, "requires exactly three direct visible advisory, applications and aviation groups in order");
+  }
+
+  const projectNodes = all.filter((element) => element.attributes.has("data-project-id"));
+  const projectIds = projectNodes.map((element) => elementAttribute(element, "data-project-id"));
+  let evidenceValid = JSON.stringify(projectIds) === JSON.stringify(PROJECT_IDS);
+  const byFact = new Map(PROJECT_FACT_CONTRACT.map((record) => [record.id, record]));
+  for (const group of PROJECT_STRUCTURE) {
+    const section = sections.find((element) => elementAttribute(element, "data-section") === group.group);
+    const groupProjects = section ? elementDescendants(section).filter((element) => element.attributes.has("data-project-id")) : [];
+    if (JSON.stringify(groupProjects.map((element) => elementAttribute(element, "data-project-id"))) !== JSON.stringify(group.projects.map((project) => project.id))) evidenceValid = false;
+    group.projects.forEach((expectedProject, index) => {
+      const project = groupProjects[index];
+      const facts = project ? elementDescendants(project).filter((element) => element.attributes.has("data-fact-id")) : [];
+      if (JSON.stringify(facts.map((element) => elementAttribute(element, "data-fact-id"))) !== JSON.stringify(expectedProject.facts)) evidenceValid = false;
+      facts.forEach((node, factIndex) => {
+        const expected = byFact.get(expectedProject.facts[factIndex]);
+        if (!expected || !pageElementIsActive(node) || publishedStaticText(node) !== normalizeExactLiteral(expected[lang === "pl" ? "display_pl" : "display_en"])) evidenceValid = false;
+      });
+    });
+  }
+  const factIds = projectNodes.flatMap((project) => elementDescendants(project).filter((element) => element.attributes.has("data-fact-id")).map((element) => elementAttribute(element, "data-fact-id")));
+  if (!evidenceValid || JSON.stringify(factIds) !== JSON.stringify(PROJECT_FACT_ORDER)) error(errors, "project-evidence", path, "requires the exact 12-project and 31-fact immutable bilingual evidence order");
+
+  const times = all.filter((element) => element.name === "time");
+  const statusNodes = all.filter((element) => elementAttribute(element, "data-fact-id") === "portfolio.akrobacja_com.current_status");
+  const akrobacja = projectNodes.find((element) => elementAttribute(element, "data-project-id") === "akrobacja");
+  if (times.length !== 1 || statusNodes.length !== 1 || !elementIsWithin(times[0], akrobacja) || !elementIsWithin(statusNodes[0], akrobacja)
+    || elementAttribute(times[0], "datetime") !== "2026-08-26" || publishedStaticText(times[0]) !== "2026-08-26") {
+    error(errors, "project-status", path, "allows only the exact dated Akrobacja current-status line as of 2026-08-26");
+  }
+
+  const index = all.find((element) => element.name === "nav" && elementHasClass(element, "projects-index"));
+  const indexHrefs = index ? directElementChildren(index, "a").map((anchor) => elementAttribute(anchor, "href")) : [];
+  if (JSON.stringify(indexHrefs) !== JSON.stringify(PROJECT_GROUP_ORDER.map((id) => `#${id}`))) error(errors, "project-index", path, "requires one no-JS three-anchor group index");
+
+  const controls = all.filter((element) => (element.name === "a" || element.name === "button")
+    && (elementHasClass(element, "btn-primary") || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
+  if (controls.length !== 1 || controls[0].name !== "a" || elementAttribute(controls[0], "href") !== contract.ctaHref || publishedStaticText(controls[0]) !== normalizeExactLiteral(contract.ctaLabel)) {
+    error(errors, "project-controls", path, "requires one exact contextual mail CTA and no extra conversion control");
+  }
+
+  const current = all.filter((element) => element.name === "a" && elementAttribute(element, "aria-current") === "page");
+  const expectedCurrent = lang === "pl" ? "/case-studies/" : "/en/case-studies/";
+  if (current.length !== 1 || elementAttribute(current[0], "href") !== expectedCurrent) error(errors, "project-shell", path, "requires Projects as the single current localized navigation route");
+  verifyProjectSchema(path, parsedRoot, lang, errors);
+  verifyProjectResourceCensus(path, parsedRoot, contract, errors);
+  verifyProjectClaimBoundary(path, parsedRoot, errors);
+  const digest = serviceDocumentDigest(parsedRoot);
+  if (digest !== PROJECT_DOCUMENT_MANIFEST[lang]) error(errors, "project-document-manifest", path, `requires the exact full Projects document manifest; actual ${digest}`);
+  return { projectIds, factIds };
+}
+
+function verifyProjectParity(pl, en, errors) {
+  if (JSON.stringify(pl) !== JSON.stringify(en)) error(errors, "project-parity", "projects", "PL and EN must expose identical ordered project and fact IDs");
+}
+
 const SERVICE_SECTION_ORDER = Object.freeze(["problem", "fit", "scope", "method", "evidence", "contact"]);
 const SERVICE_SURFACES = Object.freeze({
   transformation: Object.freeze(["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html"]),
@@ -5314,6 +5560,8 @@ const SERVICE_PUBLIC_SURFACE_CONTRACT = Object.freeze([
   "en/aplikacje-operacyjne/index.html",
   "lotnictwo/index.html",
   "en/lotnictwo/index.html",
+  "case-studies/index.html",
+  "en/case-studies/index.html",
   ...SERVICE_SURFACE_LIST,
   "llms.txt",
   "llms-full.txt",
@@ -5411,18 +5659,18 @@ const SERVICE_FACT_CONTRACT = Object.freeze([
   ["career.pwc.organization", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
   ["career.pwc.title", "Associate Director, Advisory / Procurement Expert", "Wicedyrektor w Advisory / Procurement Expert", "Associate Director, Advisory / Procurement Expert", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
   ["career.pwc.responsibility", "Work with the CAPP methodology", "Pracowałem z metodyką CAPP (Complete & Agile Procurement).", "I worked with the CAPP (Complete & Agile Procurement) methodology.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["project.orlen.role", "CONNECT project manager", "Kierownik projektu CONNECT", "CONNECT Project Manager", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["project.orlen.platform_scope", "Central sourcing platform for the ORLEN Group", "Centralna platforma sourcingowa dla Grupy ORLEN", "Central sourcing platform for the ORLEN Group", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["project.orlen.connect_scope", "CONNECT sourcing platform for 15 ORLEN Group entities in 4 countries with a 60-person delivery team", "15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół", "15 ORLEN Group entities across 4 countries, 60-person team", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.transformation]],
+  ["project.orlen.role", "CONNECT project manager", "Kierownik projektu CONNECT", "CONNECT Project Manager", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation, ...PROJECT_SURFACES]],
+  ["project.orlen.platform_scope", "Central sourcing platform for the ORLEN Group", "Centralna platforma sourcingowa dla Grupy ORLEN", "Central sourcing platform for the ORLEN Group", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation, ...PROJECT_SURFACES]],
+  ["project.orlen.connect_scope", "CONNECT sourcing platform for 15 ORLEN Group entities in 4 countries with a 60-person delivery team", "15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół", "15 ORLEN Group entities across 4 countries, 60-person team", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.transformation, ...PROJECT_SURFACES]],
   ["hero.implementations", "20+ SAP Ariba implementations", "20+", "20+", "Owner confirmation, 2026-08-25: 20+ SAP Ariba implementations", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba]],
-  ["project.kghm.role", "Implementation and integration delivery", "Realizacja wdrożenia i integracji", "Implementation and integration delivery", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
-  ["project.kghm.scope", "Sourcing and external workforce management", "Sourcing i obsługa pracowników zewnętrznych", "Sourcing and external workforce management", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
-  ["project.kghm.integration", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba]],
-  ["project.zabka.role", "SAP Ariba implementation-delivery responsibility", "Realizacja wdrożenia SAP Ariba", "Delivery of the SAP Ariba implementation", "Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
-  ["project.zabka.implementation", "Procurement, supplier risk and sourcing functional scope", "Zakupy, ryzyko dostawców i sourcing", "Procurement, supplier risk and sourcing", "Owner-confirmed pre-Task-5 functional scope, 2026-08-26", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba]],
-  ["project.zabka.proof", "SAP Ariba Buying, Supplier Risk and sourcing", "SAP Ariba Buying, Supplier Risk i sourcing", "SAP Ariba Buying, Supplier Risk and sourcing", "Owner-confirmed pre-Task-5 implementation proof, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
-  ["project.lot.implementation", "SAP Ariba implementation for PLL LOT", "Wdrożenie SAP Ariba dla PLL LOT", "SAP Ariba implementation for PLL LOT", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba]],
-  ["project.motor_oil.implementation", "SAP procurement implementation for Motor Oil Hellas", "Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas", "SAP procurement implementation for Motor Oil Hellas", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba]],
+  ["project.kghm.role", "Implementation and integration delivery", "Realizacja wdrożenia i integracji", "Implementation and integration delivery", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.kghm.scope", "Sourcing and external workforce management", "Sourcing i obsługa pracowników zewnętrznych", "Sourcing and external workforce management", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.kghm.integration", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.zabka.role", "SAP Ariba implementation-delivery responsibility", "Realizacja wdrożenia SAP Ariba", "Delivery of the SAP Ariba implementation", "Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.zabka.implementation", "Procurement, supplier risk and sourcing functional scope", "Zakupy, ryzyko dostawców i sourcing", "Procurement, supplier risk and sourcing", "Owner-confirmed pre-Task-5 functional scope, 2026-08-26", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.zabka.proof", "SAP Ariba Buying, Supplier Risk and sourcing", "SAP Ariba Buying, Supplier Risk i sourcing", "SAP Ariba Buying, Supplier Risk and sourcing", "Owner-confirmed pre-Task-5 implementation proof, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.lot.implementation", "SAP Ariba implementation for PLL LOT", "Wdrożenie SAP Ariba dla PLL LOT", "SAP Ariba implementation for PLL LOT", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.motor_oil.implementation", "SAP procurement implementation for Motor Oil Hellas", "Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas", "SAP procurement implementation for Motor Oil Hellas", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
   ["career.pkp_plk.organization", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
   ["career.pkp_plk.dates", "June 2013 to September 2015", "06.2013 – 09.2015", "06.2013 – 09.2015", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
   ["career.pkp_plk.title", "Board Advisor", "Doradca Zarządu", "Board Advisor", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
@@ -5783,6 +6031,7 @@ async function verifyArtifacts(_factData, context) {
 async function verifyPages(factData, family, context) {
   const selectedPairs = ROUTE_PAIRS.filter((pair) => family === "all" || pair[4] === family);
   if (family === "services" || family === "all") verifyServiceRegistryInventory(factData, context.errors, { required: true });
+  if (family === "projects" || family === "all") verifyProjectRegistryInventory(factData, context.errors, { required: true });
   for (const [plFile, enFile, plRoute, enRoute, routeFamily] of selectedPairs) {
     const pl = await readRequired(context, plFile, "route-file");
     const en = await readRequired(context, enFile, "route-file");
@@ -5807,6 +6056,11 @@ async function verifyPages(factData, family, context) {
       const plEvidence = verifyServicePage(plFile, plRoot, "pl", factData, context.errors);
       const enEvidence = verifyServicePage(enFile, enRoot, "en", factData, context.errors);
       verifyServiceParity(plEvidence, enEvidence, context.errors);
+    }
+    if (routeFamily === "projects") {
+      const plEvidence = verifyProjectPage(plFile, plRoot, "pl", factData, context.errors);
+      const enEvidence = verifyProjectPage(enFile, enRoot, "en", factData, context.errors);
+      verifyProjectParity(plEvidence, enEvidence, context.errors);
     }
     await verifyLocalLinks(plFile, plRoot, family, context);
     await verifyLocalLinks(enFile, enRoot, family, context);
@@ -5896,7 +6150,9 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   const facts = await readFacts({ root, onError: (id, path, message) => error(errors, id, path, message) });
   if (scope === "facts" || scope === "all") {
     const completeServiceContext = await hasCompleteServiceDocumentContext(root);
+    const completeProjectContext = await hasCompleteProjectDocumentContext(root);
     verifyServiceRegistryInventory(facts, errors, { required: completeServiceContext });
+    verifyProjectRegistryInventory(facts, errors, { required: completeProjectContext });
     const publicSurfaces = verifyPublicSurfaceInventory(facts, errors);
     const factIds = verifyFactSchema(facts, publicSurfaces, errors);
     verifyBlockedSchema(facts, factIds, errors);
