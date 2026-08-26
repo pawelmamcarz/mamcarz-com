@@ -715,6 +715,55 @@ test("Plan 1 broad review round 2 facts scan fails closed on malformed JS", asyn
   );
 });
 
+const defaultIgnorableQuantitativeSeparators = [
+  ["U+200B zero-width space", "\u200B"],
+  ["U+2060 word joiner", "\u2060"],
+  ["U+FEFF zero-width no-break space", "\uFEFF"]
+];
+
+for (const [label, separator] of defaultIgnorableQuantitativeSeparators) {
+  test(`Plan 1 broad review round 3 rejects an unsupported EUR assertion split by ${label}`, async () => {
+    const root = await productionRegistryFixture({
+      llmsFull: productionFactSurfaceControls.llmsFull.replace(
+        "Neutral context after the controlled claims.",
+        `This means at least EUR 500${separator}M.\nNeutral context after the controlled claims.`
+      )
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith("ERROR fact-surface-unapproved-unit llms-full.txt:")),
+      result.errors.join("\n")
+    );
+  });
+}
+
+const defaultIgnorableRetiredNameSeparators = [
+  ["U+200B zero-width space", "\u200B"],
+  ["U+200C zero-width non-joiner", "\u200C"]
+];
+
+for (const [label, separator] of defaultIgnorableRetiredNameSeparators) {
+  test(`Plan 1 broad review round 3 rejects a retired JS literal split by ${label}`, async () => {
+    const root = await productionRegistryFixture({
+      js: `${validBrowserScript}\nconst formerName = "WarsawFlight${separator}Safety";`
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status assets/js/main.js:")),
+      result.errors.join("\n")
+    );
+  });
+}
+
+test("Plan 1 broad review round 3 permits default-ignorable characters in unrelated public copy", async () => {
+  const root = await productionRegistryFixture({
+    llmsFull: productionFactSurfaceControls.llmsFull.replace("Neutral context before", "Neutral\u200B context before"),
+    js: `${validBrowserScript}\nconst safeName = "WarsawFlight\u200BSafely";`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.deepEqual(result.errors, []);
+});
+
 test("missing fixture files report standardized file-read errors", async () => {
   const root = await fixture();
   const missingRoot = resolve(root, "missing");

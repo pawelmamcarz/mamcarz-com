@@ -45,6 +45,7 @@ function isHttpUrl(value) {
 function normalize(text) {
   return text
     .normalize("NFKC")
+    .replace(/\p{Default_Ignorable_Code_Point}+/gu, "")
     .replace(/\u00a0/g, " ")
     .replace(/\s+/g, " ")
     .trim()
