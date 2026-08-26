@@ -20,6 +20,20 @@ const aviationProductHtml = {
   pl: await readFile(resolve("lotnictwo/index.html"), "utf8"),
   en: await readFile(resolve("en/lotnictwo/index.html"), "utf8")
 };
+const serviceProductHtml = Object.freeze({
+  transformation: Object.freeze({
+    pl: await readFile(resolve("uslugi/transformacja-zakupow/index.html"), "utf8"),
+    en: await readFile(resolve("en/uslugi/transformacja-zakupow/index.html"), "utf8")
+  }),
+  ariba: Object.freeze({
+    pl: await readFile(resolve("uslugi/wdrozenie-sap-ariba/index.html"), "utf8"),
+    en: await readFile(resolve("en/uslugi/wdrozenie-sap-ariba/index.html"), "utf8")
+  }),
+  publicProcurement: Object.freeze({
+    pl: await readFile(resolve("uslugi/doradztwo-zamowienia-publiczne/index.html"), "utf8"),
+    en: await readFile(resolve("en/uslugi/doradztwo-zamowienia-publiczne/index.html"), "utf8")
+  })
+});
 const publicClaimSurfaceFixture = [
   "index.html",
   "en/index.html",
@@ -118,12 +132,19 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
 
 function pagePairFiles(pair, overrides = {}) {
   const [plFile, enFile, plRoute, enRoute, family] = pair;
+  const serviceKey = plFile.includes("transformacja-zakupow")
+    ? "transformation"
+    : plFile.includes("wdrozenie-sap-ariba")
+      ? "ariba"
+      : "publicProcurement";
   const defaultPl = family === "applications"
     ? applicationPageFixture("pl")
     : family === "aviation"
       ? aviationProductHtml.pl
     : family === "knowledge"
       ? knowledgePageFixture("pl")
+    : family === "services"
+      ? serviceProductHtml[serviceKey].pl
     : pageShellFixture({ lang: "pl", plRoute, enRoute, title: "Strona" });
   const defaultEn = family === "applications"
     ? applicationPageFixture("en")
@@ -131,6 +152,8 @@ function pagePairFiles(pair, overrides = {}) {
       ? aviationProductHtml.en
     : family === "knowledge"
       ? knowledgePageFixture("en")
+    : family === "services"
+      ? serviceProductHtml[serviceKey].en
     : pageShellFixture({ lang: "en", plRoute, enRoute, title: "Page" });
   return {
     [plFile]: overrides.pl ?? defaultPl,
@@ -466,6 +489,30 @@ const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "application
 const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "projects");
 const aviationPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
 const knowledgePair = plan2RoutePairs.find((pair) => pair[4] === "knowledge");
+const servicePairs = plan2RoutePairs.filter((pair) => pair[4] === "services");
+
+function servicePairKey(pair) {
+  return pair[0].includes("transformacja-zakupow")
+    ? "transformation"
+    : pair[0].includes("wdrozenie-sap-ariba")
+      ? "ariba"
+      : "publicProcurement";
+}
+
+async function servicePageMutation({ key = "transformation", lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts } = {}) {
+  const factData = await readFacts();
+  const facts = mutateFacts(structuredClone(factData.facts));
+  const files = Object.assign({}, ...servicePairs.map((pair) => {
+    const pairKey = servicePairKey(pair);
+    const pairHtml = serviceProductHtml[pairKey];
+    return pagePairFiles(pair, {
+      pl: pairKey === key && lang === "pl" ? mutate(pairHtml.pl) : pairHtml.pl,
+      en: pairKey === key && lang === "en" ? mutate(pairHtml.en) : pairHtml.en
+    });
+  }));
+  const root = await pageArchitectureFixture({ files, facts });
+  return runVerification({ root, scope: "pages", family: "services" });
+}
 
 const knowledgeContract = Object.freeze({
   pl: Object.freeze({
@@ -2677,6 +2724,42 @@ test("Plan 2 Task 2 accepts a complete mirrored application contract", async () 
   const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
   const result = await runVerification({ root, scope: "pages", family: "applications" });
   assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 5 accepts the exact six-page advisory dossier contract", async () => {
+  const result = await servicePageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 5 rejects section, evidence, CTA, resource, schema and hidden-claim drift", async () => {
+  const cases = [
+    ["section order", "transformation", "pl", "service-sections", (html) => html.replace('data-section="problem"', 'data-section="scope"')],
+    ["evidence order", "transformation", "en", "service-evidence", (html) => html.replace("career.pzu.organization", "career.pwc.organization")],
+    ["second conversion", "ariba", "pl", "service-controls", (html) => html.replace("</main>", '<a class="btn-primary" href="mailto:fake@example.com">Drugi kontakt</a></main>')],
+    ["external image", "ariba", "en", "service-resource-census", (html) => html.replace("</main>", '<img src="https://example.com/fake.jpg" alt="KGHM"></main>')],
+    ["inline style", "publicProcurement", "pl", "service-resource-census", (html) => html.replace("<h1", '<h1 style="display:block"')],
+    ["schema offer", "publicProcurement", "en", "service-schema", (html) => html.replace('"provider": {', '"offers": {}, "provider": {')],
+    ["entity hidden unsupported client", "transformation", "pl", "service-claim-boundary", (html) => html.replace("</footer>", '<template>P&#111;lpharma</template></footer>')],
+    ["comment old annual portfolio", "transformation", "en", "service-claim-boundary", (html) => html.replace("</footer>", '<!-- PLN 500M per year --></footer>')]
+  ];
+  for (const [label, key, lang, expectedId, mutate] of cases) {
+    const result = await servicePageMutation({ key, lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 5 rejects coordinated page and mutable-registry fact drift", async () => {
+  const approved = "PZU S.A.";
+  const fabricated = "Invented Client S.A.";
+  const result = await servicePageMutation({
+    key: "transformation",
+    lang: "pl",
+    mutate: (html) => html.replace(approved, fabricated),
+    mutateFacts: (facts) => facts.map((record) => record.id === "career.pzu.organization"
+      ? { ...record, value: fabricated, display_pl: fabricated, display_en: fabricated }
+      : record)
+  });
+  assert.ok(errorIds(result).includes("service-fact-contract"), result.errors.join("\n"));
 });
 
 test("readFacts reads fixtures without starting CLI verification", async () => {

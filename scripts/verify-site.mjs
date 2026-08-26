@@ -5302,6 +5302,286 @@ function verifyKnowledgePage(path, parsedRoot, lang, errors) {
   verifyKnowledgeBoundary(path, parsedRoot, errors);
 }
 
+const SERVICE_SECTION_ORDER = Object.freeze(["problem", "fit", "scope", "method", "evidence", "contact"]);
+const SERVICE_SURFACES = Object.freeze({
+  transformation: Object.freeze(["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html"]),
+  ariba: Object.freeze(["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html"]),
+  publicProcurement: Object.freeze(["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html"])
+});
+
+const SERVICE_CONTRACTS = Object.freeze({
+  transformation: Object.freeze({
+    files: SERVICE_SURFACES.transformation,
+    facts: Object.freeze([
+      "career.pzu.organization", "career.pzu.title", "career.pzu.responsibility",
+      "career.pwc.organization", "career.pwc.title", "career.pwc.responsibility",
+      "project.orlen.role", "project.orlen.platform_scope", "project.orlen.connect_scope"
+    ]),
+    pl: Object.freeze({
+      title: "Transformacja zakupów",
+      lead: "Porządkuję model operacyjny zakupów: decyzje, role, procesy, dane i technologię. Efektem pracy jest uzgodniony projekt zmiany, który można wdrożyć i rozliczać.",
+      description: "Projekt modelu operacyjnego zakupów obejmujący decyzje, role, procesy, dane i technologię.",
+      url: "https://mamcarz.com/uslugi/transformacja-zakupow/",
+      sectionTitles: Object.freeze(["Model operacyjny przed narzędziem.", "Jasna decyzja po obu stronach.", "Rejestr projektowanej zmiany.", "Cztery zamknięcia decyzyjne.", "Doświadczenie zapisane faktami.", "Ustalmy projekt zmiany."]),
+      method: Object.freeze(["Diagnoza", "Projekt", "Sekwencja", "Governance"]),
+      ctaHref: "mailto:pawel@mamcarz.com?subject=Transformacja%20zakup%C3%B3w",
+      ctaLabel: "Porozmawiaj o transformacji zakupów"
+    }),
+    en: Object.freeze({
+      title: "Procurement transformation",
+      lead: "I structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.",
+      description: "Procurement operating-model design across decisions, roles, processes, data and technology.",
+      url: "https://mamcarz.com/en/uslugi/transformacja-zakupow/",
+      sectionTitles: Object.freeze(["Operating model before tooling.", "A clear decision on both sides.", "Change-design register.", "Four decision closures.", "Experience recorded as facts.", "Define the change project."]),
+      method: Object.freeze(["Diagnosis", "Design", "Sequence", "Governance"]),
+      ctaHref: "mailto:pawel@mamcarz.com?subject=Procurement%20transformation",
+      ctaLabel: "Discuss procurement transformation"
+    })
+  }),
+  ariba: Object.freeze({
+    files: SERVICE_SURFACES.ariba,
+    facts: Object.freeze([
+      "hero.implementations", "project.kghm.role", "project.kghm.scope", "project.kghm.integration",
+      "project.zabka.role", "project.zabka.implementation", "project.zabka.proof",
+      "project.lot.implementation", "project.motor_oil.implementation"
+    ]),
+    pl: Object.freeze({
+      title: "Wdrożenie SAP Ariba",
+      lead: "Prowadzę wdrożenia SAP Ariba od decyzji procesowych i danych po konfigurację, integrację, testy i uruchomienie. Zakres wynika z realnego modelu zakupowego, a nie z listy funkcji systemu.",
+      description: "Prowadzenie wdrożenia SAP Ariba od decyzji procesowych i danych po integrację, testy i uruchomienie.",
+      url: "https://mamcarz.com/uslugi/wdrozenie-sap-ariba/",
+      sectionTitles: Object.freeze(["Proces wyznacza konfigurację.", "Wdrożenie potrzebuje właścicieli decyzji.", "Rejestr zakresu rozwiązania.", "Od decyzji do uruchomienia.", "Zakresy potwierdzone faktami.", "Ustalmy zakres wdrożenia."]),
+      method: Object.freeze(["Decyzje procesowe", "Dane i integracja", "Testy", "Uruchomienie"]),
+      ctaHref: "mailto:pawel@mamcarz.com?subject=Wdro%C5%BCenie%20SAP%20Ariba",
+      ctaLabel: "Porozmawiaj o wdrożeniu SAP Ariba"
+    }),
+    en: Object.freeze({
+      title: "SAP Ariba implementation",
+      lead: "I lead SAP Ariba implementations from process and data decisions through configuration, integration, testing and launch. The scope follows the real procurement operating model, not a feature checklist.",
+      description: "SAP Ariba implementation leadership from process and data decisions through integration, testing and launch.",
+      url: "https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba/",
+      sectionTitles: Object.freeze(["Process determines configuration.", "Implementation needs decision owners.", "Solution scope register.", "From decisions to launch.", "Scopes confirmed by facts.", "Define the implementation scope."]),
+      method: Object.freeze(["Process decisions", "Data and integration", "Testing", "Launch"]),
+      ctaHref: "mailto:pawel@mamcarz.com?subject=SAP%20Ariba%20implementation",
+      ctaLabel: "Discuss an SAP Ariba implementation"
+    })
+  }),
+  publicProcurement: Object.freeze({
+    files: SERVICE_SURFACES.publicProcurement,
+    facts: Object.freeze(["career.pkp_plk.organization", "career.pkp_plk.dates", "career.pkp_plk.title", "career.pkp_plk.responsibility"]),
+    pl: Object.freeze({
+      title: "Doradztwo w zamówieniach publicznych",
+      lead: "Pomagam uporządkować strategię postępowania, odpowiedzialności, dokumenty i decyzje w projektach objętych zamówieniami publicznymi. Pracuję na styku zakupów, technologii i zarządzania projektem, z wyraźną granicą odpowiedzialności prawnej.",
+      description: "Porządkowanie strategii postępowania, odpowiedzialności, dokumentów i decyzji w projektach zamówień publicznych.",
+      url: "https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne/",
+      sectionTitles: Object.freeze(["Decyzje przed dokumentami.", "Granica odpowiedzialności jest częścią zakresu.", "Rejestr pracy doradczej.", "Porządek postępowania.", "Doświadczenie zawodowe.", "Ustalmy zakres doradztwa."]),
+      method: Object.freeze(["Strategia", "Role", "Dokumenty robocze", "Governance"]),
+      ctaHref: "mailto:pawel@mamcarz.com?subject=Zam%C3%B3wienia%20publiczne",
+      ctaLabel: "Porozmawiaj o zamówieniach publicznych"
+    }),
+    en: Object.freeze({
+      title: "Public procurement advisory",
+      lead: "I help structure procedure strategy, responsibilities, documents and decisions in public procurement projects. I work across procurement, technology and project governance, with a clear boundary around legal responsibility.",
+      description: "Structuring procedure strategy, responsibilities, documents and decisions in public procurement projects.",
+      url: "https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne/",
+      sectionTitles: Object.freeze(["Decisions before documents.", "The responsibility boundary is part of scope.", "Advisory work register.", "Procedure working order.", "Professional experience.", "Define the advisory scope."]),
+      method: Object.freeze(["Strategy", "Roles", "Working documents", "Governance"]),
+      ctaHref: "mailto:pawel@mamcarz.com?subject=Public%20procurement%20advisory",
+      ctaLabel: "Discuss public procurement advisory"
+    })
+  })
+});
+
+const SERVICE_FACT_CONTRACT = Object.freeze([
+  ["career.pzu.organization", "PZU S.A.", "PZU S.A.", "PZU S.A.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["career.pzu.title", "Strategic Project Director", "Dyrektor Projektu Strategicznego", "Strategic Project Director", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["career.pzu.responsibility", "Procurement transformation from spend analysis to target operating model", "Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["career.pwc.organization", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["career.pwc.title", "Associate Director, Advisory / Procurement Expert", "Wicedyrektor w Advisory / Procurement Expert", "Associate Director, Advisory / Procurement Expert", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["career.pwc.responsibility", "Work with the CAPP methodology", "Pracowałem z metodyką CAPP (Complete & Agile Procurement).", "I worked with the CAPP (Complete & Agile Procurement) methodology.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["project.orlen.role", "CONNECT project manager", "Kierownik projektu CONNECT", "CONNECT Project Manager", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["project.orlen.platform_scope", "Central sourcing platform for the ORLEN Group", "Centralna platforma sourcingowa dla Grupy ORLEN", "Central sourcing platform for the ORLEN Group", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["project.orlen.connect_scope", "CONNECT sourcing platform for 15 ORLEN Group entities in 4 countries with a 60-person delivery team", "15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół", "15 ORLEN Group entities across 4 countries, 60-person team", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.transformation]],
+  ["hero.implementations", "20+ SAP Ariba implementations", "20+", "20+", "Owner confirmation, 2026-08-25: 20+ SAP Ariba implementations", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba]],
+  ["project.kghm.role", "Implementation and integration delivery", "Realizacja wdrożenia i integracji", "Implementation and integration delivery", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
+  ["project.kghm.scope", "Sourcing and external workforce management", "Sourcing i obsługa pracowników zewnętrznych", "Sourcing and external workforce management", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
+  ["project.kghm.integration", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba]],
+  ["project.zabka.role", "SAP Ariba implementation-delivery responsibility", "Realizacja wdrożenia SAP Ariba", "Delivery of the SAP Ariba implementation", "Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
+  ["project.zabka.implementation", "Procurement, supplier risk and sourcing functional scope", "Zakupy, ryzyko dostawców i sourcing", "Procurement, supplier risk and sourcing", "Owner-confirmed pre-Task-5 functional scope, 2026-08-26", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba]],
+  ["project.zabka.proof", "SAP Ariba Buying, Supplier Risk and sourcing", "SAP Ariba Buying, Supplier Risk i sourcing", "SAP Ariba Buying, Supplier Risk and sourcing", "Owner-confirmed pre-Task-5 implementation proof, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba]],
+  ["project.lot.implementation", "SAP Ariba implementation for PLL LOT", "Wdrożenie SAP Ariba dla PLL LOT", "SAP Ariba implementation for PLL LOT", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba]],
+  ["project.motor_oil.implementation", "SAP procurement implementation for Motor Oil Hellas", "Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas", "SAP procurement implementation for Motor Oil Hellas", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt", "worker/index.js", ...SERVICE_SURFACES.ariba]],
+  ["career.pkp_plk.organization", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
+  ["career.pkp_plk.dates", "June 2013 to September 2015", "06.2013 – 09.2015", "06.2013 – 09.2015", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
+  ["career.pkp_plk.title", "Board Advisor", "Doradca Zarządu", "Board Advisor", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
+  ["career.pkp_plk.responsibility", "SAP AG framework agreement negotiation for the PKP Group", "Negocjowałem umowę ramową z SAP AG dla grupy PKP.", "I negotiated an SAP AG framework agreement for the PKP Group.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]]
+].map(([id, value, display_pl, display_en, source_label, surfaces]) => Object.freeze({ id, value, display_pl, display_en, kind: "constant", as_of: null, source_type: "owner_verified", source_label, source_url: null, surfaces: Object.freeze(surfaces), status: "approved" })));
+
+const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
+  transformation: Object.freeze({ pl: "82b2912f18ff5358172be88b20c4f18535f35a7fe074d651d5817327b7da0f4f", en: "c8cc4b2b57ba437248dd2ad3d641de4a20230da4e82fad73f04b37296835704f" }),
+  ariba: Object.freeze({ pl: "PENDING", en: "PENDING" }),
+  publicProcurement: Object.freeze({ pl: "PENDING", en: "PENDING" })
+});
+
+function serviceKeyForPath(path) {
+  if (path.includes("transformacja-zakupow")) return "transformation";
+  if (path.includes("wdrozenie-sap-ariba")) return "ariba";
+  return "publicProcurement";
+}
+
+function serviceDocumentDigest(parsedRoot) {
+  const records = documentNodeDescendants(parsedRoot).map((node) => {
+    if (node.type === "text") return ["text", node.value];
+    if (node.type === "comment") return ["comment", node.value];
+    if (node.type !== "element") return [node.type];
+    return ["element", node.name, node.attributes.sourceAttributeCount ?? node.attributes.size, [...node.attributes].map(([name, value]) => [name, value ?? null])];
+  });
+  return createHash("sha256").update(JSON.stringify(records)).digest("hex");
+}
+
+function verifyServiceFactContract(path, factData, requiredIds, errors) {
+  const records = Array.isArray(factData.facts) ? factData.facts : [];
+  const byId = new Map(records.map((record) => [record.id, record]));
+  const required = new Set(requiredIds);
+  const valid = SERVICE_FACT_CONTRACT.filter((expected) => required.has(expected.id)).every((expected) => {
+    const actual = byId.get(expected.id);
+    return actual
+      && ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "status"].every((key) => actual[key] === expected[key])
+      && JSON.stringify(actual.surfaces) === JSON.stringify(expected.surfaces);
+  });
+  if (!valid) error(errors, "service-fact-contract", path, "requires every approved advisory fact value, display, status, provenance, null URL and exact service surface from the immutable Task 5 contract");
+}
+
+function serviceCanonicalCorpus(parsedRoot) {
+  return normalizeExactHtmlLiteral(documentNodeDescendants(parsedRoot).map((node) => {
+    if (node.type === "text" || node.type === "comment") return node.value;
+    if (node.type !== "element") return "";
+    return `${node.name} ${[...node.attributes].map(([name, value]) => `${name} ${value ?? ""}`).join(" ")}`;
+  }).join(" ")).replace(/[^\p{L}\p{N}+#]+/gu, " ").trim();
+}
+
+function verifyServiceClaimBoundary(path, parsedRoot, errors) {
+  const corpus = serviceCanonicalCorpus(parsedRoot);
+  const forbidden = [
+    /polpharma/i, /500\s*m(?:ln|illion)?\s*pln/i, /pln\s*500\s*m/i, /100\s*m\+?\s*pln/i,
+    /marketplanet/i, /gold\s*partner/i, /all\s*for\s*one/i, /award/i, /nagrod/i,
+    /largest|leading|największ|wiodąc/i, /guaranteed|gwarantowan/i,
+    /not\s+just|nie\s+tylko|comprehensive|kompleksow/i
+  ];
+  if (forbidden.some((pattern) => pattern.test(corpus))) {
+    error(errors, "service-claim-boundary", path, "forbids unsupported clients, values, results, ranks, partner or ownership status, legal conclusions and AI-tell sales copy across active and inactive source");
+  }
+}
+
+function verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors) {
+  const elements = elementDescendants(parsedRoot);
+  const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "object", "picture", "source", "style", "video"]);
+  const images = elements.filter((element) => element.name === "img");
+  const validSignature = images.length === 1
+    && elementAttribute(images[0], "src") === "/assets/img/signature.png"
+    && elementAttribute(images[0], "alt") === ""
+    && elementIsWithin(images[0], elements.find((element) => element.name === "footer"));
+  const eventOrStyle = elements.some((element) => element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)));
+  const extraExecutable = elements.filter((element) => element.name === "script").some((script) => {
+    const type = elementAttribute(script, "type");
+    const src = elementAttribute(script, "src");
+    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer")));
+  });
+  const externalAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
+    const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
+  });
+  if (!validSignature || elements.some((element) => forbiddenTags.has(element.name)) || eventOrStyle || extraExecutable || externalAnchors.length > 0) {
+    error(errors, "service-resource-census", path, "allows only the shared shell signature, exact local navigation resources, one bounded schema, one shared script and the contextual mail CTA");
+  }
+}
+
+function verifyServiceSchema(path, parsedRoot, contract, errors) {
+  const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
+  let schema = null;
+  try { schema = scripts.length === 1 ? JSON.parse(rawElementText(scripts[0])) : null; } catch { schema = null; }
+  const expected = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: contract.title,
+    url: contract.url,
+    description: contract.description,
+    provider: { "@type": "Person", name: "Paweł Mamcarz" }
+  };
+  if (!sameJsonContract(schema, expected)) error(errors, "service-schema", path, "requires one exact localized Service schema with name, URL, purpose and Paweł Mamcarz provider only");
+}
+
+function verifyServicePage(path, parsedRoot, lang, factData, errors) {
+  const key = serviceKeyForPath(path);
+  const pair = SERVICE_CONTRACTS[key];
+  const contract = pair[lang];
+  const all = elementDescendants(parsedRoot);
+  const body = htmlBodyRoot(parsedRoot);
+  const main = all.find((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  verifyServiceFactContract(path, factData, pair.facts, errors);
+  if (elementAttribute(body, "data-page") !== "services") error(errors, "service-shell", path, 'body must use data-page="services"');
+  const h1s = all.filter((element) => element.name === "h1" && pageElementIsActive(element));
+  if (h1s.length !== 1 || publishedStaticText(h1s[0]) !== normalizeExactLiteral(contract.title)) error(errors, "service-h1", path, "requires the exact localized service H1");
+  const leads = all.filter((element) => elementHasClass(element, "page-lead") && pageElementIsActive(element));
+  if (leads.length !== 1 || publishedStaticText(leads[0]) !== normalizeExactLiteral(contract.lead)) error(errors, "service-lead", path, "requires the exact claim-safe localized lead");
+
+  const sectionMarkers = all.filter((element) => element.attributes.has("data-section"));
+  const directSections = directElementChildren(main, "section");
+  const names = sectionMarkers.map((section) => elementAttribute(section, "data-section"));
+  const titles = directSections.map((section) => elementDescendants(section, "h2")[0]).map((heading) => heading ? publishedStaticText(heading) : "");
+  if (JSON.stringify(names) !== JSON.stringify(SERVICE_SECTION_ORDER)
+    || directSections.length !== SERVICE_SECTION_ORDER.length
+    || !directSections.every((section, index) => section === sectionMarkers[index] && pageElementIsActive(section))
+    || JSON.stringify(titles) !== JSON.stringify(contract.sectionTitles.map(normalizeExactLiteral))) {
+    error(errors, "service-sections", path, "requires the exact six direct visible problem, fit, scope, method, evidence and contact sections with localized titles");
+  }
+
+  const methodSection = sectionMarkers.find((section) => elementAttribute(section, "data-section") === "method");
+  const methodSteps = methodSection ? elementDescendants(methodSection).filter((element) => element.attributes.has("data-method-step")) : [];
+  const methodValid = methodSteps.length === contract.method.length
+    && methodSteps.every((step, index) => elementAttribute(step, "data-method-step") === String(index + 1)
+      && publishedStaticText(elementDescendants(step, "h3")[0]) === normalizeExactLiteral(contract.method[index])
+      && pageElementIsActive(step));
+  if (!methodValid) error(errors, "service-method", path, "requires the exact ordered four-step localized method sequence");
+
+  const evidenceSection = sectionMarkers.find((section) => elementAttribute(section, "data-section") === "evidence");
+  const evidenceNodes = evidenceSection ? elementDescendants(evidenceSection).filter((element) => element.attributes.has("data-fact-id")) : [];
+  const factIds = evidenceNodes.map((node) => elementAttribute(node, "data-fact-id"));
+  const immutableById = new Map(SERVICE_FACT_CONTRACT.map((record) => [record.id, record]));
+  const evidenceValid = JSON.stringify(factIds) === JSON.stringify(pair.facts)
+    && evidenceNodes.every((node, index) => {
+      const fact = immutableById.get(pair.facts[index]);
+      return fact && publishedStaticText(node) === normalizeExactLiteral(lang === "pl" ? fact.display_pl : fact.display_en) && pageElementIsActive(node);
+    });
+  if (!evidenceValid) error(errors, "service-evidence", path, "requires the exact ordered immutable evidence IDs and localized literals");
+
+  const controls = all.filter((element) => (element.name === "a" || element.name === "button")
+    && (["btn-primary", "btn-secondary", "btn-ghost", "cta-link"].some((className) => elementHasClass(element, className))
+      || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
+  const contact = sectionMarkers.find((section) => elementAttribute(section, "data-section") === "contact");
+  const cta = controls[0];
+  if (controls.length !== 1 || cta?.name !== "a" || !elementIsWithin(cta, contact)
+    || elementAttribute(cta, "href") !== contract.ctaHref || publishedStaticText(cta) !== normalizeExactLiteral(contract.ctaLabel)) {
+    error(errors, "service-controls", path, "requires one contextual localized mail CTA and no other conversion control");
+  }
+
+  const nav = all.find((element) => element.name === "nav" && elementHasClass(element, "site-nav") && pageElementIsActive(element));
+  const current = nav ? elementDescendants(nav, "a").filter((anchor) => elementAttribute(anchor, "aria-current") === "page") : [];
+  const expectedCurrent = lang === "pl" ? `/${path.replace(/index\.html$/, "")}` : `/${path.replace(/index\.html$/, "")}`;
+  if (current.length !== 1 || elementAttribute(current[0], "href") !== expectedCurrent) error(errors, "service-shell", path, "requires the current advisory route as the sole raw aria-current page link");
+
+  verifyServiceSchema(path, parsedRoot, contract, errors);
+  verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors);
+  verifyServiceClaimBoundary(path, parsedRoot, errors);
+  const digest = serviceDocumentDigest(parsedRoot);
+  if (digest !== SERVICE_DOCUMENT_MANIFEST[key][lang]) error(errors, "service-document-manifest", path, `requires immutable full-document text, comment, element and raw attribute manifest; actual ${digest}`);
+  return factIds;
+}
+
+function verifyServiceParity(plFacts, enFacts, errors) {
+  if (JSON.stringify(plFacts) !== JSON.stringify(enFacts)) error(errors, "service-parity", "services", "PL and EN evidence order must be structurally identical");
+}
+
 async function verifyAviationHomepageLinks(context) {
   for (const [path, href] of [["index.html", "/lotnictwo/"], ["en/index.html", "/en/lotnictwo/"]]) {
     const html = await readRequired(context, path, "aviation-home-link");
@@ -5446,6 +5726,11 @@ async function verifyPages(factData, family, context) {
     if (routeFamily === "knowledge") {
       verifyKnowledgePage(plFile, plRoot, "pl", context.errors);
       verifyKnowledgePage(enFile, enRoot, "en", context.errors);
+    }
+    if (routeFamily === "services") {
+      const plEvidence = verifyServicePage(plFile, plRoot, "pl", factData, context.errors);
+      const enEvidence = verifyServicePage(enFile, enRoot, "en", factData, context.errors);
+      verifyServiceParity(plEvidence, enEvidence, context.errors);
     }
     await verifyLocalLinks(plFile, plRoot, family, context);
     await verifyLocalLinks(enFile, enRoot, family, context);
