@@ -763,6 +763,131 @@ test("Task 7 round 2 probe catches a real sink after a control block", async () 
   assert.ok(errorIds(result).includes("js-inner-html"));
 });
 
+test("Task 7 round 3 rejects sinks in function, arrow, class and object division operands", async () => {
+  const mutations = [
+    ["function expression", "const result = function () {} / (node.innerHTML = payload) / divisor;"],
+    ["arrow-function expression", "const result = (() => {}) / (node.innerHTML = payload) / divisor;"],
+    ["class expression", "const result = class {} / (node.innerHTML = payload) / divisor;"],
+    ["object literal", "const result = ({}) / (node.innerHTML = payload) / divisor;"]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator masked division-operand sinks after: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 3 permits regex statements after declarations and statement blocks", async () => {
+  const controls = [
+    ["function declaration", "function declared() {} /.innerHTML=/.test(value);"],
+    ["class declaration", "class Declared {} /.innerHTML=/.test(value);"],
+    ["if block", "if (safe) {} /.innerHTML=/.test(value);"],
+    ["for block", "for (; false;) {} /.innerHTML=/.test(value);"],
+    ["standalone block", "{} /.innerHTML=/.test(value);"]
+  ];
+  const rejected = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator rejected declaration/block regex statements: ${rejected.join(", ")}`);
+});
+
+test("Task 7 round 3 rejects prefix updates through call-member chains", async () => {
+  const mutations = [
+    ["call-chain increment", "++getNode().innerHTML;"],
+    ["call-chain decrement", "--getNode().outerHTML;"]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator accepted prefix call-chain updates: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 3 keeps postfix ASI reads safe across line comments and block comments", async () => {
+  const controls = [
+    ["plain newline", "counter++\nnode.innerHTML;"],
+    ["line comment", "counter++ // completed update\nnode.innerHTML;"],
+    ["multiline block comment", "counter-- /* completed\nupdate */ node.outerHTML;"]
+  ];
+  const rejected = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator treated postfix ASI reads as prefix sinks: ${rejected.join(", ")}`);
+});
+
+test("Task 7 round 3 keeps the current browser script sink-clean", async () => {
+  const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
+  const root = await fixture({ css: foundationCss, js: browserScript });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(!errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 3 probe catches arrow and nested-object division sinks", async () => {
+  const mutations = [
+    ["async arrow expression", "const result = (async () => {}) / (node.outerHTML = payload) / divisor;"],
+    ["object with method", "const result = ({ method() {} }) / (node.innerHTML = payload) / divisor;"]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 3 probe permits regex after function and class declarations with nested bodies", async () => {
+  const controls = [
+    ["function declaration", "function declared(value = {}) {} /.innerHTML=/.test(value);"],
+    ["class declaration", "class Declared { method() {} } /.outerHTML=/.test(value);"]
+  ];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 3 probe distinguishes ASI reads and sinks across comments and line separators", async () => {
+  const safeRoot = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\ncounter++ /* completed\nupdate */ getNode().innerHTML;`
+  });
+  const safeResult = await runVerification({ root: safeRoot, scope: "foundation" });
+  assert.ok(!errorIds(safeResult).includes("js-inner-html"));
+
+  const prefixRoot = await fixture({ css: foundationCss, js: `${validBrowserScript}\ncounter\n++getNode().innerHTML;` });
+  const prefixResult = await runVerification({ root: prefixRoot, scope: "foundation" });
+  assert.ok(errorIds(prefixResult).includes("js-inner-html"));
+
+  const separatorRoot = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\n// completed comment\u2028node.innerHTML = payload;`
+  });
+  const separatorResult = await runVerification({ root: separatorRoot, scope: "foundation" });
+  assert.ok(errorIds(separatorResult).includes("js-inner-html"));
+});
+
+test("Task 7 round 3 probe catches optional methods and nested member-call prefix chains", async () => {
+  const mutations = [
+    ["optional HTML method", 'getRegistry().current?.insertAdjacentHTML?.("beforeend", payload);'],
+    ["nested call/member prefix", "++getRegistry().current.getNode().innerHTML;"]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
 test("Task 7 navigation clears an open mobile menu when entering desktop width", async () => {
   const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
   const listeners = { document: {}, toggle: {}, overlay: {}, window: {} };
@@ -1907,6 +2032,72 @@ const task7HomeMutations = [
 for (const lang of ["pl", "en"]) {
   for (const [mutation, expectedError, mutate] of task7HomeMutations) {
     test(`Task 7 home baseline rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+const task7Round3ExactResourceMutations = [
+  ["alternate stylesheet rel", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">'
+  )],
+  ["stylesheet title attribute", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1" title="decoy">'
+  )],
+  ["stylesheet integrity attribute", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1" integrity="sha256-decoy">'
+  )],
+  ["stylesheet data decoy", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1" data-decoy="true">'
+  )],
+  ["deferred async browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer async>'
+  )],
+  ["typed browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer type="text/javascript">'
+  )],
+  ["browser script integrity attribute", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer integrity="sha256-decoy">'
+  )],
+  ["browser script data decoy", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer data-decoy="true">'
+  )],
+  ["disabled latin font preload", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin disabled>'
+  )],
+  ["latin-ext font preload title attribute", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin title="decoy">'
+  )],
+  ["font preload integrity attribute", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin integrity="sha256-decoy">'
+  )],
+  ["font preload data decoy", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin data-decoy="true">'
+  )]
+];
+
+for (const lang of ["pl", "en"]) {
+  test(`Task 7 round 3 exact resources accepts current controlled tags on ${lang}`, async () => {
+    const root = await fixture({ [`${lang}Html`]: homepageFixture(lang, lang === "pl" ? "Marka" : "Brand") });
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(!errorIds(result).includes("home-cache-version"));
+    assert.ok(!errorIds(result).includes("home-font-preload"));
+  });
+  for (const [mutation, expectedError, mutate] of task7Round3ExactResourceMutations) {
+    test(`Task 7 round 3 exact resources rejects ${mutation} on ${lang}`, async () => {
       const result = await task7HomeMutation(lang, mutate);
       assert.ok(errorIds(result).includes(expectedError));
     });

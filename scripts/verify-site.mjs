@@ -267,6 +267,10 @@ function elementAttributeTokens(element, name) {
   return normalize(elementAttribute(element, name) ?? "").split(" ").filter(Boolean);
 }
 
+function elementHasExactAttributeNames(element, names) {
+  return element.attributes.size === names.size && [...names].every((name) => element.attributes.has(name));
+}
+
 function staticVisibleText(node) {
   let text = "";
   const visit = (current, ancestorHidden = false) => {
@@ -641,23 +645,32 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
 
   const expectedCss = "/assets/css/style.css?v=20260825-flightplan-1";
   const expectedJs = "/assets/js/main.js?v=20260825-flightplan-1";
-  const activeStylesheets = elements.filter((element) => element.name === "link"
-    && elementAttributeTokens(element, "rel").includes("stylesheet")
-    && elementIsActiveResource(element));
-  const validStylesheets = activeStylesheets.filter((element) => elementAttribute(element, "href") === expectedCss
-    && !element.attributes.has("media")
-    && !element.attributes.has("disabled"));
-  const executableScriptTypes = new Set(["", "text/javascript", "application/javascript", "module"]);
-  const executableBrowserScripts = elements.filter((element) => {
-    if (element.name !== "script" || !elementIsActiveResource(element)) return false;
-    const type = element.attributes.has("type") ? normalize(elementAttribute(element, "type") ?? "") : "";
-    return executableScriptTypes.has(type);
+  const stylesheetAttributeNames = new Set(["rel", "href"]);
+  const stylesheetNodes = elements.filter((element) => element.name === "link" && (
+    elementAttributeTokens(element, "rel").includes("stylesheet")
+    || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")
+  ));
+  const validStylesheets = stylesheetNodes.filter((element) => {
+    const rel = elementAttributeTokens(element, "rel");
+    return elementHasExactAttributeNames(element, stylesheetAttributeNames)
+      && rel.length === 1
+      && rel[0] === "stylesheet"
+      && elementAttribute(element, "href") === expectedCss
+      && elementIsActiveResource(element);
   });
-  const validBrowserScripts = executableBrowserScripts.filter((element) => elementAttribute(element, "src") === expectedJs
+  const executableScriptTypes = new Set(["", "text/javascript", "application/javascript", "module"]);
+  const scriptAttributeNames = new Set(["src", "defer"]);
+  const browserScriptNodes = elements.filter((element) => {
+    if (element.name !== "script") return false;
+    const type = element.attributes.has("type") ? normalize(elementAttribute(element, "type") ?? "") : "";
+    return (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js") || executableScriptTypes.has(type);
+  });
+  const validBrowserScripts = browserScriptNodes.filter((element) => elementHasExactAttributeNames(element, scriptAttributeNames)
+    && elementAttribute(element, "src") === expectedJs
     && element.attributes.has("defer")
-    && !element.attributes.has("nomodule"));
-  if (activeStylesheets.length !== 1 || validStylesheets.length !== 1
-    || executableBrowserScripts.length !== 1 || validBrowserScripts.length !== 1) {
+    && elementIsActiveResource(element));
+  if (stylesheetNodes.length !== 1 || validStylesheets.length !== 1
+    || browserScriptNodes.length !== 1 || validBrowserScripts.length !== 1) {
     error(errors, "home-cache-version", page.path, `homepage requires exactly one active ${expectedCss} stylesheet and one executable deferred ${expectedJs} script`);
   }
 
@@ -665,6 +678,7 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2",
     "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2"
   ]);
+  const fontAttributeNames = new Set(["rel", "as", "type", "href", "crossorigin"]);
   const fontLinks = elements.filter((element) => element.name === "link" && (
     (elementAttribute(element, "href") ?? "").startsWith("/assets/fonts/")
     || (elementAttributeTokens(element, "rel").includes("preload") && normalize(elementAttribute(element, "as") ?? "") === "font")
@@ -672,14 +686,14 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
   const validFontLinks = fontLinks.filter((element) => {
     const rel = elementAttributeTokens(element, "rel");
     const crossorigin = normalize(elementAttribute(element, "crossorigin") ?? "");
-    return expectedFontHrefs.has(elementAttribute(element, "href"))
+    return elementHasExactAttributeNames(element, fontAttributeNames)
+      && expectedFontHrefs.has(elementAttribute(element, "href"))
       && rel.length === 1
       && rel[0] === "preload"
       && normalize(elementAttribute(element, "as") ?? "") === "font"
       && normalize(elementAttribute(element, "type") ?? "") === "font/woff2"
       && element.attributes.has("crossorigin")
       && (crossorigin === "" || crossorigin === "anonymous")
-      && !element.attributes.has("media")
       && elementIsActiveResource(element);
   });
   const actualFontHrefs = new Set(validFontLinks.map((element) => elementAttribute(element, "href")));
@@ -1051,11 +1065,38 @@ function tokenizeJavascriptForHtmlSinks(source) {
     return ![")", "]", "}", "++", "--"].includes(previous.value);
   };
 
-  const opensStatementBlock = (previous) => !previous
-    || previous.afterControlHead
-    || previous.closesBlock
-    || blockPrefixKeywords.has(previous.value)
-    || [";", "{", "=>", ")"].includes(previous.value);
+  const constructIsDeclaration = (index) => {
+    const before = tokens[index - 1];
+    return !before || before.value === ";" || before.value === "{" || before.closesBlock;
+  };
+
+  const functionKindBeforeParenthesis = () => {
+    const last = tokens.length - 1;
+    const functionIndex = tokens[last]?.value === "function"
+      ? last
+      : (tokens[last]?.type === "identifier" && tokens[last - 1]?.value === "function" ? last - 1 : -1);
+    if (functionIndex === -1) return null;
+    return constructIsDeclaration(functionIndex) ? "function-declaration" : "function-expression";
+  };
+
+  const classKindBeforeBrace = () => {
+    const last = tokens.length - 1;
+    const classIndex = tokens[last]?.value === "class"
+      ? last
+      : (tokens[last]?.type === "identifier" && tokens[last - 1]?.value === "class" ? last - 1 : -1);
+    if (classIndex === -1) return null;
+    return constructIsDeclaration(classIndex) ? "block" : "expression";
+  };
+
+  const braceKind = (previous) => {
+    if (previous?.value === "=>" || previous?.closesFunction === "expression") return "expression";
+    if (previous?.closesFunction === "declaration") return "block";
+    const classKind = classKindBeforeBrace();
+    if (classKind !== null) return classKind;
+    if (!previous || previous.afterControlHead || previous.closesBlock || blockPrefixKeywords.has(previous.value)) return "block";
+    if ([";", "{", ")"].includes(previous.value)) return "block";
+    return "expression";
+  };
 
   const readRegex = (start) => {
     let index = start + 1;
@@ -1117,16 +1158,29 @@ function tokenizeJavascriptForHtmlSinks(source) {
     let previous = null;
     const parenthesisKinds = [];
     const braceKinds = [];
+    let lineBreakBefore = false;
+    const pushCode = (type, value, metadata = {}) => {
+      const token = push(type, value, { lineBreakBefore, ...metadata });
+      lineBreakBefore = false;
+      return token;
+    };
     while (index < source.length) {
       const character = source[index];
       const next = source[index + 1];
       if (/\s/.test(character)) {
+        if (/[\r\n\u2028\u2029]/.test(character)) lineBreakBefore = true;
         index += 1;
         continue;
       }
       if (character === "/" && next === "/") {
-        const newline = source.indexOf("\n", index + 2);
-        index = newline === -1 ? source.length : newline + 1;
+        const relativeTerminator = source.slice(index + 2).search(/[\r\n\u2028\u2029]/);
+        if (relativeTerminator === -1) {
+          index = source.length;
+          continue;
+        }
+        const terminator = index + 2 + relativeTerminator;
+        lineBreakBefore = true;
+        index = terminator + (source[terminator] === "\r" && source[terminator + 1] === "\n" ? 2 : 1);
         continue;
       }
       if (character === "/" && next === "*") {
@@ -1135,55 +1189,64 @@ function tokenizeJavascriptForHtmlSinks(source) {
           errors.push(`unterminated block comment at offset ${index}`);
           return { index: source.length, closed: false };
         }
+        if (/[\r\n\u2028\u2029]/.test(source.slice(index, closing + 2))) lineBreakBefore = true;
         index = closing + 2;
         continue;
       }
       if (character === "'" || character === '"') {
         const string = readQuotedString(index);
-        previous = push(string.token.type, string.token.value);
+        previous = pushCode(string.token.type, string.token.value);
         index = string.end;
         continue;
       }
       if (character === "`") {
         index = scanTemplate(index);
         previous = tokens.at(-1) ?? null;
+        lineBreakBefore = false;
         continue;
       }
       const codePoint = sourceCodePoint(source, index);
       if (character === "\\" || jsIdentifierStart.test(codePoint.value)) {
         const identifier = readJsIdentifier(source, index, errors);
-        previous = push("identifier", identifier.value);
+        previous = pushCode("identifier", identifier.value);
         index = identifier.end > index ? identifier.end : codePoint.end;
         continue;
       }
       if (/\d/.test(character)) {
         const match = /^\d(?:[a-z0-9_.]*\d)?/i.exec(source.slice(index));
-        previous = push("number", match?.[0] ?? character);
+        previous = pushCode("number", match?.[0] ?? character);
         index += match?.[0].length ?? 1;
         continue;
       }
       if (character === "}" && stopAtTemplateBrace && braceDepth === 0) return { index: index + 1, closed: true };
       if (character === "/" && canStartRegex(previous)) {
         index = readRegex(index);
-        previous = push("regex", "regex");
+        previous = pushCode("regex", "regex");
         continue;
       }
       const punctuator = jsPunctuators.find((candidate) => source.startsWith(candidate, index)) ?? character;
       if (punctuator === "(") {
-        parenthesisKinds.push(previous?.type === "identifier" && regexControlHeadKeywords.has(previous.value) ? "control" : "normal");
-        previous = push("punctuator", punctuator);
+        const functionKind = functionKindBeforeParenthesis();
+        parenthesisKinds.push(previous?.type === "identifier" && regexControlHeadKeywords.has(previous.value)
+          ? "control"
+          : (functionKind ?? "normal"));
+        previous = pushCode("punctuator", punctuator);
       } else if (punctuator === ")") {
-        previous = push("punctuator", punctuator, { afterControlHead: parenthesisKinds.pop() === "control" });
+        const kind = parenthesisKinds.pop();
+        previous = pushCode("punctuator", punctuator, {
+          afterControlHead: kind === "control",
+          closesFunction: kind === "function-expression" ? "expression" : (kind === "function-declaration" ? "declaration" : null)
+        });
       } else if (punctuator === "{") {
         braceDepth += 1;
-        const kind = opensStatementBlock(previous) ? "block" : "expression";
+        const kind = braceKind(previous);
         braceKinds.push(kind);
-        previous = push("punctuator", punctuator);
+        previous = pushCode("punctuator", punctuator);
       } else if (punctuator === "}") {
         if (braceDepth > 0) braceDepth -= 1;
-        previous = push("punctuator", punctuator, { closesBlock: braceKinds.pop() === "block" });
+        previous = pushCode("punctuator", punctuator, { closesBlock: braceKinds.pop() === "block" });
       } else {
-        previous = push("punctuator", punctuator);
+        previous = pushCode("punctuator", punctuator);
       }
       index += punctuator.length;
     }
@@ -1207,11 +1270,43 @@ function htmlSinkAccessAt(tokens, index) {
   return null;
 }
 
+function tokenCanEndExpression(token) {
+  if (!token || token.afterControlHead || token.closesBlock) return false;
+  if (["identifier", "number", "regex", "string", "template"].includes(token.type)) return true;
+  if ([")", "]", "++", "--"].includes(token.value)) return true;
+  return token.value === "}";
+}
+
+function tokenIsPrefixUpdate(tokens, index) {
+  const token = tokens[index];
+  return token.lineBreakBefore || !tokenCanEndExpression(tokens[index - 1]);
+}
+
 function htmlSinkHasPrefixUpdate(tokens, accessIndex) {
   let sawReceiver = false;
+  let parentheses = 0;
+  let brackets = 0;
   for (let index = accessIndex - 1; index >= 0; index -= 1) {
     const token = tokens[index];
-    if (token.value === "++" || token.value === "--") return sawReceiver;
+    if (token.value === ")") {
+      parentheses += 1;
+      sawReceiver = true;
+      continue;
+    }
+    if (token.value === "]") {
+      brackets += 1;
+      sawReceiver = true;
+      continue;
+    }
+    if (parentheses > 0) {
+      if (token.value === "(") parentheses -= 1;
+      continue;
+    }
+    if (brackets > 0) {
+      if (token.value === "[") brackets -= 1;
+      continue;
+    }
+    if (token.value === "++" || token.value === "--") return sawReceiver && tokenIsPrefixUpdate(tokens, index);
     if (["identifier", "number", "string"].includes(token.type)) {
       sawReceiver = true;
       continue;
