@@ -9,7 +9,7 @@ const kinds = new Set(["constant", "dated"]);
 const sourceTypes = new Set(["owner_verified", "public_source", "internal_evidence"]);
 const statuses = new Set(["approved", "review", "retired"]);
 const blockedKeys = ["id", "pattern", "forbidden_contexts", "reason"];
-const publicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js"];
+const requiredPublicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"];
 
 function error(errors, id, path, message) {
   errors.push(`ERROR ${id} ${path}: ${message}`);
@@ -1408,6 +1408,60 @@ function verifyAliases(fact, index, errors) {
   }
 }
 
+function verifyStringArray(value, id, path, message, errors) {
+  const valid = Array.isArray(value) && value.length > 0 && value.every(nonEmptyString);
+  if (!valid) error(errors, id, path, message);
+  return valid;
+}
+
+function verifyPublicSurfaceInventory(factData, errors) {
+  const path = "content/site-facts.json";
+  const surfaces = factData.public_claim_surfaces;
+  const valid = Array.isArray(surfaces)
+    && surfaces.length >= requiredPublicClaimSurfaces.length
+    && surfaces.every(nonEmptyString)
+    && new Set(surfaces).size === surfaces.length
+    && requiredPublicClaimSurfaces.every((surface) => surfaces.includes(surface));
+  if (!valid) {
+    error(errors, "public-surface-inventory", path, `public_claim_surfaces must uniquely include ${requiredPublicClaimSurfaces.join(", ")}`);
+    return requiredPublicClaimSurfaces;
+  }
+  return surfaces;
+}
+
+function verifySurfaceRules(fact, index, publicSurfaces, errors) {
+  const path = "content/site-facts.json";
+  if (Object.hasOwn(fact, "forbidden_variants")) {
+    verifyStringArray(fact.forbidden_variants, "fact-forbidden-variants", path, `facts[${index}] forbidden_variants must be a non-empty string array`, errors);
+  }
+  if (!Object.hasOwn(fact, "surface_rules")) return;
+  if (!isPlainObject(fact.surface_rules) || Object.keys(fact.surface_rules).length === 0) {
+    error(errors, "fact-surface-rules", path, `facts[${index}] surface_rules must be a non-empty object`);
+    return;
+  }
+  for (const [surface, rule] of Object.entries(fact.surface_rules)) {
+    if (!publicSurfaces.includes(surface) || !Array.isArray(fact.surfaces) || !fact.surfaces.includes(surface)) {
+      error(errors, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} must name a declared public fact surface`);
+    }
+    if (!isPlainObject(rule)) {
+      error(errors, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} must be an object`);
+      continue;
+    }
+    const keys = Object.keys(rule);
+    if (keys.some((key) => !["approved_any", "forbidden"].includes(key))) {
+      error(errors, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} contains an unsupported key`);
+    }
+    if (fact.status === "approved") {
+      verifyStringArray(rule.approved_any, "fact-surface-rules", path, `facts[${index}] approved surface rule ${surface} requires approved_any`, errors);
+    } else if (Object.hasOwn(rule, "approved_any")) {
+      error(errors, "fact-surface-rules", path, `facts[${index}] non-approved surface rule ${surface} cannot declare approved_any`);
+    }
+    if (Object.hasOwn(rule, "forbidden")) {
+      verifyStringArray(rule.forbidden, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} forbidden must be a non-empty string array`, errors);
+    }
+  }
+}
+
 function verifyPinnedFactContract(fact, errors) {
   const path = "content/site-facts.json";
   if (fact.id === "portfolio.akrobacja_com.current_status") {
@@ -1426,7 +1480,7 @@ function verifyPinnedFactContract(fact, errors) {
   }
 }
 
-function verifyFactSchema(factData, errors) {
+function verifyFactSchema(factData, publicSurfaces, errors) {
   const path = "content/site-facts.json";
   if (factData.version !== 1) error(errors, "facts-version", path, "expected version 1");
   if (!Array.isArray(factData.facts)) {
@@ -1457,8 +1511,10 @@ function verifyFactSchema(factData, errors) {
     if (!nonEmptyString(fact.source_label)) error(errors, "fact-source-label", path, `facts[${index}] source_label must be a non-empty string`);
     if (fact.source_url !== null && (!nonEmptyString(fact.source_url) || !isHttpUrl(fact.source_url))) error(errors, "fact-source-url", path, `facts[${index}] source_url must be null or an http(s) URL`);
     if (!Array.isArray(fact.surfaces) || fact.surfaces.length === 0 || !fact.surfaces.every(nonEmptyString)) error(errors, "fact-surfaces", path, `facts[${index}] surfaces must be a non-empty string array`);
+    else if (fact.surfaces.some((surface) => !publicSurfaces.includes(surface))) error(errors, "fact-surfaces", path, `facts[${index}] surfaces must be declared in public_claim_surfaces`);
     if (!statuses.has(fact.status)) error(errors, "fact-status", path, `facts[${index}] status is invalid`);
     verifyAliases(fact, index, errors);
+    verifySurfaceRules(fact, index, publicSurfaces, errors);
     verifyPinnedFactContract(fact, errors);
   }
   return ids;
@@ -1507,9 +1563,56 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-async function verifyBlockedSurfaces(factData, context) {
+function publicSurfaceSearchTexts(surface, text) {
+  if (surface.endsWith(".html")) {
+    const parsed = parseStaticHtml(text);
+    return [normalize(stripHtmlComments(text)), staticVisibleText(parsed.root)];
+  }
+  if (surface.endsWith(".js")) return [normalize(stripJsComments(text))];
+  return [normalize(text)];
+}
+
+function surfaceContains(searchTexts, candidate) {
+  const normalized = normalize(candidate);
+  return normalized.length > 0 && searchTexts.some((text) => text.includes(normalized));
+}
+
+function factStatusCandidates(fact, surface) {
+  const aliases = isPlainObject(fact.aliases)
+    ? [fact.aliases.pl, fact.aliases.en].flatMap((items) => Array.isArray(items) ? items : [])
+    : [];
+  const forbidden = Array.isArray(fact.forbidden_variants) ? fact.forbidden_variants : [];
+  const surfaceForbidden = Array.isArray(fact.surface_rules?.[surface]?.forbidden) ? fact.surface_rules[surface].forbidden : [];
+  return [...new Set([fact.value, fact.display_pl, fact.display_en, ...aliases, ...forbidden, ...surfaceForbidden].filter(nonEmptyString))];
+}
+
+async function verifyPublicFactSurfaces(factData, publicSurfaces, context) {
+  const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
+  for (const surface of publicSurfaces) {
+    const text = await read(context, surface);
+    if (text === null) continue;
+    const searchTexts = publicSurfaceSearchTexts(surface, text);
+    for (const fact of records) {
+      if (fact.status === "review" || fact.status === "retired") {
+        const published = factStatusCandidates(fact, surface).find((candidate) => surfaceContains(searchTexts, candidate));
+        if (published) error(context.errors, "fact-surface-status", surface, `${fact.id} has status ${fact.status} but publishes ${published}`);
+        continue;
+      }
+      if (fact.status !== "approved") continue;
+      if (!Array.isArray(fact.surfaces) || !fact.surfaces.includes(surface)) continue;
+      const rule = isPlainObject(fact.surface_rules?.[surface]) ? fact.surface_rules[surface] : null;
+      if (!rule) continue;
+      const approved = Array.isArray(rule.approved_any) && rule.approved_any.some((candidate) => surfaceContains(searchTexts, candidate));
+      if (!approved) error(context.errors, "fact-surface-approved", surface, `${fact.id} is missing an exact approved surface claim`);
+      const forbidden = Array.isArray(rule.forbidden) ? rule.forbidden.find((candidate) => surfaceContains(searchTexts, candidate)) : null;
+      if (forbidden) error(context.errors, "fact-surface-forbidden", surface, `${fact.id} publishes forbidden semantic variant ${forbidden}`);
+    }
+  }
+}
+
+async function verifyBlockedSurfaces(factData, publicSurfaces, context) {
   const claims = Array.isArray(factData.blocked_claims) ? factData.blocked_claims.filter((claim) => isPlainObject(claim) && nonEmptyString(claim.id) && nonEmptyString(claim.pattern)) : [];
-  for (const surface of publicClaimSurfaces) {
+  for (const surface of publicSurfaces) {
     const text = await read(context, surface);
     if (text === null) continue;
     for (const claim of claims) {
@@ -2450,9 +2553,11 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   if (!["all", "facts", "foundation", "home"].includes(scope)) error(errors, "cli-scope", "scripts/verify-site.mjs", `unsupported scope ${scope}`);
   const facts = await readFacts({ root, onError: (id, path, message) => error(errors, id, path, message) });
   if (scope === "facts" || scope === "all") {
-    const factIds = verifyFactSchema(facts, errors);
+    const publicSurfaces = verifyPublicSurfaceInventory(facts, errors);
+    const factIds = verifyFactSchema(facts, publicSurfaces, errors);
     verifyBlockedSchema(facts, factIds, errors);
-    await verifyBlockedSurfaces(facts, context);
+    await verifyPublicFactSurfaces(facts, publicSurfaces, context);
+    await verifyBlockedSurfaces(facts, publicSurfaces, context);
   }
   if (scope === "foundation" || scope === "all") await verifyFoundation(context);
   if (scope === "home" || scope === "all") await verifyHome(facts, context);

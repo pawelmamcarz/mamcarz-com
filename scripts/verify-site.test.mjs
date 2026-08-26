@@ -12,6 +12,14 @@ import { parseCssRules, readFacts, runVerification } from "./verify-site.mjs";
 const execFileAsync = promisify(execFile);
 const modulePath = resolve("scripts/verify-site.mjs");
 const foundationCss = await readFile(resolve("assets/css/style.css"), "utf8");
+const publicClaimSurfaceFixture = [
+  "index.html",
+  "en/index.html",
+  "llms.txt",
+  "llms-full.txt",
+  "worker/index.js",
+  "assets/js/main.js"
+];
 
 const navigationFixture = {
   pl: `
@@ -227,7 +235,7 @@ function blockedClaim(overrides = {}) {
   };
 }
 
-async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = legacyNavigationFixture, css = "body{}", js = validBrowserScript, heroImage = Buffer.from("fixture"), extraFiles = {} } = {}) {
+async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], public_claim_surfaces = publicClaimSurfaceFixture, pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = legacyNavigationFixture, css = "body{}", js = validBrowserScript, llms = "", llmsFull = "", worker = "", heroImage = Buffer.from("fixture"), extraFiles = {} } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-test-"));
   const fixtureFacts = [...facts];
   for (const [id, displayPl, displayEn] of controlledAboutFacts) {
@@ -245,7 +253,7 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
     mkdir(resolve(root, "worker"), { recursive: true })
   ]);
   await Promise.all([
-    writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, facts: fixtureFacts, blocked_claims })),
+    writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, public_claim_surfaces, facts: fixtureFacts, blocked_claims })),
     writeFile(resolve(root, "index.html"), plHtml ?? homepageFixture("pl", pl)),
     writeFile(resolve(root, "en/index.html"), enHtml ?? homepageFixture("en", en)),
     writeFile(resolve(root, "uslugi/wdrozenie-sap-ariba/index.html"), serviceHtml),
@@ -253,9 +261,9 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
     writeFile(resolve(root, "assets/css/style.css"), css),
     writeFile(resolve(root, "assets/js/main.js"), js),
     ...(heroImage === null ? [] : [writeFile(resolve(root, "assets/img/IMG_3284-480.webp"), heroImage)]),
-    writeFile(resolve(root, "llms.txt"), ""),
-    writeFile(resolve(root, "llms-full.txt"), ""),
-    writeFile(resolve(root, "worker/index.js"), ""),
+    writeFile(resolve(root, "llms.txt"), llms),
+    writeFile(resolve(root, "llms-full.txt"), llmsFull),
+    writeFile(resolve(root, "worker/index.js"), worker),
     ...Object.entries(extraFiles).map(async ([relativePath, content]) => {
       const filePath = resolve(root, relativePath);
       await mkdir(resolve(filePath, ".."), { recursive: true });
@@ -284,6 +292,16 @@ async function currentHomepageMutationFixture(lang, mutate) {
 
 function errorIds(result) {
   return result.errors.map((error) => error.split(" ")[1]);
+}
+
+function publicSurfaceOptions(surface, text) {
+  if (surface === "index.html") return { plHtml: `<p>${text}</p>` };
+  if (surface === "en/index.html") return { enHtml: `<p>${text}</p>` };
+  if (surface === "llms.txt") return { llms: text };
+  if (surface === "llms-full.txt") return { llmsFull: text };
+  if (surface === "worker/index.js") return { worker: `const publicCopy = ${JSON.stringify(text)};` };
+  if (surface === "assets/js/main.js") return { js: `const publicCopy = ${JSON.stringify(text)};` };
+  throw new Error(`Unsupported public claim surface fixture: ${surface}`);
 }
 
 async function verifyFixtureCss(css) {
@@ -413,6 +431,145 @@ test("facts scope enforces every blocked pattern, not only Polpharma", async () 
   });
   const result = await runVerification({ root, scope: "facts" });
   assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.acme llms.txt:")));
+});
+
+test("Plan 1 broad review requires the complete public claim-surface inventory", async () => {
+  const root = await fixture({
+    public_claim_surfaces: publicClaimSurfaceFixture.filter((surface) => surface !== "assets/js/main.js")
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(errorIds(result).includes("public-surface-inventory"));
+});
+
+test("Plan 1 broad review enforces an additional registry-declared public surface", async () => {
+  const display = "review claim on a registry extension";
+  const root = await fixture({
+    public_claim_surfaces: [...publicClaimSurfaceFixture, "press-kit.txt"],
+    facts: [fact(), fact({
+      id: "claim.review.registry_extension",
+      value: display,
+      display_pl: display,
+      display_en: display,
+      source_type: "internal_evidence",
+      source_label: "Unapproved registry-extension fixture",
+      surfaces: ["index.html"],
+      status: "review"
+    })],
+    extraFiles: { "press-kit.txt": display }
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status press-kit.txt:")),
+    result.errors.join("\n")
+  );
+});
+
+for (const status of ["review", "retired"]) {
+  for (const surface of publicClaimSurfaceFixture) {
+    test(`Plan 1 broad review rejects ${status} publication on ${surface}`, async () => {
+      const display = `${status} claim on ${surface}`;
+      const statusFact = fact({
+        id: `claim.${status}.${surface.replaceAll(/[^a-z0-9]+/gi, "_")}`,
+        value: display,
+        display_pl: display,
+        display_en: display,
+        source_type: "internal_evidence",
+        source_label: `Unapproved ${status} fixture`,
+        surfaces: ["index.html"],
+        status
+      });
+      const root = await fixture({
+        facts: [fact(), statusFact],
+        ...publicSurfaceOptions(surface, display)
+      });
+      const result = await runVerification({ root, scope: "facts" });
+      assert.ok(
+        result.errors.some((entry) => entry.startsWith(`ERROR fact-surface-status ${surface}:`)),
+        result.errors.join("\n")
+      );
+    });
+  }
+}
+
+const highRiskSemanticDrifts = [
+  {
+    id: "hero.implementations",
+    surface: "llms.txt",
+    approved: "20+ SAP Ariba implementations",
+    drift: "20+ SAP Ariba implementations, SAP Fieldglass and SAP S/4HANA"
+  },
+  {
+    id: "hero.implementations",
+    surface: "llms-full.txt",
+    approved: "20+ SAP Ariba implementations",
+    drift: "20+ SAP Ariba/Fieldglass/S/4HANA implementations"
+  },
+  {
+    id: "hero.implementations",
+    surface: "worker/index.js",
+    approved: "20+ wdrożeń SAP Ariba",
+    drift: "20+ wdrożeń SAP Ariba, SAP Fieldglass i SAP S/4HANA"
+  },
+  {
+    id: "hero.project_value_eur",
+    surface: "llms-full.txt",
+    approved: "Total value of delivered projects: EUR 500M.",
+    drift: "Total value of delivered projects: EUR 500M+."
+  },
+  {
+    id: "hero.project_value_eur",
+    surface: "worker/index.js",
+    approved: "Łączna wartość zrealizowanych projektów: 500 mln EUR.",
+    drift: "Łączna wartość zrealizowanych projektów: ponad 500 mln EUR."
+  }
+];
+
+for (const { id, surface, approved, drift } of highRiskSemanticDrifts) {
+  test(`Plan 1 broad review rejects semantic drift for ${id} on ${surface}`, async () => {
+    const controlled = fact({
+      id,
+      value: approved,
+      display_pl: approved,
+      display_en: approved,
+      surfaces: [surface],
+      surface_rules: {
+        [surface]: {
+          approved_any: [approved],
+          forbidden: [drift]
+        }
+      }
+    });
+    const root = await fixture({
+      facts: [fact(), controlled],
+      ...publicSurfaceOptions(surface, `${approved}\n${drift}`)
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith(`ERROR fact-surface-forbidden ${surface}:`)),
+      result.errors.join("\n")
+    );
+  });
+}
+
+test("Plan 1 broad review accepts an exact approved surface claim without drift", async () => {
+  const surface = "llms.txt";
+  const approved = "20+ SAP Ariba implementations";
+  const controlled = fact({
+    id: "hero.implementations",
+    value: approved,
+    display_pl: approved,
+    display_en: approved,
+    surfaces: [surface],
+    surface_rules: {
+      [surface]: {
+        approved_any: [approved],
+        forbidden: ["20+ SAP Ariba, SAP Fieldglass and SAP S/4HANA implementations"]
+      }
+    }
+  });
+  const root = await fixture({ facts: [fact(), controlled], llms: approved });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(!errorIds(result).some((id) => id.startsWith("fact-surface-")), result.errors.join("\n"));
 });
 
 test("missing fixture files report standardized file-read errors", async () => {
@@ -1067,6 +1224,53 @@ test("Task 7 navigation clears an open mobile menu when entering desktop width",
   window.innerWidth = 390;
   dispatch("window", "resize");
   assert.equal(menu.classList.contains("is-open"), false, "returning to mobile must not reopen the menu");
+});
+
+test("Plan 1 broad review back-to-top click respects the runtime motion preference", async () => {
+  const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
+  for (const [reduced, expectedBehavior] of [[true, "auto"], [false, "smooth"]]) {
+    let clickHandler = null;
+    const scrollCalls = [];
+    const backToTop = {
+      classList: { toggle() {} },
+      addEventListener(type, callback) {
+        if (type === "click") clickHandler = callback;
+      }
+    };
+    const document = {
+      documentElement: { classList: { add() {} }, lang: "pl" },
+      querySelectorAll: () => [],
+      querySelector: () => null,
+      getElementById: (id) => id === "backToTop" ? backToTop : null,
+      addEventListener() {}
+    };
+    const window = {
+      innerWidth: 1280,
+      location: { pathname: "/" },
+      scrollY: 0,
+      addEventListener() {},
+      matchMedia(query) {
+        assert.equal(query, "(prefers-reduced-motion: reduce)");
+        return { matches: reduced };
+      },
+      scrollTo(options) {
+        scrollCalls.push(options);
+      }
+    };
+
+    runInNewContext(browserScript, {
+      document,
+      window,
+      requestAnimationFrame: (callback) => callback(),
+      setTimeout() {}
+    });
+
+    assert.equal(typeof clickHandler, "function", "back-to-top click path must be registered");
+    clickHandler();
+    assert.equal(scrollCalls.length, 1, "one click must issue one scroll");
+    assert.equal(scrollCalls[0].top, 0);
+    assert.equal(scrollCalls[0].behavior, expectedBehavior, `reduced=${reduced}`);
+  }
 });
 
 test("foundation requires text-only chat messages and a DOM-built fallback email link", async () => {

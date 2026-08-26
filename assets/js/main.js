@@ -80,7 +80,8 @@ function initBackToTop() {
   }, { passive: true });
 
   backToTop.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
   });
 }
 
@@ -100,17 +101,17 @@ function initChat() {
       thinking: "Zaglądam do notatek…",
       apiErrorBefore: "Hmm, coś mi się zacięło. Spróbuj jeszcze raz albo napisz wprost do Pawła na",
       apiErrorAfter: ".",
-      netErrorBefore: "Nie mogę się teraz połączyć z AI. Najszybszy kontakt to",
-      netErrorAfter: ", odpowiadam zwykle w ciągu doby.",
-      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.\nPaweł od ponad 25 lat projektuje procesy i systemy zakupowe dla firm takich jak KGHM, Żabka czy PKN ORLEN. Poza pracą lata śmigłowcem, gra improv i fotografuje. Zapytaj mnie o jego usługi, doświadczenie albo jak się z nim skontaktować."
+      netErrorBefore: "Nie mogę się teraz połączyć z AI. Możesz napisać bezpośrednio do Pawła na",
+      netErrorAfter: ".",
+      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.\nZapytaj mnie o usługi Pawła, jego doświadczenie albo najprostszy sposób kontaktu."
     },
     en: {
       thinking: "Checking my notes…",
       apiErrorBefore: "Hmm, something got stuck. Try again, or drop Paweł a line at",
       apiErrorAfter: ".",
-      netErrorBefore: "Can't reach the AI right now. Fastest way is",
-      netErrorAfter: ", Paweł usually replies within a day.",
-      greeting: "Hi! I'm Paweł Mamcarz's assistant.\nPaweł has been shaping procurement for 25+ years at organisations like KGHM, Żabka and PKN ORLEN. Outside work he flies helicopters, plays improv and takes photos. Ask me about his services, experience or how to get in touch."
+      netErrorBefore: "Can't reach the AI right now. You can email Paweł directly at",
+      netErrorAfter: ".",
+      greeting: "Hi! I'm Paweł Mamcarz's assistant.\nAsk me about Paweł's services, his experience, or the simplest way to get in touch."
     }
   }[language];
 
