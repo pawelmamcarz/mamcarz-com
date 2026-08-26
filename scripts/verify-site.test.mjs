@@ -519,21 +519,43 @@ function knowledgePageFixture(lang) {
       inLanguage: resource.inLanguage
     }))
   };
-  const body = `<section class="knowledge-index" data-section="resources">${resources}</section>
-    <aside class="knowledge-contact"><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></aside>`;
-  return pageShellFixture({
-    lang,
-    plRoute,
-    enRoute,
-    title: contract.title,
-    lead: contract.purpose,
-    dataPage: "knowledge",
-    head: `<script type="application/ld+json">${JSON.stringify(schema)}</script>`,
-    body
-  }).replace('<footer class="site-footer"><a href="mailto:pawel@mamcarz.com">Contact</a></footer>', '<footer class="site-footer"><a href="/">Home</a></footer>').replace(
-    lang === "pl" ? '<a href="/wiedza/">Wiedza</a>' : '<a href="/en/wiedza/">Knowledge</a>',
-    lang === "pl" ? '<a href="/wiedza/" aria-current="page">Wiedza</a>' : '<a href="/en/wiedza/" aria-current="page">Knowledge</a>'
-  );
+  const copy = lang === "pl" ? {
+    description: contract.purpose, ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna",
+    home: "/", logoLabel: "Paweł Mamcarz, strona główna", advisory: "Doradztwo",
+    submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
+    primary: [["/aplikacje-operacyjne/", "Aplikacje operacyjne"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]],
+    paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", breadcrumbLabel: "Okruszki", breadcrumbHome: "Strona główna",
+    kicker: "RESEARCH INDEX / 02 ENTRIES", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
+    contactLabel: "KONTAKT / NASTĘPNY KROK", contactCopy: "Jeśli materiał dotyczy decyzji, nad którą pracujesz, przejdź do rozmowy.",
+    footer: [["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/#contact", "Kontakt"]]
+  } : {
+    description: contract.purpose, ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation",
+    home: "/en/", logoLabel: "Paweł Mamcarz, homepage", advisory: "Advisory",
+    submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
+    primary: [["/en/aplikacje-operacyjne/", "Operational applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Knowledge", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]],
+    paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", breadcrumbLabel: "Breadcrumb", breadcrumbHome: "Home",
+    kicker: "RESEARCH INDEX / 03 ENTRIES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
+    contactLabel: "CONTACT / NEXT STEP", contactCopy: "If a resource relates to a decision you are working on, continue to the conversation.",
+    footer: [["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/#contact", "Contact"]]
+  };
+  const submenu = copy.submenu.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
+  const primary = copy.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
+  const footer = copy.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
+  return `<!DOCTYPE html><html lang="${lang}"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title>
+    <meta name="description" content="${copy.description}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow">
+    <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
+    <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:site_name" content="Paweł Mamcarz">
+    <script type="application/ld+json">${JSON.stringify(schema)}</script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2">
+  </head><body class="knowledge-page" data-page="knowledge">
+    <a href="#main" class="skip-link">${copy.skip}</a>
+    <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
+    <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
+    <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" loading="lazy"></a><div class="footer-copy">© Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
+    <script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script>
+  </body></html>`;
 }
 
 async function knowledgePageMutation({ lang = "pl", mutate = (html) => html, mutatePair = null } = {}) {
@@ -2257,7 +2279,7 @@ test("Plan 2 Task 3 fix round 1 inventories global section and conversion cardin
 test("Plan 2 Task 4 requires the exact Knowledge identity and purpose", async () => {
   const result = await knowledgePageMutation({
     mutate: (html) => html
-      .replace('<h1>Wiedza</h1>', '<h1>Biblioteka</h1>')
+      .replace('<h1 class="page-title">Wiedza</h1>', '<h1 class="page-title">Biblioteka</h1>')
       .replace(`<p class="page-lead">${knowledgeContract.pl.purpose}</p>`, '<p class="page-lead">Regularnie publikowane materiały dla liderów.</p>')
   });
   const ids = errorIds(result);
@@ -2309,7 +2331,10 @@ test("Plan 2 Task 4 rejects invented routes, dates and external resource URLs on
   ];
   for (const [label, lang, mutate] of cases) {
     const result = await knowledgePageMutation({ lang, mutate });
-    assert.ok(errorIds(result).includes("knowledge-boundary") || errorIds(result).includes("knowledge-schema"), `${label}: ${result.errors.join("\n")}`);
+    assert.ok(errorIds(result).includes("knowledge-boundary")
+      || errorIds(result).includes("knowledge-route-boundary")
+      || errorIds(result).includes("knowledge-date-boundary")
+      || errorIds(result).includes("knowledge-schema"), `${label}: ${result.errors.join("\n")}`);
   }
 });
 
@@ -2356,6 +2381,68 @@ test("Plan 2 Task 4 rejects shell, metadata and inactive-content laundering", as
     const ids = errorIds(result);
     assert.ok(ids.includes("knowledge-shell") || ids.includes("knowledge-boundary") || ids.includes("knowledge-resources") || ids.includes("page-canonical"), `${label}: ${result.errors.join("\n")}`);
   }
+});
+
+test("Plan 2 Task 4 fix round 1 canonicalizes every URL surface before rejecting the fake English Procurement route", async () => {
+  const cases = [
+    ["percent encoded path", (html) => html.replace("</main>", '<template><a href="/en/%70rocurement-2026/">Hidden</a></template></main>')],
+    ["repeated percent encoding", (html) => html.replace("</main>", '<a ping="/en/%2570rocurement-2026/" href="/">Ping</a></main>')],
+    ["valid encoded path with invalid query escape", (html) => html.replace("</main>", '<img src="/en/%70rocurement-2026/?bad=%ZZ" alt=""></main>')],
+    ["case variant", (html) => html.replace("</main>", '<form action="/EN/Procurement-2026/"></form></main>')],
+    ["ASCII URL whitespace", (html) => html.replace("</main>", '<object data="&#9;/en/procurement-2026/&#10;"></object></main>')],
+    ["default ignorable path character", (html) => html.replace("</main>", '<iframe src="/en/procure&#x200B;ment-2026/"></iframe></main>')],
+    ["entity encoded path", (html) => html.replace("</main>", '<a href="&#47;en&#47;procurement-2026&#47;">Hidden</a></main>')],
+    ["split adjacent comments", (html) => html.replace("</main>", "<!-- /en/procurement- --><!-- 2026/ --></main>")],
+    ["split adjacent tags", (html) => html.replace("</main>", "<template>/en/procurement-</template><template>2026/</template></main>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-route-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const ordinarySeparatedText = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</main>", "<p>/en/procurement-</p><p>2026/ is not a route token.</p></main>")
+  });
+  assert.equal(errorIds(ordinarySeparatedText).includes("knowledge-route-boundary"), false, ordinarySeparatedText.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 1 pins the full Knowledge structure, resources and main control census", async () => {
+  const cases = [
+    ["extra sibling resource link", (html) => html.replace("</section>", '<a href="/wystapienia/">Duplicate resource</a></section>')],
+    ["external image", (html) => html.replace("</main>", '<img src="https://example.com/report.png" alt="Report"></main>')],
+    ["external ping", (html) => html.replace('href="/#contact"', 'href="/#contact" ping="https://example.com/collect"')],
+    ["new browsing context", (html) => html.replace('href="/#contact"', 'href="/#contact" target="_blank"')],
+    ["generic card class", (html) => html.replace('class="knowledge-entry" data-resource', 'class="generic-card" data-resource')],
+    ["wrong localized dt", (html) => html.replace("<dt>Typ</dt>", "<dt>Data</dt>")],
+    ["second unstyled button", (html) => html.replace("</main>", "<button>More</button></main>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes("knowledge-document-contract"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 fix round 1 rejects date metadata and date-like factual text on every source surface", async () => {
+  const cases = [
+    ["visible dotted date", (html) => html.replace("</main>", "<p>Opublikowano: 26.08.2026</p></main>")],
+    ["date meta", (html) => html.replace("</head>", '<meta name="date" content="2026-08-26"></head>')],
+    ["ISO text", (html) => html.replace("</main>", "<p>Published 2026-08-26</p></main>")],
+    ["entity date", (html) => html.replace("</main>", "<!-- Updated 26&#46;08&#46;2026 --></main>")],
+    ["inline split date", (html) => html.replace("</main>", "<p>Published <span>26.</span><span>08.</span><span>2026</span></p></main>")],
+    ["schema date", (html) => html.replace('"hasPart"', '"datePublished":"2026-08-26","hasPart"')],
+    ["date attribute", (html) => html.replace("</main>", '<p data-published="2026-08-26">Archive</p></main>')],
+    ["inactive date", (html) => html.replace("</main>", "<template><p>Updated 2026/08/26</p></template></main>")],
+    ["approved-looking title in an unowned location", (html) => html.replace("</main>", "<p>Procurement Process 2026</p></main>")],
+    ["approved-looking title in a comment", (html) => html.replace("</main>", "<!-- Procurement Process 2026 --></main>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-date-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const approvedYears = await knowledgePageMutation();
+  assert.equal(errorIds(approvedYears).includes("knowledge-date-boundary"), false, approvedYears.errors.join("\n"));
 });
 
 test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {
