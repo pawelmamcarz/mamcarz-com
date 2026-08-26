@@ -1,4 +1,5 @@
 import { readFile, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
@@ -125,6 +126,7 @@ function renderedText(html) {
 
 function openingTagAttributes(openingTag) {
   const attributes = new Map();
+  let sourceAttributeCount = 0;
   const tag = /^<\s*[a-z][a-z0-9:-]*/i.exec(openingTag);
   if (!tag) return attributes;
   let cursor = tag[0].length;
@@ -138,6 +140,7 @@ function openingTagAttributes(openingTag) {
       cursor += 1;
       continue;
     }
+    sourceAttributeCount += 1;
     while (/\s/.test(openingTag[cursor] ?? "")) cursor += 1;
     let value = null;
     if (openingTag[cursor] === "=") {
@@ -158,6 +161,7 @@ function openingTagAttributes(openingTag) {
     }
     if (!attributes.has(name)) attributes.set(name, value);
   }
+  Object.defineProperty(attributes, "sourceAttributeCount", { value: sourceAttributeCount });
   return attributes;
 }
 
@@ -3100,6 +3104,14 @@ const APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST = Object.freeze({
 const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact"];
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
+const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
+  pl: Object.freeze({ elementCount: 186, digest: "ec6b2553ef9783694e5bb63de4ea381d66dcac4198797c14606aba48ffd3c792" }),
+  en: Object.freeze({ elementCount: 186, digest: "011554d74762d63cedd9962b75a2cea10cb083f380e5df0f087573dc0c926771" })
+});
+const APPLICATION_HUMAN_METADATA_FIELDS = new Set([
+  "name:description", "name:author", "property:og:title", "property:og:description",
+  "property:og:image:alt", "property:og:site_name"
+]);
 
 function directElementChildren(node, name = null) {
   return (node?.children ?? []).filter((child) => child.type === "element" && (name === null || child.name === name));
@@ -3228,6 +3240,84 @@ function exactApplicationSemanticAttributes(element, expected) {
         ? normalizeExactHtmlLiteral(actualValue) === normalizeExactLiteral(value)
         : actualValue === value;
     });
+}
+
+function applicationAttributeUsesHumanNormalization(element, name) {
+  if (APPLICATION_NORMALIZED_SEMANTIC_TEXT_ATTRIBUTES.has(name)) return true;
+  if (element.name !== "meta" || name !== "content") return false;
+  const discriminator = element.attributes.has("name")
+    ? `name:${elementAttribute(element, "name")}`
+    : `property:${elementAttribute(element, "property")}`;
+  return APPLICATION_HUMAN_METADATA_FIELDS.has(discriminator);
+}
+
+function applicationApprovedEvidenceAnchors(evidenceRows, factData) {
+  const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
+  const approved = new Set();
+  for (const row of evidenceRows) {
+    const ids = (elementAttribute(row, "data-fact-ids") ?? "").trim().split(/\s+/).filter(Boolean);
+    const approvedUrls = new Set(ids.flatMap((factId) => records
+      .filter((fact) => fact.id === factId && fact.status === "approved" && isHttpUrl(fact.source_url))
+      .map((fact) => fact.source_url)));
+    const rowChildren = directElementChildren(row);
+    const ledgerRows = directElementChildren(rowChildren[2], "div");
+    const ledgerLeaves = directElementChildren(ledgerRows[0]);
+    const allowedParents = new Set([rowChildren[1], ledgerLeaves[1]].filter(Boolean));
+    for (const anchor of elementDescendants(row, "a")) {
+      const href = elementAttribute(anchor, "href");
+      if (allowedParents.has(anchor.parent)
+        && directElementChildren(anchor.parent).length === 1
+        && (anchor.attributes.sourceAttributeCount ?? anchor.attributes.size) === anchor.attributes.size
+        && exactElementAttributes(anchor, { href })
+        && approvedUrls.has(href)
+        && directElementChildren(anchor).length === 0
+        && elementIsActiveResource(anchor)
+        && elementIsVisibleIfDisclosuresOpen(anchor)) {
+        approved.add(anchor);
+      }
+    }
+  }
+  return approved;
+}
+
+function applicationDocumentManifestDigest(parsedRoot, transparentElements = new Set()) {
+  const entries = [];
+  const visit = (node, parentPath) => {
+    const children = (node.children ?? [])
+      .filter((child) => child.type === "element" && !transparentElements.has(child));
+    children.forEach((element, index) => {
+      const path = `${parentPath}/${index}`;
+      const attributes = [...element.attributes]
+        .sort(([first], [second]) => first < second ? -1 : (first > second ? 1 : 0))
+        .map(([name, value]) => [
+          name,
+          applicationAttributeUsesHumanNormalization(element, name)
+            ? normalizeExactHtmlLiteral(value ?? "")
+            : value
+        ]);
+      entries.push([path, element.name, element.attributes.sourceAttributeCount ?? element.attributes.size, attributes]);
+      visit(element, path);
+    });
+  };
+  visit(parsedRoot, "");
+  return {
+    elementCount: entries.length,
+    digest: createHash("sha256").update(JSON.stringify(entries)).digest("hex")
+  };
+}
+
+function verifyApplicationDocumentManifest(path, parsedRoot, lang, evidenceRows, factData, errors) {
+  const transparentEvidenceAnchors = applicationApprovedEvidenceAnchors(evidenceRows, factData);
+  const actual = applicationDocumentManifestDigest(parsedRoot, transparentEvidenceAnchors);
+  const expected = APPLICATION_DOCUMENT_MANIFEST[lang];
+  if (actual.elementCount !== expected.elementCount || actual.digest !== expected.digest) {
+    error(
+      errors,
+      "application-document-manifest",
+      path,
+      `requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`
+    );
+  }
 }
 
 function expectedApplicationNavigationText(navigation) {
@@ -3397,8 +3487,17 @@ function verifyApplicationSemanticAttributes(path, parsedRoot, lang, body, nav, 
 function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
   const page = APPLICATION_PAGE_CONTRACT[lang];
   const literals = APPLICATION_LITERAL_CONTRACT[lang];
-  const heads = elementDescendants(parsedRoot, "head");
+  const all = elementDescendants(parsedRoot);
+  const htmls = all.filter((element) => element.name === "html");
+  const heads = all.filter((element) => element.name === "head");
+  const bodies = all.filter((element) => element.name === "body");
+  const titles = all.filter((element) => element.name === "title");
+  const metas = all.filter((element) => element.name === "meta");
+  const links = all.filter((element) => element.name === "link");
+  const bases = all.filter((element) => element.name === "base");
+  const html = htmls.length === 1 ? htmls[0] : null;
   const head = heads.length === 1 ? heads[0] : null;
+  const body = bodies.length === 1 ? bodies[0] : null;
   const expectedMetas = [
     { attributes: { charset: "UTF-8" }, contentType: "token" },
     { attributes: { name: "viewport", content: "width=device-width, initial-scale=1.0" }, contentType: "token" },
@@ -3420,22 +3519,54 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
     { rel: "alternate", hreflang: "en", href: APPLICATION_PAGE_CONTRACT.en.url },
     { rel: "alternate", hreflang: "x-default", href: APPLICATION_PAGE_CONTRACT.pl.url }
   ];
-  const titles = head === null ? [] : directElementChildren(head, "title").filter(elementIsActiveResource);
-  const metas = head === null ? [] : directElementChildren(head, "meta").filter(elementIsActiveResource);
-  const headLinks = head === null ? [] : directElementChildren(head, "link");
-  const resourceLinks = headLinks.slice(0, expectedResources.length);
-  const valid = head !== null
+  const expectedAssets = [
+    { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
+    { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" }
+  ];
+  const expectedHeadTags = [
+    "meta", "meta", "title", "meta", "meta", "meta",
+    "link", "link", "link", "link",
+    "meta", "meta", "meta", "meta", "meta", "meta", "meta", "meta",
+    "script", "link", "link", "link", "link"
+  ];
+  const rootElements = directElementChildren(parsedRoot);
+  const htmlChildren = directElementChildren(html);
+  const headChildren = directElementChildren(head);
+  const validDocument = html !== null
+    && head !== null
+    && body !== null
+    && rootElements.length === 1
+    && rootElements[0] === html
+    && html.parent === parsedRoot
+    && htmlChildren.length === 2
+    && htmlChildren[0] === head
+    && htmlChildren[1] === body
+    && head.parent === html
+    && body.parent === html
+    && bases.length === 0
+    && titles.every((element) => element.parent === head)
+    && metas.every((element) => element.parent === head)
+    && links.every((element) => element.parent === head)
+    && headChildren.length === expectedHeadTags.length
+    && headChildren.every((element, index) => element.name === expectedHeadTags[index]);
+  const valid = validDocument
     && titles.length === 1
+    && exactElementAttributes(titles[0], {})
+    && elementIsActiveResource(titles[0])
     && normalizeExactHtmlLiteral(rawElementText(titles[0])) === normalizeExactLiteral(literals.documentTitle)
     && metas.length === expectedMetas.length
-    && metas.every((meta, index) => exactApplicationAttributes(
+    && metas.every((meta, index) => elementIsActiveResource(meta) && exactApplicationAttributes(
       meta,
       expectedMetas[index].attributes,
       expectedMetas[index].contentType === "human" ? new Set(["content"]) : new Set()
     ))
-    && resourceLinks.length === expectedResources.length
-    && resourceLinks.every((link, index) => elementIsActiveResource(link)
-      && exactApplicationAttributes(link, expectedResources[index]));
+    && links.length === expectedResources.length + expectedAssets.length
+    && links.every((link, index) => elementIsActiveResource(link)
+      && exactApplicationAttributes(link, index < expectedResources.length
+        ? expectedResources[index]
+        : expectedAssets[index - expectedResources.length]));
   if (!valid) {
     error(errors, "application-metadata", path, "requires the exact claim-safe Task 2 title and metadata set");
   }
@@ -3653,6 +3784,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   }
   const applicationFooter = footers.length === 1 ? footers[0] : null;
   const evidenceRows = applicationOwnedEvidenceRows(main);
+  verifyApplicationDocumentManifest(path, parsedRoot, lang, evidenceRows, factData, errors);
   verifyApplicationAnchorManifest(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, evidenceRows, errors);
   verifyApplicationSemanticAttributes(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, errors);
 

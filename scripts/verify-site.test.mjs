@@ -1724,6 +1724,120 @@ test("Plan 2 Task 2 fix round 3 compares metadata tokens raw and human fields se
   assert.deepEqual(humanEquivalent.errors, []);
 });
 
+test("Plan 2 Task 2 fix round 4 rejects every unapproved attribute on active and inactive elements", async () => {
+  const cases = [
+    ["root language", (html) => html.replace('<html lang="pl">', '<html lang="fr">')],
+    ["duplicate root language", (html) => html.replace('<html lang="pl">', '<html lang="pl" LANG="fr">')],
+    ["root direction", (html) => html.replace('<html lang="pl">', '<html lang="pl" dir="rtl">')],
+    ["input mode on content", (html) => html.replace("<dt>Procurement</dt>", '<dt inputmode="numeric">Procurement</dt>')],
+    ["arbitrary global data attribute", (html) => html.replace("<dt>Procurement</dt>", '<dt data-claim="unapproved">Procurement</dt>')],
+    ["attribute inside template", (html) => html.replace("</footer>", '<template><span lang="fr"></span></template></footer>')],
+    ["attribute inside noscript", (html) => html.replace("</footer>", '<noscript><span dir="rtl"></span></noscript></footer>')],
+    ["attribute inside hidden subtree", (html) => html.replace("</footer>", '<div hidden><span inputmode="numeric"></span></div></footer>')],
+    ["attribute inside inert subtree", (html) => html.replace("</footer>", '<div inert><span data-claim="unapproved"></span></div></footer>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const approvedUrl = "https://example.com/approved-product";
+  const approvedFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    source_url: approvedUrl,
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const duplicateEvidenceHref = await applicationPageMutation({
+    facts: [fact(), approvedFact],
+    mutate: (html) => html.replace(
+      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      `<h3 class="evidence-row__title"><a href="${approvedUrl}" href="https://example.com/unapproved">czympojade.pl</a></h3>`
+    )
+  });
+  assert.ok(
+    errorIds(duplicateEvidenceHref).includes("application-document-manifest"),
+    `duplicate approved evidence href: ${duplicateEvidenceHref.errors.join("\n")}`
+  );
+});
+
+test("Plan 2 Task 2 fix round 4 rejects every extra document element including forms", async () => {
+  const cases = [
+    ["external form", '<form action="https://example.com/collect" method="post"></form>'],
+    ["form controls", '<form><input name="claim" value="100"><button type="submit">Send</button></form>'],
+    ["benign extra element", "<aside></aside>"],
+    ["inactive extra element", "<template><div></div></template>"],
+    ["nested inactive extra element", "<noscript><template><span></span></template></noscript>"]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, addition]) => ({
+    label,
+    result: await applicationPageMutation({
+      mutate: (html) => html.replace("</footer>", `${addition}</footer>`)
+    })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 4 rejects every unapproved executable style and resource element", async () => {
+  const cases = [
+    ["inline style", "<style>.claim{display:block}</style>"],
+    ["inline script", "<script>globalThis.claim=true</script>"],
+    ["external iframe", '<iframe src="https://example.com/embed"></iframe>'],
+    ["external image", '<img src="https://example.com/claim.png" alt="">'],
+    ["object", '<object data="https://example.com/claim"></object>'],
+    ["embed", '<embed src="https://example.com/claim">'],
+    ["picture source", '<picture><source srcset="https://example.com/claim.webp"><img src="https://example.com/claim.png" alt=""></picture>'],
+    ["video", '<video src="https://example.com/claim.mp4"></video>'],
+    ["audio", '<audio src="https://example.com/claim.mp3"></audio>'],
+    ["inactive script", "<template><script>globalThis.claim=true</script></template>"],
+    ["inactive style", "<noscript><style>.claim{display:block}</style></noscript>"]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, addition]) => ({
+    label,
+    result: await applicationPageMutation({
+      mutate: (html) => html.replace("</footer>", `${addition}</footer>`)
+    })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 4 owns every document root and metadata element without inactive decoys", async () => {
+  const moveTitleToBody = (html) => {
+    const title = html.match(/<title>[\s\S]*?<\/title>/)?.[0];
+    assert.ok(title);
+    return html.replace(title, "").replace('<body class="applications-page" data-page="applications">', `<body class="applications-page" data-page="applications">${title}`);
+  };
+  const cases = [
+    ["template meta claim", (html) => html.replace("</footer>", '<template><meta name="price" content="100 PLN"></template></footer>')],
+    ["template canonical competitor", (html) => html.replace("</footer>", '<template><link rel="canonical" href="https://example.com/claim"></template></footer>')],
+    ["direct base", (html) => html.replace("</head>", '<base href="https://example.com/"></head>')],
+    ["template base", (html) => html.replace("</footer>", '<template><base href="https://example.com/"></template></footer>')],
+    ["duplicate title", (html) => html.replace("</title>", "</title><title>Competing title</title>")],
+    ["title moved to body", moveTitleToBody],
+    ["duplicate head", (html) => html.replace("</head>", "</head><head></head>")],
+    ["duplicate body", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body></body><body class="applications-page" data-page="applications">')],
+    ["duplicate html", (html) => html.replace("</html>", "</html><html></html>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    const ids = errorIds(result);
+    assert.ok(ids.includes("application-document-manifest"), `${label} document: ${result.errors.join("\n")}`);
+    assert.ok(ids.includes("application-metadata"), `${label} metadata: ${result.errors.join("\n")}`);
+  }
+});
+
 test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN product pair", async () => {
   const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
   const result = await runVerification({ root, scope: "pages", family: "applications" });

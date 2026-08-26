@@ -76,10 +76,29 @@ Focused GREEN:
 - The same command passes 4 tests, 4 pass, 0 fail.
 - The complete Task 2 focus passes 25 tests, 25 pass, 0 fail. Task 1 remains isolated and passes 36 tests, 36 pass, 0 fail.
 - Evidence anchor exemptions are now derived only from the exact three direct article rows owned by the direct `main > section[data-section="evidence"]` structure. Fake evidence classes elsewhere remain subject to the 21-anchor whole-document manifest. The exact approved associated `source_url` control still passes.
-- The semantic manifest now pins 16 exact nodes, including menu, toggle, overlay, back control and main IDs and state values. A fail-closed controlled-attribute set rejects unmanifested accessibility, behavior, visibility, focus, form-state, event-handler and inline-style attributes across active and inactive descendants.
+- The semantic manifest pins 15 exact semantic-role nodes, including menu, toggle, overlay, back control and main IDs and state values. A fail-closed controlled-attribute set rejects unmanifested accessibility, behavior, visibility, focus, form-state, event-handler and inline-style attributes across active and inactive descendants.
 - Exact owned-copy collection excludes hidden and inert subtrees, so unavailable content cannot satisfy the main or shell literal contract. The intentionally closed Advisory disclosure remains valid because its source labels are still included by the navigation contract.
 - Human-readable attributes retain case-preserving Unicode, entity and whitespace equivalence. State and reference tokens, including `aria-hidden`, `aria-current`, `aria-expanded`, `aria-controls`, IDs, roles and `tabindex`, now compare their parsed source values without entity decoding, Unicode folding or whitespace normalization.
 - Metadata fields are explicitly typed. Human titles, descriptions, author and accessible image labels use the case-preserving human comparator; viewport, robots, Open Graph type, URLs, images, locale and canonical/hreflang resources compare raw exact values.
+
+### Fix round 4
+
+Focused RED:
+
+- Command: `node --test --test-name-pattern='Plan 2 Task 2 fix round 4' scripts/verify-site.test.mjs`.
+- Result before the document-manifest implementation: 4 tests, 0 pass, 4 fail.
+- The first failing examples confirmed zero verifier errors for `lang="fr"`, an external form with `action` and `method`, an inline `style` element and a metadata claim inside a footer `template`.
+- Follow-up attribute-occurrence regressions were also watched RED: the focused attribute test had 1 test, 0 pass, 1 fail first when duplicate `lang` attributes were collapsed by the parser and again when duplicate `href` attributes were hidden by the approved evidence-link exception.
+
+Focused GREEN:
+
+- The complete round 4 focus passes 4 tests, 4 pass, 0 fail.
+- The complete Task 2 focus passes 29 tests, 29 pass, 0 fail. Task 1 remains isolated and passes 36 tests, 36 pass, 0 fail.
+- A pinned SHA-256 manifest covers the pre-order path, tag, source attribute occurrence count and complete sorted attribute map of all 186 elements on each localized page. Any extra element, unknown attribute, duplicate attribute or changed position fails across active, hidden, inert, template and noscript descendants.
+- Human normalization is limited to the already approved human-readable semantic attributes and typed human metadata values. State, reference, resource, URL, locale and other document tokens remain raw exact.
+- The only structural variant is an evidence anchor at an exact approved evidence leaf. It is transparent to the 186-element base manifest only when it is the leaf's sole element child, has only the exact `href`, has no element descendants and targets an approved associated `source_url`; the existing immutable evidence contract still validates its text and placement.
+- Metadata validation now inventories every `html`, `head`, `body`, `title`, `base`, `meta` and `link` in the parsed document, requires the single exact root nesting and complete 23-element head order, rejects every `base`, and validates all four canonical/hreflang links plus all four approved head assets without slicing.
+- The same document manifest pins both scripts, all stylesheet/font/icon resources and the signature image. Extra style, script, iframe, image, object, embed, source, picture, video, audio and form variants are rejected even inside inactive descendants.
 
 ## Verification gates
 
@@ -88,7 +107,7 @@ Focused GREEN:
 - `npm run verify:facts`: PASS.
 - `npm run verify:foundation`: PASS.
 - `npm run verify:site`: PASS.
-- `npm run test:verify-site`: PASS, 490 tests, 490 pass, 0 fail.
+- `npm run test:verify-site`: PASS, 494 tests, 494 pass, 0 fail.
 - `node --check scripts/verify-site.mjs`: PASS.
 - `node --check scripts/verify-site.test.mjs`: PASS.
 - `node --check assets/js/main.js`: PASS.
@@ -104,6 +123,8 @@ Focused GREEN:
 - The browser review was not repeated in fix round 2 because the product and stylesheet remain byte-unchanged.
 - Fix-round 3 diff inspection: the PL/EN product pages, shared CSS, facts registry and browser script remain byte-unchanged from `fde212f476a542042f4c07598b8ab441abe814d2`; only the verifier, verifier tests and this report changed.
 - The browser review was not repeated in fix round 3 because no product or stylesheet file changed.
+- Fix-round 4 diff inspection: the PL/EN product pages, shared CSS, facts registry and browser script remain byte-unchanged from both the original Task 2 product commit `ee98910d3369d7b91c085f844d49cf8c0f9c4273` and the round 4 base `3b9f5b503320b6a13e53513f7478d2d362d63591`; only the verifier, verifier tests and this report changed.
+- The browser review was not repeated in fix round 4 because no product or stylesheet file changed.
 
 ## Limitations
 
