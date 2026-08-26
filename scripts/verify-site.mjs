@@ -6292,6 +6292,14 @@ const ARTIFACT_FILES = Object.freeze([
 const ARTIFACT_COMMON_DISCLAIMER = "This is a conceptual procurement operating model. Capability descriptions and scores are illustrative target-state assumptions, not claims about current product availability, legal compliance or a measured organisation.";
 const ARTIFACT_PRODUCT_DISCLAIMER = "Product names are model labels. Verify availability, scope and licensing for the relevant SAP landscape.";
 const ARTIFACT_TOOLBAR_LABEL = "Back to the Polish Procurement 2026 page";
+const ARTIFACT_FAVICON_PATH = "/favicon.svg";
+const ARTIFACT_LEADS = Object.freeze({
+  "diagrams/diagram1_universal.html": "A workshop view of strategic and operational steps with five scenario lenses. Select a labelled record to inspect its decision boundary.",
+  "diagrams/diagram2_ariba.html": "A static vocabulary for discussing a landscape. Each placement is a workshop hypothesis to verify for the organisation, not an implementation bill of materials or portfolio snapshot.",
+  "diagrams/diagram3_maturity.html": "Change either side of each dimension to discuss a hypothetical baseline and target. The values do not describe an organisation.",
+  "diagrams/infographic.html": "A compact workshop sheet for separating a process sequence from the choices made for a particular operating model.",
+  "infographic_procurement_2026_EN.html": "A compact workshop sheet for separating a process sequence from the choices made for a particular operating model."
+});
 const ARTIFACT_TOKENS = Object.freeze({
   "--artifact-bg": "#102831",
   "--artifact-panel": "#193D49",
@@ -6362,6 +6370,23 @@ const ARIBA_FEATURE_LABELS = new Set([
 const ARIBA_NEUTRAL_LABELS = new Set([
   "Organisation-specific data", "Implementation-specific controls", "External market inputs", "Integration decision"
 ]);
+const ARIBA_WORKSHOP_QUESTIONS = Object.freeze([
+  "Workshop question: which planning inputs and ownership rules belong in the landscape?",
+  "Workshop question: which market and internal inputs support the analysis?",
+  "Workshop question: which suite scope supports the chosen category workflow?",
+  "Workshop question: which sourcing, lifecycle and risk labels require landscape validation?",
+  "Workshop question: how are contract records and implementation controls divided?",
+  "Workshop question: which channels and catalogue rules guide a stated need?",
+  "Workshop question: which workflow and budget controls apply to a request?",
+  "Workshop question: where do order records and network exchanges sit?",
+  "Workshop question: which exchanges, acknowledgements and integrations are in scope?",
+  "Workshop question: which invoice decisions and exceptions are represented?",
+  "Workshop question: where is automation appropriate and where is human oversight required?",
+  "Workshop question: which internal and external signals enter the risk workflow?",
+  "Workshop question: which evidence, applicability decisions and controls are required?",
+  "Workshop question: which source owns each data object and reporting rule?",
+  "Workshop question: which governance and collaboration records belong in the landscape?"
+]);
 const MATURITY_DIMENSIONS = Object.freeze([
   Object.freeze(["ai", "AI & Orchestration", 1, 4]),
   Object.freeze(["risk", "Risk & Resilience", 1, 4]),
@@ -6391,11 +6416,11 @@ const INFOGRAPHIC_NOTES = Object.freeze([
 // behavior-specific contracts below. Values are filled from the reviewed
 // implementation, never derived from a mutable digest.
 const ARTIFACT_CENSUS = Object.freeze({
-  "diagrams/diagram1_universal.html": Object.freeze({ elements: 73, tags: Object.freeze({ a: 1, body: 1, button: 15, circle: 7, desc: 1, div: 2, figcaption: 1, figure: 1, h1: 1, h2: 2, head: 1, header: 2, html: 1, main: 1, meta: 2, nav: 1, p: 6, path: 14, rect: 1, script: 1, section: 2, style: 1, svg: 1, text: 5, title: 2 }), attributes: Object.freeze({ "aria-controls": 15, "aria-label": 2, "aria-labelledby": 4, "aria-live": 1, "aria-pressed": 15, charset: 1, class: 55, content: 1, cx: 7, cy: 7, d: 14, "data-artifact": 1, "data-description": 15, "data-record-id": 35, "data-record-kind": 15, fill: 22, height: 1, href: 1, id: 6, lang: 1, name: 1, r: 7, role: 2, stroke: 22, "stroke-width": 22, target: 1, "text-anchor": 5, type: 15, viewbox: 1, width: 1, x: 6, xmlns: 1, y: 6 }) }),
-  "diagrams/diagram2_ariba.html": Object.freeze({ elements: 155, tags: Object.freeze({ a: 1, article: 15, body: 1, div: 19, h1: 1, h2: 3, h3: 15, head: 1, header: 4, html: 1, li: 33, main: 1, meta: 2, nav: 1, p: 37, section: 3, style: 1, title: 1, ul: 15 }), attributes: Object.freeze({ "aria-label": 1, charset: 1, class: 110, content: 1, "data-artifact": 1, "data-feature-label": 6, "data-map-group": 3, "data-marker": 15, "data-model-label": 11, "data-product-name": 16, "data-record-id": 15, href: 1, lang: 1, name: 1, target: 1 }) }),
-  "diagrams/diagram3_maturity.html": Object.freeze({ elements: 291, tags: Object.freeze({ a: 1, body: 1, dd: 5, div: 22, dl: 1, dt: 5, fieldset: 16, form: 1, h1: 1, h2: 9, h3: 1, head: 1, header: 1, html: 1, input: 80, label: 80, legend: 16, li: 4, main: 1, meta: 2, nav: 1, ol: 1, output: 8, p: 12, script: 1, section: 9, span: 8, style: 1, title: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 1, "aria-live": 1, charset: 1, checked: 16, class: 130, content: 1, "data-artifact": 1, "data-baseline": 8, "data-dimension": 8, "data-side": 16, "data-target": 8, for: 80, href: 1, id: 87, lang: 1, name: 81, target: 1, type: 80, value: 80 }) }),
-  "diagrams/infographic.html": Object.freeze({ elements: 51, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 1, id: 3, lang: 1, name: 1, scope: 5, target: 1 }) }),
-  "infographic_procurement_2026_EN.html": Object.freeze({ elements: 51, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 1, id: 3, lang: 1, name: 1, scope: 5, target: 1 }) })
+  "diagrams/diagram1_universal.html": Object.freeze({ elements: 74, tags: Object.freeze({ a: 1, body: 1, button: 15, circle: 7, desc: 1, div: 2, figcaption: 1, figure: 1, h1: 1, h2: 2, head: 1, header: 2, html: 1, link: 1, main: 1, meta: 2, nav: 1, p: 6, path: 14, rect: 1, script: 1, section: 2, style: 1, svg: 1, text: 5, title: 2 }), attributes: Object.freeze({ "aria-controls": 15, "aria-label": 2, "aria-labelledby": 4, "aria-live": 1, "aria-pressed": 15, charset: 1, class: 55, content: 1, cx: 7, cy: 7, d: 14, "data-artifact": 1, "data-description": 15, "data-record-id": 35, "data-record-kind": 15, fill: 22, height: 1, href: 2, id: 6, lang: 1, name: 1, r: 7, rel: 1, role: 2, stroke: 22, "stroke-width": 22, target: 1, "text-anchor": 5, type: 16, viewbox: 1, width: 1, x: 6, xmlns: 1, y: 6 }) }),
+  "diagrams/diagram2_ariba.html": Object.freeze({ elements: 156, tags: Object.freeze({ a: 1, article: 15, body: 1, div: 19, h1: 1, h2: 3, h3: 15, head: 1, header: 4, html: 1, li: 33, link: 1, main: 1, meta: 2, nav: 1, p: 37, section: 3, style: 1, title: 1, ul: 15 }), attributes: Object.freeze({ "aria-label": 1, charset: 1, class: 110, content: 1, "data-artifact": 1, "data-feature-label": 6, "data-map-group": 3, "data-marker": 15, "data-model-label": 11, "data-product-name": 16, "data-record-id": 15, href: 2, lang: 1, name: 1, rel: 1, target: 1, type: 1 }) }),
+  "diagrams/diagram3_maturity.html": Object.freeze({ elements: 292, tags: Object.freeze({ a: 1, body: 1, dd: 5, div: 22, dl: 1, dt: 5, fieldset: 16, form: 1, h1: 1, h2: 9, h3: 1, head: 1, header: 1, html: 1, input: 80, label: 80, legend: 16, li: 4, link: 1, main: 1, meta: 2, nav: 1, ol: 1, output: 8, p: 12, script: 1, section: 9, span: 8, style: 1, title: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 1, "aria-live": 1, charset: 1, checked: 16, class: 130, content: 1, "data-artifact": 1, "data-baseline": 8, "data-dimension": 8, "data-side": 16, "data-target": 8, for: 80, href: 2, id: 87, lang: 1, name: 81, rel: 1, target: 1, type: 81, value: 80 }) }),
+  "diagrams/infographic.html": Object.freeze({ elements: 52, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, link: 1, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 2, id: 3, lang: 1, name: 1, rel: 1, scope: 5, target: 1, type: 1 }) }),
+  "infographic_procurement_2026_EN.html": Object.freeze({ elements: 52, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, link: 1, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 2, id: 3, lang: 1, name: 1, rel: 1, scope: 5, target: 1, type: 1 }) })
 });
 
 function artifactCensus(parsedRoot) {
@@ -6420,8 +6445,11 @@ function artifactSourceCorpus(html) {
 }
 
 function verifyArtifactClaimBoundary(path, html, parsedRoot, errors) {
-  const source = artifactSourceCorpus(html);
-  const compact = source.replace(/[^a-z0-9%+>]+/g, "");
+  const sourceVariants = [
+    artifactSourceCorpus(html),
+    artifactSourceCorpus(html.replace(/<!--[\s\S]*?-->/g, ""))
+  ];
+  const compacts = sourceVariants.map((source) => source.replace(/[^a-z0-9%+>]+/g, ""));
   const forbidden = [
     "reality2026", "asof2026", "newlayers2026", "target2027", "currentreadiness",
     "90%+", ">90%", "fullcsrdcsdddautomation", "everytransaction",
@@ -6432,10 +6460,15 @@ function verifyArtifactClaimBoundary(path, html, parsedRoot, errors) {
     "guaranteedregulatorycompliance", "complianceautomation", "realtimeprediction",
     "realtimepredictive", "digitaltwin", "touchlessrate"
   ];
-  if (forbidden.some((claim) => compact.includes(claim))) {
+  if (forbidden.some((claim) => compacts.some((compact) => compact.includes(claim)))) {
     error(errors, "artifact-claims", path, "contains an unsupported current-state, capability, partner, compliance or performance claim");
   }
   const visible = publishedStaticText(htmlBodyRoot(parsedRoot));
+  const percentages = [...visible.matchAll(/\b\d+(?:\.\d+)?\s*%/g)].map((match) => match[0].replace(/\s+/g, ""));
+  const expectedPercentages = path === "diagrams/diagram3_maturity.html" ? ["38%"] : [];
+  if (JSON.stringify(percentages) !== JSON.stringify(expectedPercentages)) {
+    error(errors, "artifact-claims", path, "allows only the exact baseline percentage derived by the illustrative maturity model");
+  }
   const visibleWithoutDisclaimer = normalizeExactLiteral(visible.replace(ARTIFACT_COMMON_DISCLAIMER, ""));
   if (visibleWithoutDisclaimer.includes("—")
     || /\b(?:best|leading|ultimate|most)\b/i.test(visibleWithoutDisclaimer)
@@ -6448,21 +6481,27 @@ function verifyArtifactClaimBoundary(path, html, parsedRoot, errors) {
 async function verifyArtifactResources(path, html, parsedRoot, styleText, context) {
   const all = elementDescendants(parsedRoot);
   const forbiddenTags = new Set([
-    "applet", "audio", "base", "embed", "frame", "frameset", "iframe", "img", "link",
+    "applet", "audio", "base", "embed", "frame", "frameset", "iframe", "img",
     "object", "picture", "portal", "source", "track", "video"
   ]);
   const resourceAttributes = new Set(["action", "background", "cite", "data", "formaction", "manifest", "ping", "poster", "profile", "src", "srcdoc", "srcset", "usemap", "xlink:href"]);
+  const exactFavicon = (element) => exactActiveLink(element, { rel: "icon", type: "image/svg+xml", href: ARTIFACT_FAVICON_PATH });
   const invalidResource = all.some((element) => forbiddenTags.has(element.name)
     || [...element.attributes].some(([name, value]) => resourceAttributes.has(name) && nonEmptyString(value))
-    || (element.name !== "a" && element.attributes.has("href"))
+    || (element.name !== "a" && !exactFavicon(element) && element.attributes.has("href"))
+    || (element.name === "link" && !exactFavicon(element))
     || (element.name === "script" && element.attributes.has("src")));
   const cssUrls = [...styleText.matchAll(/url\(\s*(["']?)([^"')]+)\1\s*\)/gi)].map((match) => decodeCssEscapes(match[2].trim()));
   const invalidCss = /@import\b/i.test(styleText)
     || cssUrls.some((url) => !ARTIFACT_FONT_PATHS.has(url))
     || /(?:https?:)?\/\//i.test(styleText)
     || /data\s*:/i.test(styleText);
-  if (invalidResource || invalidCss || /<\s*(?:iframe|embed|object)\b/i.test(html)) {
-    error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests and the parent return link");
+  const scriptText = all.filter((element) => element.name === "script").map((script) => rawElementText(script)).join("\n");
+  const invalidDynamicScript = /(?:document\s*\.\s*)?createElement\s*\(\s*["']script["']\s*\)/i.test(scriptText)
+    || /\.\s*src\s*=\s*["'](?:https?:)?\/\//i.test(scriptText)
+    || /setAttribute\s*\(\s*["']src["']\s*,\s*["'](?:https?:)?\/\//i.test(scriptText);
+  if (invalidResource || invalidCss || invalidDynamicScript || /<\s*(?:iframe|embed|object)\b/i.test(html)) {
+    error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests, the exact local favicon and the parent return link");
   }
   for (const fontPath of new Set(cssUrls)) {
     try {
@@ -6472,6 +6511,30 @@ async function verifyArtifactResources(path, html, parsedRoot, styleText, contex
       error(context.errors, "artifact-resource", path, `${fontPath} is missing (${cause.code ?? cause.message})`);
     }
   }
+  try {
+    const favicon = await stat(resolve(context.root, routeToFile(ARTIFACT_FAVICON_PATH)));
+    if (!favicon.isFile()) throw Object.assign(new Error("favicon target is not a file"), { code: "NOT_FILE" });
+  } catch (cause) {
+    error(context.errors, "artifact-favicon", path, `${ARTIFACT_FAVICON_PATH} is missing (${cause.code ?? cause.message})`);
+  }
+}
+
+function decodedArtifactCssDeclarations(rule) {
+  return [...rule.declarations].map(([property, value]) => [
+    normalize(decodeCssEscapes(property)),
+    normalize(decodeCssEscapes(value)).replace(/\s*!\s*important\s*$/, "")
+  ]);
+}
+
+function verifyArtifactStylesheetVisibility(path, rules, errors) {
+  const hidden = rules.some((rule) => {
+    const declarations = decodedArtifactCssDeclarations(rule);
+    return declarations.some(([property, value]) => (property === "display" && value === "none")
+      || (property === "visibility" && new Set(["hidden", "collapse"]).has(value))
+      || (property === "content-visibility" && value === "hidden")
+      || (property === "opacity" && /^0(?:\.0+)?%?$/.test(value)));
+  });
+  if (hidden) error(errors, "artifact-visibility", path, "forbids stylesheet rules that hide required toolbar, disclaimer or artifact content");
 }
 
 function verifyArtifactSafety(path, html, parsedRoot, styleText, errors) {
@@ -6515,9 +6578,15 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
     || h1s.length !== 1 || !nonEmptyString(publishedStaticText(h1s[0]))) {
     error(context.errors, "artifact-document", path, "requires one complete English HTML5 document, title, viewport and visible h1");
   }
-  if (elementAttribute(body, "data-artifact") !== expectedArtifact
+  if (!body || elementAttribute(body, "data-artifact") !== expectedArtifact
     || all.filter((element) => element.attributes.has("data-artifact")).length !== 1) {
     error(context.errors, "artifact-manifest", path, `body must be the sole data-artifact owner with value ${expectedArtifact}`);
+  }
+  const faviconLinks = head ? directElementChildren(head, "link") : [];
+  const allLinks = all.filter((element) => element.name === "link");
+  if (faviconLinks.length !== 1 || allLinks.length !== 1
+    || !exactActiveLink(faviconLinks[0], { rel: "icon", type: "image/svg+xml", href: ARTIFACT_FAVICON_PATH })) {
+    error(context.errors, "artifact-favicon", path, "requires exactly one active local SVG favicon declaration in head");
   }
   const toolbars = all.filter((element) => element.name === "nav" && elementHasClass(element, "artifact-toolbar") && pageElementIsActive(element));
   const links = toolbars.length === 1 ? directElementChildren(toolbars[0], "a").filter(pageElementIsActive) : [];
@@ -6539,7 +6608,12 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
   if (styles.length !== 1 || Object.entries(ARTIFACT_TOKENS).some(([property, value]) => propertyValue(rules, ":root", property) !== value)) {
     error(context.errors, "artifact-style", path, "requires the exact five local Flight Plan artifact tokens");
   }
+  const leads = all.filter((element) => elementHasClass(element, "artifact-lead") && pageElementIsActive(element));
+  if (leads.length !== 1 || publishedStaticText(leads[0]) !== ARTIFACT_LEADS[path]) {
+    error(context.errors, "artifact-copy", path, "requires the exact reviewed claim-safe artifact lead");
+  }
   verifyArtifactSafety(path, html, root, styleText, context.errors);
+  verifyArtifactStylesheetVisibility(path, rules, context.errors);
   verifyArtifactClaimBoundary(path, html, root, context.errors);
   const actualCensus = artifactCensus(root);
   const expectedCensus = ARTIFACT_CENSUS[path];
@@ -6568,6 +6642,14 @@ function verifyProcessArtifact(path, artifact, errors) {
     error(errors, "process-geometry", path, "requires the exact 20 pointer geometries mapped to 15 logical records and no geometry tab stops");
   }
   const rules = parseCssRules(styleText);
+  const pointerDeclarationManifest = rules.flatMap((rule) => decodedArtifactCssDeclarations(rule)
+    .filter(([property]) => property === "pointer-events")
+    .flatMap(([, value]) => rule.selectors.map((selector) => [rule.media, selector, value])));
+  const expectedPointerDeclarationManifest = [
+    [[], ".process-geometry", "stroke"],
+    [[], "circle.process-geometry", "visiblepainted"],
+    [[], ".map-label", "none"]
+  ];
   const paths = geometries.filter((element) => element.name === "path");
   const circles = geometries.filter((element) => element.name === "circle");
   const lensCircles = circles.filter((element) => elementAttribute(element, "r") === "18");
@@ -6576,8 +6658,10 @@ function verifyProcessArtifact(path, artifact, errors) {
     const strokeWidth = Number.parseFloat(elementAttribute(element, "stroke-width") ?? "");
     return elementAttribute(element, "stroke") !== "none" && Number.isFinite(strokeWidth) && strokeWidth > 0;
   };
-  const ownsSafePointerHits = propertyValue(rules, ".process-geometry", "pointer-events") === "stroke"
+  const ownsSafePointerHits = JSON.stringify(pointerDeclarationManifest) === JSON.stringify(expectedPointerDeclarationManifest)
+    && propertyValue(rules, ".process-geometry", "pointer-events") === "stroke"
     && propertyValue(rules, "circle.process-geometry", "pointer-events") === "visiblePainted"
+    && propertyValue(rules, ".map-label", "pointer-events") === "none"
     && paths.length === 14
     && paths.every((element) => elementAttribute(element, "fill") === "none" && hasPaintedStroke(element))
     && lensCircles.length === 5
@@ -6637,6 +6721,13 @@ function verifyAribaMapArtifact(path, artifact, errors) {
     || JSON.stringify(recordIds) !== JSON.stringify(PROCESS_RECORDS.map((record) => record[0]))
     || JSON.stringify(titles) !== JSON.stringify(expectedTitles)) {
     error(errors, "ariba-map-model", path, "requires the exact three groups, 15 markers, logical record order and process/lens titles");
+  }
+  const workshopQuestions = cells.map((cell) => {
+    const questions = elementDescendants(cell).filter((element) => elementHasClass(element, "model-cell__question"));
+    return questions.length === 1 ? publishedStaticText(questions[0]) : null;
+  });
+  if (JSON.stringify(workshopQuestions) !== JSON.stringify(ARIBA_WORKSHOP_QUESTIONS)) {
+    error(errors, "ariba-map-copy", path, "requires the exact 15 reviewed workshop questions in process order");
   }
   let validVocabulary = cells.length === 15;
   for (const cell of cells) {
@@ -6740,8 +6831,33 @@ function verifyMaturityArtifact(path, artifact, errors) {
   if (behaviorFragments.some((fragment) => !script.includes(fragment))) {
     error(errors, "maturity-interaction", path, "requires safely rendered native-control updates and an independently testable calculator");
   }
+  const summaries = all.filter((element) => element.name === "section" && elementHasClass(element, "scenario-summary"));
+  const summary = summaries[0];
+  const summaryHeadings = summary ? directElementChildren(summary, "h2") : [];
+  const summaryLists = summary ? directElementChildren(summary, "dl") : [];
+  const summaryRows = summaryLists.length === 1 ? directElementChildren(summaryLists[0], "div") : [];
+  const actualSummaryRows = summaryRows.map((row) => {
+    const terms = directElementChildren(row, "dt");
+    const values = directElementChildren(row, "dd");
+    return terms.length === 1 && values.length === 1
+      ? [publishedStaticText(terms[0]), elementAttribute(values[0], "id"), publishedStaticText(values[0])]
+      : null;
+  });
+  const expectedSummaryRows = [
+    ["Illustrative baseline", "baseline-average", "1.9 / 5.0"],
+    ["Scenario target", "target-average", "4.3 / 5.0"],
+    ["Total scenario gap", "total-gap", "+19 points"],
+    ["Maximum single gap", "maximum-gap", "3"],
+    ["Illustrative baseline score", "baseline-score", "38%"]
+  ];
+  if (summaries.length !== 1 || summaryHeadings.length !== 1
+    || !exactElementAttributes(summaryHeadings[0], { id: "scenario-summary-title" })
+    || publishedStaticText(summaryHeadings[0]) !== "Scenario score"
+    || JSON.stringify(actualSummaryRows) !== JSON.stringify(expectedSummaryRows)) {
+    error(errors, "maturity-output", path, "requires the exact Scenario score heading and honestly labelled baseline-derived output rows");
+  }
   const visible = publishedStaticText(artifact.body);
-  for (const required of ["Illustrative baseline", "Scenario target", "Scenario score", "Largest scenario gaps", "1.9", "4.3", "+19", "38%"] ) {
+  for (const required of ["Illustrative baseline", "Illustrative baseline score", "Scenario target", "Scenario score", "Largest scenario gaps", "1.9", "4.3", "+19", "38%"] ) {
     if (!visible.includes(required)) error(errors, "maturity-output", path, `missing initial illustrative output ${required}`);
   }
 }
@@ -6770,6 +6886,22 @@ function verifyInfographicArtifact(path, artifact, errors) {
   }
 }
 
+async function publicHtmlPaths(root, relativeDirectory = "") {
+  const entries = await readdir(resolve(root, relativeDirectory), { withFileTypes: true });
+  const paths = [];
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name, "en"))) {
+    if (entry.isDirectory()) {
+      if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
+      const childDirectory = relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name;
+      paths.push(...await publicHtmlPaths(root, childDirectory));
+      continue;
+    }
+    if (!entry.isFile() || !entry.name.endsWith(".html")) continue;
+    paths.push(relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name);
+  }
+  return paths;
+}
+
 async function verifyArtifacts(_factData, context) {
   let diagramFiles = [];
   try {
@@ -6780,6 +6912,20 @@ async function verifyArtifacts(_factData, context) {
   if (JSON.stringify(diagramFiles) !== JSON.stringify(["diagram1_universal.html", "diagram2_ariba.html", "diagram3_maturity.html", "infographic.html"])) {
     error(context.errors, "artifact-manifest", "diagrams", "requires the exact four embedded artifact files and no sixth diagram artifact");
   }
+  try {
+    const artifactOwners = [];
+    for (const path of await publicHtmlPaths(context.root)) {
+      const html = await readFile(resolve(context.root, path), "utf8");
+      const parsed = parseStaticHtml(html);
+      if (elementDescendants(parsed.root, "body").some((body) => body.attributes.has("data-artifact"))) artifactOwners.push(path);
+    }
+    const expectedOwners = ARTIFACT_FILES.map(([path]) => path).sort();
+    if (JSON.stringify(artifactOwners.sort()) !== JSON.stringify(expectedOwners)) {
+      error(context.errors, "artifact-manifest", "artifacts", `requires exact recursive body[data-artifact] paths ${JSON.stringify(expectedOwners)}; actual ${JSON.stringify(artifactOwners.sort())}`);
+    }
+  } catch (cause) {
+    error(context.errors, "artifact-manifest", "artifacts", `unable to enumerate public HTML recursively: ${cause.code ?? cause.message}`);
+  }
   const files = new Map();
   const parsed = new Map();
   for (const [path, dataArtifact] of ARTIFACT_FILES) {
@@ -6789,11 +6935,16 @@ async function verifyArtifacts(_factData, context) {
     parsed.set(path, artifact);
     await verifyArtifactResources(path, html, artifact.root, artifact.styleText, context);
   }
-  verifyProcessArtifact("diagrams/diagram1_universal.html", parsed.get("diagrams/diagram1_universal.html"), context.errors);
-  verifyAribaMapArtifact("diagrams/diagram2_ariba.html", parsed.get("diagrams/diagram2_ariba.html"), context.errors);
-  verifyMaturityArtifact("diagrams/diagram3_maturity.html", parsed.get("diagrams/diagram3_maturity.html"), context.errors);
-  verifyInfographicArtifact("diagrams/infographic.html", parsed.get("diagrams/infographic.html"), context.errors);
-  verifyInfographicArtifact("infographic_procurement_2026_EN.html", parsed.get("infographic_procurement_2026_EN.html"), context.errors);
+  const process = parsed.get("diagrams/diagram1_universal.html");
+  const ariba = parsed.get("diagrams/diagram2_ariba.html");
+  const maturity = parsed.get("diagrams/diagram3_maturity.html");
+  const embeddedInfographic = parsed.get("diagrams/infographic.html");
+  const standaloneInfographic = parsed.get("infographic_procurement_2026_EN.html");
+  if (process?.body) verifyProcessArtifact("diagrams/diagram1_universal.html", process, context.errors);
+  if (ariba?.body) verifyAribaMapArtifact("diagrams/diagram2_ariba.html", ariba, context.errors);
+  if (maturity?.body) verifyMaturityArtifact("diagrams/diagram3_maturity.html", maturity, context.errors);
+  if (embeddedInfographic?.body) verifyInfographicArtifact("diagrams/infographic.html", embeddedInfographic, context.errors);
+  if (standaloneInfographic?.body) verifyInfographicArtifact("infographic_procurement_2026_EN.html", standaloneInfographic, context.errors);
   if (files.get("diagrams/infographic.html") !== files.get("infographic_procurement_2026_EN.html")) {
     error(context.errors, "infographic-parity", "diagrams/infographic.html", "embedded and standalone infographic files must be byte-for-byte identical");
   }

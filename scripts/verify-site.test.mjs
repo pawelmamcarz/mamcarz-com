@@ -39,6 +39,24 @@ const artifactPaths = Object.freeze([
 const artifactProductHtml = Object.freeze(Object.fromEntries(await Promise.all(
   artifactPaths.map(async (path) => [path, await readFile(resolve(path), "utf8")])
 )));
+const artifactFaviconLink = '<link rel="icon" type="image/svg+xml" href="/favicon.svg">';
+
+function round2ArtifactHtml(path, html) {
+  let updated = html.includes(artifactFaviconLink)
+    ? html
+    : html.replace("</title>", `</title>\n  ${artifactFaviconLink}`);
+  if (path === "diagrams/diagram3_maturity.html") {
+    updated = updated.replace(
+      '<dt>Scenario score</dt><dd id="baseline-score">38%</dd>',
+      '<dt>Illustrative baseline score</dt><dd id="baseline-score">38%</dd>'
+    );
+  }
+  return updated;
+}
+
+function round2ArtifactOverrides() {
+  return Object.fromEntries(artifactPaths.map((path) => [path, round2ArtifactHtml(path, artifactProductHtml[path])]));
+}
 const serviceProductHtml = Object.freeze({
   transformation: Object.freeze({
     pl: await readFile(resolve("uslugi/transformacja-zakupow/index.html"), "utf8"),
@@ -451,8 +469,9 @@ function errorIds(result) {
   return result.errors.map((error) => error.split(" ")[1]);
 }
 
-async function artifactFamilyMutation({ path = null, mutate = (html) => html, overrides = {} } = {}) {
+async function artifactFamilyMutation({ path = null, mutate = (html) => html, overrides = {}, omit = [], includeFavicon = true } = {}) {
   const files = { ...artifactProductHtml, ...overrides };
+  for (const omittedPath of omit) delete files[omittedPath];
   if (path !== null) {
     const current = files[path];
     assert.equal(typeof current, "string", `${path} must be an artifact fixture`);
@@ -466,7 +485,8 @@ async function artifactFamilyMutation({ path = null, mutate = (html) => html, ov
       "procurement-2026/index.html": "<!doctype html><html lang=\"pl\"><head><title>Procurement 2026</title></head><body><h1>Procurement 2026</h1></body></html>",
       "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
       "assets/fonts/dmsans-latin.woff2": "fixture-font",
-      "assets/fonts/dmmono-latin.woff2": "fixture-font"
+      "assets/fonts/dmmono-latin.woff2": "fixture-font",
+      ...(includeFavicon ? { "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>" } : {})
     }
   });
   return runVerification({ root, scope: "pages", family: "artifacts" });
@@ -5769,6 +5789,168 @@ test("Plan 2 Task 8 fix round 1 owns distinct pointer hits for open paths and fi
   }
 });
 
+test("Plan 2 Task 8 fix round 2 rejects every pointer cascade override while retaining label pass-through", async () => {
+  const processPath = "diagrams/diagram1_universal.html";
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    ["all geometry hits disabled", (html) => html.replace("</style>", "    .process-map svg { pointer-events:none; }\n  </style>")],
+    ["open paths made fill-sensitive", (html) => html.replace("</style>", "    .process-map path.process-geometry { pointer-events:all!important; }\n  </style>")],
+    ["filled-circle centre hits removed", (html) => html.replace("</style>", "    .process-map circle.process-geometry { pointer-events:stroke!important; }\n  </style>")],
+    ["browser-valid escaped pointer override", (html) => html.replace("</style>", "    .process-map path.process-geometry { p\\6f inter-events:a\\6c l!important; }\n  </style>")],
+    ["important required declaration", (html) => html.replace("pointer-events: stroke;", "pointer-events: stroke !important;")],
+    ["map labels intercept pointer input", (html) => html.replace("pointer-events: none;", "pointer-events: auto;")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: processPath, mutate, overrides });
+    assert.ok(errorIds(result).includes("process-pointer-hit"), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 owns the scenario heading and honest baseline-derived score label independently", async () => {
+  const path = "diagrams/diagram3_maturity.html";
+  const overrides = round2ArtifactOverrides();
+  const result = await artifactFamilyMutation({
+    path,
+    overrides,
+    mutate: (html) => html.replace(
+      '<dt>Illustrative baseline score</dt><dd id="baseline-score">38%</dd>',
+      '<dt>Scenario score</dt><dd id="baseline-score">38%</dd>'
+    )
+  });
+  assert.ok(errorIds(result).includes("maturity-output"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 2 joins browser-visible copy around HTML comments before claim checks", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    ["retired aviation name", (html) => html.replace("A workshop view", "Warsaw<!--split-->FlightSafety workshop view")],
+    ["blocked client", (html) => html.replace("A workshop view", "Pol<!--split-->pharma workshop view")],
+    ["legacy framing", (html) => html.replace("A workshop view", "Reality<!--split--> 2026 workshop view")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes("artifact-claims"), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 owns claim-safe leads, SAP workshop questions and generic percentages", async () => {
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    [
+      "invented 50 percent result",
+      "artifact-claims",
+      "diagrams/diagram2_ariba.html",
+      (html) => html.replace("Each placement is a workshop hypothesis", "SAP Ariba reduces procurement cost by 50%. Each placement is a workshop hypothesis")
+    ],
+    [
+      "lead drift",
+      "artifact-copy",
+      "diagrams/diagram1_universal.html",
+      (html) => html.replace("Select a labelled record to inspect its decision boundary.", "Select a record to inspect the model.")
+    ],
+    [
+      "workshop question drift",
+      "ariba-map-copy",
+      "diagrams/diagram2_ariba.html",
+      (html) => html.replace("which planning inputs and ownership rules belong in the landscape?", "which inputs belong in the landscape?")
+    ]
+  ];
+  for (const [label, expected, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 rejects dynamic external scripts and stylesheet-hidden required content", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    [
+      "dynamic external script",
+      "artifact-resource",
+      (html) => html.replace("  </script>", '    const remoteScript = document.createElement("script");\n    remoteScript.src = "https://example.com/payload.js";\n    document.head.append(remoteScript);\n  </script>')
+    ],
+    [
+      "CSS-hidden disclaimer",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-disclaimer { display: none !important; }\n  </style>")
+    ],
+    [
+      "CSS-hidden toolbar",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-toolbar { visibility: hidden; }\n  </style>")
+    ],
+    [
+      "CSS-hidden content",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-shell { opacity: 0; }\n  </style>")
+    ],
+    [
+      "browser-valid escaped hidden disclaimer",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-disclaimer { d\\69 splay: n\\6f ne!important; }\n  </style>")
+    ]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 requires one exact owned local favicon in every artifact", async () => {
+  const overrides = round2ArtifactOverrides();
+  const accepted = await artifactFamilyMutation({ overrides });
+  assert.deepEqual(accepted.errors, [], accepted.errors.join("\n"));
+
+  const path = "diagrams/diagram1_universal.html";
+  const cases = [
+    ["missing link", (html) => html.replace(`  ${artifactFaviconLink}\n`, "")],
+    ["duplicate link", (html) => html.replace(artifactFaviconLink, `${artifactFaviconLink}\n  ${artifactFaviconLink}`)],
+    ["wrong local href", (html) => html.replace('href="/favicon.svg"', 'href="/favicon.ico"')],
+    ["external href", (html) => html.replace('href="/favicon.svg"', 'href="https://example.com/favicon.svg"')],
+    ["wrong declaration", (html) => html.replace('type="image/svg+xml"', 'type="image/png"')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes("artifact-favicon"), `${label}:\n${result.errors.join("\n")}`);
+  }
+
+  const missingFile = await artifactFamilyMutation({ overrides, includeFavicon: false });
+  assert.ok(errorIds(missingFile).includes("artifact-favicon"), missingFile.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 2 owns the recursive public artifact manifest and reports malformed files safely", async () => {
+  const overrides = round2ArtifactOverrides();
+  for (const path of ["unplanned.html", "extras/nested/unplanned.html"]) {
+    const result = await artifactFamilyMutation({
+      overrides: { ...overrides, [path]: round2ArtifactHtml("diagrams/infographic.html", artifactProductHtml["diagrams/infographic.html"]) }
+    });
+    assert.ok(errorIds(result).includes("artifact-manifest"), `${path}:\n${result.errors.join("\n")}`);
+  }
+
+  let missing;
+  try {
+    missing = await artifactFamilyMutation({ overrides, omit: ["diagrams/diagram1_universal.html"] });
+  } catch (cause) {
+    assert.fail(`missing artifact must aggregate structured errors, not throw ${cause?.name}: ${cause?.message}`);
+  }
+  assert.ok(errorIds(missing).includes("artifact-file"), missing.errors.join("\n"));
+
+  let malformed;
+  try {
+    malformed = await artifactFamilyMutation({
+      overrides: {
+        ...overrides,
+        "diagrams/diagram1_universal.html": `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Malformed artifact</title>${artifactFaviconLink}<style>:root { --artifact-bg: #102831; --artifact-panel: #193D49; --artifact-paper: #E9EDEF; --artifact-line: #8E9CA1; --artifact-signal: #D94B2B; }</style></head></html>`
+      }
+    });
+  } catch (cause) {
+    assert.fail(`malformed artifact must aggregate structured errors, not throw ${cause?.name}: ${cause?.message}`);
+  }
+  assert.ok(errorIds(malformed).includes("artifact-document"), malformed.errors.join("\n"));
+});
+
 test("Plan 2 Task 8 protects the static SAP workshop map and its bounded vocabulary", async () => {
   const cases = [
     ["marker", "ariba-map-model", (html) => html.replace('data-marker="1" data-record-id="s1"', 'data-marker="01" data-record-id="s1"')],
@@ -5781,6 +5963,56 @@ test("Plan 2 Task 8 protects the static SAP workshop map and its bounded vocabul
     const result = await artifactFamilyMutation({ path: "diagrams/diagram2_ariba.html", mutate });
     assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
   }
+});
+
+test("Plan 2 Task 8 fix round 2 independently owns the exact typed SAP workshop taxonomy", async () => {
+  const approvedTaxonomy = [
+    ["product-name", "SAP S/4HANA"],
+    ["model-label", "Organisation-specific data"],
+    ["model-label", "External market inputs"],
+    ["model-label", "Organisation-specific data"],
+    ["product-name", "SAP Ariba Strategic Sourcing Suite"],
+    ["product-name", "SAP Ariba Sourcing"],
+    ["product-name", "SAP Ariba Supplier Lifecycle and Performance"],
+    ["product-name", "SAP Ariba Supplier Risk"],
+    ["product-name", "SAP Ariba Contracts"],
+    ["model-label", "Implementation-specific controls"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["feature-label", "guided buying"],
+    ["feature-label", "catalogues"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["feature-label", "approval workflows"],
+    ["feature-label", "budget checks"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["product-name", "SAP Business Network for Procurement"],
+    ["product-name", "SAP Business Network for Procurement"],
+    ["feature-label", "network-based collaboration"],
+    ["model-label", "Integration decision"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["feature-label", "invoice management"],
+    ["model-label", "Implementation-specific controls"],
+    ["model-label", "Organisation-specific data"],
+    ["product-name", "SAP Ariba Supplier Risk"],
+    ["model-label", "External market inputs"],
+    ["model-label", "Organisation-specific data"],
+    ["model-label", "Implementation-specific controls"],
+    ["product-name", "SAP S/4HANA"],
+    ["model-label", "Organisation-specific data"],
+    ["product-name", "SAP Ariba Supplier Lifecycle and Performance"],
+    ["product-name", "SAP Business Network for Procurement"]
+  ];
+  const extractTaxonomy = (html) => [...html.matchAll(/<li class="model-vocabulary__item" data-(product-name|feature-label|model-label)="([^"]+)">([^<]+)<\/li>/g)]
+    .map(([, kind, value, text]) => {
+      assert.equal(text, value, `${kind} item must publish its typed value verbatim`);
+      return [kind, value];
+    });
+  const product = artifactProductHtml["diagrams/diagram2_ariba.html"];
+  assert.deepEqual(extractTaxonomy(product), approvedTaxonomy);
+
+  const coordinatedProductMutation = product.replaceAll("SAP Ariba Sourcing", "SAP Imaginary Procurement");
+  const coordinatedVerifierMutation = (await readFile(modulePath, "utf8")).replaceAll("SAP Ariba Sourcing", "SAP Imaginary Procurement");
+  assert.match(coordinatedVerifierMutation, /SAP Imaginary Procurement/);
+  assert.notDeepEqual(extractTaxonomy(coordinatedProductMutation), approvedTaxonomy, "the test-owned taxonomy must kill coordinated product and verifier drift");
 });
 
 test("Plan 2 Task 8 protects the maturity model inventory, native controls, guards and formulas", async () => {
@@ -5827,6 +6059,89 @@ test("Plan 2 Task 8 maturity calculator derives the approved illustrative initia
       { id: "esg", label: "ESG / Sustainability", gap: 2 }
     ]
   });
+});
+
+test("Plan 2 Task 8 fix round 2 executes maturity formulas over edited, boundary and guarded scenarios", () => {
+  const html = artifactProductHtml["diagrams/diagram3_maturity.html"];
+  const scriptFrom = (source) => {
+    const script = /<script>([\s\S]*?)<\/script>/.exec(source)?.[1];
+    assert.ok(script, "maturity artifact must expose one inline behavior script");
+    const sandbox = {};
+    runInNewContext(script, sandbox);
+    return sandbox.procurementMaturityModel.calculateScenario;
+  };
+  const dimensions = [
+    ["ai", "AI & Orchestration"],
+    ["risk", "Risk & Resilience"],
+    ["esg", "ESG / Sustainability"],
+    ["data", "Data & Analytics"],
+    ["srm", "Supplier Relationship Management"],
+    ["strat", "Strategic Procurement"],
+    ["oper", "Operational Procurement"],
+    ["integ", "Platform Integration"]
+  ];
+  const input = (baselines, targets) => dimensions.map(([id, label], index) => ({
+    id,
+    label,
+    baseline: baselines[index],
+    target: targets[index]
+  }));
+  const plain = (value) => JSON.parse(JSON.stringify(value));
+  const calculate = scriptFrom(html);
+  const cases = [
+    {
+      label: "upper target boundary",
+      input: input(Array(8).fill(1), Array(8).fill(5)),
+      expected: {
+        baselineAverage: "1.0", targetAverage: "5.0", totalGap: 32, maximumGap: 4, baselineScore: 20,
+        largestGaps: dimensions.slice(0, 4).map(([id, label]) => ({ id, label, gap: 4 }))
+      }
+    },
+    {
+      label: "target below baseline",
+      input: input([5, 4, 3, 2, 1, 5, 4, 3], [1, 2, 3, 4, 5, 1, 2, 3]),
+      expected: {
+        baselineAverage: "3.4", targetAverage: "2.6", totalGap: -6, maximumGap: 4, baselineScore: 68,
+        largestGaps: [
+          { id: "srm", label: "Supplier Relationship Management", gap: 4 },
+          { id: "data", label: "Data & Analytics", gap: 2 },
+          { id: "esg", label: "ESG / Sustainability", gap: 0 },
+          { id: "integ", label: "Platform Integration", gap: 0 }
+        ]
+      }
+    },
+    {
+      label: "stable non-initial ties",
+      input: input(Array(8).fill(2), [3, 3, 3, 3, 1, 1, 2, 2]),
+      expected: {
+        baselineAverage: "2.0", targetAverage: "2.3", totalGap: 2, maximumGap: 1, baselineScore: 40,
+        largestGaps: dimensions.slice(0, 4).map(([id, label]) => ({ id, label, gap: 1 }))
+      }
+    }
+  ];
+  for (const scenario of cases) {
+    assert.deepEqual(plain(calculate(scenario.input)), scenario.expected, scenario.label);
+  }
+
+  const valid = cases[2].input;
+  const invalidCases = [
+    valid.slice(0, -1),
+    [valid[1], valid[0], ...valid.slice(2)],
+    valid.map((dimension, index) => index === 0 ? { ...dimension, baseline: 0 } : dimension),
+    valid.map((dimension, index) => index === 0 ? { ...dimension, target: 6 } : dimension),
+    valid.map((dimension, index) => index === 0 ? { ...dimension, target: 1.5 } : dimension)
+  ];
+  for (const invalid of invalidCases) assert.throws(() => calculate(invalid), /Invalid (?:scenario|dimension)/);
+
+  const conditionalCorruption = html.replace(
+    "targetAverage: (targetTotal / dimensions.length).toFixed(1),",
+    "targetAverage: ((targetTotal === 34 ? targetTotal : baselineTotal) / dimensions.length).toFixed(1),"
+  );
+  assert.notEqual(conditionalCorruption, html, "conditional target-average mutation must apply");
+  const calculateMutant = scriptFrom(conditionalCorruption);
+  const initial = input([1, 1, 1, 2, 2, 3, 3, 2], [4, 4, 3, 4, 4, 5, 5, 5]);
+  assert.equal(calculateMutant(initial).targetAverage, "4.3", "confirmed mutant preserves the initial result");
+  assert.notDeepEqual(plain(calculateMutant(cases[2].input)), cases[2].expected, "non-initial runtime vector must kill the confirmed conditional corruption");
 });
 
 test("Plan 2 Task 8 requires exact infographic byte parity, process order and non-claim notes", async () => {
