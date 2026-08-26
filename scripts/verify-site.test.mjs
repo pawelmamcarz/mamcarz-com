@@ -141,11 +141,13 @@ function controlledAboutFixture(lang) {
     </div>`;
 }
 
-function publicProcurementSkillsFixture(lang, { href, outcome } = {}) {
+function publicProcurementSkillsFixture(lang, { href, labels, outcome } = {}) {
   const localized = lang === "pl"
-    ? { href: "/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Możliwy wynik", title: "Zamówienia publiczne" }
-    : { href: "/en/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Possible outcome", title: "Public procurement" };
-  return `<article data-service="public-procurement"><h3><a href="${href ?? localized.href}">${localized.title}</a></h3><dl><div><dt>${outcome ?? localized.outcome}</dt><dd>One</dd></div></dl></article>`;
+    ? { href: "/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Działanie", "Możliwy wynik"], title: "Zamówienia publiczne" }
+    : { href: "/en/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Action", "Possible outcome"], title: "Public procurement" };
+  const ledgerLabels = labels ?? [localized.labels[0], localized.labels[1], outcome ?? localized.labels[2]];
+  const ledger = ledgerLabels.map((label) => `<div><dt>${label}</dt><dd>One</dd></div>`).join("");
+  return `<article data-service="public-procurement"><h3><a href="${href ?? localized.href}">${localized.title}</a></h3><dl>${ledger}</dl></article>`;
 }
 
 function replaceHomepageSection(html, sectionId, replacement) {
@@ -951,6 +953,34 @@ test("home scope rejects an extra annotated About aviation fact item", async () 
   assert.ok(errorIds(result).includes("home-about-structure"));
 });
 
+test("home scope rejects an unsupported sibling paragraph anywhere in About", async () => {
+  const about = `<section id="about">${controlledAboutFixture("pl")}<p>Niepotwierdzona informacja</p></section>`;
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "about", about);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects a seventh annotated About fact in a sibling list", async () => {
+  const duplicate = '<ul class="about-facts"><li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li></ul>';
+  const about = `<section id="about">${controlledAboutFixture("pl")}${duplicate}</section>`;
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "about", about);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope fails closed when English About control markers are absent", async () => {
+  const uncontrolledAbout = controlledAboutFixture("en")
+    .replaceAll(/ data-about-copy="[^"]+"/g, "")
+    .replace(' class="about-facts"', "");
+  const about = `<section id="about">${uncontrolledAbout}</section>`;
+  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "about", about);
+  const root = await fixture({ enHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
 const unannotatedHomeClaims = [
   ["resume", '<p class="timeline-role">Unregistered role</p>'],
   ["portfolio", '<div class="pcard__title">Unregistered project</div>'],
@@ -989,6 +1019,30 @@ test("home scope accepts the localized English public-procurement Skills structu
   const root = await fixture({ enHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(!errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects mixed-language public-procurement ledger labels", async () => {
+  const article = publicProcurementSkillsFixture("pl", { labels: ["Problem", "Działanie", "Możliwy wynik", "Possible outcome"] });
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects an extra unknown public-procurement ledger label", async () => {
+  const article = publicProcurementSkillsFixture("pl", { labels: ["Problem", "Działanie", "Możliwy wynik", "Ryzyko"] });
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects reordered public-procurement ledger labels", async () => {
+  const article = publicProcurementSkillsFixture("pl", { labels: ["Działanie", "Problem", "Możliwy wynik"] });
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
 });
 
 test("home scope rejects a missing public-procurement service item", async () => {

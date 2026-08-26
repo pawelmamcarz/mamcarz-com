@@ -184,9 +184,6 @@ function verifyAboutStructure(activeBody, page, errors) {
   const about = sectionBlock(activeBody, { section: "about" });
   if (!about) return;
   const aboutTexts = tagBlocks(about.full, "div").filter((block) => hasClass(block.opening, "about-text"));
-  const hasControlledEnglishCopy = page.lang === "en" && aboutTexts.some((block) => block.full.includes("data-about-copy=") || openingTags(block.full, "[a-z][a-z0-9:-]*").some((tag) => hasClass(tag, "about-facts")));
-  if (page.lang === "en" && !hasControlledEnglishCopy) return;
-
   const problems = [];
   if (aboutTexts.length !== 1) problems.push(`expected one .about-text; found ${aboutTexts.length}`);
   const aboutText = aboutTexts[0];
@@ -196,8 +193,11 @@ function verifyAboutStructure(activeBody, page, errors) {
   }
 
   const contract = aboutCopyContracts[page.lang];
+  const allParagraphs = tagBlocks(about.full, "p");
   const paragraphs = tagBlocks(aboutText.full, "p");
-  if (paragraphs.length !== 3) problems.push(`expected section label plus two narrative paragraphs; found ${paragraphs.length}`);
+  if (allParagraphs.length !== 3 || paragraphs.length !== 3) {
+    problems.push(`expected exactly three controlled About paragraphs; found ${allParagraphs.length} section-wide and ${paragraphs.length} in .about-text`);
+  }
   const label = paragraphs[0];
   if (!label || (attributeValue(label.opening, "class") ?? "").trim() !== "section-label" || attributeValue(label.opening, "data-about-copy") !== null || renderedText(label.content) !== normalize(contract.label)) {
     problems.push("section label must be the exact localized controlled paragraph");
@@ -209,21 +209,26 @@ function verifyAboutStructure(activeBody, page, errors) {
     }
   }
 
-  if (tagBlocks(aboutText.full, "span").length > 0) problems.push("unsupported span inside .about-text");
+  if (tagBlocks(about.full, "span").length > 0) problems.push("unsupported span inside About");
 
-  const allOpeningTags = openingTags(aboutText.full, "[a-z][a-z0-9:-]*");
+  const allOpeningTags = openingTags(about.full, "[a-z][a-z0-9:-]*");
+  const items = tagBlocks(about.full, "li");
   const aboutFactTags = allOpeningTags.filter((tag) => hasClass(tag, "about-fact"));
+  const annotatedTags = allOpeningTags.filter((tag) => attributeValue(tag, "data-fact-id") !== null);
+  if (items.length !== aboutAviationFactOrder.length || aboutFactTags.length !== aboutAviationFactOrder.length || annotatedTags.length !== aboutAviationFactOrder.length) {
+    problems.push(`expected six About li, .about-fact and data-fact-id uses; found ${items.length}, ${aboutFactTags.length} and ${annotatedTags.length}`);
+  }
   if (aboutFactTags.some((tag) => !/^<li\b/i.test(tag) || attributeValue(tag, "data-fact-id") === null)) {
     problems.push("every .about-fact must be an annotated li");
   }
 
   const aboutFactContainers = allOpeningTags.filter((tag) => hasClass(tag, "about-facts"));
-  const aboutFactLists = tagBlocks(aboutText.full, "ul").filter((block) => hasClass(block.opening, "about-facts"));
+  const aboutFactLists = tagBlocks(about.full, "ul").filter((block) => hasClass(block.opening, "about-facts"));
   if (aboutFactContainers.length !== 1 || aboutFactLists.length !== 1) {
     problems.push(`expected one ul.about-facts; found ${aboutFactContainers.length}`);
   } else {
-    const items = tagBlocks(aboutFactLists[0].full, "li");
-    if (items.length !== aboutAviationFactOrder.length) problems.push(`expected ${aboutAviationFactOrder.length} About facts; found ${items.length}`);
+    const listItems = tagBlocks(aboutFactLists[0].full, "li");
+    if (listItems.length !== aboutAviationFactOrder.length) problems.push(`expected ${aboutAviationFactOrder.length} facts in ul.about-facts; found ${listItems.length}`);
     for (const [index, factId] of aboutAviationFactOrder.entries()) {
       const item = items[index];
       if (!item || !hasClass(item.opening, "about-fact") || attributeValue(item.opening, "data-fact-id") !== factId) {
@@ -251,8 +256,8 @@ function verifyHomeStructures(activeBody, page, errors) {
     const genericCards = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => hasClass(tag, "skill-card"));
     if (genericCards.length > 0) error(errors, "home-skills-structure", page.path, "Skills must use the route/evidence system instead of skill-card");
     const localized = page.lang === "pl"
-      ? { path: "/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Możliwy wynik", name: "Zamówienia publiczne" }
-      : { path: "/en/uslugi/doradztwo-zamowienia-publiczne/", outcome: "Possible outcome", name: "Public procurement" };
+      ? { path: "/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Działanie", "Możliwy wynik"], name: "Zamówienia publiczne" }
+      : { path: "/en/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Action", "Possible outcome"], name: "Public procurement" };
     const serviceMarkers = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => attributeValue(tag, "data-service") === "public-procurement");
     const serviceArticles = tagBlocks(skills.full, "article").filter((block) => attributeValue(block.opening, "data-service") === "public-procurement");
     if (serviceMarkers.length !== 1 || serviceArticles.length !== 1) {
@@ -262,9 +267,9 @@ function verifyHomeStructures(activeBody, page, errors) {
       const exactRoute = links.length === 1 && attributeValue(links[0].opening, "href") === localized.path;
       if (!exactRoute) error(errors, "home-skills-structure", page.path, `${localized.name} must use the exact localized ${localized.path} route`);
       const labels = tagBlocks(serviceArticles[0].full, "dt").map((block) => renderedText(block.content));
-      const possibleResults = labels.filter((label) => label === normalize(localized.outcome)).length;
-      if (possibleResults !== 1) {
-        error(errors, "home-skills-structure", page.path, `${localized.name} requires one exact ${localized.outcome} row; found ${possibleResults}`);
+      const expectedLabels = localized.labels.map(normalize);
+      if (labels.length !== expectedLabels.length || labels.some((label, index) => label !== expectedLabels[index])) {
+        error(errors, "home-skills-structure", page.path, `${localized.name} requires the exact ordered ledger labels: ${localized.labels.join(", ")}`);
       }
     }
   }
