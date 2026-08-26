@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
@@ -63,6 +63,76 @@ const navigationFixture = {
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>`
 };
+
+const plan2RoutePairs = [
+  ["index.html", "en/index.html", "/", "/en/", "home"],
+  ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html", "/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/", "services"],
+  ["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html", "/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/", "services"],
+  ["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html", "/uslugi/doradztwo-zamowienia-publiczne/", "/en/uslugi/doradztwo-zamowienia-publiczne/", "services"],
+  ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/", "applications"],
+  ["lotnictwo/index.html", "en/lotnictwo/index.html", "/lotnictwo/", "/en/lotnictwo/", "aviation"],
+  ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/", "projects"],
+  ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/", "knowledge"],
+  ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/", "speaking"]
+];
+
+const plan2Families = ["all", "home", "services", "applications", "aviation", "projects", "knowledge", "speaking", "artifacts"];
+
+function pageNavigationFixture(lang, pairedRoute) {
+  const currentLanguageLink = lang === "pl"
+    ? '<a href="/en/" class="nav-lang">EN</a>'
+    : '<a href="/" class="nav-lang">PL</a>';
+  const pairedLanguageLink = lang === "pl"
+    ? `<a href="${pairedRoute}" class="nav-lang">EN</a>`
+    : `<a href="${pairedRoute}" class="nav-lang">PL</a>`;
+  return navigationFixture[lang].replace(currentLanguageLink, pairedLanguageLink);
+}
+
+function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title = "Page" }) {
+  const route = lang === "pl" ? plRoute : enRoute;
+  const pairedRoute = lang === "pl" ? enRoute : plRoute;
+  return `<!doctype html><html lang="${lang}"><head>
+    <title>${title}</title>
+    <link rel="canonical" href="https://mamcarz.com${route}">
+    <link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}">
+    <link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}">
+    <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2">
+    ${head}
+  </head><body data-page="fixture">
+    <a class="skip-link" href="#main">Skip</a>
+    ${pageNavigationFixture(lang, pairedRoute)}
+    <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1></header>${body}</main>
+    <footer class="site-footer"><a href="mailto:pawel@mamcarz.com">Contact</a></footer>
+    <script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script>
+  </body></html>`;
+}
+
+function pagePairFiles(pair, overrides = {}) {
+  const [plFile, enFile, plRoute, enRoute] = pair;
+  return {
+    [plFile]: overrides.pl ?? pageShellFixture({ lang: "pl", plRoute, enRoute, title: "Strona" }),
+    [enFile]: overrides.en ?? pageShellFixture({ lang: "en", plRoute, enRoute, title: "Page" })
+  };
+}
+
+async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
+  const routeFiles = files ?? Object.assign({}, ...plan2RoutePairs.map((pair) => pagePairFiles(pair)));
+  const remaining = { ...routeFiles, ...extraFiles };
+  const plHtml = remaining["index.html"];
+  const enHtml = remaining["en/index.html"];
+  const serviceHtml = remaining["uslugi/wdrozenie-sap-ariba/index.html"];
+  delete remaining["index.html"];
+  delete remaining["en/index.html"];
+  delete remaining["uslugi/wdrozenie-sap-ariba/index.html"];
+  return fixture({
+    facts,
+    plHtml,
+    enHtml,
+    serviceHtml,
+    extraFiles: remaining
+  });
+}
 
 const legacyNavigationFixture = `
   <nav aria-label="Main navigation">
@@ -349,6 +419,232 @@ async function verifyFixtureCss(css) {
   const root = await fixture({ css });
   return runVerification({ root, scope: "foundation" });
 }
+
+const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "applications");
+
+async function applicationPageMutation({ lang = "pl", mutate = (html) => html, facts, body = "", extraFiles = {} } = {}) {
+  const [, , plRoute, enRoute] = applicationsPair;
+  const base = pageShellFixture({ lang, plRoute, enRoute, title: lang === "pl" ? "Aplikacje" : "Applications", body });
+  const mutated = mutate(base);
+  assert.notEqual(mutated, "", "application page mutation must leave a fixture document");
+  const overrides = lang === "pl" ? { pl: mutated } : { en: mutated };
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair, overrides), facts, extraFiles });
+  return runVerification({ root, scope: "pages", family: "applications" });
+}
+
+test("Plan 2 Task 1 uses the exact route manifest and accepts every declared family", async () => {
+  const root = await pageArchitectureFixture();
+  await Promise.all(plan2RoutePairs.flatMap((pair) => pair.slice(0, 2)).map((path) => rm(resolve(root, path), { force: true })));
+
+  for (const family of plan2Families) {
+    const result = await runVerification({ root, scope: "pages", family });
+    const expectedFiles = plan2RoutePairs
+      .filter((pair) => family === "all" || pair[4] === family)
+      .flatMap((pair) => pair.slice(0, 2));
+    const actualFiles = result.errors
+      .filter((entry) => entry.startsWith("ERROR route-file "))
+      .map((entry) => /^ERROR route-file ([^:]+):/.exec(entry)?.[1]);
+    assert.deepEqual(actualFiles, expectedFiles, `${family} must select only its exact manifest files`);
+    assert.ok(!errorIds(result).includes("cli-family"), `${family} must be accepted`);
+    assert.ok(!errorIds(result).includes("cli-scope"), "pages must be an accepted scope");
+  }
+});
+
+test("Plan 2 Task 1 rejects an unsupported family before page verification", async () => {
+  const root = await pageArchitectureFixture();
+  const result = await runVerification({ root, scope: "pages", family: "unsupported" });
+  assert.ok(errorIds(result).includes("cli-family"));
+  assert.equal(result.errors.some((entry) => entry.startsWith("ERROR route-file ")), false);
+});
+
+test("Plan 2 Task 1 CLI accepts artifacts explicitly and rejects an invalid family", async () => {
+  const accepted = await execFileAsync(process.execPath, [modulePath, "--scope=pages", "--family=artifacts"]);
+  assert.match(accepted.stdout, /deferred: artifacts-contract/);
+  await assert.rejects(
+    execFileAsync(process.execPath, [modulePath, "--scope=pages", "--family=invalid-family"]),
+    (cause) => cause.stderr.includes("ERROR cli-family scripts/verify-site.mjs: unsupported family invalid-family")
+  );
+});
+
+test("Plan 2 Task 1 package exposes the isolated pages command", async () => {
+  const packageData = JSON.parse(await readFile(resolve("package.json"), "utf8"));
+  assert.equal(packageData.scripts["verify:pages"], "node scripts/verify-site.mjs --scope=pages");
+});
+
+test("Plan 2 Task 1 aggregates both missing files in the selected family", async () => {
+  const root = await fixture();
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR route-file "));
+  assert.deepEqual(missing, [
+    "ERROR route-file aplikacje-operacyjne/index.html: required file is missing",
+    "ERROR route-file en/aplikacje-operacyjne/index.html: required file is missing"
+  ]);
+});
+
+test("Plan 2 Task 1 isolates another unfinished family but all still requires every target", async () => {
+  const files = pagePairFiles(applicationsPair);
+  const root = await pageArchitectureFixture({ files });
+  const selected = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(selected.errors, [], selected.errors.join("\n"));
+
+  const all = await runVerification({ root, scope: "pages", family: "all" });
+  assert.ok(all.errors.some((entry) => entry === "ERROR route-file lotnictwo/index.html: required file is missing"));
+  assert.ok(all.errors.some((entry) => entry === "ERROR route-file en/wiedza/index.html: required file is missing"));
+});
+
+test("Plan 2 Task 1 accepts a complete paired shell and exposes bounded future hooks", async () => {
+  const root = await pageArchitectureFixture();
+  const result = await runVerification({ root, scope: "pages", family: "all" });
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.deferred, ["procurement-parent-contract", "artifacts-contract"]);
+});
+
+test("Plan 2 Task 1 counts only active h1 and main elements", async () => {
+  const mutations = [
+    ["hidden h1 decoy", "page-h1", (html) => html.replace("<h1>Aplikacje</h1>", "<h1 hidden>Aplikacje</h1><template><h1>Aplikacje</h1></template>")],
+    ["duplicate visible h1", "page-h1", (html) => html.replace("</header>", "<h1>Drugi nagłówek</h1></header>")],
+    ["hidden main decoy", "page-main", (html) => html.replace('<main id="main"', '<main hidden id="main"')],
+    ["duplicate visible main", "page-main", (html) => html.replace('<footer class="site-footer">', '<main id="duplicate"><p>Duplicate</p></main><footer class="site-footer">')]
+  ];
+  for (const [label, expectedId, mutate] of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), label);
+  }
+});
+
+test("Plan 2 Task 1 requires exact canonical, real hreflang and paired language switch", async () => {
+  const [, , plRoute, enRoute] = applicationsPair;
+  const correctCanonical = `https://mamcarz.com${plRoute}`;
+  const correctEnglish = `https://mamcarz.com${enRoute}`;
+  const mutations = [
+    ["canonical hidden decoy", "page-canonical", (html) => html
+      .replace(`href="${correctCanonical}"`, 'href="https://mamcarz.com/wrong/"')
+      .replace("</head>", `<link rel="canonical" href="${correctCanonical}" hidden></head>`)],
+    ["hreflang template decoy", "page-hreflang", (html) => html
+      .replace(`hreflang="en" href="${correctEnglish}"`, 'hreflang="en" href="https://mamcarz.com/en/wrong/"')
+      .replace("</head>", `<template><link rel="alternate" hreflang="en" href="${correctEnglish}"></template></head>`)],
+    ["wrong paired language switch", "page-language", (html) => html
+      .replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, '<a href="/en/" class="nav-lang">EN</a>')
+      .replace("</nav>", `<a href="${enRoute}" class="nav-lang" hidden>EN</a></nav>`)]
+  ];
+  for (const [label, expectedId, mutate] of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), label);
+  }
+});
+
+test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside site-nav", async () => {
+  const mutations = [
+    ["stylesheet template decoy", "page-stylesheet", (html) => html.replace(
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2"></template>'
+    )],
+    ["stylesheet hidden decoy", "page-stylesheet", (html) => html.replace(
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2" hidden>'
+    )],
+    ["script noscript decoy", "page-script", (html) => html.replace(
+      '<script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script>',
+      '<script src="/assets/js/main.js?v=20260825-flightplan-2"></script><noscript><script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script></noscript>'
+    )],
+    ["script template decoy", "page-script", (html) => html.replace(
+      '<script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script>',
+      '<script src="/assets/js/main.js?v=20260825-flightplan-2"></script><template><script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script></template>'
+    )],
+    ["script hidden decoy", "page-script", (html) => html.replace(
+      '<script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script>',
+      '<script src="/assets/js/main.js?v=20260825-flightplan-2"></script><script src="/assets/js/main.js?v=20260825-flightplan-2" defer hidden></script>'
+    )],
+    ["route outside navigation", "page-navigation", (html) => html
+      .replace('<a href="/lotnictwo/">Lotnictwo</a>', '<a href="/usunieta-trasa/">Lotnictwo</a>')
+      .replace("</main>", '<a href="/lotnictwo/">Lotnictwo decoy</a></main>')]
+  ];
+  for (const [label, expectedId, mutate] of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), label);
+  }
+});
+
+test("Plan 2 Task 1 tokenizes approved data-fact-ids on HTML whitespace", async () => {
+  const result = await applicationPageMutation({
+    body: '<article data-fact-ids="brand.promise\n\taviation.ppl_h">Evidence</article>'
+  });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 rejects unknown and comma-joined data-fact-ids", async () => {
+  for (const value of ["claim.unknown", "brand.promise,aviation.ppl_h"]) {
+    const result = await applicationPageMutation({ body: `<article data-fact-ids="${value}">Evidence</article>` });
+    assert.ok(errorIds(result).includes("page-fact-unknown"), value);
+  }
+});
+
+test("Plan 2 Task 1 rejects review and retired data-fact-ids", async () => {
+  const nonApproved = [
+    fact({ id: "claim.review", value: "review", display_pl: "review", display_en: "review", status: "review" }),
+    fact({ id: "claim.retired", value: "retired", display_pl: "retired", display_en: "retired", status: "retired" })
+  ];
+  for (const record of nonApproved) {
+    const result = await applicationPageMutation({
+      facts: [fact(), ...nonApproved],
+      body: `<article data-fact-ids="${record.id}">Evidence</article>`
+    });
+    assert.ok(result.errors.some((entry) => entry.startsWith(`ERROR page-fact-status aplikacje-operacyjne/index.html: ${record.id} has status ${record.status}`)));
+  }
+});
+
+test("Plan 2 Task 1 resolves href, src and srcset after query and fragment stripping", async () => {
+  const body = `
+    <a href="/?from=applications#top">Home</a>
+    <a href="/downloads/?mode=full#section">Download hub</a>
+    <a href="/assets/docs/probe.pdf?download=1#page-2">PDF</a>
+    <img src="/assets/img/probe.webp?v=1#hero" srcset="/assets/img/probe-480.webp?v=1 480w, /assets/img/probe-960.webp#wide 960w" alt="">`;
+  const result = await applicationPageMutation({
+    body,
+    extraFiles: {
+      "downloads/index.html": "download fixture",
+      "assets/docs/probe.pdf": "pdf fixture",
+      "assets/img/probe.webp": "image fixture",
+      "assets/img/probe-480.webp": "image fixture",
+      "assets/img/probe-960.webp": "image fixture"
+    }
+  });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 aggregates missing href, src and every srcset target", async () => {
+  const body = `
+    <a href="/missing-page/?mode=full#section">Missing page</a>
+    <img src="/assets/img/missing.png?v=1#hero" srcset="/assets/img/missing-480.webp 480w, /assets/img/missing-960.webp#wide 960w" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  assert.equal(missing.length, 4, missing.join("\n"));
+  for (const target of ["missing-page/index.html", "assets/img/missing.png", "assets/img/missing-480.webp", "assets/img/missing-960.webp"]) {
+    assert.ok(missing.some((entry) => entry.includes(target)), target);
+  }
+});
+
+test("Plan 2 Task 1 ignores fragments, mail, external URLs, protocol-relative URLs and the Worker", async () => {
+  const body = `
+    <a href="#main">Fragment</a>
+    <a href="mailto:pawel@mamcarz.com">Mail</a>
+    <a href="https://example.com/missing">External</a>
+    <a href="//cdn.example.com/missing.png">CDN</a>
+    <a href="https://mamcarz-chat-api.pawel-767.workers.dev">Worker</a>
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="">`;
+  const result = await applicationPageMutation({ body });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 never defers assets or non-manifest local routes", async () => {
+  const body = '<a href="/lotnictwo/">Deferred route</a><a href="/unplanned/">Missing local page</a><img src="/assets/img/missing.webp" alt="">';
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  assert.equal(missing.length, 2, missing.join("\n"));
+  assert.ok(missing.some((entry) => entry.includes("unplanned/index.html")));
+  assert.ok(missing.some((entry) => entry.includes("assets/img/missing.webp")));
+  assert.equal(missing.some((entry) => entry.includes("lotnictwo/index.html")), false);
+});
 
 test("readFacts reads fixtures without starting CLI verification", async () => {
   const root = await fixture();

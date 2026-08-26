@@ -1,5 +1,5 @@
 import { readFile, stat } from "node:fs/promises";
-import { resolve } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 
@@ -10,6 +10,28 @@ const sourceTypes = new Set(["owner_verified", "public_source", "internal_eviden
 const statuses = new Set(["approved", "review", "retired"]);
 const blockedKeys = ["id", "pattern", "forbidden_contexts", "reason"];
 const requiredPublicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"];
+
+const ROUTE_PAIRS = [
+  ["index.html", "en/index.html", "/", "/en/", "home"],
+  ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html", "/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/", "services"],
+  ["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html", "/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/", "services"],
+  ["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html", "/uslugi/doradztwo-zamowienia-publiczne/", "/en/uslugi/doradztwo-zamowienia-publiczne/", "services"],
+  ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/", "applications"],
+  ["lotnictwo/index.html", "en/lotnictwo/index.html", "/lotnictwo/", "/en/lotnictwo/", "aviation"],
+  ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/", "projects"],
+  ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/", "knowledge"],
+  ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/", "speaking"]
+];
+
+const VALID_FAMILIES = new Set([
+  "all", "home", "services", "applications", "aviation",
+  "projects", "knowledge", "speaking", "artifacts"
+]);
+
+const ROUTE_FILE_FAMILIES = new Map(ROUTE_PAIRS.flatMap(([plFile, enFile, , , family]) => [
+  [plFile, family],
+  [enFile, family]
+]));
 
 function error(errors, id, path, message) {
   errors.push(`ERROR ${id} ${path}: ${message}`);
@@ -2515,6 +2537,254 @@ async function verifyFoundation(context) {
   }
 }
 
+async function readRequired(context, relativePath, checkId) {
+  try {
+    return await readFile(resolve(context.root, relativePath), "utf8");
+  } catch (cause) {
+    if (cause.code === "ENOENT") error(context.errors, checkId, relativePath, "required file is missing");
+    else error(context.errors, checkId, relativePath, `unable to read required file: ${cause.code ?? cause.message}`);
+    return "";
+  }
+}
+
+function pageElementIsActive(element) {
+  return elementIsStaticallyVisible(element) && elementIsActiveResource(element);
+}
+
+function exactActiveLink(element, expectedAttributes) {
+  return element.name === "link"
+    && elementHasExactAttributeNames(element, new Set(Object.keys(expectedAttributes)))
+    && Object.entries(expectedAttributes).every(([name, value]) => {
+      if (name === "rel") {
+        const tokens = elementAttributeTokens(element, "rel");
+        return tokens.length === 1 && tokens[0] === value;
+      }
+      return elementAttribute(element, name) === value;
+    })
+    && elementIsActiveResource(element);
+}
+
+function expectedPageNavigation(lang) {
+  return lang === "pl" ? [
+    "/uslugi/transformacja-zakupow/",
+    "/uslugi/wdrozenie-sap-ariba/",
+    "/uslugi/doradztwo-zamowienia-publiczne/",
+    "/aplikacje-operacyjne/",
+    "/lotnictwo/",
+    "/case-studies/",
+    "/wiedza/",
+    "/#about",
+    "/#contact"
+  ] : [
+    "/en/uslugi/transformacja-zakupow/",
+    "/en/uslugi/wdrozenie-sap-ariba/",
+    "/en/uslugi/doradztwo-zamowienia-publiczne/",
+    "/en/aplikacje-operacyjne/",
+    "/en/lotnictwo/",
+    "/en/case-studies/",
+    "/en/wiedza/",
+    "/en/#about",
+    "/en/#contact"
+  ];
+}
+
+function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
+  const parsed = parseStaticHtml(html);
+  for (const syntaxError of parsed.errors) error(errors, "page-html-syntax", path, syntaxError);
+  const elements = elementDescendants(parsed.root);
+  const activeElements = elements.filter(pageElementIsActive);
+
+  const headings = activeElements.filter((element) => element.name === "h1");
+  if (headings.length !== 1) error(errors, "page-h1", path, `expected exactly one active h1; found ${headings.length}`);
+
+  const mains = activeElements.filter((element) => element.name === "main");
+  if (mains.length !== 1 || elementAttribute(mains[0], "id") !== "main") {
+    error(errors, "page-main", path, `expected exactly one active main#main; found ${mains.length}`);
+  }
+
+  const expectedCanonical = `https://mamcarz.com${route}`;
+  const links = elements.filter((element) => element.name === "link");
+  const canonicalCandidates = links.filter((element) => {
+    const rel = elementAttributeTokens(element, "rel");
+    return rel.includes("canonical")
+      || (elementAttribute(element, "href") === expectedCanonical && !rel.includes("alternate") && !element.attributes.has("hreflang"));
+  });
+  const validCanonicals = canonicalCandidates.filter((element) => exactActiveLink(element, { rel: "canonical", href: expectedCanonical }));
+  if (canonicalCandidates.length !== 1 || validCanonicals.length !== 1) {
+    error(errors, "page-canonical", path, `requires one active canonical ${expectedCanonical}`);
+  }
+
+  const plRoute = lang === "pl" ? route : pairedRoute;
+  const enRoute = lang === "en" ? route : pairedRoute;
+  const expectedHreflang = new Map([
+    ["pl", `https://mamcarz.com${plRoute}`],
+    ["en", `https://mamcarz.com${enRoute}`],
+    ["x-default", `https://mamcarz.com${plRoute}`]
+  ]);
+  const hreflangCandidates = links.filter((element) => element.attributes.has("hreflang")
+    || elementAttributeTokens(element, "rel").includes("alternate"));
+  const validHreflang = hreflangCandidates.filter((element) => {
+    const hreflang = normalize(elementAttribute(element, "hreflang") ?? "");
+    const href = expectedHreflang.get(hreflang);
+    return href !== undefined && exactActiveLink(element, { rel: "alternate", hreflang, href });
+  });
+  const actualHreflang = new Map(validHreflang.map((element) => [normalize(elementAttribute(element, "hreflang") ?? ""), elementAttribute(element, "href")]));
+  if (hreflangCandidates.length !== 3
+    || validHreflang.length !== 3
+    || actualHreflang.size !== 3
+    || [...expectedHreflang].some(([language, href]) => actualHreflang.get(language) !== href)) {
+    error(errors, "page-hreflang", path, "requires exact active pl, en and x-default hreflang entries for the real route pair");
+  }
+
+  const expectedStylesheet = "/assets/css/style.css?v=20260825-flightplan-2";
+  const stylesheetCandidates = links.filter((element) => elementAttributeTokens(element, "rel").includes("stylesheet")
+    || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
+  const validStylesheets = stylesheetCandidates.filter((element) => exactActiveLink(element, { rel: "stylesheet", href: expectedStylesheet }));
+  if (stylesheetCandidates.length !== 1 || validStylesheets.length !== 1) {
+    error(errors, "page-stylesheet", path, `requires one active shared stylesheet ${expectedStylesheet}`);
+  }
+
+  const expectedScript = "/assets/js/main.js?v=20260825-flightplan-2";
+  const scriptCandidates = elements.filter((element) => element.name === "script" && element.attributes.has("src"));
+  const validScripts = scriptCandidates.filter((element) => elementHasExactAttributeNames(element, new Set(["src", "defer"]))
+    && elementAttribute(element, "src") === expectedScript
+    && element.attributes.has("defer")
+    && elementIsActiveResource(element));
+  if (scriptCandidates.length !== 1 || validScripts.length !== 1) {
+    error(errors, "page-script", path, `requires one active deferred shared script ${expectedScript}`);
+  }
+
+  const siteNavs = activeElements.filter((element) => element.name === "nav" && elementHasClass(element, "site-nav"));
+  if (siteNavs.length !== 1) {
+    error(errors, "page-navigation", path, `expected exactly one active nav.site-nav; found ${siteNavs.length}`);
+  }
+  const nav = siteNavs[0];
+  if (nav) {
+    const navLinks = elementDescendants(nav, "a").filter(pageElementIsActive);
+    let previousIndex = -1;
+    for (const expectedRoute of expectedPageNavigation(lang)) {
+      const indexes = navLinks.flatMap((link, index) => elementAttribute(link, "href") === expectedRoute ? [index] : []);
+      if (indexes.length !== 1 || indexes[0] <= previousIndex) {
+        error(errors, "page-navigation", path, `missing, duplicate or out-of-order main navigation route ${expectedRoute}`);
+      } else {
+        previousIndex = indexes[0];
+      }
+    }
+    const languageLinks = navLinks.filter((link) => elementHasClass(link, "nav-lang"));
+    if (languageLinks.length !== 1 || elementAttribute(languageLinks[0], "href") !== pairedRoute) {
+      error(errors, "page-language", path, `language switch must target the exact paired route ${pairedRoute}`);
+    }
+  }
+
+  return parsed.root;
+}
+
+function verifyFactIds(path, parsedRoot, factData, errors) {
+  const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
+  const byId = new Map(records.filter((fact) => nonEmptyString(fact.id)).map((fact) => [fact.id, fact]));
+  for (const element of elementDescendants(parsedRoot)) {
+    if (!element.attributes.has("data-fact-ids")) continue;
+    const value = element.attributes.get("data-fact-ids");
+    const ids = typeof value === "string" ? value.trim().split(/\s+/).filter(Boolean) : [];
+    if (ids.length === 0) {
+      error(errors, "page-fact-ids", path, "data-fact-ids must contain at least one whitespace-delimited fact ID");
+      continue;
+    }
+    for (const factId of ids) {
+      const fact = byId.get(factId);
+      if (!fact) error(errors, "page-fact-unknown", path, `unknown data-fact-ids token ${factId}`);
+      else if (fact.status !== "approved") error(errors, "page-fact-status", path, `${factId} has status ${fact.status}`);
+    }
+  }
+}
+
+function routeToFile(urlPath) {
+  const clean = urlPath.split(/[?#]/)[0];
+  if (clean === "/") return "index.html";
+  if (clean.endsWith("/")) return `${clean.slice(1)}index.html`;
+  return clean.slice(1);
+}
+
+function rootRelativeReference(value) {
+  return nonEmptyString(value) && value.startsWith("/") && !value.startsWith("//");
+}
+
+function elementLocalReferences(element) {
+  const references = [];
+  for (const attribute of ["href", "src"]) {
+    const value = elementAttribute(element, attribute);
+    if (rootRelativeReference(value)) references.push({ attribute, url: value });
+  }
+  const srcset = elementAttribute(element, "srcset");
+  if (nonEmptyString(srcset)) {
+    for (const candidate of srcset.split(",")) {
+      const value = candidate.trim().split(/\s+/)[0];
+      if (rootRelativeReference(value)) references.push({ attribute: "srcset", url: value });
+    }
+  }
+  return references;
+}
+
+function defersMissingRoute(targetFile, family) {
+  const ownerFamily = ROUTE_FILE_FAMILIES.get(targetFile);
+  return family !== "all" && ownerFamily !== undefined && ownerFamily !== family;
+}
+
+async function verifyLocalLinks(path, parsedRoot, family, context) {
+  const references = elementDescendants(parsedRoot)
+    .filter(elementIsActiveResource)
+    .flatMap(elementLocalReferences);
+  const checked = new Set();
+  for (const reference of references) {
+    const targetFile = routeToFile(reference.url);
+    if (!nonEmptyString(targetFile) || checked.has(targetFile)) continue;
+    checked.add(targetFile);
+    const targetPath = resolve(context.root, targetFile);
+    const relativeTarget = relative(context.root, targetPath);
+    if (relativeTarget.startsWith("..") || isAbsolute(relativeTarget)) {
+      error(context.errors, "local-target", path, `${reference.attribute} ${reference.url} escapes the site root`);
+      continue;
+    }
+    try {
+      const targetStat = await stat(targetPath);
+      if (!targetStat.isFile()) throw Object.assign(new Error("target is not a file"), { code: "NOT_FILE" });
+    } catch (cause) {
+      if (defersMissingRoute(targetFile, family)) continue;
+      error(context.errors, "local-target", path, `${reference.attribute} ${reference.url} maps to missing ${targetFile} (${cause.code ?? cause.message})`);
+    }
+  }
+}
+
+function addDeferred(context, contract) {
+  if (!context.deferred.includes(contract)) context.deferred.push(contract);
+}
+
+async function verifyProcurementParent(_factData, context) {
+  // Task 7 owns the substantive PL-only parent-page contract.
+  addDeferred(context, "procurement-parent-contract");
+}
+
+async function verifyArtifacts(_factData, context) {
+  // Task 8 owns the five artifact files and their substantive contract.
+  addDeferred(context, "artifacts-contract");
+}
+
+async function verifyPages(factData, family, context) {
+  const selectedPairs = ROUTE_PAIRS.filter((pair) => family === "all" || pair[4] === family);
+  for (const [plFile, enFile, plRoute, enRoute] of selectedPairs) {
+    const pl = await readRequired(context, plFile, "route-file");
+    const en = await readRequired(context, enFile, "route-file");
+    const plRoot = verifyPageShell(plFile, pl, "pl", plRoute, enRoute, context.errors);
+    const enRoot = verifyPageShell(enFile, en, "en", enRoute, plRoute, context.errors);
+    verifyFactIds(plFile, plRoot, factData, context.errors);
+    verifyFactIds(enFile, enRoot, factData, context.errors);
+    await verifyLocalLinks(plFile, plRoot, family, context);
+    await verifyLocalLinks(enFile, enRoot, family, context);
+  }
+  if (family === "speaking" || family === "all") await verifyProcurementParent(factData, context);
+  if (family === "artifacts" || family === "all") await verifyArtifacts(factData, context);
+}
+
 function candidates(fact, language) {
   const aliases = isPlainObject(fact.aliases) && Array.isArray(fact.aliases[language]) ? fact.aliases[language] : [];
   return [language === "pl" ? fact.display_pl : fact.display_en, ...aliases].filter(nonEmptyString).map(normalize);
@@ -2582,11 +2852,14 @@ async function verifyHome(factData, context) {
   }
 }
 
-export async function runVerification({ root = defaultRoot, scope = "all", lang = "all" } = {}) {
+export async function runVerification({ root = defaultRoot, scope = "all", lang = "all", family = "all" } = {}) {
   const errors = [];
-  const context = { root, scope, lang, errors };
+  const deferred = [];
+  const context = { root, scope, lang, family, errors, deferred };
   if (!["all", "pl", "en"].includes(lang)) error(errors, "cli-lang", "scripts/verify-site.mjs", `unsupported language ${lang}`);
-  if (!["all", "facts", "foundation", "home"].includes(scope)) error(errors, "cli-scope", "scripts/verify-site.mjs", `unsupported scope ${scope}`);
+  if (!["all", "facts", "foundation", "home", "pages"].includes(scope)) error(errors, "cli-scope", "scripts/verify-site.mjs", `unsupported scope ${scope}`);
+  const validFamily = VALID_FAMILIES.has(family);
+  if (!validFamily) error(errors, "cli-family", "scripts/verify-site.mjs", `unsupported family ${family}`);
   const facts = await readFacts({ root, onError: (id, path, message) => error(errors, id, path, message) });
   if (scope === "facts" || scope === "all") {
     const publicSurfaces = verifyPublicSurfaceInventory(facts, errors);
@@ -2597,18 +2870,22 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   }
   if (scope === "foundation" || scope === "all") await verifyFoundation(context);
   if (scope === "home" || scope === "all") await verifyHome(facts, context);
-  return { facts, errors };
+  if (scope === "pages" && validFamily) await verifyPages(facts, family, context);
+  return { facts, errors, deferred };
 }
 
 async function cli() {
   const scope = process.argv.find((arg) => arg.startsWith("--scope="))?.split("=")[1] ?? "all";
   const lang = process.argv.find((arg) => arg.startsWith("--lang="))?.split("=")[1] ?? "all";
-  const result = await runVerification({ scope, lang });
+  const family = process.argv.find((arg) => arg.startsWith("--family="))?.split("=")[1] ?? "all";
+  const result = await runVerification({ scope, lang, family });
+  const deferredLabel = result.deferred.length > 0 ? `; deferred: ${result.deferred.join(", ")}` : "";
   if (result.errors.length) {
     console.error(result.errors.join("\n"));
+    if (result.deferred.length > 0) console.error(`DEFERRED ${result.deferred.join(", ")}`);
     process.exitCode = 1;
   } else {
-    console.log(`OK site verification (${scope})`);
+    console.log(`OK site verification (${scope}${deferredLabel})`);
   }
 }
 

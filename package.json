@@ -10,6 +10,7 @@
     "verify:facts": "node scripts/verify-site.mjs --scope=facts",
     "verify:foundation": "node scripts/verify-site.mjs --scope=foundation",
     "verify:home": "node scripts/verify-site.mjs --scope=home",
+    "verify:pages": "node scripts/verify-site.mjs --scope=pages",
     "test:verify-site": "node --test scripts/verify-site.test.mjs"
   },
   "devDependencies": {
