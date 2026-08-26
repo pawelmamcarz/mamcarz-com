@@ -68,6 +68,147 @@ function renderedText(html) {
     .replace(/<[^>]+>/g, " ")));
 }
 
+function htmlTokens(html) {
+  const tokens = [];
+  let cursor = 0;
+  while (cursor < html.length) {
+    const opening = html.indexOf("<", cursor);
+    if (opening === -1) {
+      tokens.push({ type: "text", value: html.slice(cursor) });
+      break;
+    }
+    if (opening > cursor) tokens.push({ type: "text", value: html.slice(cursor, opening) });
+    if (html.startsWith("<!--", opening)) {
+      const commentEnd = html.indexOf("-->", opening + 4);
+      const end = commentEnd === -1 ? html.length : commentEnd + 3;
+      tokens.push({ type: "comment", value: html.slice(opening, end) });
+      cursor = end;
+      continue;
+    }
+    let quote = null;
+    let end = opening + 1;
+    for (; end < html.length; end += 1) {
+      const character = html[end];
+      if (quote !== null) {
+        if (character === quote) quote = null;
+      } else if (character === "\"" || character === "'") {
+        quote = character;
+      } else if (character === ">") {
+        break;
+      }
+    }
+    if (end >= html.length) {
+      tokens.push({ type: "text", value: html.slice(opening) });
+      break;
+    }
+    tokens.push({ type: "tag", value: html.slice(opening, end + 1) });
+    cursor = end + 1;
+  }
+  return tokens;
+}
+
+function htmlTagInfo(tag) {
+  const match = /^<\s*(\/?)\s*([a-z][a-z0-9:-]*)\b/i.exec(tag);
+  if (!match) return null;
+  const name = match[2].toLowerCase();
+  return {
+    name,
+    closing: match[1] === "/",
+    selfClosing: /\/\s*>$/.test(tag) || voidHtmlElements.has(name)
+  };
+}
+
+function openingTagAttributes(openingTag) {
+  const attributes = new Map();
+  const tag = /^<\s*[a-z][a-z0-9:-]*/i.exec(openingTag);
+  if (!tag) return attributes;
+  let cursor = tag[0].length;
+  while (cursor < openingTag.length) {
+    while (/\s/.test(openingTag[cursor] ?? "")) cursor += 1;
+    if (openingTag[cursor] === ">" || (openingTag[cursor] === "/" && openingTag[cursor + 1] === ">")) break;
+    const nameStart = cursor;
+    while (cursor < openingTag.length && !/[\s=/>]/.test(openingTag[cursor])) cursor += 1;
+    const name = openingTag.slice(nameStart, cursor).toLowerCase();
+    if (name.length === 0) {
+      cursor += 1;
+      continue;
+    }
+    while (/\s/.test(openingTag[cursor] ?? "")) cursor += 1;
+    let value = null;
+    if (openingTag[cursor] === "=") {
+      cursor += 1;
+      while (/\s/.test(openingTag[cursor] ?? "")) cursor += 1;
+      const quote = openingTag[cursor];
+      if (quote === "\"" || quote === "'") {
+        cursor += 1;
+        const valueStart = cursor;
+        while (cursor < openingTag.length && openingTag[cursor] !== quote) cursor += 1;
+        value = openingTag.slice(valueStart, cursor);
+        if (openingTag[cursor] === quote) cursor += 1;
+      } else {
+        const valueStart = cursor;
+        while (cursor < openingTag.length && !/[\s>]/.test(openingTag[cursor])) cursor += 1;
+        value = openingTag.slice(valueStart, cursor);
+      }
+    }
+    if (!attributes.has(name)) attributes.set(name, value);
+  }
+  return attributes;
+}
+
+function isStaticallyHidden(openingTag) {
+  const attributes = openingTagAttributes(openingTag);
+  return attributes.has("hidden") || normalize(attributes.get("aria-hidden") ?? "") === "true";
+}
+
+function staticVisibleHtml(html) {
+  const stack = [];
+  let invisibleDepth = 0;
+  let output = "";
+  for (const token of htmlTokens(html)) {
+    if (token.type === "comment") continue;
+    if (token.type === "text") {
+      if (invisibleDepth === 0) output += token.value;
+      continue;
+    }
+    const info = htmlTagInfo(token.value);
+    if (!info) continue;
+    if (info.closing) {
+      const matchingIndex = stack.findLastIndex((entry) => entry.name === info.name);
+      const closingIsVisible = invisibleDepth === 0;
+      if (matchingIndex === -1) {
+        if (closingIsVisible) output += token.value;
+        continue;
+      }
+      for (let index = stack.length - 1; index >= matchingIndex; index -= 1) {
+        if (stack[index].selfInvisible) invisibleDepth -= 1;
+      }
+      stack.length = matchingIndex;
+      if (closingIsVisible) output += token.value;
+      continue;
+    }
+    const selfInvisible = isStaticallyHidden(token.value) || suppressedTextElements.has(info.name);
+    if (invisibleDepth === 0 && !selfInvisible) output += token.value;
+    if (!info.selfClosing) {
+      stack.push({ name: info.name, selfInvisible });
+      if (selfInvisible) invisibleDepth += 1;
+    }
+  }
+  return output;
+}
+
+function staticVisibleText(html) {
+  let text = "";
+  for (const token of htmlTokens(staticVisibleHtml(html))) {
+    if (token.type === "text") text += token.value;
+    else if (token.type === "tag") {
+      const info = htmlTagInfo(token.value);
+      if (info && blockTextElements.has(info.name)) text += " ";
+    }
+  }
+  return normalize(decodeHtmlEntities(text));
+}
+
 function homepageBody(html) {
   return /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html)?.[1] ?? html;
 }
@@ -90,7 +231,9 @@ const homepageMarkers = [
 
 const forbiddenHomepageCopy = ["—", "nie tylko", "kompleksow", "innowacyjn", "realnie", "#1", "największ", "Polpharma"];
 const retiredHomepageAviationName = /(^|[^\p{L}\p{N}_])warsawflightsafety($|[^\p{L}\p{N}_])/u;
-const inlineHomepageTextTags = /<\/?(?:abbr|b|bdi|bdo|cite|code|data|dfn|em|i|kbd|mark|q|ruby|s|samp|small|span|strong|sub|sup|time|u|var|wbr)\b[^>]*>/gi;
+const blockTextElements = new Set(["address", "article", "aside", "blockquote", "body", "br", "dd", "details", "dialog", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul"]);
+const suppressedTextElements = new Set(["script", "style", "template"]);
+const voidHtmlElements = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
 
 const homeFactTags = ["a", "dd", "div", "h1", "h3", "li", "p", "span", "strong"];
 
@@ -375,12 +518,11 @@ function verifyHomepageContent(body, page, errors) {
     error(errors, "home-section-order", page.path, "homepage requires exactly the 11 ordered sections and two ordered CTA markers");
   }
 
-  const visible = renderedText(activeBody);
+  const visible = staticVisibleText(body);
   for (const pattern of forbiddenHomepageCopy) {
     if (visible.includes(normalize(pattern))) error(errors, "home-forbidden-copy", page.path, `visible copy contains ${pattern}`);
   }
-  const inlineAwareVisible = renderedText(activeBody.replace(inlineHomepageTextTags, ""));
-  if (retiredHomepageAviationName.test(inlineAwareVisible)) {
+  if (retiredHomepageAviationName.test(visible)) {
     error(errors, "home-retired-aviation-name", page.path, "visible homepage copy must not publish the retired WarsawFlightSafety name");
   }
   return visible;
@@ -458,19 +600,21 @@ function pairedLinkSequence(activeBody) {
 
 function verifyEnglishPolishOnlyLink(activeBody, page, errors) {
   if (page.lang !== "en") return;
-  const procurementAnchors = tagBlocks(activeBody, "a").filter((link) => {
+  const findProcurementAnchors = (html) => tagBlocks(html, "a").filter((link) => {
     const href = attributeValue(link.opening, "href");
     return href === "/procurement-2026/"
       || href === "/en/procurement-2026/"
       || annotatedFactSequence(link.full).includes("portfolio.procurement_process_2026");
   });
+  const procurementAnchors = findProcurementAnchors(activeBody);
   if (procurementAnchors.length === 0) return;
-  const validPolishOnly = procurementAnchors.length === 1 && procurementAnchors.every(({ opening, content }) => {
+  const visibleProcurementAnchors = findProcurementAnchors(staticVisibleHtml(activeBody));
+  const validPolishOnly = procurementAnchors.length === 1 && visibleProcurementAnchors.length === 1 && visibleProcurementAnchors.every(({ opening, content }) => {
     const disclosureLabels = tagBlocks(content, "div").filter((block) => hasClass(block.opening, "pcard__link"));
     return attributeValue(opening, "href") === "/procurement-2026/"
       && attributeValue(opening, "lang") === "pl"
       && disclosureLabels.length === 1
-      && renderedText(disclosureLabels[0].content) === normalize("Open project in Polish");
+      && staticVisibleText(disclosureLabels[0].content) === normalize("Open project in Polish");
   });
   if (!validPolishOnly) {
     error(errors, "home-en-pl-only-link", page.path, "Procurement 2026 requires the exact Polish route, lang=pl and visible Open project in Polish label on that anchor; a fake English route is forbidden");

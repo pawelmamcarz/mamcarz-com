@@ -929,6 +929,31 @@ test("home review hardening rejects the visible retired aviation name split by i
   assert.ok(errorIds(result).includes("home-retired-aviation-name"));
 });
 
+for (const lang of ["pl", "en"]) {
+  test(`home visibility hardening rejects the retired aviation name joined by an inline anchor on ${lang}`, async () => {
+    const root = await currentHomepageMutationFixture(lang, (html) => html.replace("</main>", '<p>WarsawFlight<a href="#contact">Safety</a></p></main>'));
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+  });
+}
+
+test("home visibility hardening does not join the retired aviation name across block boundaries", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", "<p>WarsawFlight</p><p>Safety</p></main>"));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+});
+
+for (const [hiddenKind, retiredCopy] of [
+  ["hidden", '<p hidden>WarsawFlightSafety</p>'],
+  ["aria-hidden", '<p aria-hidden="true">WarsawFlightSafety</p>']
+]) {
+  test(`home visibility hardening ignores retired aviation copy hidden with ${hiddenKind}`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${retiredCopy}</main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+  });
+}
+
 test("home scope rejects an approved fact annotation with the wrong localized value", async () => {
   const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
   const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Wrong client</div></section>');
@@ -1371,6 +1396,67 @@ for (const [location, mutate] of [
     assert.ok(errorIds(result).includes("home-en-pl-only-link"));
   });
 }
+
+for (const [hiddenKind, mutate] of [
+  ["hidden target anchor", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a href="/procurement-2026/" lang="pl" hidden class="pcard">'
+  )],
+  ["aria-hidden target anchor", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a href="/procurement-2026/" lang="pl" aria-hidden="true" class="pcard">'
+  )],
+  ["hidden label wrapper", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link" hidden>Open project in Polish</div>'
+  )],
+  ["aria-hidden label wrapper", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link" aria-hidden="true">Open project in Polish</div>'
+  )],
+  ["hidden inline label", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link"><span hidden>Open project in Polish</span></div>'
+  )],
+  ["aria-hidden inline label", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link"><span aria-hidden="true">Open project in Polish</span></div>'
+  )],
+  ["hidden ancestor", (html) => html.replace('<div class="portfolio-cards">', '<div class="portfolio-cards" hidden>')]
+]) {
+  test(`home visibility hardening rejects the Polish-only disclosure with a ${hiddenKind}`, async () => {
+    const root = await currentHomepageMutationFixture("en", mutate);
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  });
+}
+
+test("home visibility hardening does not treat aria-hidden false or data-hidden as hidden", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a href="/procurement-2026/" lang="pl" aria-hidden="false" data-hidden="fixture" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
+});
+
+test("home visibility hardening resists a hidden decoy inside the visible retired aviation name", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    "</main>",
+    '<p>WarsawFlight<span hidden>archived</span><a href="#contact">Safety</a></p></main>'
+  ));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+});
+
+test("home visibility hardening resists an aria-hidden disclosure decoy beside a generic label", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div aria-hidden=" TRUE "><div class="pcard__link">Open project in Polish</div></div><div class="pcard__link">Open project</div>'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+});
 
 test("home parity preserves the local skip-link target", async () => {
   const plHtml = `<a href="#main">Przejdź do treści</a>${homepageFixture("pl", "Marka")}`;
