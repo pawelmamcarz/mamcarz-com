@@ -2734,12 +2734,18 @@ test("Plan 2 Task 5 accepts the exact six-page advisory dossier contract", async
 test("Plan 2 Task 5 rejects section, evidence, CTA, resource, schema and hidden-claim drift", async () => {
   const cases = [
     ["section order", "transformation", "pl", "service-sections", (html) => html.replace('data-section="problem"', 'data-section="scope"')],
+    ["duplicate section", "transformation", "en", "service-sections", (html) => html.replace('</main>', '<section data-section="contact"><h2>Contact</h2></section></main>')],
     ["evidence order", "transformation", "en", "service-evidence", (html) => html.replace("career.pzu.organization", "career.pwc.organization")],
+    ["duplicate evidence", "ariba", "pl", "service-evidence", (html) => html.replace('data-fact-id="hero.implementations"', 'data-fact-id="project.kghm.role"')],
     ["second conversion", "ariba", "pl", "service-controls", (html) => html.replace("</main>", '<a class="btn-primary" href="mailto:fake@example.com">Drugi kontakt</a></main>')],
     ["external image", "ariba", "en", "service-resource-census", (html) => html.replace("</main>", '<img src="https://example.com/fake.jpg" alt="KGHM"></main>')],
     ["inline style", "publicProcurement", "pl", "service-resource-census", (html) => html.replace("<h1", '<h1 style="display:block"')],
     ["schema offer", "publicProcurement", "en", "service-schema", (html) => html.replace('"provider":{', '"offers":{},"provider":{')],
+    ["schema rating", "ariba", "pl", "service-schema", (html) => html.replace('"provider":{', '"aggregateRating":{},"provider":{')],
+    ["schema area served", "transformation", "en", "service-schema", (html) => html.replace('"provider":{', '"areaServed":"CEE","provider":{')],
+    ["raw shell state", "publicProcurement", "pl", "service-shell", (html) => html.replace('aria-expanded="false"', 'aria-expanded="true"')],
     ["entity hidden unsupported client", "transformation", "pl", "service-claim-boundary", (html) => html.replace("</footer>", '<template>P&#111;lpharma</template></footer>')],
+    ["inline-split hidden unsupported client", "transformation", "en", "service-claim-boundary", (html) => html.replace("</footer>", '<template>Pol<span>pharma</span></template></footer>')],
     ["comment old annual portfolio", "transformation", "en", "service-claim-boundary", (html) => html.replace("</footer>", '<!-- PLN 500M per year --></footer>')]
   ];
   for (const [label, key, lang, expectedId, mutate] of cases) {

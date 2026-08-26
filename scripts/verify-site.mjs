@@ -5462,13 +5462,19 @@ function serviceCanonicalCorpus(parsedRoot) {
 
 function verifyServiceClaimBoundary(path, parsedRoot, errors) {
   const corpus = serviceCanonicalCorpus(parsedRoot);
+  const compactTextCorpus = normalizeExactHtmlLiteral(documentNodeDescendants(parsedRoot)
+    .filter((node) => node.type === "text" || node.type === "comment")
+    .map((node) => node.value)
+    .join(""))
+    .replace(/[^\p{L}\p{N}+#]+/gu, "");
   const forbidden = [
     /polpharma/i, /500\s*m(?:ln|illion)?\s*pln/i, /pln\s*500\s*m/i, /100\s*m\+?\s*pln/i,
     /marketplanet/i, /gold\s*partner/i, /all\s*for\s*one/i, /award/i, /nagrod/i,
     /largest|leading|największ|wiodąc/i, /guaranteed|gwarantowan/i,
     /not\s+just|nie\s+tylko|comprehensive|kompleksow/i
   ];
-  if (forbidden.some((pattern) => pattern.test(corpus))) {
+  const compactForbidden = [/polpharma/i, /marketplanet/i, /goldpartner/i, /allforone/i];
+  if (forbidden.some((pattern) => pattern.test(corpus)) || compactForbidden.some((pattern) => pattern.test(compactTextCorpus))) {
     error(errors, "service-claim-boundary", path, "forbids unsupported clients, values, results, ranks, partner or ownership status, legal conclusions and AI-tell sales copy across active and inactive source");
   }
 }
@@ -5567,8 +5573,14 @@ function verifyServicePage(path, parsedRoot, lang, factData, errors) {
 
   const nav = all.find((element) => element.name === "nav" && elementHasClass(element, "site-nav") && pageElementIsActive(element));
   const current = nav ? elementDescendants(nav, "a").filter((anchor) => elementAttribute(anchor, "aria-current") === "page") : [];
+  const toggle = nav ? directElementChildren(nav, "button").find((element) => elementHasClass(element, "nav-toggle")) : null;
+  const advisory = nav ? elementDescendants(nav, "details").find((element) => elementHasClass(element, "nav-group")) : null;
   const expectedCurrent = lang === "pl" ? `/${path.replace(/index\.html$/, "")}` : `/${path.replace(/index\.html$/, "")}`;
-  if (current.length !== 1 || elementAttribute(current[0], "href") !== expectedCurrent) error(errors, "service-shell", path, "requires the current advisory route as the sole raw aria-current page link");
+  if (current.length !== 1 || elementAttribute(current[0], "href") !== expectedCurrent
+    || !exactApplicationAttributes(toggle, { class: "nav-toggle", id: "nav-toggle", "aria-label": lang === "pl" ? "Menu nawigacyjne" : "Navigation menu", "aria-controls": "nav-menu", "aria-expanded": "false" }, new Set(["aria-label"]))
+    || !exactElementAttributes(advisory, { class: "nav-group" })) {
+    error(errors, "service-shell", path, "requires the current advisory route, exact closed mobile toggle state and closed advisory disclosure");
+  }
 
   verifyServiceSchema(path, parsedRoot, contract, errors);
   verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors);
