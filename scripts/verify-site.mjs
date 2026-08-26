@@ -221,7 +221,7 @@ function inspectHtmlStartTagSyntax(source) {
 }
 
 function parsedTag(openingTag) {
-  const match = /^<\s*(\/?)\s*([a-z][a-z0-9:-]*)\b/i.exec(openingTag);
+  const match = /^<(\/?)([a-z][a-z0-9:-]*)\b/i.exec(openingTag);
   if (!match) return null;
   const name = match[2].toLowerCase();
   const closing = match[1] === "/";
@@ -290,7 +290,7 @@ function parseStaticHtml(html) {
       continue;
     }
     if (tag.closing) {
-      if (tag.sourceSelfClosing || !/^<\s*\/\s*[a-z][a-z0-9:-]*\s*>$/i.test(source)) {
+      if (tag.sourceSelfClosing || !/^<\/[a-z][a-z0-9:-]*\s*>$/i.test(source)) {
         errors.push(`malformed closing tag </${tag.name}> at offset ${opening}`);
       }
       const current = stack[stack.length - 1];
@@ -326,7 +326,7 @@ function parseStaticHtml(html) {
     append(node);
     cursor = tagEnd + 1;
     if (rawTextElements.has(tag.name) && !tag.selfClosing) {
-      const closing = new RegExp(`<\\/\\s*${escapeRegExp(tag.name)}\\s*>`, "ig");
+      const closing = new RegExp(`<\\/${escapeRegExp(tag.name)}\\s*>`, "ig");
       closing.lastIndex = cursor;
       const match = closing.exec(html);
       if (!match) {
@@ -4251,6 +4251,142 @@ function verifyApplicationParity(plEvidence, enEvidence, errors) {
   }
 }
 
+const AVIATION_PAGE_CONTRACT = Object.freeze({
+  pl: Object.freeze({
+    title: "Lotnictwo",
+    lead: "Lotnictwo jest jednym z głównych obszarów mojej działalności. Łączę operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach, które wymagają jasnych procedur oraz odpowiedzialności.",
+    description: "Operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach lotniczych opartych na jasnych procedurach oraz odpowiedzialności.",
+    url: "https://mamcarz.com/lotnictwo/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Projekt%20lotniczy"
+  }),
+  en: Object.freeze({
+    title: "Aviation",
+    lead: "Aviation is one of the core areas of my business. I connect operations, sales, training, safety, media and software in work that depends on clear procedures and accountability.",
+    description: "Operations, sales, training, safety, media and software in aviation work built around clear procedures and accountability.",
+    url: "https://mamcarz.com/en/lotnictwo/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Aviation%20project"
+  })
+});
+
+const AVIATION_SECTION_ORDER = Object.freeze(["operations", "training-safety", "media", "software", "ventures", "contact"]);
+const AVIATION_FACT_ORDER = Object.freeze([
+  "aviation.ppl_h",
+  "aviation.ppl_a",
+  "aviation.aerobatics_rating",
+  "aviation.diverse_extreme_team",
+  "aviation.forum_photographer",
+  "aviation.air_to_air_media",
+  "portfolio.akrobacja_com",
+  "portfolio.akrobacja_com.current_status",
+  "portfolio.akrobacja_com.type",
+  "portfolio.filmolot_pl",
+  "portfolio.filmolot_pl.type"
+]);
+
+function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
+  const expected = AVIATION_PAGE_CONTRACT[lang];
+  const all = elementDescendants(parsedRoot);
+  const body = htmlBodyRoot(parsedRoot);
+  const main = all.find((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  if (body === null || elementAttribute(body, "data-page") !== "aviation") {
+    error(errors, "aviation-data-page", path, 'body must use data-page="aviation"');
+  }
+  const h1s = all.filter((element) => element.name === "h1" && pageElementIsActive(element));
+  if (h1s.length !== 1 || publishedStaticText(h1s[0]) !== normalizeExactLiteral(expected.title)) {
+    error(errors, "aviation-h1", path, "requires the exact localized aviation h1");
+  }
+  const leads = all.filter((element) => elementHasClass(element, "page-lead") && pageElementIsActive(element));
+  if (leads.length !== 1 || publishedStaticText(leads[0]) !== normalizeExactLiteral(expected.lead)) {
+    error(errors, "aviation-lead", path, "requires the exact owner-approved aviation lead");
+  }
+  const directSections = directElementChildren(main, "section");
+  const sectionNames = directSections.map((section) => elementAttribute(section, "data-section"));
+  if (JSON.stringify(sectionNames) !== JSON.stringify(AVIATION_SECTION_ORDER)
+    || directSections.some((section) => !pageElementIsActive(section))) {
+    error(errors, "aviation-sections", path, "requires six direct visible operating sectors exactly once and in order");
+  }
+
+  const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
+  const byId = new Map(records.map((record) => [record.id, record]));
+  const factElements = all.filter((element) => element.attributes.has("data-fact-id"));
+  const factIds = factElements.map((element) => elementAttribute(element, "data-fact-id"));
+  let factsValid = JSON.stringify(factIds) === JSON.stringify(AVIATION_FACT_ORDER);
+  for (const [index, factId] of factIds.entries()) {
+    const record = byId.get(factId);
+    const display = lang === "pl" ? record?.display_pl : record?.display_en;
+    factsValid = factsValid
+      && AVIATION_FACT_ORDER[index] === factId
+      && record?.status === "approved"
+      && record?.source_url === null
+      && Array.isArray(record?.surfaces)
+      && record.surfaces.includes(path)
+      && publishedStaticText(factElements[index]) === normalizeExactLiteral(display ?? "")
+      && directElementChildren(factElements[index], "a").length === 0;
+  }
+  if (!factsValid) {
+    error(errors, "aviation-facts", path, "requires the exact ordered approved aviation fact surfaces and localized registry values as plain text");
+  }
+  const status = factElements.find((element) => elementAttribute(element, "data-fact-id") === "portfolio.akrobacja_com.current_status");
+  if (status?.name !== "time" || elementAttribute(status, "datetime") !== "2026-08-26" || elementAttribute(status, "data-as-of") !== "2026-08-26") {
+    error(errors, "aviation-status-date", path, "akrobacja.com current status requires the visible approved as-of date 2026-08-26");
+  }
+
+  const pictures = all.filter((element) => elementHasClass(element, "aviation-venture-image"));
+  const sources = pictures.length === 1 ? elementDescendants(pictures[0], "source") : [];
+  const images = pictures.length === 1 ? elementDescendants(pictures[0], "img") : [];
+  if (pictures.length !== 1 || sources.length !== 1 || images.length !== 1
+    || elementAttribute(sources[0], "srcset") !== "/assets/img/portfolio/akrobacja.webp"
+    || elementAttribute(images[0], "src") !== "/assets/img/portfolio/akrobacja.jpg") {
+    error(errors, "aviation-image", path, "requires the single approved local Akrobacja webp/jpg image pair");
+  }
+
+  const schemaScripts = all.filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
+  let schema = null;
+  try { schema = schemaScripts.length === 1 ? JSON.parse(rawElementText(schemaScripts[0])) : null; } catch { schema = null; }
+  const provider = isPlainObject(schema?.provider) ? schema.provider : null;
+  if (!isPlainObject(schema)
+    || !sameStringSet(Object.keys(schema), ["@context", "@type", "name", "url", "description", "provider"])
+    || schema["@context"] !== "https://schema.org"
+    || schema["@type"] !== "Service"
+    || schema.name !== expected.title
+    || schema.url !== expected.url
+    || schema.description !== expected.description
+    || !isPlainObject(provider)
+    || !sameStringSet(Object.keys(provider), ["@type", "name"])
+    || provider["@type"] !== "Person"
+    || provider.name !== "Paweł Mamcarz") {
+    error(errors, "aviation-schema", path, "requires one localized claim-safe Service schema with provider only");
+  }
+
+  const ctas = all.filter((element) => elementHasClass(element, "btn-primary") && pageElementIsActive(element));
+  const contact = directSections.find((section) => elementAttribute(section, "data-section") === "contact");
+  if (ctas.length !== 1 || ctas[0].name !== "a" || elementAttribute(ctas[0], "href") !== expected.contactHref || !elementIsWithin(ctas[0], contact)) {
+    error(errors, "aviation-contact", path, "requires exactly one localized mailto CTA inside contact");
+  }
+
+  const rawPublished = normalize(documentNodeDescendants(parsedRoot)
+    .map((node) => node.type === "comment" ? node.value : node.type === "text" ? node.value : node.type === "element" ? [...node.attributes.values()].filter((value) => typeof value === "string").join(" ") : "")
+    .join(" "));
+  const forbidden = /warsaw\s*flight\s*safety|pasja\s+po\s+godzinach|po\s+godzinach|outside\s+work|after[ -]?hours?|side[ -]?project|\binstruktor\b|\binstructor\b|\bato\b|\boperator\b|commercial[ -]?pilot|pilot\s+komercyjny|\bszko(?:ła|ly|le)\b|\bschool\b|\bavailable\b|\bdostępn|\bprice\b|\bcena\b|market[ -]?leader|lider\s+rynku/i;
+  if (forbidden.test(rawPublished)) {
+    error(errors, "aviation-forbidden-copy", path, "contains retired, side-activity or unsupported aviation claim language");
+  }
+  const anchors = all.filter((element) => element.name === "a");
+  if (anchors.some((anchor) => /^https?:\/\//i.test(browserNormalizedUrl(elementAttribute(anchor, "href")) ?? ""))) {
+    error(errors, "aviation-external-link", path, "aviation pages may not invent or publish an external venture URL");
+  }
+}
+
+async function verifyAviationHomepageLinks(context) {
+  for (const [path, href] of [["index.html", "/lotnictwo/"], ["en/index.html", "/en/lotnictwo/"]]) {
+    const html = await readRequired(context, path, "aviation-home-link");
+    const parsed = parseStaticHtml(html);
+    const links = elementDescendants(parsed.root, "a")
+      .filter((anchor) => pageElementIsActive(anchor) && browserNormalizedUrl(elementAttribute(anchor, "href")) === href);
+    if (links.length < 1) error(context.errors, "aviation-home-link", path, `requires a direct visible ${href} link`);
+  }
+}
+
 function routeToFile(urlPath) {
   const clean = urlPath.split(/[?#]/)[0];
   if (clean === "/") return "index.html";
@@ -4378,9 +4514,14 @@ async function verifyPages(factData, family, context) {
       const enEvidence = verifyApplicationPage(enFile, enRoot, "en", factData, context.errors);
       verifyApplicationParity(plEvidence, enEvidence, context.errors);
     }
+    if (routeFamily === "aviation") {
+      verifyAviationPage(plFile, plRoot, "pl", factData, context.errors);
+      verifyAviationPage(enFile, enRoot, "en", factData, context.errors);
+    }
     await verifyLocalLinks(plFile, plRoot, family, context);
     await verifyLocalLinks(enFile, enRoot, family, context);
   }
+  if (family === "aviation" || family === "all") await verifyAviationHomepageLinks(context);
   if (family === "speaking" || family === "all") await verifyProcurementParent(factData, context);
   if (family === "artifacts" || family === "all") await verifyArtifacts(factData, context);
 }

@@ -16,6 +16,10 @@ const applicationProductHtml = {
   pl: await readFile(resolve("aplikacje-operacyjne/index.html"), "utf8"),
   en: await readFile(resolve("en/aplikacje-operacyjne/index.html"), "utf8")
 };
+const aviationProductHtml = {
+  pl: await readFile(resolve("lotnictwo/index.html"), "utf8"),
+  en: await readFile(resolve("en/lotnictwo/index.html"), "utf8")
+};
 const publicClaimSurfaceFixture = [
   "index.html",
   "en/index.html",
@@ -116,9 +120,13 @@ function pagePairFiles(pair, overrides = {}) {
   const [plFile, enFile, plRoute, enRoute, family] = pair;
   const defaultPl = family === "applications"
     ? applicationPageFixture("pl")
+    : family === "aviation"
+      ? aviationProductHtml.pl
     : pageShellFixture({ lang: "pl", plRoute, enRoute, title: "Strona" });
   const defaultEn = family === "applications"
     ? applicationPageFixture("en")
+    : family === "aviation"
+      ? aviationProductHtml.en
     : pageShellFixture({ lang: "en", plRoute, enRoute, title: "Page" });
   return {
     [plFile]: overrides.pl ?? defaultPl,
@@ -145,6 +153,8 @@ async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
       "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
       "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
       "assets/img/signature.png": "fixture-image",
+      "assets/img/portfolio/akrobacja.webp": "fixture-webp",
+      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
       ...remaining
     }
   });
@@ -432,6 +442,10 @@ async function productionRegistryFixture(overrides = {}) {
     extraFiles: {
       "aplikacje-operacyjne/index.html": applicationPageFixture("pl"),
       "en/aplikacje-operacyjne/index.html": applicationPageFixture("en"),
+      "lotnictwo/index.html": aviationProductHtml.pl,
+      "en/lotnictwo/index.html": aviationProductHtml.en,
+      "assets/img/portfolio/akrobacja.webp": "fixture-webp",
+      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
       ...extraFiles
     }
   });
@@ -443,7 +457,8 @@ async function verifyFixtureCss(css) {
 }
 
 const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "applications");
-const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
+const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "projects");
+const aviationPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
 
 const applicationContract = {
   pl: {
@@ -489,9 +504,39 @@ function applicationFactRecords() {
   }));
 }
 
+function aviationFactRecords() {
+  const surfaces = ["lotnictwo/index.html", "en/lotnictwo/index.html"];
+  const records = [
+    ["aviation.ppl_h", "PPL(H)", "PPL(H)"],
+    ["aviation.ppl_a", "PPL(A)", "PPL(A)"],
+    ["aviation.aerobatics_rating", "uprawnienia do akrobacji", "aerobatics rating"],
+    ["aviation.diverse_extreme_team", "pilot pokazowy Diverse Extreme Team (2013)", "display pilot for the Diverse Extreme Team (2013)"],
+    ["aviation.forum_photographer", "fotograf prasowy agencji Forum", "Press photographer with Forum Agency"],
+    ["aviation.air_to_air_media", "sesje air-to-air, realizacje wideo i dronem", "air-to-air shoots, video and drone production"],
+    ["portfolio.akrobacja_com", "akrobacja.com", "akrobacja.com"],
+    ["portfolio.akrobacja_com.current_status", "Aktualna marka działalności lotniczej", "Current aviation venture"],
+    ["portfolio.akrobacja_com.type", "Platforma sprzedaży voucherów na loty akrobacyjne.", "Voucher sales platform for aerobatic flights."],
+    ["portfolio.filmolot_pl", "FilmoLot.pl", "FilmoLot.pl"],
+    ["portfolio.filmolot_pl.type", "Lotnictwo · fotografia i wideo", "Aviation · photography and video"]
+  ];
+  return records.map(([id, displayPl, displayEn]) => fact({
+    id,
+    value: displayEn,
+    display_pl: displayPl,
+    display_en: displayEn,
+    surfaces,
+    status: "approved",
+    source_url: null,
+    ...(id === "portfolio.akrobacja_com.current_status" ? { kind: "dated", as_of: "2026-08-26" } : {})
+  }));
+}
+
 function withApplicationFacts(records) {
   const merged = [...(records ?? [fact()])];
   for (const record of applicationFactRecords()) {
+    if (!merged.some((candidate) => candidate.id === record.id)) merged.push(record);
+  }
+  for (const record of aviationFactRecords()) {
     if (!merged.some((candidate) => candidate.id === record.id)) merged.push(record);
   }
   return merged;
@@ -526,6 +571,38 @@ async function genericPageMutation({ lang = "pl", mutate = (html) => html, facts
   const overrides = lang === "pl" ? { pl: mutated } : { en: mutated };
   const root = await pageArchitectureFixture({ files: pagePairFiles(genericParserPair, overrides), facts, extraFiles });
   return runVerification({ root, scope: "pages", family });
+}
+
+async function genericAviationPageMutation({ lang = "pl" } = {}) {
+  const [, , plRoute, enRoute] = aviationPair;
+  const generic = pageShellFixture({ lang, plRoute, enRoute, title: lang === "pl" ? "Strona" : "Page" });
+  const overrides = lang === "pl" ? { pl: generic } : { en: generic };
+  const root = await pageArchitectureFixture({ files: pagePairFiles(aviationPair, overrides) });
+  return runVerification({ root, scope: "pages", family: "aviation" });
+}
+
+async function aviationPageMutation({ lang = "pl", mutate = (html) => html } = {}) {
+  const [factData, pl, en] = await Promise.all([
+    readFacts(),
+    readFile(resolve("lotnictwo/index.html"), "utf8"),
+    readFile(resolve("en/lotnictwo/index.html"), "utf8")
+  ]);
+  const current = lang === "pl" ? pl : en;
+  const mutated = mutate(current);
+  assert.notEqual(mutated, "", "aviation mutation must leave a fixture document");
+  const files = pagePairFiles(aviationPair, {
+    pl: lang === "pl" ? mutated : pl,
+    en: lang === "en" ? mutated : en
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    facts: factData.facts,
+    extraFiles: {
+      "assets/img/portfolio/akrobacja.webp": "fixture-webp",
+      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg"
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "aviation" });
 }
 
 function movePageMetadata(html, destination) {
@@ -1926,6 +2003,67 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
   })));
   for (const { label, result } of malformedOutcomes) {
     assert.ok(errorIds(result).includes("page-html-syntax"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 parser precondition rejects spaced closing-token boundaries", async () => {
+  const cases = [
+    ["space after slash", (html) => html.replace("<span></span>", "<span></ span>")],
+    ["space before slash", (html) => html.replace("<span></span>", "<span>< /span>")],
+    ["raw script space after slash", (html) => html.replace("</script>", "</ script>")],
+    ["raw style space after slash", (html) => html.replace("</footer>", "<style></ style></footer>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-html-syntax"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const legalCaseAndWhitespace = await applicationPageMutation({
+    mutate: (html) => html.replace("</script>", "</SCRIPT >")
+  });
+  assert.deepEqual(legalCaseAndWhitespace.errors, []);
+});
+
+test("Plan 2 Task 3 requires the exact aviation core identity before product creation", async () => {
+  const result = await genericAviationPageMutation({ lang: "pl" });
+  assert.ok(errorIds(result).includes("aviation-h1"), result.errors.join("\n"));
+  assert.ok(errorIds(result).includes("aviation-lead"), result.errors.join("\n"));
+  assert.ok(errorIds(result).includes("aviation-sections"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 3 accepts the complete mirrored aviation contract", async () => {
+  const result = await aviationPageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 3 pins section order, fact order, status date, image and CTA", async () => {
+  const cases = [
+    ["section order", (html) => html.replace('data-section="operations"', 'data-section="media"')],
+    ["fact order", (html) => html.replace('data-fact-id="aviation.ppl_h"', 'data-fact-id="aviation.ppl_a"')],
+    ["status date", (html) => html.replaceAll("2026-08-26", "2026-08-25")],
+    ["image", (html) => html.replace("/assets/img/portfolio/akrobacja.webp", "/assets/img/portfolio/other.webp")],
+    ["CTA", (html) => html.replace("mailto:pawel@mamcarz.com?subject=Projekt%20lotniczy", "mailto:pawel@mamcarz.com")]
+  ];
+  const expected = ["aviation-sections", "aviation-facts", "aviation-status-date", "aviation-image", "aviation-contact"];
+  for (const [index, [label, mutate]] of cases.entries()) {
+    const result = await aviationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expected[index]), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 rejects retired, inferred and externally linked venture copy", async () => {
+  const additions = [
+    "Warsaw" + "FlightSafety",
+    "Instructor available",
+    '<a href="https://akrobacja.com">akrobacja.com</a>'
+  ];
+  for (const addition of additions) {
+    const result = await aviationPageMutation({ mutate: (html) => html.replace("</main>", `<p>${addition}</p></main>`) });
+    const ids = errorIds(result);
+    assert.ok(ids.includes("aviation-forbidden-copy") || ids.includes("aviation-external-link"), result.errors.join("\n"));
   }
 });
 
