@@ -1028,6 +1028,58 @@ test("Plan 2 Task 1 fix round 4 fails closed on unterminated CSS strings and pre
   assert.deepEqual(mismatches, [], `CSS string mismatches: ${mismatches.join(", ")}`);
 });
 
+test("Plan 2 Task 1 fix round 5 exposes only the first direct summary of closed details", async () => {
+  const [, , , enRoute] = applicationsPair;
+  const languageLink = `<a href="${enRoute}" class="nav-lang">EN</a>`;
+  const cases = [
+    ["direct text after an empty first summary", `<details><summary></summary>EN</details>`, true],
+    ["comment then direct text after an empty first summary", `<details><summary></summary><!-- hidden branch -->EN</details>`, true],
+    ["direct text without a summary", `<details>EN</details>`, true],
+    ["text in a second direct summary", `<details><summary></summary><summary>EN</summary></details>`, true],
+    ["direct text in a nested closed disclosure", `<details><summary><details><summary></summary>EN</details></summary></details>`, true],
+    ["first-summary text and descendants", `<details><summary><span>E</span>N</summary><span>FR</span></details>`, false],
+    ["direct text in an open disclosure", `<details open><summary></summary>EN</details>`, false],
+    ["nested first-summary descendants", `<details><summary><details><summary><span>EN</span></summary>FR</details></summary>PL</details>`, false],
+    ["first summary before a hidden second summary", `<details><summary>EN</summary><summary>FR</summary></details>`, false],
+    ["hidden first summary", `<details><summary hidden>EN</summary></details>`, true],
+    ["aria-hidden first summary", `<details><summary aria-hidden="true">EN</summary></details>`, true],
+    ["template content in the first summary", `<details><summary><template>EN</template></summary></details>`, true]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, content, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace(languageLink, `<a href="${enRoute}" class="nav-lang">${content}</a>`) })
+  })));
+  const mismatches = outcomes
+    .filter(({ shouldFail, result }) => errorIds(result).includes("page-language") !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `closed-details text mismatches: ${mismatches.join(", ")}`);
+});
+
+test("Plan 2 Task 1 fix round 5 preserves inactive wrappers and disclosure-open route checks", async () => {
+  const [, , , enRoute] = applicationsPair;
+  const languageLink = `<a href="${enRoute}" class="nav-lang">EN</a>`;
+  const inactiveCases = [
+    ["hidden language link", `<a href="${enRoute}" class="nav-lang" hidden>EN</a>`],
+    ["aria-hidden language link", `<a href="${enRoute}" class="nav-lang" aria-hidden="true">EN</a>`],
+    ["language link inside template", `<template>${languageLink}</template>`],
+    ["language link inside noscript", `<noscript>${languageLink}</noscript>`]
+  ];
+  const outcomes = await Promise.all(inactiveCases.map(async ([label, replacement]) => ({
+    label,
+    result: await applicationPageMutation({ mutate: (html) => html.replace(languageLink, replacement) })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-language"), label);
+  }
+
+  const valid = await applicationPageMutation({
+    mutate: (html) => html.replace(languageLink, `<a href="${enRoute}" class="nav-lang"><details><summary>EN</summary></details></a>`)
+  });
+  assert.equal(errorIds(valid).includes("page-language"), false, valid.errors.join("\n"));
+  assert.equal(errorIds(valid).includes("page-navigation"), false, valid.errors.join("\n"));
+});
+
 test("readFacts reads fixtures without starting CLI verification", async () => {
   const root = await fixture();
   const data = await readFacts({ root });

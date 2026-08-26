@@ -337,11 +337,18 @@ function elementHasExactAttributeNames(element, names) {
 function staticVisibleText(node) {
   let text = "";
   const visit = (current, ancestorHidden = false) => {
+    const parent = current.parent;
+    const hiddenByClosedDisclosure = parent?.type === "element"
+      && parent.name === "details"
+      && !parent.attributes.has("open")
+      && current !== parent.children.find((child) => child.type === "element" && child.name === "summary");
+    const hidden = ancestorHidden
+      || hiddenByClosedDisclosure
+      || (current.type === "element" && !elementIsStaticallyVisible(current));
     if (current.type === "text") {
-      if (!ancestorHidden) text += current.value;
+      if (!hidden) text += current.value;
       return;
     }
-    const hidden = ancestorHidden || (current.type === "element" && !elementIsStaticallyVisible(current));
     const block = current.type === "element" && blockTextElements.has(current.name);
     if (!hidden && block) text += " ";
     for (const child of current.children ?? []) visit(child, hidden);
