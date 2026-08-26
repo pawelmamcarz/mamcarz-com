@@ -4982,10 +4982,59 @@ function knowledgeInactiveSourceFragments(parsedRoot) {
   return fragments;
 }
 
+function knowledgeEmbeddedUrlCandidates(fragment) {
+  const source = decodeHtmlEntities(fragment).replace(/\p{Default_Ignorable_Code_Point}/gu, "");
+  const candidates = [];
+  const add = (value) => {
+    const candidate = value.trim().replace(/^[({[,]+|[)}\],.;]+$/g, "");
+    if (candidate.length > 0) candidates.push(candidate);
+  };
+  for (const match of source.matchAll(/["']([^"']+)["']/g)) add(match[1]);
+  for (const match of source.matchAll(/(?:^|[\s{,])(?:["']?[a-z][a-z0-9:._-]*["']?)\s*[:=]\s*(?:["']([^"']+)["']|([^\s"'<>},;]+))/gi)) {
+    add(match[1] ?? match[2] ?? "");
+  }
+  for (const match of source.matchAll(/(?:\/|%(?:25)*2f)[^\s"'<>},;]+/gi)) add(match[0]);
+  return [...new Set(candidates)];
+}
+
+function knowledgeInactiveUrlViolation(parsedRoot) {
+  const candidates = knowledgeInactiveSourceFragments(parsedRoot).flatMap(knowledgeEmbeddedUrlCandidates);
+  return candidates.some((value) => knowledgeHasBannedRoute(value)
+    || (knowledgeHasMalformedPercent(value) && knowledgeHasBannedRoute(decodeValidPercentEscapes(value))));
+}
+
 function knowledgeUrlPropertyViolation(parsedRoot) {
   const candidates = [...knowledgeDocumentUrlValues(parsedRoot), ...knowledgeInactiveSourceFragments(parsedRoot)];
   return candidates.some((value) => knowledgeHasBannedRoute(value)
     || (knowledgeHasMalformedPercent(value) && /\/en\//i.test(decodeHtmlEntities(value))));
+}
+
+function knowledgeInactiveTemporalIdentifierViolation(parsedRoot) {
+  const temporalHeads = new Set(["date", "time", "year", "timestamp", "temporal"]);
+  const temporalQualifiers = new Set([
+    "at", "coverage", "created", "creation", "end", "modified", "publication", "published", "release", "start", "updated", "upload"
+  ]);
+  const exactIdentifiers = new Set([
+    "creationdate", "datecreated", "datemodified", "datepublished", "dateupdated", "endtime", "publicationdate",
+    "publisheddate", "releasedate", "starttime", "temporalcoverage", "timecreated", "timemodified", "timestamp", "updatedate", "uploaddate"
+  ]);
+  for (const fragment of knowledgeInactiveSourceFragments(parsedRoot)) {
+    const source = decodeHtmlEntities(fragment).replace(/\p{Default_Ignorable_Code_Point}/gu, "");
+    for (const match of source.matchAll(/[a-z][a-z0-9_-]*/gi)) {
+      const compact = match[0].replace(/[-_]+/g, "").toLowerCase();
+      if (exactIdentifiers.has(compact)) return true;
+      const words = match[0]
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .replace(/[-_]+/g, " ")
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean);
+      if (words.length > 1
+        && words.some((word) => temporalHeads.has(word))
+        && words.every((word) => temporalHeads.has(word) || temporalQualifiers.has(word))) return true;
+    }
+  }
+  return false;
 }
 
 function knowledgeHasDateBoundaryViolation(parsedRoot) {
@@ -5118,10 +5167,17 @@ function verifyKnowledgeBoundary(path, parsedRoot, errors) {
   const extraScripts = elements.filter((element) => element.name === "script"
     && elementAttribute(element, "type") !== "application/ld+json"
     && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-2");
-  const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot);
+  const inactiveUrlViolation = knowledgeInactiveUrlViolation(parsedRoot);
+  const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot) || inactiveUrlViolation;
   if (bannedRoute) {
     error(errors, "knowledge-route-boundary", path, "forbids the canonical /en/procurement-2026/ path across encoded URL attributes and adjacent inactive source fragments");
     error(errors, "knowledge-url-property-boundary", path, "forbids canonical or malformed fake English Procurement routes across every URL-valued attribute, metadata property, schema property and inactive source fragment");
+  }
+  if (inactiveUrlViolation) {
+    error(errors, "knowledge-inactive-url-boundary", path, "forbids embedded bare, quoted, JSON-like or attribute-style fake English Procurement URLs extracted from comments and statically inactive source");
+  }
+  if (knowledgeInactiveTemporalIdentifierViolation(parsedRoot)) {
+    error(errors, "knowledge-temporal-identifier-boundary", path, "forbids semantic date and time identifier tokens in comments and statically inactive source");
   }
   const temporalViolation = knowledgeHasDateBoundaryViolation(parsedRoot);
   if (temporalViolation) {

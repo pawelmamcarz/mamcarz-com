@@ -2504,6 +2504,55 @@ test("Plan 2 Task 4 fix round 2 rejects temporal metadata, clock literals and ev
   assert.equal(errorIds(owned2026).includes("knowledge-temporal-boundary"), false, owned2026.errors.join("\n"));
 });
 
+test("Plan 2 Task 4 fix round 3 extracts embedded fake-route candidates only from inactive source", async () => {
+  const cases = [
+    ["attribute-style comment", (html) => html.replace("</footer>", "<!-- forbidden href=/en/%70rocurement-%32%30%32%36/ --></footer>")],
+    ["JSON-like repeated encoding", (html) => html.replace("</footer>", '<!-- {"href":"/en/%2570rocurement-%2532%2530%2532%2536/"} --></footer>')],
+    ["single-quoted inactive value", (html) => html.replace("</footer>", "<template>target='/en/%70rocurement-%32%30%32%36/'</template></footer>")],
+    ["whitespace-split comments", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement- --> \n <!-- %32%30%32%36/ --></footer>")],
+    ["fully encoded route with malformed query", (html) => html.replace("</footer>", "<!-- href=%2Fen%2F%70rocurement-%32%30%32%36%2F?bad=%ZZ --></footer>")],
+    ["default-ignorable quoted route", (html) => html.replace("</footer>", '<div hidden>{"url":"/en/procure&#x200B;ment-%32%30%32%36/"}</div></footer>')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-inactive-url-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const ordinaryVisibleSplit = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</footer>", "<p>href=/en/%70rocurement-</p><p>%32%30%32%36/</p></footer>")
+  });
+  assert.equal(errorIds(ordinaryVisibleSplit).includes("knowledge-inactive-url-boundary"), false, ordinaryVisibleSplit.errors.join("\n"));
+
+  const allowedPolishRoute = await knowledgePageMutation();
+  assert.equal(errorIds(allowedPolishRoute).includes("knowledge-inactive-url-boundary"), false, allowedPolishRoute.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 3 tokenizes temporal identifiers in comments and inactive source", async () => {
+  const cases = [
+    ["uploadDate JSON comment", (html) => html.replace("</footer>", '<!-- {"uploadDate":"unknown"} --></footer>')],
+    ["startTime JSON comment", (html) => html.replace("</footer>", '<!-- {"startTime":"unknown"} --></footer>')],
+    ["dateCreated attribute style", (html) => html.replace("</footer>", "<!-- dateCreated=unknown --></footer>")],
+    ["mixed-case entity token", (html) => html.replace("</footer>", "<!-- UpLoAd&#68;ate=unknown --></footer>")],
+    ["default-ignorable token", (html) => html.replace("</footer>", "<!-- start&#x200B;Time=unknown --></footer>")],
+    ["inline hidden token split", (html) => html.replace("</footer>", "<div hidden><span>upload</span><span>Date</span></div></footer>")],
+    ["inactive sibling token split", (html) => html.replace("</footer>", "<span hidden>start</span> \n <span hidden>Time</span></footer>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-temporal-identifier-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const innocentProse = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</footer>", "<!-- The candidate starts a timely discussion. --></footer>")
+  });
+  assert.equal(errorIds(innocentProse).includes("knowledge-temporal-identifier-boundary"), false, innocentProse.errors.join("\n"));
+
+  const owned2026 = await knowledgePageMutation();
+  assert.equal(errorIds(owned2026).includes("knowledge-temporal-identifier-boundary"), false, owned2026.errors.join("\n"));
+});
+
 test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {
   const additions = [
     ["external image", '<img src="https://example.com/claim.png" alt="">'],
