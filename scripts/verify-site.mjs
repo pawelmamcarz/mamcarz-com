@@ -239,8 +239,12 @@ function htmlBodyRoot(parsedRoot) {
   return bodies.length === 1 ? bodies[0] : parsedRoot;
 }
 
+function elementHasHiddenState(element) {
+  return element.attributes.has("hidden") || normalize(elementAttribute(element, "aria-hidden") ?? "") === "true";
+}
+
 function elementIsStaticallyHidden(element) {
-  return element.attributes.has("hidden") || normalize(elementAttribute(element, "aria-hidden") ?? "") === "true" || rawTextElements.has(element.name);
+  return elementHasHiddenState(element) || rawTextElements.has(element.name);
 }
 
 function elementIsStaticallyVisible(element) {
@@ -248,6 +252,17 @@ function elementIsStaticallyVisible(element) {
     if (elementIsStaticallyHidden(current)) return false;
   }
   return true;
+}
+
+function elementHasNoHiddenAncestor(element) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (elementHasHiddenState(current)) return false;
+  }
+  return true;
+}
+
+function elementAttributeTokens(element, name) {
+  return normalize(elementAttribute(element, name) ?? "").split(" ").filter(Boolean);
 }
 
 function staticVisibleText(node) {
@@ -589,8 +604,8 @@ function verifyHomepageContent(body, parsedBody, page, errors) {
 function verifyHomepageBaseline(parsedRoot, page, errors) {
   const elements = elementDescendants(parsedRoot);
   const mains = elements.filter((element) => element.name === "main");
-  if (mains.length !== 1 || elementAttribute(mains[0] ?? { attributes: new Map() }, "id") !== "main") {
-    error(errors, "home-main", page.path, "homepage requires exactly one main#main landmark");
+  if (mains.length !== 1 || elementAttribute(mains[0] ?? { attributes: new Map() }, "id") !== "main" || !elementIsStaticallyVisible(mains[0])) {
+    error(errors, "home-main", page.path, "homepage requires exactly one visible main#main landmark");
   }
 
   const skipLinks = elements.filter((element) => element.name === "a" && elementHasClass(element, "skip-link"));
@@ -606,30 +621,66 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
   }
 
   const chatInputs = elements.filter((element) => element.name === "input" && elementAttribute(element, "id") === "chat-input");
-  if (chatInputs.length !== 1 || elementAttribute(chatInputs[0], "maxlength") !== "2000") {
-    error(errors, "home-chat-maxlength", page.path, "chat input requires maxlength 2000");
+  if (chatInputs.length !== 1 || elementAttribute(chatInputs[0], "maxlength") !== "2000" || !elementIsStaticallyVisible(chatInputs[0])) {
+    error(errors, "home-chat-maxlength", page.path, "homepage requires one visible chat input with maxlength 2000");
   }
 
   const heroSections = elements.filter((element) => element.name === "section" && elementAttribute(element, "id") === "hero");
-  const heroImages = heroSections.length === 1 ? elementDescendants(heroSections[0], "img") : [];
+  const visibleHero = heroSections.length === 1 && elementIsStaticallyVisible(heroSections[0]);
+  const heroImages = visibleHero ? elementDescendants(heroSections[0], "img") : [];
   const heroImage = heroImages[0];
   const width = heroImage ? elementAttribute(heroImage, "width") : null;
   const height = heroImage ? elementAttribute(heroImage, "height") : null;
   const validDimensions = /^\d+$/.test(width ?? "") && Number(width) > 0
     && /^\d+$/.test(height ?? "") && Number(height) > 0;
-  if (heroImages.length !== 1 || !validDimensions || elementAttribute(heroImage, "fetchpriority") !== "high") {
-    error(errors, "home-hero-image", page.path, "hero requires one image with explicit positive width and height plus fetchpriority=high");
+  if (!visibleHero || heroImages.length !== 1 || !elementIsStaticallyVisible(heroImage) || !validDimensions || elementAttribute(heroImage, "fetchpriority") !== "high") {
+    error(errors, "home-hero-image", page.path, "visible hero requires one visible image with explicit positive width and height plus fetchpriority=high");
   }
 
   const expectedCss = "/assets/css/style.css?v=20260825-flightplan-1";
   const expectedJs = "/assets/js/main.js?v=20260825-flightplan-1";
-  const stylesheetLinks = elements.filter((element) => element.name === "link"
-    && (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
-  const browserScripts = elements.filter((element) => element.name === "script"
-    && (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
-  if (stylesheetLinks.length !== 1 || elementAttribute(stylesheetLinks[0], "href") !== expectedCss
-    || browserScripts.length !== 1 || elementAttribute(browserScripts[0], "src") !== expectedJs) {
-    error(errors, "home-cache-version", page.path, `homepage requires exactly ${expectedCss} and ${expectedJs}`);
+  const activeStylesheets = elements.filter((element) => element.name === "link"
+    && elementAttributeTokens(element, "rel").includes("stylesheet")
+    && elementHasNoHiddenAncestor(element));
+  const validStylesheets = activeStylesheets.filter((element) => elementAttribute(element, "href") === expectedCss);
+  const executableScriptTypes = new Set(["", "text/javascript", "application/javascript", "module"]);
+  const executableBrowserScripts = elements.filter((element) => {
+    if (element.name !== "script" || !elementHasNoHiddenAncestor(element)) return false;
+    const type = element.attributes.has("type") ? normalize(elementAttribute(element, "type") ?? "") : "";
+    return executableScriptTypes.has(type);
+  });
+  const validBrowserScripts = executableBrowserScripts.filter((element) => elementAttribute(element, "src") === expectedJs
+    && element.attributes.has("defer"));
+  if (activeStylesheets.length !== 1 || validStylesheets.length !== 1
+    || executableBrowserScripts.length !== 1 || validBrowserScripts.length !== 1) {
+    error(errors, "home-cache-version", page.path, `homepage requires exactly one active ${expectedCss} stylesheet and one executable deferred ${expectedJs} script`);
+  }
+
+  const expectedFontHrefs = new Set([
+    "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2",
+    "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2"
+  ]);
+  const fontLinks = elements.filter((element) => element.name === "link" && (
+    (elementAttribute(element, "href") ?? "").startsWith("/assets/fonts/")
+    || (elementAttributeTokens(element, "rel").includes("preload") && normalize(elementAttribute(element, "as") ?? "") === "font")
+  ));
+  const validFontLinks = fontLinks.filter((element) => {
+    const rel = elementAttributeTokens(element, "rel");
+    const crossorigin = normalize(elementAttribute(element, "crossorigin") ?? "");
+    return expectedFontHrefs.has(elementAttribute(element, "href"))
+      && rel.length === 1
+      && rel[0] === "preload"
+      && normalize(elementAttribute(element, "as") ?? "") === "font"
+      && normalize(elementAttribute(element, "type") ?? "") === "font/woff2"
+      && element.attributes.has("crossorigin")
+      && (crossorigin === "" || crossorigin === "anonymous")
+      && elementHasNoHiddenAncestor(element);
+  });
+  const actualFontHrefs = new Set(validFontLinks.map((element) => elementAttribute(element, "href")));
+  if (fontLinks.length !== 2 || validFontLinks.length !== 2
+    || actualFontHrefs.size !== expectedFontHrefs.size
+    || [...expectedFontHrefs].some((href) => !actualFontHrefs.has(href))) {
+    error(errors, "home-font-preload", page.path, "homepage requires only the Barlow Semi Condensed 600 latin and latin-ext WOFF2 font preloads with crossorigin");
   }
 
   if (elements.some((element) => element.attributes.has("style"))) {
@@ -868,6 +919,238 @@ function stripJsComments(source) {
     output += character;
   }
   return output;
+}
+
+const htmlSinkAssignments = new Set([
+  "=", "+=", "-=", "*=", "/=", "%=", "**=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "&&=", "||=", "??=", "++", "--"
+]);
+
+const jsPunctuators = [
+  ">>>=", "===", "!==", "**=", "<<=", ">>=", "&&=", "||=", "??=", ">>>", "...", "=>", "==", "!=", "<=", ">=", "++", "--", "**", "<<", ">>", "&&", "||", "??", "?.", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^="
+].sort((first, second) => second.length - first.length);
+
+function readJsEscape(source, index, errors) {
+  const escaped = source[index + 1];
+  if (escaped === undefined) {
+    errors.push(`unterminated escape at offset ${index}`);
+    return { value: "", end: source.length };
+  }
+  if (escaped === "\n") return { value: "", end: index + 2 };
+  if (escaped === "\r") return { value: "", end: index + (source[index + 2] === "\n" ? 3 : 2) };
+  const simpleEscapes = new Map([
+    ["b", "\b"], ["f", "\f"], ["n", "\n"], ["r", "\r"], ["t", "\t"], ["v", "\v"], ["0", "\0"]
+  ]);
+  if (simpleEscapes.has(escaped)) return { value: simpleEscapes.get(escaped), end: index + 2 };
+  if (escaped === "x") {
+    const digits = source.slice(index + 2, index + 4);
+    if (!/^[0-9a-f]{2}$/i.test(digits)) errors.push(`invalid hexadecimal escape at offset ${index}`);
+    return { value: /^[0-9a-f]{2}$/i.test(digits) ? String.fromCodePoint(Number.parseInt(digits, 16)) : "", end: Math.min(source.length, index + 4) };
+  }
+  if (escaped === "u") {
+    if (source[index + 2] === "{") {
+      const closing = source.indexOf("}", index + 3);
+      const digits = closing === -1 ? "" : source.slice(index + 3, closing);
+      const codePoint = /^[0-9a-f]{1,6}$/i.test(digits) ? Number.parseInt(digits, 16) : -1;
+      if (closing === -1 || codePoint < 0 || codePoint > 0x10FFFF) errors.push(`invalid Unicode escape at offset ${index}`);
+      return { value: codePoint >= 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "", end: closing === -1 ? source.length : closing + 1 };
+    }
+    const digits = source.slice(index + 2, index + 6);
+    if (!/^[0-9a-f]{4}$/i.test(digits)) errors.push(`invalid Unicode escape at offset ${index}`);
+    return { value: /^[0-9a-f]{4}$/i.test(digits) ? String.fromCodePoint(Number.parseInt(digits, 16)) : "", end: Math.min(source.length, index + 6) };
+  }
+  return { value: escaped, end: index + 2 };
+}
+
+function tokenizeJavascriptForHtmlSinks(source) {
+  const tokens = [];
+  const errors = [];
+
+  const push = (type, value) => {
+    const token = { type, value };
+    tokens.push(token);
+    return token;
+  };
+
+  const readQuotedString = (start) => {
+    const quote = source[start];
+    let value = "";
+    let index = start + 1;
+    while (index < source.length) {
+      const character = source[index];
+      if (character === quote) return { token: { type: "string", value }, end: index + 1 };
+      if (character === "\n" || character === "\r") {
+        errors.push(`unterminated string at offset ${start}`);
+        return { token: { type: "string", value }, end: index };
+      }
+      if (character === "\\") {
+        const escape = readJsEscape(source, index, errors);
+        value += escape.value;
+        index = escape.end;
+        continue;
+      }
+      value += character;
+      index += 1;
+    }
+    errors.push(`unterminated string at offset ${start}`);
+    return { token: { type: "string", value }, end: source.length };
+  };
+
+  const canStartRegex = (previous) => {
+    if (!previous) return true;
+    if (previous.type === "identifier") return new Set(["await", "case", "delete", "do", "else", "in", "instanceof", "new", "return", "throw", "typeof", "void", "yield"]).has(previous.value);
+    if (["number", "regex", "string", "template"].includes(previous.type)) return false;
+    return ![")", "]", "}", "++", "--"].includes(previous.value);
+  };
+
+  const readRegex = (start) => {
+    let index = start + 1;
+    let escaped = false;
+    let characterClass = false;
+    while (index < source.length) {
+      const character = source[index];
+      if (character === "\n" || character === "\r") break;
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === "[") characterClass = true;
+      else if (character === "]") characterClass = false;
+      else if (character === "/" && !characterClass) {
+        index += 1;
+        while (/[a-z]/i.test(source[index] ?? "")) index += 1;
+        return index;
+      }
+      index += 1;
+    }
+    errors.push(`unterminated regular expression at offset ${start}`);
+    return index;
+  };
+
+  let scanCode;
+  const scanTemplate = (start) => {
+    let index = start + 1;
+    let value = "";
+    let dynamic = false;
+    while (index < source.length) {
+      const character = source[index];
+      if (character === "`") {
+        push(dynamic ? "template" : "string", dynamic ? "" : value);
+        return index + 1;
+      }
+      if (character === "\\") {
+        const escape = readJsEscape(source, index, errors);
+        value += escape.value;
+        index = escape.end;
+        continue;
+      }
+      if (character === "$" && source[index + 1] === "{") {
+        dynamic = true;
+        const expression = scanCode(index + 2, true);
+        if (!expression.closed) errors.push(`unterminated template expression at offset ${index}`);
+        index = expression.index;
+        continue;
+      }
+      value += character;
+      index += 1;
+    }
+    errors.push(`unterminated template at offset ${start}`);
+    push("template", "");
+    return source.length;
+  };
+
+  scanCode = (start = 0, stopAtTemplateBrace = false) => {
+    let index = start;
+    let braceDepth = 0;
+    let previous = null;
+    while (index < source.length) {
+      const character = source[index];
+      const next = source[index + 1];
+      if (/\s/.test(character)) {
+        index += 1;
+        continue;
+      }
+      if (character === "/" && next === "/") {
+        const newline = source.indexOf("\n", index + 2);
+        index = newline === -1 ? source.length : newline + 1;
+        continue;
+      }
+      if (character === "/" && next === "*") {
+        const closing = source.indexOf("*/", index + 2);
+        if (closing === -1) {
+          errors.push(`unterminated block comment at offset ${index}`);
+          return { index: source.length, closed: false };
+        }
+        index = closing + 2;
+        continue;
+      }
+      if (character === "'" || character === '"') {
+        const string = readQuotedString(index);
+        previous = push(string.token.type, string.token.value);
+        index = string.end;
+        continue;
+      }
+      if (character === "`") {
+        index = scanTemplate(index);
+        previous = tokens.at(-1) ?? null;
+        continue;
+      }
+      if (/[a-z_$]/i.test(character)) {
+        const match = /^[a-z_$][a-z0-9_$]*/i.exec(source.slice(index));
+        previous = push("identifier", match[0]);
+        index += match[0].length;
+        continue;
+      }
+      if (/\d/.test(character)) {
+        const match = /^\d(?:[a-z0-9_.]*\d)?/i.exec(source.slice(index));
+        previous = push("number", match?.[0] ?? character);
+        index += match?.[0].length ?? 1;
+        continue;
+      }
+      if (character === "}" && stopAtTemplateBrace && braceDepth === 0) return { index: index + 1, closed: true };
+      if (character === "{") braceDepth += 1;
+      else if (character === "}" && braceDepth > 0) braceDepth -= 1;
+      if (character === "/" && canStartRegex(previous)) {
+        index = readRegex(index);
+        previous = push("regex", "regex");
+        continue;
+      }
+      const punctuator = jsPunctuators.find((candidate) => source.startsWith(candidate, index)) ?? character;
+      previous = push("punctuator", punctuator);
+      index += punctuator.length;
+    }
+    return { index, closed: !stopAtTemplateBrace };
+  };
+
+  scanCode();
+  return { tokens, errors };
+}
+
+function htmlSinkAccessAt(tokens, index) {
+  const token = tokens[index];
+  if (!token) return null;
+  if ((token.value === "." || token.value === "?.") && tokens[index + 1]?.type === "identifier") {
+    return { property: tokens[index + 1].value, end: index + 1 };
+  }
+  const bracketStart = token.value === "[" ? index : ((token.value === "?." && tokens[index + 1]?.value === "[") ? index + 1 : -1);
+  if (bracketStart !== -1 && tokens[bracketStart + 1]?.type === "string" && tokens[bracketStart + 2]?.value === "]") {
+    return { property: tokens[bracketStart + 1].value, end: bracketStart + 2 };
+  }
+  return null;
+}
+
+function inspectJavascriptHtmlSinks(source) {
+  const lexical = tokenizeJavascriptForHtmlSinks(source);
+  for (let index = 0; index < lexical.tokens.length; index += 1) {
+    const access = htmlSinkAccessAt(lexical.tokens, index);
+    if (!access) continue;
+    const after = lexical.tokens[access.end + 1];
+    if ((access.property === "innerHTML" || access.property === "outerHTML") && htmlSinkAssignments.has(after?.value)) {
+      return { unsafe: true, errors: lexical.errors };
+    }
+    if (access.property === "insertAdjacentHTML"
+      && (after?.value === "(" || (after?.value === "?." && lexical.tokens[access.end + 2]?.value === "("))) {
+      return { unsafe: true, errors: lexical.errors };
+    }
+  }
+  return { unsafe: false, errors: lexical.errors };
 }
 
 function namedFunctionBody(source, functionName) {
@@ -1595,10 +1878,10 @@ function verifyBrowserScript(js, errors) {
     const invocation = new RegExp(`\\b${initializer}\\s*\\(\\s*\\)\\s*;`).test(activeJs);
     if (!definition || !invocation) error(errors, "js-initializer", path, `${initializer} must be declared and invoked`);
   }
-  const unsafeHtmlAssignment = /\.(?:innerHTML|outerHTML)\s*(?:\+\+|--|\*\*=|<<=|>>>=|>>=|&&=|\|\|=|\?\?=|[+\-*/%&|^]?=)/;
-  const unsafeHtmlMethod = /\.insertAdjacentHTML\s*\(/;
-  if (unsafeHtmlAssignment.test(activeJs) || unsafeHtmlMethod.test(activeJs)) {
-    error(errors, "js-inner-html", path, "HTML injection sinks are forbidden");
+  const htmlSinkInspection = inspectJavascriptHtmlSinks(js);
+  if (htmlSinkInspection.unsafe || htmlSinkInspection.errors.length > 0) {
+    const detail = htmlSinkInspection.errors.length > 0 ? `; lexical errors: ${htmlSinkInspection.errors.join(", ")}` : "";
+    error(errors, "js-inner-html", path, `HTML injection sinks are forbidden${detail}`);
   }
   const workerUrl = "https://mamcarz-chat-api.pawel-767.workers.dev";
   if ((activeJs.match(new RegExp(escapeRegExp(workerUrl), "g")) ?? []).length !== 1) {

@@ -166,6 +166,8 @@ function homepageFixture(lang, content) {
     : [["Advisory", "Advisory"], ["Operational application", "Operational%20application"], ["Aviation", "Aviation"]];
   const skipLabel = lang === "pl" ? "Przejdź do treści" : "Skip to main content";
   return `<!doctype html><html lang="${lang}"><head>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
     <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">
   </head><body>
     <a href="#main" class="skip-link">${skipLabel}</a>
@@ -577,6 +579,82 @@ test("Task 7 foundation rejects alternate HTML injection sinks in chat rendering
     if (!errorIds(result).includes("js-inner-html")) acceptedUnsafeSinks.push(label);
   }
   assert.deepEqual(acceptedUnsafeSinks, [], `validator accepted unsafe sinks: ${acceptedUnsafeSinks.join(", ")}`);
+});
+
+test("Task 7 review rejects bracket and optional-call HTML injection sinks", async () => {
+  const mutations = [
+    ["computed innerHTML assignment", 'node["innerHTML"] = payload;'],
+    ["computed outerHTML compound assignment", "node['outerHTML'] += payload;"],
+    ["optional insertAdjacentHTML call", 'node.insertAdjacentHTML?.("beforeend", payload);'],
+    ["computed insertAdjacentHTML call", 'node["insertAdjacentHTML"]("beforeend", payload);']
+  ];
+  const acceptedUnsafeSinks = [];
+  for (const [label, unsafeSink] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${unsafeSink}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) acceptedUnsafeSinks.push(label);
+  }
+  assert.deepEqual(acceptedUnsafeSinks, [], `validator accepted unsafe sinks: ${acceptedUnsafeSinks.join(", ")}`);
+});
+
+test("Task 7 review ignores HTML sink spellings in comments and literal text", async () => {
+  const controls = [
+    ["double-quoted string", 'const task7Text = "node.innerHTML = payload";'],
+    ["single-quoted string", "const task7Text = 'node.insertAdjacentHTML(';"],
+    ["template raw text", "const task7Text = `node.innerHTML = payload; node.insertAdjacentHTML(`;"],
+    ["line comment", "// node.innerHTML = payload"],
+    ["block comment", "/* node.insertAdjacentHTML(\"beforeend\", payload) */"]
+  ];
+  const rejectedSafeControls = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejectedSafeControls.push(label);
+  }
+  assert.deepEqual(rejectedSafeControls, [], `validator rejected inert sink text: ${rejectedSafeControls.join(", ")}`);
+});
+
+test("Task 7 review probe catches escaped and optional computed HTML sinks", async () => {
+  const probes = [
+    ["hex-escaped computed property", 'node["inner\\x48TML"] ??= payload;'],
+    ["optional computed property separated by a comment", 'node?.[/* bounded gap */"outerHTML"] ||= payload;'],
+    ["static template computed method", 'node[`insertAdjacentHTML`]?.("beforeend", payload);']
+  ];
+  const missed = [];
+  for (const [label, probe] of probes) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${probe}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) missed.push(label);
+  }
+  assert.deepEqual(missed, [], `validator missed bypass probes: ${missed.join(", ")}`);
+});
+
+test("Task 7 review probe permits regex, dynamic-template raw text and inert key arrays", async () => {
+  const probes = [
+    ["regular expression", String.raw`const sinkPattern = /\.innerHTML\s*=|insertAdjacentHTML\(/;`],
+    ["dynamic template raw text", "const label = `node.innerHTML = ${safeValue}; node.insertAdjacentHTML(`;"],
+    ["inert key array", 'const sinkNames = ["innerHTML", "outerHTML", "insertAdjacentHTML"];']
+  ];
+  const rejected = [];
+  for (const [label, probe] of probes) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${probe}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator rejected safe probes: ${rejected.join(", ")}`);
+});
+
+test("Task 7 review fails closed on unterminated JavaScript lexical states", async () => {
+  const mutations = [
+    ["string", 'const broken = "unterminated'],
+    ["block comment", "/* unterminated"],
+    ["template", "const broken = `unterminated"]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
 });
 
 test("Task 7 navigation clears an open mobile menu when entering desktop width", async () => {
@@ -1723,6 +1801,114 @@ const task7HomeMutations = [
 for (const lang of ["pl", "en"]) {
   for (const [mutation, expectedError, mutate] of task7HomeMutations) {
     test(`Task 7 home baseline rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+const task7ReviewHomeSemanticMutations = [
+  ["hidden main landmark", "home-main", (html) => html.replace('<main id="main">', '<main id="main" hidden>')],
+  ["aria-hidden main landmark", "home-main", (html) => html.replace('<main id="main">', '<main id="main" aria-hidden="true">')],
+  ["main landmark inside a hidden ancestor", "home-main", (html) => html
+    .replace('<main id="main">', '<div hidden><main id="main">')
+    .replace('</main><footer>', '</main></div><footer>')],
+  ["hidden hero section", "home-hero-image", (html) => html.replace('<section id="hero">', '<section id="hero" hidden>')],
+  ["aria-hidden hero section", "home-hero-image", (html) => html.replace('<section id="hero">', '<section id="hero" aria-hidden="true">')],
+  ["hero section inside an aria-hidden ancestor", "home-hero-image", (html) => html
+    .replace('<section id="hero">', '<div aria-hidden="true"><section id="hero">')
+    .replace('</section>\n    <section data-section="trust">', '</section></div>\n    <section data-section="trust">')],
+  ["hidden chat input", "home-chat-maxlength", (html) => html.replace('<input id="chat-input"', '<input hidden id="chat-input"')],
+  ["aria-hidden chat input", "home-chat-maxlength", (html) => html.replace('<input id="chat-input"', '<input aria-hidden="true" id="chat-input"')],
+  ["chat input inside a hidden ancestor", "home-chat-maxlength", (html) => html.replace(
+    '<input id="chat-input" maxlength="2000">',
+    '<div hidden><input id="chat-input" maxlength="2000"></div>'
+  )],
+  ["stylesheet changed to a style preload", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260825-flightplan-1">'
+  )],
+  ["hidden stylesheet", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1" hidden>'
+  )],
+  ["stylesheet attributes on a meta decoy", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">'
+  )],
+  ["additional active stylesheet", "home-cache-version", (html) => html.replace(
+    "</head>",
+    '<link rel="stylesheet" href="/assets/css/extra.css">\n  </head>'
+  )],
+  ["non-executable JSON browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" type="application/json" defer>'
+  )],
+  ["browser script without defer", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1">'
+  )],
+  ["hidden browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer hidden>'
+  )],
+  ["browser-script attributes on a meta decoy", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script>',
+    '<meta src="/assets/js/main.js?v=20260825-flightplan-1" defer>'
+  )],
+  ["additional executable browser script", "home-cache-version", (html) => html.replace(
+    "</body>",
+    '<script src="/assets/js/extra.js" defer></script></body>'
+  )],
+  ["Playfair substituted for the latin Barlow preload", "home-font-preload", (html) => html.replace(
+    '/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2',
+    '/assets/fonts/playfair-latin.woff2'
+  )],
+  ["DM Sans substituted for the latin-ext Barlow preload", "home-font-preload", (html) => html.replace(
+    '/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2',
+    '/assets/fonts/dmsans-latext.woff2'
+  )],
+  ["third font preload", "home-font-preload", (html) => html.replace(
+    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">',
+    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">'
+  )],
+  ["font preload with the wrong rel", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="prefetch" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload with an additional rel token", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload stylesheet" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload with the wrong destination", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="script" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload with the wrong MIME type", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/ttf" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload without crossorigin", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2">'
+  )],
+  ["font preload with credentialed crossorigin", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin="use-credentials">'
+  )],
+  ["hidden font preload", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin hidden>'
+  )],
+  ["font-preload attributes on a meta decoy", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<meta rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )]
+];
+
+for (const lang of ["pl", "en"]) {
+  for (const [mutation, expectedError, mutate] of task7ReviewHomeSemanticMutations) {
+    test(`Task 7 review home semantics rejects ${mutation} on ${lang}`, async () => {
       const result = await task7HomeMutation(lang, mutate);
       assert.ok(errorIds(result).includes(expectedError));
     });
