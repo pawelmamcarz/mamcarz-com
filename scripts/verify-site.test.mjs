@@ -503,6 +503,16 @@ const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "projects")
 const aviationPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
 const knowledgePair = plan2RoutePairs.find((pair) => pair[4] === "knowledge");
 const servicePairs = plan2RoutePairs.filter((pair) => pair[4] === "services");
+const serviceFactIdFixture = new Set([
+  "career.pzu.organization", "career.pzu.title", "career.pzu.responsibility",
+  "career.pwc.organization", "career.pwc.title", "career.pwc.responsibility",
+  "project.orlen.role", "project.orlen.platform_scope", "project.orlen.connect_scope",
+  "hero.implementations", "project.kghm.role", "project.kghm.scope", "project.kghm.integration",
+  "project.zabka.role", "project.zabka.implementation", "project.zabka.proof",
+  "project.lot.implementation", "project.motor_oil.implementation",
+  "career.pkp_plk.organization", "career.pkp_plk.dates", "career.pkp_plk.title", "career.pkp_plk.responsibility"
+]);
+const serviceSurfaceFixture = new Set(servicePairs.flatMap(([plFile, enFile]) => [plFile, enFile]));
 
 function servicePairKey(pair) {
   return pair[0].includes("transformacja-zakupow")
@@ -529,22 +539,27 @@ async function servicePageMutation({ key = "transformation", lang = "pl", mutate
 
 async function serviceRegistryMutation({ mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
   const factData = await readFacts();
+  const facts = mutateFacts(structuredClone(factData.facts));
+  const publicClaimSurfaces = mutateSurfaces(structuredClone(factData.public_claim_surfaces));
   const root = await productionRegistryFixture({
-    facts: mutateFacts(structuredClone(factData.facts)),
-    public_claim_surfaces: mutateSurfaces(structuredClone(factData.public_claim_surfaces))
+    facts,
+    public_claim_surfaces: publicClaimSurfaces
   });
-  const [pages, facts, all] = await Promise.all([
+  const pagesAllRoot = await pageArchitectureFixture({ facts, public_claim_surfaces: publicClaimSurfaces });
+  const [pages, pagesAll, factsResult, all] = await Promise.all([
     runVerification({ root, scope: "pages", family: "services" }),
+    runVerification({ root: pagesAllRoot, scope: "pages", family: "all" }),
     runVerification({ root, scope: "facts" }),
     runVerification({ root, scope: "all" })
   ]);
-  return { pages, facts, all };
+  return { pages, pagesAll, facts: factsResult, all };
 }
 
 function assertServiceRegistryInventoryErrors(results, label) {
-  for (const [scope, result] of Object.entries(results)) {
-    assert.ok(errorIds(result).includes("service-registry-inventory"), `${label}, ${scope}: ${result.errors.join("\n")}`);
-  }
+  const missing = Object.entries(results)
+    .filter(([, result]) => !errorIds(result).includes("service-registry-inventory"))
+    .map(([scope, result]) => `${scope}: ${result.errors.join("\n") || "no errors"}`);
+  assert.deepEqual(missing, [], `${label}, missing dedicated error in:\n${missing.join("\n")}`);
 }
 
 const knowledgeContract = Object.freeze({
@@ -2848,6 +2863,14 @@ test("Plan 2 Task 5 fix round 1 owns the exact ordered public service-surface in
     const results = await serviceRegistryMutation({ mutateSurfaces });
     assertServiceRegistryInventoryErrors(results, label);
   }
+});
+
+test("Plan 2 Task 5 fix round 2 rejects wholesale removal of the immutable service registry in every relevant scope", async () => {
+  const results = await serviceRegistryMutation({
+    mutateFacts: (facts) => facts.filter((record) => !serviceFactIdFixture.has(record.id)),
+    mutateSurfaces: (surfaces) => surfaces.filter((surface) => !serviceSurfaceFixture.has(surface))
+  });
+  assertServiceRegistryInventoryErrors(results, "wholesale service registry removal");
 });
 
 test("readFacts reads fixtures without starting CLI verification", async () => {

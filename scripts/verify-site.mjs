@@ -5429,14 +5429,14 @@ const SERVICE_FACT_CONTRACT = Object.freeze([
   ["career.pkp_plk.responsibility", "SAP AG framework agreement negotiation for the PKP Group", "Negocjowałem umowę ramową z SAP AG dla grupy PKP.", "I negotiated an SAP AG framework agreement for the PKP Group.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]]
 ].map(([id, value, display_pl, display_en, source_label, surfaces]) => Object.freeze({ id, value, display_pl, display_en, kind: "constant", as_of: null, source_type: "owner_verified", source_label, source_url: null, surfaces: Object.freeze(surfaces), status: "approved" })));
 
-function verifyServiceRegistryInventory(factData, errors) {
+function verifyServiceRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
   const publicSurfaces = Array.isArray(factData.public_claim_surfaces) ? factData.public_claim_surfaces : [];
   const contractIds = new Set(SERVICE_FACT_CONTRACT.map((record) => record.id));
   const ownsServiceState = records.some((record) => contractIds.has(record?.id)
       || (Array.isArray(record?.surfaces) && record.surfaces.some((surface) => SERVICE_SURFACE_LIST.includes(surface))))
     || publicSurfaces.some((surface) => SERVICE_SURFACE_LIST.includes(surface));
-  if (!ownsServiceState) return;
+  if (!required && !ownsServiceState) return;
 
   const failures = [];
   if (JSON.stringify(publicSurfaces) !== JSON.stringify(SERVICE_PUBLIC_SURFACE_CONTRACT)) {
@@ -5467,6 +5467,17 @@ function verifyServiceRegistryInventory(factData, errors) {
   if (failures.length > 0) {
     error(errors, "service-registry-inventory", "content/site-facts.json", failures.join("; "));
   }
+}
+
+async function hasCompleteServiceDocumentContext(root) {
+  const documents = await Promise.all(SERVICE_SURFACE_LIST.map(async (path) => {
+    try {
+      return (await stat(resolve(root, path))).isFile();
+    } catch {
+      return false;
+    }
+  }));
+  return documents.every(Boolean);
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
@@ -5771,7 +5782,7 @@ async function verifyArtifacts(_factData, context) {
 
 async function verifyPages(factData, family, context) {
   const selectedPairs = ROUTE_PAIRS.filter((pair) => family === "all" || pair[4] === family);
-  if (family === "services" || family === "all") verifyServiceRegistryInventory(factData, context.errors);
+  if (family === "services" || family === "all") verifyServiceRegistryInventory(factData, context.errors, { required: true });
   for (const [plFile, enFile, plRoute, enRoute, routeFamily] of selectedPairs) {
     const pl = await readRequired(context, plFile, "route-file");
     const en = await readRequired(context, enFile, "route-file");
@@ -5884,7 +5895,8 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   else if (!validFamily) error(errors, "cli-family", "scripts/verify-site.mjs", `unsupported family ${family}`);
   const facts = await readFacts({ root, onError: (id, path, message) => error(errors, id, path, message) });
   if (scope === "facts" || scope === "all") {
-    verifyServiceRegistryInventory(facts, errors);
+    const completeServiceContext = await hasCompleteServiceDocumentContext(root);
+    verifyServiceRegistryInventory(facts, errors, { required: completeServiceContext });
     const publicSurfaces = verifyPublicSurfaceInventory(facts, errors);
     const factIds = verifyFactSchema(facts, publicSurfaces, errors);
     verifyBlockedSchema(facts, factIds, errors);

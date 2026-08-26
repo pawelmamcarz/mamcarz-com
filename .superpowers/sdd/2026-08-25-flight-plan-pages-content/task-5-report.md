@@ -157,7 +157,7 @@ The first RED output also reported missing local fixture assets during the pages
 - Every registry record is reverse-scanned for each service path. Each actual fact-ID multiset must equal the immutable approved set, so unrelated, fabricated and duplicate authorizations fail.
 - Every immutable Task 5 record must occur once and retain its exact complete `surfaces` array, including its legitimate non-service surfaces.
 - `public_claim_surfaces` must equal the exact ordered service-aware inventory: the existing home, application, aviation, LLMS, worker and browser-script surfaces plus the six service paths. Missing, extra, typo, duplicate and reordered entries fail.
-- The contract runs under `pages/services`, `pages/all`, `facts` and `scope=all`, while fixtures with no service state remain governed by their existing contracts.
+- Explicit `pages/services` and `pages/all` verification always requires the contract. Under `facts` and `scope=all`, Task 5 applicability is derived independently from the complete six-document service context; fixtures without that document context remain governed by their existing contracts.
 
 ### GREEN and carried verification
 
@@ -189,3 +189,44 @@ git diff --check
 ```
 
 No push, merge, deployment, production access, external browsing, asset work or product Browser mutation occurred.
+
+## Fix round 2: wholesale registry-removal closure
+
+This round changed only the verifier, its mutation tests and this report. The six service HTML files, shared CSS, `content/site-facts.json` and browser JavaScript remain byte-identical to `d6ee67d607ed9b49848a080769b6d81803ef0ead`; Browser was not repeated.
+
+### Wholesale-removal RED
+
+A complete Task 5 fixture removed all 22 immutable service fact records and all six service entries from `public_claim_surfaces`. Existing page-level checks noticed missing fact records, but the dedicated registry inventory remained silent because its activation depended on the same mutable state being removed:
+
+```text
+pages/services: no service-registry-inventory
+pages/all: no service-registry-inventory
+facts: no errors
+scope=all: no service-registry-inventory
+Fix round 2: 0/1, exit 1
+```
+
+The assertion collected all four missing scopes before failing, so an earlier page-level or fixture error could not mask the absent dedicated inventory error.
+
+### Independent activation
+
+- `pages/services` and `pages/all` force `service-registry-inventory` from the immutable selected family contract, regardless of mutable registry contents.
+- `facts` and `scope=all` establish Task 5 applicability by checking that all six exact paths from immutable `SERVICE_SURFACE_LIST` exist as files beneath the verification root.
+- Registry content is evaluated only after this independent activation decision. Removing every service record and public surface can therefore no longer disable the guard.
+- Partial or legacy fixtures without the complete six-document context retain their pre-Task-5 facts behavior; explicit service page scopes still fail according to their selected family contract.
+
+### GREEN and carried verification
+
+```text
+Fix round 2: 1/1, exit 0
+Task 5 including prior mutations: 7/7, exit 0
+Task 4: 18/18, exit 0
+Task 3: 10/10, exit 0
+Task 2: 34/34, exit 0
+Task 1: 36/36, exit 0
+Full verifier: 533/533, 0 failures, exit 0, 53.03 s
+```
+
+All service, Knowledge, aviation, application, home, facts, foundation and full-site gates; verifier/test/browser-script syntax checks; prohibited-claim scans; `git diff --check`; and frozen-product identity checks returned exit 0. No product, registry, CSS, browser JavaScript or asset byte changed.
+
+No push, merge, deployment, production access, external browsing or Browser rerun occurred.
