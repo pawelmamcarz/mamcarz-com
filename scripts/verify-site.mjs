@@ -74,6 +74,21 @@ function normalize(text) {
     .toLocaleLowerCase("en-US");
 }
 
+function normalizeExactLiteral(text) {
+  return text
+    .normalize("NFKC")
+    .replace(/\p{Default_Ignorable_Code_Point}+/gu, "")
+    .replace(/\u00a0/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function sameExactLiteral(actual, expected) {
+  return typeof actual === "string"
+    && typeof expected === "string"
+    && normalizeExactLiteral(actual) === normalizeExactLiteral(expected);
+}
+
 const htmlNamedCharacterReferences = new Map([
   ["AMP", "&"], ["amp", "&"],
   ["LT", "<"], ["lt", "<"],
@@ -95,6 +110,10 @@ function decodeHtmlEntities(text) {
     const codePoint = Number.parseInt(hexadecimal ? entity.slice(1) : entity, hexadecimal ? 16 : 10);
     return codePoint > 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "�";
   });
+}
+
+function normalizeExactHtmlLiteral(text) {
+  return normalizeExactLiteral(decodeHtmlEntities(text));
 }
 
 function renderedText(html) {
@@ -2985,6 +3004,93 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
   })
 });
 
+function freezeApplicationManifest(entries) {
+  return Object.freeze(entries.map((entry) => Object.freeze({
+    ...entry,
+    attributes: Object.freeze({ ...entry.attributes })
+  })));
+}
+
+const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
+  pl: freezeApplicationManifest([
+    { role: "skip", href: "#main", label: "Przejdź do treści", kind: "text", attributes: { href: "#main", class: "skip-link" } },
+    { role: "nav-logo", href: "/", label: "PM · Mamcarz.com", kind: "logo", attributes: { href: "/", class: "nav-logo" } },
+    { role: "nav-advisory-0", href: "/uslugi/transformacja-zakupow/", label: "Transformacja zakupów", kind: "text", attributes: { href: "/uslugi/transformacja-zakupow/" } },
+    { role: "nav-advisory-1", href: "/uslugi/wdrozenie-sap-ariba/", label: "Wdrożenie SAP Ariba", kind: "text", attributes: { href: "/uslugi/wdrozenie-sap-ariba/" } },
+    { role: "nav-advisory-2", href: "/uslugi/doradztwo-zamowienia-publiczne/", label: "Zamówienia publiczne", kind: "text", attributes: { href: "/uslugi/doradztwo-zamowienia-publiczne/" } },
+    { role: "nav-primary-0", href: "/aplikacje-operacyjne/", label: "Aplikacje operacyjne", kind: "text", attributes: { href: "/aplikacje-operacyjne/", "aria-current": "page" } },
+    { role: "nav-primary-1", href: "/lotnictwo/", label: "Lotnictwo", kind: "text", attributes: { href: "/lotnictwo/" } },
+    { role: "nav-primary-2", href: "/case-studies/", label: "Projekty", kind: "text", attributes: { href: "/case-studies/" } },
+    { role: "nav-primary-3", href: "/wiedza/", label: "Wiedza", kind: "text", attributes: { href: "/wiedza/" } },
+    { role: "nav-primary-4", href: "/#about", label: "O mnie", kind: "text", attributes: { href: "/#about" } },
+    { role: "nav-primary-5", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } },
+    { role: "nav-language", href: "/en/aplikacje-operacyjne/", label: "EN", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/", class: "nav-lang" } },
+    { role: "breadcrumb-home", href: "/", label: "Strona główna", kind: "text", attributes: { href: "/" } },
+    { role: "contact-cta", href: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna", label: "Opisz aplikację operacyjną", kind: "text", attributes: { class: "btn-primary", href: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna" } },
+    { role: "footer-sign", href: "/", label: "", kind: "signature", attributes: { class: "footer-sign", href: "/", "aria-label": "Paweł Mamcarz, strona główna" } },
+    { role: "footer-link-0", href: "/", label: "Strona główna", kind: "text", attributes: { href: "/" } },
+    { role: "footer-link-1", href: "/uslugi/transformacja-zakupow/", label: "Doradztwo", kind: "text", attributes: { href: "/uslugi/transformacja-zakupow/" } },
+    { role: "footer-link-2", href: "/aplikacje-operacyjne/", label: "Aplikacje", kind: "text", attributes: { href: "/aplikacje-operacyjne/" } },
+    { role: "footer-link-3", href: "/lotnictwo/", label: "Lotnictwo", kind: "text", attributes: { href: "/lotnictwo/" } },
+    { role: "footer-link-4", href: "/case-studies/", label: "Projekty", kind: "text", attributes: { href: "/case-studies/" } },
+    { role: "footer-link-5", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } }
+  ]),
+  en: freezeApplicationManifest([
+    { role: "skip", href: "#main", label: "Skip to content", kind: "text", attributes: { href: "#main", class: "skip-link" } },
+    { role: "nav-logo", href: "/en/", label: "PM · Mamcarz.com", kind: "logo", attributes: { href: "/en/", class: "nav-logo" } },
+    { role: "nav-advisory-0", href: "/en/uslugi/transformacja-zakupow/", label: "Procurement transformation", kind: "text", attributes: { href: "/en/uslugi/transformacja-zakupow/" } },
+    { role: "nav-advisory-1", href: "/en/uslugi/wdrozenie-sap-ariba/", label: "SAP Ariba implementation", kind: "text", attributes: { href: "/en/uslugi/wdrozenie-sap-ariba/" } },
+    { role: "nav-advisory-2", href: "/en/uslugi/doradztwo-zamowienia-publiczne/", label: "Public procurement", kind: "text", attributes: { href: "/en/uslugi/doradztwo-zamowienia-publiczne/" } },
+    { role: "nav-primary-0", href: "/en/aplikacje-operacyjne/", label: "Operational applications", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/", "aria-current": "page" } },
+    { role: "nav-primary-1", href: "/en/lotnictwo/", label: "Aviation", kind: "text", attributes: { href: "/en/lotnictwo/" } },
+    { role: "nav-primary-2", href: "/en/case-studies/", label: "Projects", kind: "text", attributes: { href: "/en/case-studies/" } },
+    { role: "nav-primary-3", href: "/en/wiedza/", label: "Knowledge", kind: "text", attributes: { href: "/en/wiedza/" } },
+    { role: "nav-primary-4", href: "/en/#about", label: "About", kind: "text", attributes: { href: "/en/#about" } },
+    { role: "nav-primary-5", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } },
+    { role: "nav-language", href: "/aplikacje-operacyjne/", label: "PL", kind: "text", attributes: { href: "/aplikacje-operacyjne/", class: "nav-lang" } },
+    { role: "breadcrumb-home", href: "/en/", label: "Home", kind: "text", attributes: { href: "/en/" } },
+    { role: "contact-cta", href: "mailto:pawel@mamcarz.com?subject=Operational%20application", label: "Describe the operational application", kind: "text", attributes: { class: "btn-primary", href: "mailto:pawel@mamcarz.com?subject=Operational%20application" } },
+    { role: "footer-sign", href: "/en/", label: "", kind: "signature", attributes: { class: "footer-sign", href: "/en/", "aria-label": "Paweł Mamcarz, home" } },
+    { role: "footer-link-0", href: "/en/", label: "Home", kind: "text", attributes: { href: "/en/" } },
+    { role: "footer-link-1", href: "/en/uslugi/transformacja-zakupow/", label: "Advisory", kind: "text", attributes: { href: "/en/uslugi/transformacja-zakupow/" } },
+    { role: "footer-link-2", href: "/en/aplikacje-operacyjne/", label: "Applications", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/" } },
+    { role: "footer-link-3", href: "/en/lotnictwo/", label: "Aviation", kind: "text", attributes: { href: "/en/lotnictwo/" } },
+    { role: "footer-link-4", href: "/en/case-studies/", label: "Projects", kind: "text", attributes: { href: "/en/case-studies/" } },
+    { role: "footer-link-5", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } }
+  ])
+});
+
+const APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST = Object.freeze({
+  pl: freezeApplicationManifest([
+    { role: "site-nav", tag: "nav", attributes: { "aria-label": "Nawigacja główna" } },
+    { role: "nav-current", tag: "a", attributes: { "aria-current": "page" } },
+    { role: "nav-toggle", tag: "button", attributes: { "aria-label": "Menu nawigacyjne", "aria-controls": "nav-menu", "aria-expanded": "false" } },
+    { role: "back-to-top", tag: "button", attributes: { "aria-label": "Wróć na górę" } },
+    { role: "breadcrumb", tag: "nav", attributes: { "aria-label": "Okruszki" } },
+    { role: "breadcrumb-separator", tag: "span", attributes: { "aria-hidden": "true" } },
+    { role: "breadcrumb-current", tag: "span", attributes: { "aria-current": "page" } },
+    { role: "problem-ledger", tag: "dl", attributes: { "aria-label": "Obszary metody" } },
+    { role: "delivery-route", tag: "div", attributes: { "aria-label": "Droga do uruchomienia" } },
+    { role: "fit-ledger", tag: "dl", attributes: { "aria-label": "Warunki współpracy" } },
+    { role: "footer-sign", tag: "a", attributes: { "aria-label": "Paweł Mamcarz, strona główna" } },
+    { role: "footer-signature", tag: "img", attributes: { alt: "" } }
+  ]),
+  en: freezeApplicationManifest([
+    { role: "site-nav", tag: "nav", attributes: { "aria-label": "Main navigation" } },
+    { role: "nav-current", tag: "a", attributes: { "aria-current": "page" } },
+    { role: "nav-toggle", tag: "button", attributes: { "aria-label": "Navigation menu", "aria-controls": "nav-menu", "aria-expanded": "false" } },
+    { role: "back-to-top", tag: "button", attributes: { "aria-label": "Back to top" } },
+    { role: "breadcrumb", tag: "nav", attributes: { "aria-label": "Breadcrumb" } },
+    { role: "breadcrumb-separator", tag: "span", attributes: { "aria-hidden": "true" } },
+    { role: "breadcrumb-current", tag: "span", attributes: { "aria-current": "page" } },
+    { role: "problem-ledger", tag: "dl", attributes: { "aria-label": "Method domains" } },
+    { role: "delivery-route", tag: "div", attributes: { "aria-label": "Route to launch" } },
+    { role: "fit-ledger", tag: "dl", attributes: { "aria-label": "Working conditions" } },
+    { role: "footer-sign", tag: "a", attributes: { "aria-label": "Paweł Mamcarz, home" } },
+    { role: "footer-signature", tag: "img", attributes: { alt: "" } }
+  ])
+});
+
 const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact"];
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
@@ -3022,7 +3128,31 @@ function publishedStaticText(node) {
     for (const child of current.children ?? []) visit(child);
   };
   visit(node);
-  return normalize(decodeHtmlEntities(text));
+  return normalizeExactHtmlLiteral(text);
+}
+
+function exactStaticVisibleText(node) {
+  let text = "";
+  const visit = (current, ancestorHidden = false) => {
+    const parent = current.parent;
+    const hiddenByClosedDisclosure = parent?.type === "element"
+      && parent.name === "details"
+      && !parent.attributes.has("open")
+      && current !== parent.children.find((child) => child.type === "element" && child.name === "summary");
+    const hidden = ancestorHidden
+      || hiddenByClosedDisclosure
+      || (current.type === "element" && !elementIsStaticallyVisible(current));
+    if (current.type === "text") {
+      if (!hidden) text += current.value;
+      return;
+    }
+    const block = current.type === "element" && blockTextElements.has(current.name);
+    if (!hidden && block) text += " ";
+    for (const child of current.children ?? []) visit(child, hidden);
+    if (!hidden && block) text += " ";
+  };
+  visit(node);
+  return normalizeExactHtmlLiteral(text);
 }
 
 function sameStringSet(actual, expected) {
@@ -3030,13 +3160,49 @@ function sameStringSet(actual, expected) {
 }
 
 function literalContractText(parts) {
-  return normalize(parts.join(" "));
+  return normalizeExactLiteral(parts.join(" "));
 }
 
 function exactElementAttributes(element, expected) {
   return element !== undefined
     && elementHasExactAttributeNames(element, new Set(Object.keys(expected)))
     && Object.entries(expected).every(([name, value]) => elementAttribute(element, name) === value);
+}
+
+const APPLICATION_USER_FACING_ATTRIBUTES = new Set([
+  "alt", "label", "placeholder", "srcdoc", "title", "value"
+]);
+
+const APPLICATION_NORMALIZED_SEMANTIC_TEXT_ATTRIBUTES = new Set([
+  "alt", "aria-description", "aria-label", "aria-placeholder", "aria-roledescription", "aria-valuetext",
+  "label", "placeholder", "title", "value"
+]);
+
+function isApplicationSemanticAttribute(name) {
+  return name.startsWith("aria-") || APPLICATION_USER_FACING_ATTRIBUTES.has(name);
+}
+
+function exactApplicationAttributes(element, expected, normalizedNames = new Set()) {
+  return element !== undefined
+    && elementHasExactAttributeNames(element, new Set(Object.keys(expected)))
+    && Object.entries(expected).every(([name, value]) => {
+      const actual = elementAttribute(element, name);
+      return normalizedNames.has(name)
+        ? actual !== null && normalizeExactHtmlLiteral(actual) === normalizeExactLiteral(value)
+        : actual === value;
+    });
+}
+
+function exactApplicationSemanticAttributes(element, expected) {
+  const actual = new Map([...element.attributes].filter(([name]) => isApplicationSemanticAttribute(name)));
+  return actual.size === Object.keys(expected).length
+    && Object.entries(expected).every(([name, value]) => {
+      if (!actual.has(name)) return false;
+      const actualValue = actual.get(name) ?? "";
+      return APPLICATION_NORMALIZED_SEMANTIC_TEXT_ATTRIBUTES.has(name)
+        ? normalizeExactHtmlLiteral(actualValue) === normalizeExactLiteral(value)
+        : decodeHtmlEntities(actualValue) === value;
+    });
 }
 
 function expectedApplicationNavigationText(navigation) {
@@ -3054,6 +3220,131 @@ function expectedApplicationMainText(literals) {
     ...literals.hero,
     ...APPLICATION_SECTIONS.flatMap((section) => literals.sections[section])
   ];
+}
+
+function firstDescendantWithClass(node, name, className) {
+  return node === undefined || node === null
+    ? undefined
+    : elementDescendants(node, name).find((element) => elementHasClass(element, className));
+}
+
+function applicationAnchorRoleNodes(body, nav, main, footer) {
+  const bodyChildren = directElementChildren(body);
+  const navChildren = directElementChildren(nav);
+  const menu = navChildren.find((element) => element.name === "ul" && elementHasClass(element, "nav-list"));
+  const menuItems = directElementChildren(menu, "li");
+  const advisory = directElementChildren(menuItems[0], "details")[0];
+  const submenu = directElementChildren(advisory, "ul")[0];
+  const submenuLinks = directElementChildren(submenu, "li").map((item) => directElementChildren(item, "a")[0]);
+  const primaryLinks = menuItems.slice(1).map((item) => directElementChildren(item, "a")[0]);
+  const breadcrumb = firstDescendantWithClass(main, "nav", "breadcrumb");
+  const contact = main === undefined || main === null
+    ? undefined
+    : elementDescendants(main, "section").find((section) => elementAttribute(section, "data-section") === "contact");
+  const footerLinksList = firstDescendantWithClass(footer, "ul", "footer-links");
+  const footerLinks = directElementChildren(footerLinksList, "li").map((item) => directElementChildren(item, "a")[0]);
+  return [
+    ["skip", bodyChildren.find((element) => element.name === "a" && elementHasClass(element, "skip-link"))],
+    ["nav-logo", navChildren.find((element) => element.name === "a" && elementHasClass(element, "nav-logo"))],
+    ...submenuLinks.map((node, index) => [`nav-advisory-${index}`, node]),
+    ...primaryLinks.map((node, index) => [`nav-primary-${index}`, node]),
+    ["nav-language", navChildren.find((element) => element.name === "a" && elementHasClass(element, "nav-lang"))],
+    ["breadcrumb-home", directElementChildren(breadcrumb, "a")[0]],
+    ["contact-cta", contact === undefined ? undefined : elementDescendants(contact, "a").find((element) => elementHasClass(element, "btn-primary"))],
+    ["footer-sign", footer === undefined || footer === null ? undefined : elementDescendants(footer, "a").find((element) => elementHasClass(element, "footer-sign"))],
+    ...footerLinks.map((node, index) => [`footer-link-${index}`, node])
+  ].map(([role, node]) => ({ role, node }));
+}
+
+function validApplicationAnchorLeaf(anchor, expected) {
+  const semanticNames = new Set(Object.keys(expected.attributes).filter((name) => APPLICATION_NORMALIZED_SEMANTIC_TEXT_ATTRIBUTES.has(name)));
+  if (anchor?.name !== "a"
+    || !elementIsActiveResource(anchor)
+    || !elementIsVisibleIfDisclosuresOpen(anchor)
+    || elementAttribute(anchor, "href") !== expected.href
+    || !exactApplicationAttributes(anchor, expected.attributes, semanticNames)
+    || publishedStaticText(anchor) !== normalizeExactLiteral(expected.label)) return false;
+  const children = directElementChildren(anchor);
+  if (expected.kind === "text") return children.length === 0;
+  if (expected.kind === "logo") {
+    return children.length === 1
+      && children[0].name === "b"
+      && exactElementAttributes(children[0], {})
+      && directElementChildren(children[0]).length === 0
+      && publishedStaticText(children[0]) === "PM";
+  }
+  if (expected.kind === "signature") {
+    const image = children[0];
+    return children.length === 1
+      && image?.name === "img"
+      && exactApplicationAttributes(image, {
+        src: "/assets/img/signature.png",
+        alt: "",
+        width: "160",
+        loading: "lazy"
+      }, new Set(["alt"]));
+  }
+  return false;
+}
+
+function verifyApplicationAnchorManifest(path, parsedRoot, lang, body, nav, main, footer, errors) {
+  const manifest = APPLICATION_ANCHOR_MANIFEST[lang];
+  const roleNodes = applicationAnchorRoleNodes(body, nav, main, footer);
+  const evidenceRows = elementDescendants(parsedRoot).filter((element) => elementHasClass(element, "evidence-row"));
+  const evidenceAnchors = new Set(elementDescendants(parsedRoot, "a")
+    .filter((anchor) => evidenceRows.some((row) => elementIsWithin(anchor, row))));
+  const actual = elementDescendants(parsedRoot, "a").filter((anchor) => !evidenceAnchors.has(anchor));
+  const valid = actual.length === manifest.length
+    && roleNodes.length === manifest.length
+    && manifest.every((expected, index) => expected.role === roleNodes[index]?.role
+      && actual[index] === roleNodes[index]?.node
+      && validApplicationAnchorLeaf(actual[index], expected));
+  if (!valid) {
+    error(errors, "application-anchor-manifest", path, "every document anchor must match the immutable localized role, order, href, attributes and case-preserving label manifest");
+  }
+}
+
+function applicationSemanticRoleNodes(body, nav, main, footer, anchorRoleNodes) {
+  const navCurrent = anchorRoleNodes.find(({ role }) => role === "nav-primary-0")?.node;
+  const navToggle = directElementChildren(nav, "button").find((element) => elementAttribute(element, "id") === "nav-toggle");
+  const backToTop = directElementChildren(body, "button").find((element) => elementAttribute(element, "id") === "backToTop");
+  const breadcrumb = firstDescendantWithClass(main, "nav", "breadcrumb");
+  const breadcrumbSpans = directElementChildren(breadcrumb, "span");
+  const mainSections = main === undefined || main === null ? [] : elementDescendants(main, "section");
+  const problem = mainSections.find((section) => elementAttribute(section, "data-section") === "problem");
+  const delivery = mainSections.find((section) => elementAttribute(section, "data-section") === "delivery");
+  const fit = mainSections.find((section) => elementAttribute(section, "data-section") === "fit");
+  const footerSign = anchorRoleNodes.find(({ role }) => role === "footer-sign")?.node;
+  return [
+    ["site-nav", nav],
+    ["nav-current", navCurrent],
+    ["nav-toggle", navToggle],
+    ["back-to-top", backToTop],
+    ["breadcrumb", breadcrumb],
+    ["breadcrumb-separator", breadcrumbSpans[0]],
+    ["breadcrumb-current", breadcrumbSpans[1]],
+    ["problem-ledger", firstDescendantWithClass(problem, "dl", "applications-ledger")],
+    ["delivery-route", firstDescendantWithClass(delivery, "div", "route-sequence")],
+    ["fit-ledger", firstDescendantWithClass(fit, "dl", "applications-ledger")],
+    ["footer-sign", footerSign],
+    ["footer-signature", directElementChildren(footerSign, "img")[0]]
+  ].map(([role, node]) => ({ role, node }));
+}
+
+function verifyApplicationSemanticAttributes(path, parsedRoot, lang, body, nav, main, footer, errors) {
+  const manifest = APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST[lang];
+  const anchorRoleNodes = applicationAnchorRoleNodes(body, nav, main, footer);
+  const roleNodes = applicationSemanticRoleNodes(body, nav, main, footer, anchorRoleNodes);
+  const actual = elementDescendants(parsedRoot).filter((element) => [...element.attributes.keys()].some(isApplicationSemanticAttribute));
+  const valid = actual.length === manifest.length
+    && roleNodes.length === manifest.length
+    && manifest.every((expected, index) => expected.role === roleNodes[index]?.role
+      && actual[index] === roleNodes[index]?.node
+      && actual[index]?.name === expected.tag
+      && exactApplicationSemanticAttributes(actual[index], expected.attributes));
+  if (!valid) {
+    error(errors, "application-semantic-attributes", path, "every user-facing, accessibility, reference and state attribute must match the immutable localized semantic manifest");
+  }
 }
 
 function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
@@ -3080,9 +3371,9 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
   const metas = head === null ? [] : directElementChildren(head, "meta").filter(elementIsActiveResource);
   const valid = head !== null
     && titles.length === 1
-    && decodeHtmlEntities(rawElementText(titles[0])).replace(/\s+/g, " ").trim() === literals.documentTitle
+    && normalizeExactHtmlLiteral(rawElementText(titles[0])) === normalizeExactLiteral(literals.documentTitle)
     && metas.length === expectedMetas.length
-    && metas.every((meta, index) => exactElementAttributes(meta, expectedMetas[index]));
+    && metas.every((meta, index) => exactApplicationAttributes(meta, expectedMetas[index], new Set(["content"])));
   if (!valid) {
     error(errors, "application-metadata", path, "requires the exact claim-safe Task 2 title and metadata set");
   }
@@ -3114,23 +3405,24 @@ function verifyApplicationNavigation(path, parsedRoot, lang, errors) {
       && elementIsVisibleIfDisclosuresOpen(links[0])
       && elementIsActiveResource(links[0])
       && exactElementAttributes(links[0], { href: expected.submenu[index][0] })
-      && publishedStaticText(links[0]) === normalize(expected.submenu[index][1]));
+      && publishedStaticText(links[0]) === normalizeExactLiteral(expected.submenu[index][1]));
   const validPrimary = primaryLinks.length === expected.primary.length
     && primaryLinks.every((links, index) => {
       if (links.length !== 1 || !elementIsVisibleIfDisclosuresOpen(links[0]) || !elementIsActiveResource(links[0])) return false;
       const [href, label, current] = expected.primary[index];
       const attributes = current ? { href, "aria-current": "page" } : { href };
-      return exactElementAttributes(links[0], attributes) && staticVisibleText(links[0]) === normalize(label);
+      return exactApplicationAttributes(links[0], attributes)
+        && exactStaticVisibleText(links[0]) === normalizeExactLiteral(label);
     });
   const valid = nav !== null
     && overlays.length === 1
     && exactElementAttributes(overlays[0], { class: "nav-overlay", id: "nav-overlay" })
-    && exactElementAttributes(nav, { class: "site-nav", "aria-label": expected.ariaLabel })
+    && exactApplicationAttributes(nav, { class: "site-nav", "aria-label": expected.ariaLabel }, new Set(["aria-label"]))
     && children.length === 4
     && logo?.name === "a"
     && pageElementIsActive(logo)
     && exactElementAttributes(logo, { href: expected.logoHref, class: "nav-logo" })
-    && staticVisibleText(logo) === normalize("PM · Mamcarz.com")
+    && exactStaticVisibleText(logo) === normalizeExactLiteral("PM · Mamcarz.com")
     && menu?.name === "ul"
     && elementIsVisibleIfDisclosuresOpen(menu)
     && elementIsActiveResource(menu)
@@ -3142,7 +3434,7 @@ function verifyApplicationNavigation(path, parsedRoot, lang, errors) {
     && exactElementAttributes(advisory, { class: "nav-group" })
     && summaries.length === 1
     && exactElementAttributes(summaries[0], {})
-    && staticVisibleText(summaries[0]) === normalize(expected.advisory)
+    && exactStaticVisibleText(summaries[0]) === normalizeExactLiteral(expected.advisory)
     && submenu !== null
     && exactElementAttributes(submenu, { class: "nav-submenu" })
     && validSubmenu
@@ -3150,19 +3442,19 @@ function verifyApplicationNavigation(path, parsedRoot, lang, errors) {
     && language?.name === "a"
     && pageElementIsActive(language)
     && exactElementAttributes(language, { href: expected.languageHref, class: "nav-lang" })
-    && staticVisibleText(language) === normalize(expected.languageLabel)
+    && exactStaticVisibleText(language) === normalizeExactLiteral(expected.languageLabel)
     && toggle?.name === "button"
     && pageElementIsActive(toggle)
-    && exactElementAttributes(toggle, {
+    && exactApplicationAttributes(toggle, {
       class: "nav-toggle",
       id: "nav-toggle",
       "aria-label": expected.toggleLabel,
       "aria-controls": "nav-menu",
       "aria-expanded": "false"
-    })
+    }, new Set(["aria-label"]))
     && directElementChildren(toggle).length === 3
     && toggleSpans.length === 3
-    && toggleSpans.every((span) => exactElementAttributes(span, {}) && staticVisibleText(span) === "")
+    && toggleSpans.every((span) => exactElementAttributes(span, {}) && exactStaticVisibleText(span) === "")
     && publishedStaticText(nav) === literalContractText(expectedApplicationNavigationText(expected));
   if (!valid) {
     error(errors, "application-navigation", path, "requires the exact localized v2 application navigation, native Advisory disclosure, active route and mobile toggle");
@@ -3183,7 +3475,7 @@ function verifyApplicationShellCopy(path, parsedRoot, lang, main, nav, errors) {
     && exactElementAttributes(footer, { class: "site-footer" })
     && footerLinks.length === literals.footerLinks.length + 1
     && footerLinks.slice(1).every((link, index) => exactElementAttributes(link, { href: literals.footerLinks[index][0] })
-      && staticVisibleText(link) === normalize(literals.footerLinks[index][1]))
+      && exactStaticVisibleText(link) === normalizeExactLiteral(literals.footerLinks[index][1]))
     && publishedStaticText(footer) === literalContractText(literals.footer);
   const expectedBodyText = [
     literals.skip,
@@ -3198,7 +3490,7 @@ function verifyApplicationShellCopy(path, parsedRoot, lang, main, nav, errors) {
     && skip?.name === "a"
     && pageElementIsActive(skip)
     && exactElementAttributes(skip, { href: "#main", class: "skip-link" })
-    && staticVisibleText(skip) === normalize(literals.skip)
+    && exactStaticVisibleText(skip) === normalizeExactLiteral(literals.skip)
     && shellNav === nav
     && overlay?.name === "div"
     && pageElementIsActive(overlay)
@@ -3206,8 +3498,8 @@ function verifyApplicationShellCopy(path, parsedRoot, lang, main, nav, errors) {
     && publishedStaticText(overlay) === ""
     && back?.name === "button"
     && pageElementIsActive(back)
-    && exactElementAttributes(back, { class: "back-to-top", id: "backToTop", "aria-label": literals.backLabel })
-    && staticVisibleText(back) === normalize("↑")
+    && exactApplicationAttributes(back, { class: "back-to-top", id: "backToTop", "aria-label": literals.backLabel }, new Set(["aria-label"]))
+    && exactStaticVisibleText(back) === normalizeExactLiteral("↑")
     && shellMain === main
     && validFooter
     && script?.name === "script"
@@ -3219,7 +3511,7 @@ function verifyApplicationShellCopy(path, parsedRoot, lang, main, nav, errors) {
 }
 
 function validApplicationLiteralLeaf(element, literal, approvedUrls) {
-  if (element === undefined || publishedStaticText(element) !== normalize(literal)) return false;
+  if (element === undefined || publishedStaticText(element) !== normalizeExactLiteral(literal)) return false;
   const children = directElementChildren(element);
   if (children.length === 0) return true;
   if (children.length !== 1 || children[0].name !== "a") return false;
@@ -3228,7 +3520,7 @@ function validApplicationLiteralLeaf(element, literal, approvedUrls) {
     && exactElementAttributes(link, { href: elementAttribute(link, "href") })
     && approvedUrls.has(elementAttribute(link, "href"))
     && directElementChildren(link).length === 0
-    && publishedStaticText(link) === normalize(literal);
+    && publishedStaticText(link) === normalizeExactLiteral(literal);
 }
 
 function verifyApplicationSchema(path, parsedRoot, lang, errors) {
@@ -3257,13 +3549,13 @@ function verifyApplicationSchema(path, parsedRoot, lang, errors) {
     && sameStringSet(keys, ["@context", "@type", "name", "url", "description", "provider"])
     && schema["@context"] === "https://schema.org"
     && schema["@type"] === "Service"
-    && schema.name === expected.title
+    && sameExactLiteral(schema.name, expected.title)
     && schema.url === expected.url
-    && schema.description === expected.description
+    && sameExactLiteral(schema.description, expected.description)
     && provider !== null
     && sameStringSet(Object.keys(provider), ["@type", "name"])
     && provider["@type"] === "Person"
-    && provider.name === "Paweł Mamcarz";
+    && sameExactLiteral(provider.name, "Paweł Mamcarz");
   if (!valid) {
     error(errors, "application-schema", path, "requires one direct purpose-only Service JSON-LD object with the localized page identity and Paweł Mamcarz as provider");
   }
@@ -3297,6 +3589,9 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
     || footers.length !== 1) {
     error(errors, "application-shell", path, "requires the shared skip link, main focus target, nav overlay and site footer");
   }
+  const applicationFooter = footers.length === 1 ? footers[0] : null;
+  verifyApplicationAnchorManifest(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, errors);
+  verifyApplicationSemanticAttributes(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, errors);
 
   const heroes = main === null
     ? []
@@ -3306,7 +3601,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   if (hero === null
     || headings.length !== 1
     || !elementIsWithin(headings[0], hero)
-    || staticVisibleText(headings[0]) !== normalize(expected.title)) {
+    || exactStaticVisibleText(headings[0]) !== normalizeExactLiteral(expected.title)) {
     error(errors, "application-h1", path, `requires exact localized h1: ${expected.title}`);
   }
   const leads = main === null
@@ -3315,7 +3610,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   if (hero === null
     || leads.length !== 1
     || !elementIsWithin(leads[0], hero)
-    || staticVisibleText(leads[0]) !== normalize(expected.lead)) {
+    || exactStaticVisibleText(leads[0]) !== normalizeExactLiteral(expected.lead)) {
     error(errors, "application-lead", path, "requires the exact localized opening lead in the page hero");
   }
 
@@ -3364,7 +3659,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       && pageElementIsActive(step)
       && elementAttribute(step, "data-step") === APPLICATION_DELIVERY_STEPS[index]
       && elementDescendants(step, "h3").filter(pageElementIsActive).length === 1
-      && staticVisibleText(elementDescendants(step, "h3").filter(pageElementIsActive)[0]) === normalize(expected.deliveryLabels[index]));
+      && exactStaticVisibleText(elementDescendants(step, "h3").filter(pageElementIsActive)[0]) === normalizeExactLiteral(expected.deliveryLabels[index]));
   if (!validDelivery) {
     error(errors, "application-delivery", path, "route sequence must be Discovery, data model, workflow and launch");
   }
@@ -3398,7 +3693,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       error(errors, "application-evidence-ids", path, "every evidence row needs unique exact data-fact-ids tokens");
     }
     for (const factId of ids) usedEvidenceIds.add(factId);
-    const rowText = staticVisibleText(row);
+    const rowText = exactStaticVisibleText(row);
     for (const factId of ids) {
       const fact = factsById.get(factId);
       if (!fact || fact.status !== "approved") {
@@ -3409,7 +3704,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
         error(errors, "application-evidence-surface", path, `${factId} must approve both application page surfaces`);
       }
       const display = lang === "pl" ? fact.display_pl : fact.display_en;
-      if (!nonEmptyString(display) || !rowText.includes(normalize(display))) {
+      if (!nonEmptyString(display) || !rowText.includes(normalizeExactLiteral(display))) {
         error(errors, "application-evidence-value", path, `${factId} must render its exact localized display meaning in the annotated row`);
       }
     }
@@ -3433,10 +3728,10 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       && registryMeaning.length === 1
       && registryName[0].status === "approved"
       && registryMeaning[0].status === "approved"
-      && registryName[0].display_pl === immutable.pl.name
-      && registryName[0].display_en === immutable.en.name
-      && registryMeaning[0].display_pl === immutable.pl.meaning
-      && registryMeaning[0].display_en === immutable.en.meaning
+      && sameExactLiteral(registryName[0].display_pl, immutable.pl.name)
+      && sameExactLiteral(registryName[0].display_en, immutable.en.name)
+      && sameExactLiteral(registryMeaning[0].display_pl, immutable.pl.meaning)
+      && sameExactLiteral(registryMeaning[0].display_en, immutable.en.meaning)
       && APPLICATION_SURFACES.every((surface) => registryName[0].surfaces?.includes(surface) && registryMeaning[0].surfaces?.includes(surface));
     exactEvidenceContract = exactEvidenceContract
       && immutable !== undefined
@@ -3447,7 +3742,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       && context?.name === "p"
       && exactElementAttributes(context, { class: "evidence-row__context" })
       && directElementChildren(context).length === 0
-      && publishedStaticText(context) === normalize(immutableCopy.context)
+      && publishedStaticText(context) === normalizeExactLiteral(immutableCopy.context)
       && title?.name === "h3"
       && exactElementAttributes(title, { class: "evidence-row__title" })
       && validApplicationLiteralLeaf(title, immutableCopy.name, approvedUrls)
@@ -3459,7 +3754,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       && ledgerLeaves[0].name === "dt"
       && exactElementAttributes(ledgerLeaves[0], {})
       && directElementChildren(ledgerLeaves[0]).length === 0
-      && publishedStaticText(ledgerLeaves[0]) === normalize(immutableCopy.label)
+      && publishedStaticText(ledgerLeaves[0]) === normalizeExactLiteral(immutableCopy.label)
       && ledgerLeaves[1].name === "dd"
       && exactElementAttributes(ledgerLeaves[1], {})
       && validApplicationLiteralLeaf(ledgerLeaves[1], immutableCopy.meaning, approvedUrls)
@@ -3483,16 +3778,17 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   }
 
   const published = body === null ? "" : publishedStaticText(body);
+  const publishedForScan = normalize(published);
   const genericPositioning = ["software house", "dom programistycz", "zespół programistycz", "team of developers", "development agency"];
-  if (genericPositioning.some((candidate) => published.includes(candidate))) {
+  if (genericPositioning.some((candidate) => publishedForScan.includes(candidate))) {
     error(errors, "application-positioning", path, "must not position the service as a generic software house");
   }
   const forbiddenCopy = ["—", "nie tylko", "not just", "kompleksow", "comprehensive", "innowacyjn", "innovative", "realnie", "seamless", "unlock", "leverage", "polpharma"];
-  if (forbiddenCopy.some((candidate) => published.includes(candidate))) {
+  if (forbiddenCopy.some((candidate) => publishedForScan.includes(candidate))) {
     error(errors, "application-copy", path, "contains forbidden review, client or generic AI-style copy");
   }
   for (const fact of records.filter((record) => record.status === "review" || record.status === "retired")) {
-    const candidate = factStatusCandidates(fact, path).find((value) => published.includes(normalize(value)));
+    const candidate = factStatusCandidates(fact, path).find((value) => publishedForScan.includes(normalize(value)));
     if (candidate) error(errors, "application-fact-status", path, `${fact.id} has status ${fact.status} but publishes ${candidate}`);
   }
 

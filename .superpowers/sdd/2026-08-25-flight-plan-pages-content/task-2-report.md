@@ -46,6 +46,23 @@ Focused GREEN:
 - Global active counts cover the single primary CTA and single delivery route. Every active application-page element is checked for inline style. Navigation verification is scoped to the real `site-nav` and pins its toggle, menu, overlay, native Advisory disclosure, localized routes and labels, current-page state and language switch.
 - Five generic Task 1 parser positives were moved to an unfinished-family fixture so they continue testing generic URL and fact-token behavior without weakening the intentional exact application contract. Task 1 passes 36 tests, 36 pass, 0 fail.
 
+### Fix round 2
+
+Focused RED:
+
+- Command: `node --test --test-name-pattern='Plan 2 Task 2 fix round 2' scripts/verify-site.test.mjs`.
+- Result before verifier hardening: 3 tests, 0 pass, 3 fail.
+- The three failing groups reproduced unlisted anchors anywhere in the parsed document, fabricated semantic and accessibility attributes, and case drift in exact page literals.
+- Two focused follow-up mutations also reproduced reference-token drift through a default-ignorable character and a required footer-signature anchor moved into a template before their minimal fixes.
+
+Focused GREEN:
+
+- The same command passes 3 tests, 3 pass, 0 fail.
+- The complete Task 2 focus passes 21 tests, 21 pass, 0 fail.
+- Immutable PL/EN manifests pin all 21 current anchors by document order, structural role, exact href, required attributes and case-preserving label. The footer signature also pins its localized target, accessibility label and image structure. Every parsed anchor is checked, including hidden, template and noscript descendants; evidence links retain only the existing approved `source_url` exception.
+- Immutable PL/EN semantic manifests pin all 12 current elements carrying `aria-*`, `alt`, `title`, `placeholder` or equivalent user-facing attributes. Unexpected attributes are rejected across every parsed descendant. Human-readable values allow Unicode-equivalent and whitespace-only formatting, while reference and state tokens remain exact.
+- Application-owned H1, lead, main, navigation, footer, evidence, schema and metadata literals now use a case-preserving NFKC, whitespace and default-ignorable comparator. Lowercasing remains limited to intentionally case-insensitive forbidden and security scans.
+
 ## Verification gates
 
 - `npm run verify:pages -- --family=applications`: PASS.
@@ -53,7 +70,7 @@ Focused GREEN:
 - `npm run verify:facts`: PASS.
 - `npm run verify:foundation`: PASS.
 - `npm run verify:site`: PASS.
-- `npm run test:verify-site`: PASS, 483 tests, 483 pass, 0 fail.
+- `npm run test:verify-site`: PASS, 486 tests, 486 pass, 0 fail.
 - `node --check scripts/verify-site.mjs`: PASS.
 - `node --check scripts/verify-site.test.mjs`: PASS.
 - `node --check assets/js/main.js`: PASS.
@@ -65,6 +82,8 @@ Focused GREEN:
 - Fact-surface inspection: all six rendered IDs list both application paths and both pages use the same ordered ID pairs.
 - Fix-round diff inspection: the PL/EN product pages, shared CSS, registry and browser script are unchanged from `ee98910d3369d7b91c085f844d49cf8c0f9c4273`; only the verifier, verifier tests and this report changed.
 - The prior local Chrome review was not repeated because no product or stylesheet file changed in fix round 1.
+- Fix-round 2 diff inspection: the same product surfaces remain unchanged from `31d36bc4f4d24808d0f977375263e35f6b1401ee`; only the verifier, verifier tests and this report changed.
+- The browser review was not repeated in fix round 2 because the product and stylesheet remain byte-unchanged.
 
 ## Limitations
 

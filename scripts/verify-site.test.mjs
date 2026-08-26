@@ -1488,6 +1488,106 @@ test("Plan 2 Task 2 fix round 1 requires the exact scoped mobile and desktop app
   }
 });
 
+test("Plan 2 Task 2 fix round 2 validates every document anchor against the immutable manifest", async () => {
+  const appendToDomain = (html, anchor) => html.replace("<dt>Procurement</dt>", `<dt>Procurement${anchor}</dt>`);
+  const cases = [
+    ["external wrapper", (html) => html.replace("<dt>Procurement</dt>", '<dt><a href="https://example.com/unapproved">Procurement</a></dt>')],
+    ["empty external anchor", (html) => appendToDomain(html, '<a href="https://example.com/unapproved"></a>')],
+    ["hidden external anchor", (html) => appendToDomain(html, '<a hidden href="https://example.com/unapproved"></a>')],
+    ["template external anchor", (html) => html.replace("</footer>", '<template><a href="https://example.com/unapproved">Hidden claim</a></template></footer>')],
+    ["noscript external anchor", (html) => html.replace("</footer>", '<noscript><a href="https://example.com/unapproved">Fallback claim</a></noscript></footer>')],
+    ["unlisted local anchor", (html) => appendToDomain(html, '<a href="/"></a>')],
+    ["unlisted mailto anchor", (html) => appendToDomain(html, '<a href="mailto:pawel@mamcarz.com"></a>')],
+    ["unlisted hash anchor", (html) => appendToDomain(html, '<a href="#main"></a>')],
+    ["javascript anchor", (html) => appendToDomain(html, '<a href="javascript:alert(1)"></a>')],
+    ["data anchor", (html) => appendToDomain(html, '<a href="data:text/html,claim"></a>')],
+    ["protocol-relative anchor", (html) => appendToDomain(html, '<a href="//example.com/unapproved"></a>')],
+    ["changed footer signature target", (html) => html.replace('class="footer-sign" href="/"', 'class="footer-sign" href="https://example.com/unapproved"')],
+    ["required footer signature moved into template", (html) => {
+      const sign = html.match(/<a class="footer-sign"[\s\S]*?<\/a>/)?.[0];
+      assert.ok(sign);
+      return html.replace(sign, `<template>${sign}</template>`);
+    }]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({ label, result: await applicationPageMutation({ mutate }) })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-anchor-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
+  const valid = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(valid.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 2 pins every semantic and accessibility attribute in the full document", async () => {
+  const cases = [
+    ["fabricated aria-label", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-label="Guaranteed savings">Procurement</dt>')],
+    ["fabricated aria-description", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-description="Available in 14 days">Procurement</dt>')],
+    ["fabricated aria-roledescription", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-roledescription="Owned product">Procurement</dt>')],
+    ["fabricated aria-valuetext", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-valuetext="20 percent savings">Procurement</dt>')],
+    ["fabricated title", (html) => html.replace("<dt>Procurement</dt>", '<dt title="Available now">Procurement</dt>')],
+    ["fabricated placeholder", (html) => html.replace("<dt>Procurement</dt>", '<dt placeholder="Team of five">Procurement</dt>')],
+    ["fabricated alt", (html) => html.replace('alt="" width="160"', 'alt="Guaranteed savings" width="160"')],
+    ["hidden descendant semantic value", (html) => html.replace("<dt>Procurement</dt>", '<dt>Procurement<span hidden aria-label="Available now"></span></dt>')],
+    ["template descendant semantic value", (html) => html.replace("<dt>Procurement</dt>", '<dt>Procurement<template><span title="Guaranteed savings"></span></template></dt>')],
+    ["noscript descendant semantic value", (html) => html.replace("<dt>Procurement</dt>", '<dt>Procurement<noscript><span aria-description="Team of five"></span></noscript></dt>')],
+    ["empty semantic attribute", (html) => html.replace("<dt>Procurement</dt>", '<dt title="">Procurement</dt>')],
+    ["encoded fabricated value", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-label="Savings &#50;0 percent">Procurement</dt>')],
+    ["case-drifted valid value", (html) => html.replace('aria-label="Nawigacja główna"', 'aria-label="nawigacja główna"')],
+    ["default-ignorable reference drift", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="nav-\u200bmenu"')],
+    ["uncontracted reference and hidden claim", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-labelledby="claim">Procurement<template><span id="claim">Available now</span></template></dt>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({ label, result: await applicationPageMutation({ mutate }) })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-semantic-attributes"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const unicodeEquivalent = await applicationPageMutation({
+    mutate: (html) => html.replace('aria-label="Nawigacja główna"', 'aria-label="  Nawigacja   gło&#769;wna  "')
+  });
+  assert.deepEqual(unicodeEquivalent.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 2 preserves case across exact page literals while allowing semantic whitespace", async () => {
+  const cases = [
+    ["brand case drift", "application-evidence-contract", (html) => html.replaceAll("ProcuraCost", "procuracost")],
+    ["domain case drift", "application-content", (html) => html.replace("<dt>Procurement</dt>", "<dt>procurement</dt>")],
+    ["H1 case drift", "application-h1", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title">aplikacje operacyjne</h1>')],
+    ["navigation case drift", "application-navigation", (html) => html.replace('href="/lotnictwo/">Lotnictwo</a>', 'href="/lotnictwo/">lotnictwo</a>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, expectedId, mutate]) => ({
+    label,
+    expectedId,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, expectedId, result } of outcomes) {
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const semanticWhitespace = await applicationPageMutation({
+    mutate: (html) => html
+      .replace("<dt>Procurement</dt>", "<dt> \n Procurement\u200b \t</dt>")
+      .replace(
+        'content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy."',
+        'content="  Projektowanie  aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.  "'
+      )
+  });
+  assert.deepEqual(semanticWhitespace.errors, []);
+
+  const coordinatedFact = fact({
+    id: "portfolio.procuracost",
+    value: "procuracost",
+    display_pl: "procuracost",
+    display_en: "procuracost",
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const coordinatedDrift = await applicationPageMutation({
+    facts: [fact(), coordinatedFact],
+    mutate: (html) => html.replaceAll("ProcuraCost", "procuracost")
+  });
+  assert.ok(errorIds(coordinatedDrift).includes("application-evidence-contract"), coordinatedDrift.errors.join("\n"));
+});
+
 test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN product pair", async () => {
   const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
   const result = await runVerification({ root, scope: "pages", family: "applications" });
