@@ -4725,6 +4725,11 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     breadcrumbLabel: "Okruszki", breadcrumbHomeHref: "/", breadcrumbHome: "Strona główna",
     kicker: "RESEARCH INDEX / 02 ENTRIES", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
     contactLabel: "KONTAKT / NASTĘPNY KROK", contactCopy: "Jeśli materiał dotyczy decyzji, nad którą pracujesz, przejdź do rozmowy.",
+    ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna", home: "/", logoLabel: "Paweł Mamcarz, strona główna",
+    advisory: "Doradztwo", paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
+    submenu: Object.freeze([["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]]),
+    primary: Object.freeze([["/aplikacje-operacyjne/", "Aplikacje operacyjne"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]]),
+    footer: Object.freeze([["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/#contact", "Kontakt"]]),
     resources: Object.freeze([
       Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Model interaktywny", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null }),
       Object.freeze({ href: "/wystapienia/", title: "Wystąpienia i wykłady", type: "Wystąpienia i wykłady", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null })
@@ -4739,6 +4744,11 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     breadcrumbLabel: "Breadcrumb", breadcrumbHomeHref: "/en/", breadcrumbHome: "Home",
     kicker: "RESEARCH INDEX / 03 ENTRIES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
     contactLabel: "CONTACT / NEXT STEP", contactCopy: "If a resource relates to a decision you are working on, continue to the conversation.",
+    ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation", home: "/en/", logoLabel: "Paweł Mamcarz, homepage",
+    advisory: "Advisory", paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", back: "Back to top",
+    submenu: Object.freeze([["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]]),
+    primary: Object.freeze([["/en/aplikacje-operacyjne/", "Operational applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Knowledge", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]]),
+    footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/#contact", "Contact"]]),
     resources: Object.freeze([
       Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement 2026: From Traditional Cycle to AI Orchestration", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
       Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
@@ -4778,7 +4788,11 @@ function knowledgeMainMarkup(contract, lang) {
 
 function knowledgeNodeShape(node) {
   if (node?.type === "text") {
-    const text = normalizeExactHtmlLiteral(node.value);
+    let text = normalizeExactHtmlLiteral(node.value);
+    if (node.parent?.type === "element" && node.parent.name === "script"
+      && elementAttribute(node.parent, "type") === "application/ld+json") {
+      try { text = JSON.stringify(JSON.parse(node.value)); } catch { /* preserve malformed source for mismatch */ }
+    }
     return text.length > 0 ? { text } : null;
   }
   if (node?.type !== "element") return null;
@@ -4793,6 +4807,21 @@ function knowledgeNodeShape(node) {
 function knowledgeExpectedMainShape(contract, lang) {
   const expected = parseStaticHtml(knowledgeMainMarkup(contract, lang));
   return knowledgeNodeShape(directElementChildren(expected.root, "main")[0]);
+}
+
+function knowledgeDocumentMarkup(contract, lang) {
+  const url = contract.url;
+  const plUrl = "https://mamcarz.com/wiedza/";
+  const enUrl = "https://mamcarz.com/en/wiedza/";
+  const submenu = contract.submenu.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
+  const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
+  const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" loading="lazy"></a><div class="footer-copy">© Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script></body></html>`;
+}
+
+function knowledgeExpectedDocumentShape(contract, lang) {
+  const expected = parseStaticHtml(knowledgeDocumentMarkup(contract, lang));
+  return knowledgeNodeShape(directElementChildren(expected.root, "html")[0]);
 }
 
 function sameJsonContract(actual, expected) {
@@ -4863,37 +4892,106 @@ function knowledgeUrlCandidates(attribute, value) {
   return [value];
 }
 
+const KNOWLEDGE_URL_ATTRIBUTE_NAMES = new Set([...APPLICATION_RESOURCE_ATTRIBUTE_NAMES, "itemid"]);
+
+function knowledgeMetadataContentIsUrl(element) {
+  if (element.name !== "meta" || !element.attributes.has("content")) return false;
+  const semantic = ["name", "property", "itemprop", "http-equiv"]
+    .map((name) => decodeHtmlEntities(elementAttribute(element, name) ?? "").toLowerCase())
+    .join(" ")
+    .trim();
+  return /(?:^|[:._-])(?:url|image|logo|contenturl|thumbnailurl)(?:$|[:._-])/.test(semantic);
+}
+
+function knowledgeJsonUrlValues(value, values = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) knowledgeJsonUrlValues(item, values);
+    return values;
+  }
+  if (!isPlainObject(value)) return values;
+  for (const [key, item] of Object.entries(value)) {
+    if (/^(?:@id|url|contentUrl|embedUrl|thumbnailUrl|image|logo|sameAs)$/i.test(key)) {
+      for (const candidate of Array.isArray(item) ? item : [item]) {
+        if (typeof candidate === "string") values.push(candidate);
+      }
+    }
+    knowledgeJsonUrlValues(item, values);
+  }
+  return values;
+}
+
+function knowledgeDocumentUrlValues(parsedRoot) {
+  const values = [];
+  for (const element of elementDescendants(parsedRoot)) {
+    for (const [name, value] of element.attributes.entries()) {
+      if (KNOWLEDGE_URL_ATTRIBUTE_NAMES.has(name)) {
+        values.push(...knowledgeUrlCandidates(name, value));
+      }
+    }
+    if (knowledgeMetadataContentIsUrl(element)) values.push(elementAttribute(element, "content"));
+    if (element.name === "script" && elementAttribute(element, "type") === "application/ld+json") {
+      try { knowledgeJsonUrlValues(JSON.parse(rawElementText(element)), values); } catch { /* schema verifier owns malformed JSON */ }
+    }
+  }
+  return values.filter((value) => typeof value === "string");
+}
+
+function knowledgeHasMalformedPercent(value) {
+  let candidate = decodeHtmlEntities(value).replace(/\p{Default_Ignorable_Code_Point}/gu, "");
+  for (let pass = 0; pass < 8; pass += 1) {
+    if (/%(?![0-9a-f]{2})/i.test(candidate)) return true;
+    const next = decodeValidPercentEscapes(candidate);
+    if (next === candidate) break;
+    candidate = next;
+  }
+  return /%(?![0-9a-f]{2})/i.test(candidate);
+}
+
 function knowledgeHasBannedRoute(value) {
   return knowledgeCanonicalPath(value) === "/en/procurement-2026/";
 }
 
-function knowledgeSourceHasBannedRoute(parsedRoot) {
+function knowledgeInactiveSourceFragments(parsedRoot) {
   const nodes = documentNodeDescendants(parsedRoot);
-  if (nodes.some((node) => (node.type === "text" || node.type === "comment") && knowledgeHasBannedRoute(node.value))) return true;
   const inactive = new Set(["noscript", "template"]);
+  const elementIsInactive = (element) => inactive.has(element.name)
+    || element.attributes.has("hidden")
+    || element.attributes.has("inert")
+    || /^true$/i.test(elementAttribute(element, "aria-hidden") ?? "")
+    || elementHasHiddenInlineStyle(element);
+  const fragments = nodes
+    .filter((node) => node.type === "comment")
+    .map((node) => node.value);
   const parents = [parsedRoot, ...nodes.filter((node) => node.type === "element")];
-  return parents.some((parent) => {
+  for (const parent of parents) {
     let run = [];
     const flush = () => {
       const joined = run.map((node) => node.type === "comment" ? node.value.trim() : rawElementText(node).trim()).join("");
       run = [];
-      return knowledgeHasBannedRoute(joined);
+      if (joined.length > 0) fragments.push(joined);
     };
     for (const child of parent.children ?? []) {
-      if (child.type === "comment" || (child.type === "element" && inactive.has(child.name))) {
+      if (child.type === "comment" || (child.type === "element" && elementIsInactive(child))) {
         run.push(child);
-      } else if (run.length > 0 && flush()) {
-        return true;
-      }
+      } else if (child.type === "text" && child.value.trim() === "" && run.length > 0) {
+        continue;
+      } else if (run.length > 0) flush();
     }
-    return run.length > 0 && flush();
-  });
+    if (run.length > 0) flush();
+  }
+  return fragments;
+}
+
+function knowledgeUrlPropertyViolation(parsedRoot) {
+  const candidates = [...knowledgeDocumentUrlValues(parsedRoot), ...knowledgeInactiveSourceFragments(parsedRoot)];
+  return candidates.some((value) => knowledgeHasBannedRoute(value)
+    || (knowledgeHasMalformedPercent(value) && /\/en\//i.test(decodeHtmlEntities(value))));
 }
 
 function knowledgeHasDateBoundaryViolation(parsedRoot) {
   const nodes = documentNodeDescendants(parsedRoot);
   const elements = nodes.filter((node) => node.type === "element");
-  const dateName = /(?:^|[-_:])(?:date|dated|datetime|published|publication|updated|modified)(?:$|[-_:])/i;
+  const dateName = /(?:^|[-_:])(?:date|dated|datetime|time|timestamp|year|published|publication|updated|modified|temporal)(?:$|[-_:])/i;
   const metadataViolation = elements.some((element) => {
     if ([...element.attributes.keys()].some((name) => dateName.test(name))) return true;
     if (element.name !== "meta") return false;
@@ -4901,6 +4999,18 @@ function knowledgeHasDateBoundaryViolation(parsedRoot) {
       .some((name) => dateName.test(decodeHtmlEntities(elementAttribute(element, name) ?? "")));
   });
   if (metadataViolation) return true;
+  const schemaHasTemporalKey = (value) => {
+    if (Array.isArray(value)) return value.some(schemaHasTemporalKey);
+    if (!isPlainObject(value)) return false;
+    return Object.entries(value).some(([key, item]) =>
+      /(?:date|time|timestamp|year|published|publication|updated|modified|temporal)/i.test(key)
+      || schemaHasTemporalKey(item));
+  };
+  for (const script of elements.filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json")) {
+    try {
+      if (schemaHasTemporalKey(JSON.parse(rawElementText(script)))) return true;
+    } catch { /* schema verifier owns malformed JSON */ }
+  }
 
   const approvedTitles = new Set([
     "Procurement 2026: From Traditional Cycle to AI Orchestration",
@@ -4937,8 +5047,13 @@ function knowledgeHasDateBoundaryViolation(parsedRoot) {
   }
   const normalize = (value) => decodeHtmlEntities(value).replace(/\p{Default_Ignorable_Code_Point}/gu, "");
   const corpora = [fragments.map(normalize).join(" "), fragments.map((value) => normalize(value).trim()).join("")];
-  const dateLiteral = /\b(?:19|20)\d{2}\b|\b(?:19|20)\d{2}[-/.](?:0?[1-9]|1[0-2])[-/.](?:0?[1-9]|[12]\d|3[01])\b|\b(?:0?[1-9]|[12]\d|3[01])[-/.](?:0?[1-9]|1[0-2])[-/.](?:19|20)\d{2}\b/;
-  return corpora.some((corpus) => dateLiteral.test(corpus) || /datepublished|datemodified/i.test(corpus));
+  const dateLiteral = /(?<!\d)\d{4}(?!\d)|(?<!\d)\d{4}[-/.](?:0?[1-9]|1[0-2])[-/.](?:0?[1-9]|[12]\d|3[01])(?!\d)|(?<!\d)(?:0?[1-9]|[12]\d|3[01])[-/.](?:0?[1-9]|1[0-2])[-/.]\d{4}(?!\d)/;
+  const clockLiteral = /(?<!\d)(?:[01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?(?!\d)/;
+  const temporalClaim = /\b(?:published|publication|updated|modified|dated|timestamp|temporal|time)(?:[-_ ]?at)?\b/i;
+  return corpora.some((corpus) => dateLiteral.test(corpus)
+    || clockLiteral.test(corpus)
+    || temporalClaim.test(corpus)
+    || /datepublished|datemodified/i.test(corpus));
 }
 
 function knowledgeResourceSequence(parsedRoot) {
@@ -4968,6 +5083,20 @@ function verifyKnowledgeDocumentContract(path, parsedRoot, lang, main, errors) {
   }
 }
 
+function verifyKnowledgeFullDocumentContract(path, parsedRoot, lang, errors) {
+  const htmlRoots = directElementChildren(parsedRoot, "html");
+  const actual = knowledgeNodeShape(htmlRoots[0]);
+  const expected = knowledgeExpectedDocumentShape(KNOWLEDGE_CONTRACT[lang], lang);
+  const all = elementDescendants(parsedRoot);
+  const eventHandlers = all.flatMap((element) => [...element.attributes.keys()].filter((name) => /^on/i.test(name)));
+  const valid = htmlRoots.length === 1
+    && JSON.stringify(actual) === JSON.stringify(expected)
+    && eventHandlers.length === 0;
+  if (!valid) {
+    error(errors, "knowledge-full-document-contract", path, "requires the immutable spec-backed full-document element, raw attribute, metadata, resource, script, image and actionable-control topology");
+  }
+}
+
 function verifyKnowledgeBoundary(path, parsedRoot, errors) {
   const nodes = documentNodeDescendants(parsedRoot);
   const elements = nodes.filter((node) => node.type === "element");
@@ -4989,15 +5118,15 @@ function verifyKnowledgeBoundary(path, parsedRoot, errors) {
   const extraScripts = elements.filter((element) => element.name === "script"
     && elementAttribute(element, "type") !== "application/ld+json"
     && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-2");
-  const bannedRoute = elements.some((element) => [...element.attributes.entries()]
-    .filter(([name]) => APPLICATION_RESOURCE_ATTRIBUTE_NAMES.has(name))
-    .some(([name, value]) => knowledgeUrlCandidates(name, value).some(knowledgeHasBannedRoute)))
-    || knowledgeSourceHasBannedRoute(parsedRoot);
+  const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot);
   if (bannedRoute) {
     error(errors, "knowledge-route-boundary", path, "forbids the canonical /en/procurement-2026/ path across encoded URL attributes and adjacent inactive source fragments");
+    error(errors, "knowledge-url-property-boundary", path, "forbids canonical or malformed fake English Procurement routes across every URL-valued attribute, metadata property, schema property and inactive source fragment");
   }
-  if (knowledgeHasDateBoundaryViolation(parsedRoot)) {
+  const temporalViolation = knowledgeHasDateBoundaryViolation(parsedRoot);
+  if (temporalViolation) {
     error(errors, "knowledge-date-boundary", path, "forbids publication metadata and date-like factual literals outside exact approved Procurement 2026 titles and URLs");
+    error(errors, "knowledge-temporal-boundary", path, "forbids temporal metadata, claims, clocks and unowned four-digit years outside exact Procurement 2026 resource ownership");
   }
   if (/datepublished|datemodified/.test(canonicalCorpus)
     || externalAnchors.length > 0
@@ -5111,6 +5240,7 @@ function verifyKnowledgePage(path, parsedRoot, lang, errors) {
     error(errors, "knowledge-shell", path, "requires Knowledge as the single current route in the localized v2 navigation");
   }
   verifyKnowledgeDocumentContract(path, parsedRoot, lang, main, errors);
+  verifyKnowledgeFullDocumentContract(path, parsedRoot, lang, errors);
   verifyKnowledgeBoundary(path, parsedRoot, errors);
 }
 

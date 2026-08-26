@@ -2445,6 +2445,65 @@ test("Plan 2 Task 4 fix round 1 rejects date metadata and date-like factual text
   assert.equal(errorIds(approvedYears).includes("knowledge-date-boundary"), false, approvedYears.errors.join("\n"));
 });
 
+test("Plan 2 Task 4 fix round 2 owns URL-valued metadata, itemid and statically inactive split routes", async () => {
+  const cases = [
+    ["OG URL content", (html) => html.replace('property="og:url" content="https://mamcarz.com/en/wiedza/"', 'property="og:url" content="/en/%70rocurement-2026/"')],
+    ["itemid", (html) => html.replace("</footer>", '<span itemid="/EN/Procurement-2026/"></span></footer>')],
+    ["hidden percent split spans", (html) => html.replace("</footer>", '<div hidden><span>/en/%</span><span>70rocurement-2026/</span></div></footer>')],
+    ["whitespace-separated comments", (html) => html.replace("</footer>", "<!-- /en/procurement- --> \n <!-- 2026/ --></footer>")],
+    ["hidden default-ignorable split", (html) => html.replace("</footer>", '<div aria-hidden="true"><span>/en/procure&#x200B;</span><span>ment-2026/</span></div></footer>')],
+    ["noscript entity split", (html) => html.replace("</footer>", "<noscript><span>&#47;en&#47;procurement-</span><span>2026&#47;</span></noscript></footer>")],
+    ["invalid percent fails closed", (html) => html.replace("</footer>", '<span itemid="/en/%ZZprocurement-2026/"></span></footer>')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-url-property-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const allowedPolishRoute = await knowledgePageMutation();
+  assert.equal(errorIds(allowedPolishRoute).includes("knowledge-url-property-boundary"), false, allowedPolishRoute.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actionable controls", async () => {
+  const cases = [
+    ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
+    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png"', 'img data="/assets/img/signature.png"')],
+    ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
+    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2"></body>')],
+    ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
+    ["unapproved event handler", (html) => html.replace('class="footer-sign"', 'class="footer-sign" onfocus="location.href=\'/#contact\'"')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes("knowledge-full-document-contract"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const coordinated = await knowledgePageMutation({
+    mutatePair: (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/coordinated.jpg"')
+  });
+  assert.ok(errorIds(coordinated).includes("knowledge-full-document-contract"), coordinated.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 2 rejects temporal metadata, clock literals and every unowned four-digit year", async () => {
+  const cases = [
+    ["time metadata", (html) => html.replace("</head>", '<meta name="time" content="12:30"></head>')],
+    ["published-at comment", (html) => html.replace("</footer>", "<!-- published-at --></footer>")],
+    ["future year", (html) => html.replace("</footer>", "<p>2100</p></footer>")],
+    ["past year", (html) => html.replace("</footer>", "<template>1899</template></footer>")],
+    ["clock text", (html) => html.replace("</footer>", "<p>12:30</p></footer>")],
+    ["inline split clock", (html) => html.replace("</footer>", "<p><span>12:</span><span>30</span></p></footer>")],
+    ["schema temporal key", (html) => html.replace('"hasPart"', '"temporalCoverage":"unknown","hasPart"')],
+    ["time attribute", (html) => html.replace("</footer>", '<span data-time="unknown"></span></footer>')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-temporal-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const owned2026 = await knowledgePageMutation();
+  assert.equal(errorIds(owned2026).includes("knowledge-temporal-boundary"), false, owned2026.errors.join("\n"));
+});
+
 test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {
   const additions = [
     ["external image", '<img src="https://example.com/claim.png" alt="">'],
