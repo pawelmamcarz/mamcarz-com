@@ -5419,7 +5419,7 @@ const SERVICE_FACT_CONTRACT = Object.freeze([
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
   transformation: Object.freeze({ pl: "82b2912f18ff5358172be88b20c4f18535f35a7fe074d651d5817327b7da0f4f", en: "c8cc4b2b57ba437248dd2ad3d641de4a20230da4e82fad73f04b37296835704f" }),
-  ariba: Object.freeze({ pl: "PENDING", en: "PENDING" }),
+  ariba: Object.freeze({ pl: "66bb7d1560b3a9d5b09d5225982ee50757477111e3312cad2edb4f396e9b94ce", en: "056fd02a9d43288efa0a9ed71bf3c99f15e28568c902cb9ba8643dd8eb96c0eb" }),
   publicProcurement: Object.freeze({ pl: "PENDING", en: "PENDING" })
 });
 
