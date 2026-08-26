@@ -2431,17 +2431,15 @@ function verifyBrowserScript(js, errors) {
 }
 
 async function verifyFoundation(context) {
-  const [css, js, plHome, enHome, legacyService, notFound] = await Promise.all([
+  const [css, js, plHome, enHome, notFound] = await Promise.all([
     read(context, "assets/css/style.css"),
     read(context, "assets/js/main.js"),
     read(context, "index.html"),
     read(context, "en/index.html"),
-    read(context, "uslugi/wdrozenie-sap-ariba/index.html"),
     read(context, "404.html")
   ]);
   if (plHome !== null) verifyHomepageNavigation(plHome, { path: "index.html", lang: "pl" }, context.errors);
   if (enHome !== null) verifyHomepageNavigation(enHome, { path: "en/index.html", lang: "en" }, context.errors);
-  if (legacyService !== null) verifyLegacyNavigation(legacyService, "uslugi/wdrozenie-sap-ariba/index.html", context.errors);
   if (notFound !== null) verifyLegacyNavigation(notFound, "404.html", context.errors);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
   if (css !== null && gzipSync(Buffer.from(css, "utf8")).byteLength > 75_000) {

@@ -2293,6 +2293,7 @@ footer :focus-visible,
 
   .page-hero { min-height: 52svh; }
   .page-title { font-size: clamp(3.4rem, 16vw, 5.5rem); }
+  .service-page .page-title { font-size: clamp(3.25rem, 14.25vw, 5.5rem); }
 
   .related-link {
     border-right: 0;

@@ -162,6 +162,7 @@ function pagePairFiles(pair, overrides = {}) {
 }
 
 async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
+  const completeManifest = files === undefined;
   const routeFiles = files ?? Object.assign({}, ...plan2RoutePairs.map((pair) => pagePairFiles(pair)));
   const remaining = { ...routeFiles, ...extraFiles };
   const plHtml = remaining["index.html"];
@@ -171,7 +172,7 @@ async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
   delete remaining["en/index.html"];
   delete remaining["uslugi/wdrozenie-sap-ariba/index.html"];
   return fixture({
-    facts: withApplicationFacts(facts),
+    facts: withApplicationFacts(completeManifest && facts === undefined ? (await readFacts()).facts : facts),
     plHtml,
     enHtml,
     serviceHtml,
@@ -467,8 +468,14 @@ async function productionRegistryFixture(overrides = {}) {
     llms: productionFactSurfaceControls.llms,
     llmsFull: productionFactSurfaceControls.llmsFull,
     worker: productionFactSurfaceControls.worker,
+    serviceHtml: serviceProductHtml.ariba.pl,
     ...fixtureOverrides,
     extraFiles: {
+      "uslugi/transformacja-zakupow/index.html": serviceProductHtml.transformation.pl,
+      "en/uslugi/transformacja-zakupow/index.html": serviceProductHtml.transformation.en,
+      "en/uslugi/wdrozenie-sap-ariba/index.html": serviceProductHtml.ariba.en,
+      "uslugi/doradztwo-zamowienia-publiczne/index.html": serviceProductHtml.publicProcurement.pl,
+      "en/uslugi/doradztwo-zamowienia-publiczne/index.html": serviceProductHtml.publicProcurement.en,
       "aplikacje-operacyjne/index.html": applicationPageFixture("pl"),
       "en/aplikacje-operacyjne/index.html": applicationPageFixture("en"),
       "lotnictwo/index.html": aviationProductHtml.pl,
@@ -3293,7 +3300,7 @@ test("foundation requires the navigation guard before the only JS marker", async
   assert.ok(errorIds(result).includes("js-navigation-marker"));
 });
 
-for (const [option, path] of [["serviceHtml", "uslugi/wdrozenie-sap-ariba/index.html"], ["notFoundHtml", "404.html"]]) {
+for (const [option, path] of [["notFoundHtml", "404.html"]]) {
   test(`foundation requires legacy in-flow navigation markup on ${path}`, async () => {
     const html = legacyNavigationFixture.replace('class="nav-links"', 'class="removed-nav-links"');
     const root = await fixture({ [option]: html, css: foundationCss });
