@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import test from "node:test";
+import { runInNewContext } from "node:vm";
 
 import { parseCssRules, readFacts, runVerification } from "./verify-site.mjs";
 
@@ -163,8 +164,13 @@ function homepageFixture(lang, content) {
   const contactIntents = lang === "pl"
     ? [["Doradztwo", "Doradztwo"], ["Aplikacja operacyjna", "Aplikacja%20operacyjna"], ["Lotnictwo", "Lotnictwo"]]
     : [["Advisory", "Advisory"], ["Operational application", "Operational%20application"], ["Aviation", "Aviation"]];
-  return `${navigationFixture[lang]}<main>
-    <section id="hero"><h1 data-fact-id="brand.promise">${content}</h1></section>
+  const skipLabel = lang === "pl" ? "Przejdź do treści" : "Skip to main content";
+  return `<!doctype html><html lang="${lang}"><head>
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">
+  </head><body>
+    <a href="#main" class="skip-link">${skipLabel}</a>
+    ${navigationFixture[lang]}<main id="main">
+    <section id="hero"><h1 data-fact-id="brand.promise">${content}</h1><img src="/assets/img/IMG_3284-480.webp" alt="" width="960" height="1280" fetchpriority="high"></section>
     <section data-section="trust"></section>
     <section id="process">${processLabels.map((label, index) => `<article class="route-sequence__step"><p class="section-index">0${index + 1} / ${label}</p><h3>${label}</h3></article>`).join("")}</section>
     <aside data-cta-after="process"></aside>
@@ -177,7 +183,9 @@ function homepageFixture(lang, content) {
     <section id="portfolio"></section>
     <section id="clients"></section>
     <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
-  </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><input id="chat-input" maxlength="2000">`;
+  </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><input id="chat-input" maxlength="2000">
+    <script src="/assets/js/main.js?v=20260825-flightplan-1" defer></script>
+  </body></html>`;
 }
 
 function parityInventoryFixture(lang) {
@@ -215,7 +223,7 @@ function blockedClaim(overrides = {}) {
   };
 }
 
-async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = legacyNavigationFixture, css = "body{}", js = validBrowserScript, extraFiles = {} } = {}) {
+async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = legacyNavigationFixture, css = "body{}", js = validBrowserScript, heroImage = Buffer.from("fixture"), extraFiles = {} } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-test-"));
   const fixtureFacts = [...facts];
   for (const [id, displayPl, displayEn] of controlledAboutFacts) {
@@ -227,6 +235,7 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
     mkdir(resolve(root, "content"), { recursive: true }),
     mkdir(resolve(root, "assets/css"), { recursive: true }),
     mkdir(resolve(root, "assets/js"), { recursive: true }),
+    mkdir(resolve(root, "assets/img"), { recursive: true }),
     mkdir(resolve(root, "en"), { recursive: true }),
     mkdir(resolve(root, "uslugi/wdrozenie-sap-ariba"), { recursive: true }),
     mkdir(resolve(root, "worker"), { recursive: true })
@@ -239,6 +248,7 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pl
     writeFile(resolve(root, "404.html"), notFoundHtml),
     writeFile(resolve(root, "assets/css/style.css"), css),
     writeFile(resolve(root, "assets/js/main.js"), js),
+    ...(heroImage === null ? [] : [writeFile(resolve(root, "assets/img/IMG_3284-480.webp"), heroImage)]),
     writeFile(resolve(root, "llms.txt"), ""),
     writeFile(resolve(root, "llms-full.txt"), ""),
     writeFile(resolve(root, "worker/index.js"), ""),
@@ -550,6 +560,103 @@ test("foundation rejects unsafe innerHTML assignment in the browser script", asy
   const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\nmessage.innerHTML = data.reply;` });
   const result = await runVerification({ root, scope: "foundation" });
   assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 foundation rejects alternate HTML injection sinks in chat rendering", async () => {
+  const mutations = [
+    ["outerHTML assignment", "message.outerHTML = text;"],
+    ["compound innerHTML assignment", "message.innerHTML += text;"],
+    ["insertAdjacentHTML call", 'message.insertAdjacentHTML("beforeend", text);']
+  ];
+  const acceptedUnsafeSinks = [];
+  for (const [label, unsafeSink] of mutations) {
+    const js = validBrowserScript.replace("message.textContent = text;", `message.textContent = text;\n    ${unsafeSink}`);
+    assert.notEqual(js, validBrowserScript, label);
+    const root = await fixture({ css: foundationCss, js });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) acceptedUnsafeSinks.push(label);
+  }
+  assert.deepEqual(acceptedUnsafeSinks, [], `validator accepted unsafe sinks: ${acceptedUnsafeSinks.join(", ")}`);
+});
+
+test("Task 7 navigation clears an open mobile menu when entering desktop width", async () => {
+  const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
+  const listeners = { document: {}, toggle: {}, overlay: {}, window: {} };
+  const on = (target, type, callback) => {
+    (listeners[target][type] ??= []).push(callback);
+  };
+  const dispatch = (target, type, event = {}) => {
+    for (const callback of listeners[target][type] ?? []) callback(event);
+  };
+  const makeClassList = () => {
+    const classes = new Set();
+    return {
+      add: (...names) => names.forEach((name) => classes.add(name)),
+      remove: (...names) => names.forEach((name) => classes.delete(name)),
+      contains: (name) => classes.has(name),
+      toggle(name, force) {
+        const enabled = force === undefined ? !classes.has(name) : Boolean(force);
+        if (enabled) classes.add(name);
+        else classes.delete(name);
+        return enabled;
+      }
+    };
+  };
+  const attributes = new Map([["aria-expanded", "false"]]);
+  const toggle = {
+    classList: makeClassList(),
+    addEventListener: (type, callback) => on("toggle", type, callback),
+    setAttribute: (name, value) => attributes.set(name, value),
+    getAttribute: (name) => attributes.get(name),
+    focus() {}
+  };
+  const menu = {
+    classList: makeClassList(),
+    addEventListener() {},
+    querySelectorAll: () => []
+  };
+  const overlay = {
+    classList: makeClassList(),
+    addEventListener: (type, callback) => on("overlay", type, callback)
+  };
+  const document = {
+    documentElement: { classList: makeClassList(), lang: "pl" },
+    querySelectorAll: () => [],
+    querySelector: () => null,
+    getElementById(id) {
+      return { "nav-toggle": toggle, "nav-menu": menu, "nav-overlay": overlay }[id] ?? null;
+    },
+    addEventListener: (type, callback) => on("document", type, callback)
+  };
+  const window = {
+    innerWidth: 390,
+    location: { pathname: "/" },
+    scrollY: 0,
+    addEventListener: (type, callback) => on("window", type, callback),
+    scrollTo() {}
+  };
+
+  runInNewContext(browserScript, {
+    document,
+    window,
+    requestAnimationFrame: (callback) => callback(),
+    setTimeout() {}
+  });
+
+  dispatch("toggle", "click");
+  assert.equal(menu.classList.contains("is-open"), true, "precondition: mobile menu opened");
+  assert.equal(toggle.getAttribute("aria-expanded"), "true", "precondition: toggle exposes open state");
+  assert.equal(overlay.classList.contains("is-open"), true, "precondition: overlay opened");
+
+  window.innerWidth = 1280;
+  dispatch("window", "resize");
+  assert.equal(menu.classList.contains("is-open"), false, "desktop layout must clear the mobile menu state");
+  assert.equal(toggle.getAttribute("aria-expanded"), "false", "desktop layout must reset aria-expanded");
+  assert.equal(overlay.classList.contains("is-open"), false, "desktop layout must clear the overlay state");
+
+  window.innerWidth = 390;
+  dispatch("window", "resize");
+  assert.equal(menu.classList.contains("is-open"), false, "returning to mobile must not reopen the menu");
 });
 
 test("foundation requires text-only chat messages and a DOM-built fallback email link", async () => {
@@ -1589,4 +1696,72 @@ test("home scope requires the exact ordered English contact intents", async () =
   const root = await fixture({ enHtml });
   const result = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(errorIds(result).includes("home-contact-intents"));
+});
+
+async function task7HomeMutation(lang, mutate) {
+  const valid = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
+  const mutated = mutate(valid);
+  assert.notEqual(mutated, valid, `Task 7 ${lang} mutation must change the fixture`);
+  const root = await fixture({ [`${lang}Html`]: mutated });
+  return runVerification({ root, scope: "home", lang });
+}
+
+const task7HomeMutations = [
+  ["missing main landmark", "home-main", (html) => html.replace('<main id="main">', '<div id="main">').replace("</main>", "</div>")],
+  ["missing skip link", "home-skip-link", (html) => html.replace('class="skip-link"', 'class="removed-skip-link"')],
+  ["initially expanded mobile navigation", "home-nav-toggle", (html) => html.replace('aria-expanded="false"', 'aria-expanded="true"')],
+  ["unlinked mobile navigation control", "home-nav-toggle", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="other-menu"')],
+  ["wrong chat input limit", "home-chat-maxlength", (html) => html.replace('maxlength="2000"', 'maxlength="1999"')],
+  ["missing hero image width", "home-hero-image", (html) => html.replace(' width="960"', "")],
+  ["missing hero image height", "home-hero-image", (html) => html.replace(' height="1280"', "")],
+  ["missing high-priority hero fetch", "home-hero-image", (html) => html.replace(' fetchpriority="high"', "")],
+  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260825-flightplan-1', 'style.css?v=stale')],
+  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260825-flightplan-1', 'main.js?v=stale')],
+  ["inline presentation style", "home-inline-style", (html) => html.replace('<section id="hero">', '<section id="hero" style="display:block">')]
+];
+
+for (const lang of ["pl", "en"]) {
+  for (const [mutation, expectedError, mutate] of task7HomeMutations) {
+    test(`Task 7 home baseline rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+function deterministicBudgetNoise(length) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let state = 0x51f15e;
+  let value = "";
+  for (let index = 0; index < length; index += 1) {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    value += alphabet[state % alphabet.length];
+  }
+  return value;
+}
+
+test("Task 7 foundation rejects CSS above the compressed budget", async () => {
+  const css = `${foundationCss}\n/* ${deterministicBudgetNoise(200_000)} */`;
+  const root = await fixture({ css });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-css-gzip"));
+});
+
+test("Task 7 foundation rejects browser JavaScript above the compressed budget", async () => {
+  const js = `${validBrowserScript}\nconst task7BudgetNoise = "${deterministicBudgetNoise(80_000)}";`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-js-gzip"));
+});
+
+test("Task 7 foundation rejects a hero image above the byte budget", async () => {
+  const root = await fixture({ css: foundationCss, heroImage: Buffer.alloc(220_001) });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-hero-image"));
+});
+
+test("Task 7 foundation fails closed when the budgeted hero image is missing", async () => {
+  const root = await fixture({ css: foundationCss, heroImage: null });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-hero-image"));
 });

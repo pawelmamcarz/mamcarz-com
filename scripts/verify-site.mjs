@@ -1,6 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { gzipSync } from "node:zlib";
 
 const defaultRoot = resolve(import.meta.dirname, "..");
 const factKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "surfaces", "status"];
@@ -583,6 +584,57 @@ function verifyHomepageContent(body, parsedBody, page, errors) {
     error(errors, "home-retired-aviation-name", page.path, "visible homepage copy must not publish the retired WarsawFlightSafety name");
   }
   return visible;
+}
+
+function verifyHomepageBaseline(parsedRoot, page, errors) {
+  const elements = elementDescendants(parsedRoot);
+  const mains = elements.filter((element) => element.name === "main");
+  if (mains.length !== 1 || elementAttribute(mains[0] ?? { attributes: new Map() }, "id") !== "main") {
+    error(errors, "home-main", page.path, "homepage requires exactly one main#main landmark");
+  }
+
+  const skipLinks = elements.filter((element) => element.name === "a" && elementHasClass(element, "skip-link"));
+  if (skipLinks.length !== 1 || elementAttribute(skipLinks[0], "href") !== "#main" || !elementIsStaticallyVisible(skipLinks[0])) {
+    error(errors, "home-skip-link", page.path, "homepage requires exactly one visible skip-link targeting #main");
+  }
+
+  const navToggles = elements.filter((element) => element.name === "button" && elementAttribute(element, "id") === "nav-toggle");
+  if (navToggles.length !== 1
+    || elementAttribute(navToggles[0], "aria-expanded") !== "false"
+    || elementAttribute(navToggles[0], "aria-controls") !== "nav-menu") {
+    error(errors, "home-nav-toggle", page.path, "nav-toggle requires aria-expanded=false and aria-controls=nav-menu");
+  }
+
+  const chatInputs = elements.filter((element) => element.name === "input" && elementAttribute(element, "id") === "chat-input");
+  if (chatInputs.length !== 1 || elementAttribute(chatInputs[0], "maxlength") !== "2000") {
+    error(errors, "home-chat-maxlength", page.path, "chat input requires maxlength 2000");
+  }
+
+  const heroSections = elements.filter((element) => element.name === "section" && elementAttribute(element, "id") === "hero");
+  const heroImages = heroSections.length === 1 ? elementDescendants(heroSections[0], "img") : [];
+  const heroImage = heroImages[0];
+  const width = heroImage ? elementAttribute(heroImage, "width") : null;
+  const height = heroImage ? elementAttribute(heroImage, "height") : null;
+  const validDimensions = /^\d+$/.test(width ?? "") && Number(width) > 0
+    && /^\d+$/.test(height ?? "") && Number(height) > 0;
+  if (heroImages.length !== 1 || !validDimensions || elementAttribute(heroImage, "fetchpriority") !== "high") {
+    error(errors, "home-hero-image", page.path, "hero requires one image with explicit positive width and height plus fetchpriority=high");
+  }
+
+  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-1";
+  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-1";
+  const stylesheetLinks = elements.filter((element) => element.name === "link"
+    && (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
+  const browserScripts = elements.filter((element) => element.name === "script"
+    && (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
+  if (stylesheetLinks.length !== 1 || elementAttribute(stylesheetLinks[0], "href") !== expectedCss
+    || browserScripts.length !== 1 || elementAttribute(browserScripts[0], "src") !== expectedJs) {
+    error(errors, "home-cache-version", page.path, `homepage requires exactly ${expectedCss} and ${expectedJs}`);
+  }
+
+  if (elements.some((element) => element.attributes.has("style"))) {
+    error(errors, "home-inline-style", page.path, "inline style attributes are forbidden on the homepage");
+  }
 }
 
 function exactSequence(first, second) {
@@ -1543,7 +1595,11 @@ function verifyBrowserScript(js, errors) {
     const invocation = new RegExp(`\\b${initializer}\\s*\\(\\s*\\)\\s*;`).test(activeJs);
     if (!definition || !invocation) error(errors, "js-initializer", path, `${initializer} must be declared and invoked`);
   }
-  if (/\.innerHTML\s*=/.test(activeJs)) error(errors, "js-inner-html", path, "innerHTML assignment is forbidden");
+  const unsafeHtmlAssignment = /\.(?:innerHTML|outerHTML)\s*(?:\+\+|--|\*\*=|<<=|>>>=|>>=|&&=|\|\|=|\?\?=|[+\-*/%&|^]?=)/;
+  const unsafeHtmlMethod = /\.insertAdjacentHTML\s*\(/;
+  if (unsafeHtmlAssignment.test(activeJs) || unsafeHtmlMethod.test(activeJs)) {
+    error(errors, "js-inner-html", path, "HTML injection sinks are forbidden");
+  }
   const workerUrl = "https://mamcarz-chat-api.pawel-767.workers.dev";
   if ((activeJs.match(new RegExp(escapeRegExp(workerUrl), "g")) ?? []).length !== 1) {
     error(errors, "js-chat-api", path, "expected the unchanged chat Worker URL exactly once");
@@ -1585,6 +1641,9 @@ async function verifyFoundation(context) {
   if (legacyService !== null) verifyLegacyNavigation(legacyService, "uslugi/wdrozenie-sap-ariba/index.html", context.errors);
   if (notFound !== null) verifyLegacyNavigation(notFound, "404.html", context.errors);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
+  if (css !== null && gzipSync(Buffer.from(css, "utf8")).byteLength > 75_000) {
+    error(context.errors, "budget-css-gzip", "assets/css/style.css", "compressed stylesheet exceeds 75000 bytes");
+  }
   if (css !== null) {
     const commentScan = stripCssComments(css);
     const activeCss = commentScan.css;
@@ -1810,7 +1869,19 @@ async function verifyFoundation(context) {
     }
   }
   if (js !== null && js.length === 0) error(context.errors, "foundation-js", "assets/js/main.js", "browser script is empty");
+  if (js !== null && gzipSync(Buffer.from(js, "utf8")).byteLength > 25_000) {
+    error(context.errors, "budget-js-gzip", "assets/js/main.js", "compressed browser script exceeds 25000 bytes");
+  }
   if (js !== null && js.length > 0) verifyBrowserScript(js, context.errors);
+  const heroAsset = "assets/img/IMG_3284-480.webp";
+  try {
+    const heroStat = await stat(resolve(context.root, heroAsset));
+    if (!heroStat.isFile() || heroStat.size > 220_000) {
+      error(context.errors, "budget-hero-image", heroAsset, "hero image must be a file no larger than 220000 bytes");
+    }
+  } catch (statError) {
+    error(context.errors, "budget-hero-image", heroAsset, `unable to stat required hero image: ${statError.code ?? statError.message}`);
+  }
 }
 
 function candidates(fact, language) {
@@ -1828,6 +1899,7 @@ async function verifyHome(factData, context) {
     if ((html.match(/<h1\b/gi) ?? []).length !== 1) error(context.errors, "home-h1", page.path, "expected exactly one h1");
     const parsed = parseStaticHtml(html);
     for (const syntaxError of parsed.errors) error(context.errors, "home-html-syntax", page.path, syntaxError);
+    verifyHomepageBaseline(parsed.root, page, context.errors);
     const parsedBody = htmlBodyRoot(parsed.root);
     parsedBodies.set(page.lang, parsedBody);
     const body = homepageBody(html);

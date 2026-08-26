@@ -39,6 +39,9 @@ function initNavigation() {
 
   menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
   overlay?.addEventListener("click", close);
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 760) close();
+  });
 
   const siteNav = document.querySelector(".site-nav");
   if (siteNav) {
