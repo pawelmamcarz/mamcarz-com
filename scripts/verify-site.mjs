@@ -4983,10 +4983,12 @@ function knowledgeInactiveSourceFragments(parsedRoot) {
 }
 
 function knowledgeEmbeddedUrlCandidates(fragment) {
-  const source = decodeHtmlEntities(fragment).replace(/\p{Default_Ignorable_Code_Point}/gu, "");
+  const source = decodeHtmlEntities(fragment)
+    .replace(/[\u0009\u000a\u000d]/g, "")
+    .replace(/\p{Default_Ignorable_Code_Point}/gu, "");
   const candidates = [];
   const add = (value) => {
-    const candidate = value.trim().replace(/^[({[,]+|[)}\],.;]+$/g, "");
+    const candidate = value.trim().replace(/^[({[,]+|[)}\],.;:!]+$/g, "");
     if (candidate.length > 0) candidates.push(candidate);
   };
   for (const match of source.matchAll(/["']([^"']+)["']/g)) add(match[1]);

@@ -2553,6 +2553,26 @@ test("Plan 2 Task 4 fix round 3 tokenizes temporal identifiers in comments and i
   assert.equal(errorIds(owned2026).includes("knowledge-temporal-identifier-boundary"), false, owned2026.errors.join("\n"));
 });
 
+test("Plan 2 Task 4 fix round 4 preserves inactive URL boundaries across browser whitespace and prose punctuation", async () => {
+  const cases = [
+    ["line-feed split", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement-\n%32%30%32%36/ --></footer>")],
+    ["tab split", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement-\t%32%30%32%36/ --></footer>")],
+    ["carriage-return split", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement-\r%32%30%32%36/ --></footer>")],
+    ["colon-closing prose", (html) => html.replace("</footer>", "<!-- See /en/%70rocurement-%32%30%32%36/: --></footer>")],
+    ["exclamation-closing prose", (html) => html.replace("</footer>", "<!-- See /en/%70rocurement-%32%30%32%36/! --></footer>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-inactive-url-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const ordinarySpace = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement- %32%30%32%36/ --></footer>")
+  });
+  assert.equal(errorIds(ordinarySpace).includes("knowledge-inactive-url-boundary"), false, ordinarySpace.errors.join("\n"));
+});
+
 test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {
   const additions = [
     ["external image", '<img src="https://example.com/claim.png" alt="">'],
