@@ -12,6 +12,10 @@ import { parseCssRules, readFacts, runVerification } from "./verify-site.mjs";
 const execFileAsync = promisify(execFile);
 const modulePath = resolve("scripts/verify-site.mjs");
 const foundationCss = await readFile(resolve("assets/css/style.css"), "utf8");
+const applicationProductHtml = {
+  pl: await readFile(resolve("aplikacje-operacyjne/index.html"), "utf8"),
+  en: await readFile(resolve("en/aplikacje-operacyjne/index.html"), "utf8")
+};
 const publicClaimSurfaceFixture = [
   "index.html",
   "en/index.html",
@@ -136,7 +140,13 @@ async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
     plHtml,
     enHtml,
     serviceHtml,
-    extraFiles: remaining
+    extraFiles: {
+      "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+      "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
+      "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
+      "assets/img/signature.png": "fixture-image",
+      ...remaining
+    }
   });
 }
 
@@ -433,6 +443,7 @@ async function verifyFixtureCss(css) {
 }
 
 const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "applications");
+const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
 
 const applicationContract = {
   pl: {
@@ -487,42 +498,15 @@ function withApplicationFacts(records) {
 }
 
 function applicationSchemaFixture(lang) {
-  const copy = applicationContract[lang];
-  return `<script type="application/ld+json">${JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: copy.title,
-    url: copy.url,
-    description: copy.description,
-    provider: { "@type": "Person", name: "Paweł Mamcarz" }
-  })}</script>`;
+  const schema = applicationProductHtml[lang].match(/<script type="application\/ld\+json">[\s\S]*?<\/script>/)?.[0];
+  assert.ok(schema, `${lang} application product fixture must contain Service JSON-LD`);
+  return schema;
 }
 
 function applicationPageFixture(lang, { extraBody = "" } = {}) {
-  const copy = applicationContract[lang];
-  const [plRoute, enRoute] = applicationsPair.slice(2, 4);
-  const evidence = applicationEvidenceRows.map(([nameId, typeId]) => {
-    const name = applicationEvidenceFacts.find(([id]) => id === nameId)?.[lang === "pl" ? 1 : 2];
-    const type = applicationEvidenceFacts.find(([id]) => id === typeId)?.[lang === "pl" ? 1 : 2];
-    return `<article class="evidence-row" data-fact-ids="${nameId} ${typeId}"><h3 class="evidence-row__title">${name}</h3><dl class="evidence-row__ledger"><div><dt>${lang === "pl" ? "Funkcja" : "Function"}</dt><dd>${type}</dd></div></dl></article>`;
-  }).join("");
-  const body = `
-    <section data-section="problem"><h2>${lang === "pl" ? "Proces przed interfejsem" : "Process before interface"}</h2><dl class="applications-ledger"><div><dt>Procurement</dt><dd>Decisions and data</dd></div><div><dt>Field service</dt><dd>Resources and documents</dd></div><div><dt>Aviation</dt><dd>Operational responsibility</dd></div></dl></section>
-    <section data-section="delivery"><h2>${lang === "pl" ? "Droga do uruchomienia" : "Route to launch"}</h2><div class="route-sequence"><article class="route-sequence__step" data-step="discovery"><h3>Discovery</h3></article><article class="route-sequence__step" data-step="data-model"><h3>${lang === "pl" ? "Model danych" : "Data model"}</h3></article><article class="route-sequence__step" data-step="workflow"><h3>Workflow</h3></article><article class="route-sequence__step" data-step="launch"><h3>${lang === "pl" ? "Uruchomienie" : "Launch"}</h3></article></div></section>
-    <section data-section="evidence"><h2>${lang === "pl" ? "Wybrane produkty" : "Selected products"}</h2>${evidence}</section>
-    <section data-section="fit"><h2>${lang === "pl" ? "Warunki dobrego dopasowania" : "Conditions for a good fit"}</h2><dl class="applications-ledger"><div><dt>${lang === "pl" ? "Właściciel procesu" : "Process owner"}</dt><dd>Named responsibility</dd></div><div><dt>${lang === "pl" ? "Wiedza domenowa" : "Domain knowledge"}</dt><dd>Access to users</dd></div></dl></section>
-    ${extraBody}
-    <section data-section="contact"><h2>${lang === "pl" ? "Porozmawiajmy o procesie" : "Discuss the process"}</h2><a class="btn-primary" href="${copy.contactHref}">${lang === "pl" ? "Opisz aplikację operacyjną" : "Describe the operational application"}</a></section>`;
-  return pageShellFixture({
-    lang,
-    plRoute,
-    enRoute,
-    title: copy.title,
-    lead: copy.lead,
-    dataPage: "applications",
-    head: applicationSchemaFixture(lang),
-    body
-  });
+  const contactOpening = '<section class="applications-section application-contact" data-section="contact">';
+  assert.ok(applicationProductHtml[lang].includes(contactOpening), `${lang} application product fixture must contain contact`);
+  return applicationProductHtml[lang].replace(contactOpening, `${extraBody}${contactOpening}`);
 }
 
 async function applicationPageMutation({ lang = "pl", mutate = (html) => html, facts, body = "", extraFiles = {} } = {}) {
@@ -532,6 +516,16 @@ async function applicationPageMutation({ lang = "pl", mutate = (html) => html, f
   const overrides = lang === "pl" ? { pl: mutated } : { en: mutated };
   const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair, overrides), facts: withApplicationFacts(facts), extraFiles });
   return runVerification({ root, scope: "pages", family: "applications" });
+}
+
+async function genericPageMutation({ lang = "pl", mutate = (html) => html, facts, body = "", extraFiles = {} } = {}) {
+  const [, , plRoute, enRoute, family] = genericParserPair;
+  const base = pageShellFixture({ lang, plRoute, enRoute, title: lang === "pl" ? "Strona" : "Page", body });
+  const mutated = mutate(base);
+  assert.notEqual(mutated, "", "generic page mutation must leave a fixture document");
+  const overrides = lang === "pl" ? { pl: mutated } : { en: mutated };
+  const root = await pageArchitectureFixture({ files: pagePairFiles(genericParserPair, overrides), facts, extraFiles });
+  return runVerification({ root, scope: "pages", family });
 }
 
 function movePageMetadata(html, destination) {
@@ -546,7 +540,7 @@ function movePageMetadata(html, destination) {
     assert.ok(moved.includes(tag), `fixture must contain ${tag}`);
     moved = moved.replace(tag, "");
   }
-  return moved.replace('<body data-page="applications">', `<body data-page="applications">${destination(metadata.join(""))}`);
+  return moved.replace('<body class="applications-page" data-page="applications">', `<body class="applications-page" data-page="applications">${destination(metadata.join(""))}`);
 }
 
 test("Plan 2 Task 1 uses the exact route manifest and accepts every declared family", async () => {
@@ -618,7 +612,7 @@ test("Plan 2 Task 1 accepts a complete paired shell and exposes bounded future h
 
 test("Plan 2 Task 1 counts only active h1 and main elements", async () => {
   const mutations = [
-    ["hidden h1 decoy", "page-h1", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<h1 hidden>Aplikacje operacyjne</h1><template><h1>Aplikacje operacyjne</h1></template>")],
+    ["hidden h1 decoy", "page-h1", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" hidden>Aplikacje operacyjne</h1><template><h1>Aplikacje operacyjne</h1></template>')],
     ["duplicate visible h1", "page-h1", (html) => html.replace("</header>", "<h1>Drugi nagłówek</h1></header>")],
     ["hidden main decoy", "page-main", (html) => html.replace('<main id="main"', '<main hidden id="main"')],
     ["duplicate visible main", "page-main", (html) => html.replace('<footer class="site-footer">', '<main id="duplicate"><p>Duplicate</p></main><footer class="site-footer">')]
@@ -683,7 +677,7 @@ test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside 
 });
 
 test("Plan 2 Task 1 tokenizes approved data-fact-ids on HTML whitespace", async () => {
-  const result = await applicationPageMutation({
+  const result = await genericPageMutation({
     body: '<article data-fact-ids="brand.promise\n\taviation.ppl_h">Evidence</article>'
   });
   assert.deepEqual(result.errors, []);
@@ -716,7 +710,7 @@ test("Plan 2 Task 1 resolves href, src and srcset after query and fragment strip
     <a href="/downloads/?mode=full#section">Download hub</a>
     <a href="/assets/docs/probe.pdf?download=1#page-2">PDF</a>
     <img src="/assets/img/probe.webp?v=1#hero" srcset="/assets/img/probe-480.webp?v=1 480w, /assets/img/probe-960.webp#wide 960w" alt="">`;
-  const result = await applicationPageMutation({
+  const result = await genericPageMutation({
     body,
     extraFiles: {
       "downloads/index.html": "download fixture",
@@ -749,7 +743,7 @@ test("Plan 2 Task 1 ignores fragments, mail, external URLs, protocol-relative UR
     <a href="//cdn.example.com/missing.png">CDN</a>
     <a href="https://mamcarz-chat-api.pawel-767.workers.dev">Worker</a>
     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="">`;
-  const result = await applicationPageMutation({ body });
+  const result = await genericPageMutation({ body });
   assert.deepEqual(result.errors, []);
 });
 
@@ -836,14 +830,14 @@ test("Plan 2 Task 1 fix round 1 requires the exact visible paired-language label
 
 test("Plan 2 Task 1 fix round 1 treats inline CSS and closed details as statically hidden", async () => {
   const cases = [
-    ["display none", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display:none">Aplikacje operacyjne</h1>'), true],
-    ["mixed-case important display none", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="  DiSpLaY :  NoNe !IMPORTANT  ">Aplikacje operacyjne</h1>'), true],
-    ["mixed-case visibility hidden", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style=" VISIBILITY : Hidden ">Aplikacje operacyjne</h1>'), true],
-    ["hidden ancestor", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<div hidden><h1>Aplikacje operacyjne</h1></div>"), true],
-    ["aria-hidden ancestor", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<div aria-hidden="true"><h1>Aplikacje operacyjne</h1></div>'), true],
-    ["closed details", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<details><h1>Aplikacje operacyjne</h1></details>"), true],
-    ["open details", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<details open><h1>Aplikacje operacyjne</h1></details>"), false],
-    ["benign inline style", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="color: red">Aplikacje operacyjne</h1>'), false]
+    ["display none", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display:none">Aplikacje operacyjne</h1>'), true],
+    ["mixed-case important display none", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="  DiSpLaY :  NoNe !IMPORTANT  ">Aplikacje operacyjne</h1>'), true],
+    ["mixed-case visibility hidden", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style=" VISIBILITY : Hidden ">Aplikacje operacyjne</h1>'), true],
+    ["hidden ancestor", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<div hidden><h1 class="page-title">Aplikacje operacyjne</h1></div>'), true],
+    ["aria-hidden ancestor", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<div aria-hidden="true"><h1 class="page-title">Aplikacje operacyjne</h1></div>'), true],
+    ["closed details", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<details><h1 class="page-title">Aplikacje operacyjne</h1></details>'), true],
+    ["open details", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<details open><h1 class="page-title">Aplikacje operacyjne</h1></details>'), false],
+    ["benign inline style", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="color: red">Aplikacje operacyjne</h1>'), false]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate, shouldFail]) => ({
     label,
@@ -886,7 +880,7 @@ test("Plan 2 Task 1 fix round 1 preserves internal URL whitespace and ignores no
     <a href=" mailto:pawel@mamcarz.com ">Mail</a>
     <a href=" https://example.com/missing ">External</a>
     <a href=" &sol;&sol;cdn.example.com/missing.png ">Protocol-relative</a>`;
-  const result = await applicationPageMutation({
+  const result = await genericPageMutation({
     body,
     extraFiles: { "space target/index.html": "internal-space fixture" }
   });
@@ -904,8 +898,8 @@ test("Plan 2 Task 1 fix round 1 reports another-family manifest targets that are
 
 test("Plan 2 Task 1 fix round 1 rejects duplicate fact tokens while accepting a unique list", async () => {
   const [duplicate, unique] = await Promise.all([
-    applicationPageMutation({ body: '<article data-fact-ids="brand.promise\n\tbrand.promise">Duplicate</article>' }),
-    applicationPageMutation({ body: '<article data-fact-ids="brand.promise\n\taviation.ppl_h">Unique</article>' })
+    genericPageMutation({ body: '<article data-fact-ids="brand.promise\n\tbrand.promise">Duplicate</article>' }),
+    genericPageMutation({ body: '<article data-fact-ids="brand.promise\n\taviation.ppl_h">Unique</article>' })
   ]);
   assert.ok(errorIds(duplicate).includes("page-fact-ids"));
   assert.equal(errorIds(unique).includes("page-fact-ids"), false);
@@ -922,11 +916,11 @@ test("Plan 2 Task 1 fix round 2 rejects nested, misordered and duplicate documen
   const moveHeadIntoBody = (html) => {
     const head = extractBlock(html, "<head>", "</head>");
     const withoutHead = html.slice(0, head.start) + html.slice(head.end);
-    return withoutHead.replace('<body data-page="applications">', `<body data-page="applications">${head.block}`);
+    return withoutHead.replace('<body class="applications-page" data-page="applications">', `<body class="applications-page" data-page="applications">${head.block}`);
   };
   const putBodyBeforeHead = (html) => {
     const head = extractBlock(html, "<head>", "</head>");
-    const body = extractBlock(html, '<body data-page="applications">', "</body>");
+    const body = extractBlock(html, '<body class="applications-page" data-page="applications">', "</body>");
     assert.ok(head.end <= body.start, "fixture head must precede body");
     return html.slice(0, head.start) + body.block + head.block + html.slice(body.end);
   };
@@ -934,12 +928,12 @@ test("Plan 2 Task 1 fix round 2 rejects nested, misordered and duplicate documen
     ["head nested in body", moveHeadIntoBody],
     ["body before head", putBodyBeforeHead],
     ["duplicate head", (html) => html.replace("</head>", "</head><head></head>")],
-    ["duplicate body", (html) => html.replace('<body data-page="applications">', '<body></body><body data-page="applications">')],
+    ["duplicate body", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body></body><body class="applications-page" data-page="applications">')],
     ["duplicate html root", (html) => html.replace("</html>", "</html><html></html>")],
     ["body nested below div", (html) => html
-      .replace('<body data-page="applications">', '<div><body data-page="applications">')
+      .replace('<body class="applications-page" data-page="applications">', '<div><body class="applications-page" data-page="applications">')
       .replace("</body></html>", "</body></div></html>")],
-    ["missing body element", (html) => html.replace('<body data-page="applications">', "").replace("</body>", "")]
+    ["missing body element", (html) => html.replace('<body class="applications-page" data-page="applications">', "").replace("</body>", "")]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
     label,
@@ -969,7 +963,7 @@ test("Plan 2 Task 1 fix round 2 decodes and comment-normalizes hidden inline sty
   const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
     label,
     shouldFail,
-    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje operacyjne</h1>", `<h1 ${style}>Aplikacje operacyjne</h1>`) })
+    result: await applicationPageMutation({ mutate: (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', `<h1 class="page-title" ${style}>Aplikacje operacyjne</h1>`) })
   })));
   for (const { label, shouldFail, result } of outcomes) {
     assert.equal(errorIds(result).includes("page-h1"), shouldFail, label);
@@ -1045,7 +1039,7 @@ test("Plan 2 Task 1 fix round 3 decodes browser numeric references and CSS escap
   const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
     label,
     shouldFail,
-    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje operacyjne</h1>", `<h1 ${style}>Aplikacje operacyjne</h1>`) })
+    result: await applicationPageMutation({ mutate: (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', `<h1 class="page-title" ${style}>Aplikacje operacyjne</h1>`) })
   })));
   const mismatches = outcomes
     .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
@@ -1058,12 +1052,12 @@ test("Plan 2 Task 1 fix round 4 honors exact-case named references in rendered t
   const cases = [
     ["exact whitespace names in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&Tab;EN&NewLine;</a>`), "page-language", false],
     ["invalid whitespace name case in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&TAB;EN&NEWLINE;</a>`), "page-language", true],
-    ["exact lowercase colon hides the heading", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&colon;none">Aplikacje operacyjne</h1>'), "page-h1", true],
-    ["invalid uppercase colon leaves the heading visible", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&COLON;none">Aplikacje operacyjne</h1>'), "page-h1", false],
-    ["exact lowercase bsol exposes a CSS escape", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="d&bsol;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", true],
-    ["invalid uppercase bsol remains literal", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="d&BSOL;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", false],
-    ["numeric to named reference stays one pass", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&#38;colon;none">Aplikacje operacyjne</h1>'), "page-h1", false],
-    ["named to numeric reference stays one pass", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&AMP;#58;none">Aplikacje operacyjne</h1>'), "page-h1", false]
+    ["exact lowercase colon hides the heading", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&colon;none">Aplikacje operacyjne</h1>'), "page-h1", true],
+    ["invalid uppercase colon leaves the heading visible", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&COLON;none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["exact lowercase bsol exposes a CSS escape", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="d&bsol;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", true],
+    ["invalid uppercase bsol remains literal", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="d&BSOL;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["numeric to named reference stays one pass", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&#38;colon;none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["named to numeric reference stays one pass", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&AMP;#58;none">Aplikacje operacyjne</h1>'), "page-h1", false]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate, expectedId, shouldFail]) => ({
     label,
@@ -1122,7 +1116,7 @@ test("Plan 2 Task 1 fix round 4 fails closed on unterminated CSS strings and pre
   const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
     label,
     shouldFail,
-    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje operacyjne</h1>", `<h1 ${style}>Aplikacje operacyjne</h1>`) })
+    result: await applicationPageMutation({ mutate: (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', `<h1 class="page-title" ${style}>Aplikacje operacyjne</h1>`) })
   })));
   const mismatches = outcomes
     .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
@@ -1184,8 +1178,8 @@ test("Plan 2 Task 1 fix round 5 preserves inactive wrappers and disclosure-open 
 
 test("Plan 2 Task 2 requires the exact localized application identity and opening lead", async () => {
   const cases = [
-    ["wrong Polish H1", "pl", "application-h1", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<h1>Aplikacje</h1>")],
-    ["wrong English H1", "en", "application-h1", (html) => html.replace("<h1>Operational applications</h1>", "<h1>Applications</h1>")],
+    ["wrong Polish H1", "pl", "application-h1", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title">Aplikacje</h1>')],
+    ["wrong English H1", "en", "application-h1", (html) => html.replace('<h1 class="page-title">Operational applications</h1>', '<h1 class="page-title">Applications</h1>')],
     ["changed Polish lead", "pl", "application-lead", (html) => html.replace(applicationContract.pl.lead, "Buduję aplikacje dla firm.")],
     ["hidden English lead with a template decoy", "en", "application-lead", (html) => html.replace(
       `<p class="page-lead">${applicationContract.en.lead}</p>`,
@@ -1200,12 +1194,12 @@ test("Plan 2 Task 2 requires the exact localized application identity and openin
 });
 
 test("Plan 2 Task 2 requires exactly five direct visible section markers in order", async () => {
-  const problemPattern = /<section data-section="problem">[\s\S]*?<\/section>/;
-  const deliveryPattern = /<section data-section="delivery">[\s\S]*?<\/section>/;
+  const problemPattern = /<section class="applications-section application-problem" data-section="problem">[\s\S]*?<\/section>/;
+  const deliveryPattern = /<section class="applications-section applications-section--band application-delivery" data-section="delivery">[\s\S]*?<\/section>/;
   const cases = [
     ["missing marker", (html) => html.replace('data-section="problem"', 'data-purpose="problem"')],
-    ["hidden marker", (html) => html.replace('<section data-section="problem">', '<section data-section="problem" hidden>')],
-    ["duplicate marker", (html) => html.replace('<section data-section="problem">', '<section data-section="problem"></section><section data-section="problem">')],
+    ["hidden marker", (html) => html.replace('<section class="applications-section application-problem" data-section="problem">', '<section class="applications-section application-problem" data-section="problem" hidden>')],
+    ["duplicate marker", (html) => html.replace('<section class="applications-section application-problem" data-section="problem">', '<section data-section="problem"></section><section class="applications-section application-problem" data-section="problem">')],
     ["template decoy", (html) => html.replace(problemPattern, (block) => `<template>${block}</template>`)],
     ["wrong order", (html) => {
       const problem = html.match(problemPattern)?.[0];
@@ -1234,8 +1228,8 @@ test("Plan 2 Task 2 requires the real four-step delivery sequence", async () => 
 
 test("Plan 2 Task 2 accepts only one direct purpose-only Service schema", async () => {
   const validSchema = applicationSchemaFixture("pl");
-  const forbiddenFieldSchema = validSchema.replace('"provider":', '"offers":{},"provider":');
-  const wrongTypeSchema = validSchema.replace('"@type":"Service"', '"@type":"Person"');
+  const forbiddenFieldSchema = validSchema.replace('"provider": {', '"offers": {},\n  "provider": {');
+  const wrongTypeSchema = validSchema.replace('"@type": "Service"', '"@type": "Person"');
   const cases = [
     ["forbidden field", (html) => html.replace(validSchema, forbiddenFieldSchema)],
     ["wrong active type with hidden valid decoy", (html) => html.replace(validSchema, `${wrongTypeSchema}<template>${validSchema}</template>`)],
@@ -1288,7 +1282,7 @@ test("Plan 2 Task 2 requires one localized primary mailto intent in contact", as
       lang,
       mutate: (html) => html
         .replace(`href="${expected}"`, 'href="mailto:pawel@mamcarz.com?subject=General"')
-        .replace("</section></main>", `<a href="${expected}" hidden>Decoy</a></section></main>`)
+        .replace("</section>\n</main>", `<a href="${expected}" hidden>Decoy</a></section>\n</main>`)
     });
     assert.ok(errorIds(result).includes("application-contact"), `${lang}: ${result.errors.join("\n")}`);
   }
@@ -1321,6 +1315,183 @@ test("Plan 2 Task 2 rejects visible review and retired fact meanings without ann
     const result = await applicationPageMutation({ facts: [fact(), unsafe], body: `<p>${display}</p>` });
     assert.ok(errorIds(result).includes("application-fact-status"), `${status}: ${result.errors.join("\n")}`);
   }
+});
+
+test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner-approved literals", async () => {
+  const driftFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "registry-coordinated drift",
+    display_pl: "Transport Registry Drift",
+    display_en: "czympojade.pl",
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const cases = [
+    ["missing evidence row", {}, (html) => {
+      const row = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.czympojade_pl portfolio\.czympojade_pl\.type">[\s\S]*?<\/article>/)?.[0];
+      assert.ok(row);
+      return html.replace(row, "");
+    }],
+    ["duplicate evidence row", {}, (html) => {
+      const row = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.czympojade_pl portfolio\.czympojade_pl\.type">[\s\S]*?<\/article>/)?.[0];
+      assert.ok(row);
+      return html.replace(row, `${row}${row}`);
+    }],
+    ["reordered evidence rows", {}, (html) => {
+      const first = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.czympojade_pl portfolio\.czympojade_pl\.type">[\s\S]*?<\/article>/)?.[0];
+      const second = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.przypominamy_com portfolio\.przypominamy_com\.type">[\s\S]*?<\/article>/)?.[0];
+      assert.ok(first && second);
+      return html.replace(`${first}\n        ${second}`, `${second}\n        ${first}`);
+    }],
+    ["reversed IDs within one row", {}, (html) => html.replace(
+      'data-fact-ids="portfolio.czympojade_pl portfolio.czympojade_pl.type"',
+      'data-fact-ids="portfolio.czympojade_pl.type portfolio.czympojade_pl"'
+    )],
+    ["appended evidence meaning", {}, (html) => html.replace(
+      "Aplikacja transportowa do pracy z połączeniami i rozkładami.</dd>",
+      "Aplikacja transportowa do pracy z połączeniami i rozkładami. Dodatkowy wynik.</dd>"
+    )],
+    ["appended evidence element", {}, (html) => html.replace(
+      "Aplikacja transportowa do pracy z połączeniami i rozkładami.</dd>",
+      "Aplikacja transportowa do pracy z połączeniami i rozkładami.</dd><p>Dodatkowy element.</p>"
+    )],
+    ["registry-coordinated display drift", { facts: [fact(), driftFact] }, (html) => html.replace(
+      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      '<h3 class="evidence-row__title">Transport Registry Drift</h3>'
+    )]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, options, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ ...options, mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-evidence-contract"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts only its exact registered URL", async () => {
+  const linkTitle = (href) => `<h3 class="evidence-row__title"><a href="${href}">czympojade.pl</a></h3>`;
+  const unapproved = await applicationPageMutation({
+    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle("https://example.com/unapproved"))
+  });
+  assert.ok(errorIds(unapproved).includes("application-evidence-link"), unapproved.errors.join("\n"));
+
+  const approvedUrl = "https://example.com/approved-product";
+  const approvedFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    source_url: approvedUrl,
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const approved = await applicationPageMutation({
+    facts: [fact(), approvedFact],
+    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle(approvedUrl))
+  });
+  assert.deepEqual(approved.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 1 rejects unsupported claim categories and additions anywhere in main", async () => {
+  const cases = [
+    ["timing outside evidence", "<p>Uruchomienie w 14 dni.</p>", false],
+    ["price inside evidence", "<p>Cena od 10 000 PLN.</p>", true],
+    ["savings outside evidence", "<p>Oszczędności na poziomie 20%.</p>", false],
+    ["availability inside evidence", "<p>Dostępny od września.</p>", true],
+    ["team size outside evidence", "<p>Zespół 5 osób.</p>", false],
+    ["current status inside evidence", "<p>Produkt działa obecnie.</p>", true],
+    ["ownership outside evidence", "<p>To moje produkty.</p>", false],
+    ["neutral appended element", "<aside>Additional page-owned statement.</aside>", false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, addition, insideEvidence]) => ({
+    label,
+    result: await applicationPageMutation({
+      mutate: insideEvidence
+        ? (html) => html.replace("</article>", `${addition}</article>`)
+        : (html) => html.replace('<section class="applications-section application-contact" data-section="contact">', `${addition}<section class="applications-section application-contact" data-section="contact">`)
+    })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-content"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 pins claim-safe body, footer and metadata content", async () => {
+  const cases = [
+    ["fabricated body copy", "application-shell-copy", (html) => html.replace('<footer class="site-footer">', '<p>Project price: 100 PLN.</p><footer class="site-footer">')],
+    ["fabricated footer copy", "application-shell-copy", (html) => html.replace("</footer>", "<p>Available now.</p></footer>")],
+    ["changed search description", "application-metadata", (html) => html.replace(
+      '<meta name="description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
+      '<meta name="description" content="Applications delivered in two weeks.">'
+    )],
+    ["extra offer metadata", "application-metadata", (html) => html.replace("</head>", '<meta name="price" content="10000 PLN">\n</head>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, expectedId, mutate]) => ({
+    label,
+    expectedId,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, expectedId, result } of outcomes) {
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 counts primary CTAs and route sequences across the whole page", async () => {
+  const cases = [
+    ["second primary CTA after main", "application-contact", (html) => html.replace('<footer class="site-footer">', '<a class="btn-primary" href="mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna">Duplicate</a><footer class="site-footer">')],
+    ["second route sequence after main", "application-delivery", (html) => html.replace('<footer class="site-footer">', '<div class="route-sequence"></div><footer class="site-footer">')]
+  ];
+  for (const [label, expectedId, mutate] of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 rejects inline style on every active page element", async () => {
+  const cases = [
+    (html) => html.replace('<footer class="site-footer">', '<footer class="site-footer" style="color: inherit">'),
+    (html) => html.replace('<article class="evidence-row"', '<article style="display: block" class="evidence-row"')
+  ];
+  for (const mutate of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-inline-style"), result.errors.join("\n"));
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 requires the exact scoped mobile and desktop application navigation", async () => {
+  const toggle = /<button class="nav-toggle" id="nav-toggle"[\s\S]*?<\/button>/;
+  const cases = [
+    ["missing toggle", (html) => html.replace(toggle, "")],
+    ["toggle rescued from body", (html) => {
+      const control = html.match(toggle)?.[0];
+      assert.ok(control);
+      return html.replace(control, "").replace("</nav>", `</nav>${control}`);
+    }],
+    ["toggle rescued from template", (html) => {
+      const control = html.match(toggle)?.[0];
+      assert.ok(control);
+      return html.replace(control, "").replace("</nav>", `</nav><template>${control}</template>`);
+    }],
+    ["wrong toggle target", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="other-menu"')],
+    ["wrong overlay ID", (html) => html.replace('class="nav-overlay" id="nav-overlay"', 'class="nav-overlay" id="other-overlay"')],
+    ["wrong menu ID", (html) => html.replace('class="nav-list" id="nav-menu"', 'class="nav-list" id="other-menu"')],
+    ["non-details Advisory", (html) => html.replace('<details class="nav-group">', '<div class="nav-group">').replace("</details>", "</div>")],
+    ["wrong Advisory label", (html) => html.replace("<summary>Doradztwo</summary>", "<summary>Usługi</summary>")],
+    ["missing active state", (html) => html.replace('href="/aplikacje-operacyjne/" aria-current="page"', 'href="/aplikacje-operacyjne/"')],
+    ["wrong active label with hidden valid decoy", (html) => html
+      .replace('href="/aplikacje-operacyjne/" aria-current="page">Aplikacje operacyjne</a>', 'href="/aplikacje-operacyjne/">Apps</a>')
+      .replace("</nav>", '</nav><a hidden href="/aplikacje-operacyjne/" aria-current="page">Aplikacje operacyjne</a>')],
+    ["wrong localized primary label", (html) => html.replace('href="/lotnictwo/">Lotnictwo</a>', 'href="/lotnictwo/">Aviation</a>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({ label, result: await applicationPageMutation({ mutate }) })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-navigation"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN product pair", async () => {
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(result.errors, []);
 });
 
 test("Plan 2 Task 2 accepts a complete mirrored application contract", async () => {

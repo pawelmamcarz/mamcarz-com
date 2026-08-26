@@ -2808,6 +2808,183 @@ const APPLICATION_PAGE_CONTRACT = {
   }
 };
 
+const APPLICATION_EVIDENCE_CONTRACT = Object.freeze([
+  Object.freeze({
+    ids: Object.freeze(["portfolio.czympojade_pl", "portfolio.czympojade_pl.type"]),
+    pl: Object.freeze({ context: "Produkt / 01", name: "czympojade.pl", label: "Funkcja", meaning: "Aplikacja transportowa do pracy z połączeniami i rozkładami." }),
+    en: Object.freeze({ context: "Product / 01", name: "czympojade.pl", label: "Function", meaning: "Transport application for working with connections and timetables." })
+  }),
+  Object.freeze({
+    ids: Object.freeze(["portfolio.przypominamy_com", "portfolio.przypominamy_com.type"]),
+    pl: Object.freeze({ context: "Produkt / 02", name: "Przypominamy.com", label: "Funkcja", meaning: "Platforma powiadomień dla organizacji." }),
+    en: Object.freeze({ context: "Product / 02", name: "Przypominamy.com", label: "Function", meaning: "Notification platform for organisations." })
+  }),
+  Object.freeze({
+    ids: Object.freeze(["portfolio.procuracost", "portfolio.procuracost.type"]),
+    pl: Object.freeze({ context: "Produkt / 03", name: "ProcuraCost", label: "Funkcja", meaning: "Kalkulator kosztów procedur zakupowych." }),
+    en: Object.freeze({ context: "Product / 03", name: "ProcuraCost", label: "Function", meaning: "Procurement procedure cost calculator." })
+  })
+]);
+
+const APPLICATION_LITERAL_CONTRACT = Object.freeze({
+  pl: Object.freeze({
+    documentTitle: "Aplikacje operacyjne · Paweł Mamcarz",
+    locale: "pl_PL",
+    skip: "Przejdź do treści",
+    backLabel: "Wróć na górę",
+    navigation: Object.freeze({
+      ariaLabel: "Nawigacja główna",
+      logoHref: "/",
+      advisory: "Doradztwo",
+      submenu: Object.freeze([
+        Object.freeze(["/uslugi/transformacja-zakupow/", "Transformacja zakupów"]),
+        Object.freeze(["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"]),
+        Object.freeze(["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"])
+      ]),
+      primary: Object.freeze([
+        Object.freeze(["/aplikacje-operacyjne/", "Aplikacje operacyjne", true]),
+        Object.freeze(["/lotnictwo/", "Lotnictwo", false]),
+        Object.freeze(["/case-studies/", "Projekty", false]),
+        Object.freeze(["/wiedza/", "Wiedza", false]),
+        Object.freeze(["/#about", "O mnie", false]),
+        Object.freeze(["/#contact", "Kontakt", false])
+      ]),
+      languageHref: "/en/aplikacje-operacyjne/",
+      languageLabel: "EN",
+      toggleLabel: "Menu nawigacyjne"
+    }),
+    hero: Object.freeze([
+      "Strona główna", "/", "Aplikacje operacyjne", "Aplikacje operacyjne",
+      "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji."
+    ]),
+    sections: Object.freeze({
+      problem: Object.freeze([
+        "01 / Problem", "Interfejs zaczyna się od procesu.",
+        "Punktem wyjścia są decyzje, dane, role i wyjątki. Dopiero ich układ pokazuje, jakiego narzędzia potrzebuje operacja.",
+        "Procurement", "Decyzje zakupowe, reguły, dane dostawców i odpowiedzialność za kolejne kroki.",
+        "Field service", "Zlecenia, zasoby, dokumenty i przekazanie pracy między rolami.",
+        "Lotnictwo", "Kwalifikacje, planowanie, dokumentacja i odpowiedzialność operacyjna."
+      ]),
+      delivery: Object.freeze([
+        "02 / Delivery", "Od rozpoznania do uruchomienia.",
+        "Kolejność pracy jest częścią rozwiązania. Każdy etap zamyka konkretną decyzję potrzebną do następnego kroku.",
+        "01 / Rozpoznanie", "Discovery", "Problem, użytkownicy, decyzje i ograniczenia.",
+        "02 / Struktura", "Model danych", "Obiekty, źródła, reguły jakości i odpowiedzialność.",
+        "03 / Przepływ", "Workflow", "Stany, role, wyjątki i ślad decyzji.",
+        "04 / Operacja", "Uruchomienie", "Przygotowanie danych, odbiór procesu i wejście do codziennej pracy."
+      ]),
+      evidence: Object.freeze([
+        "03 / Evidence", "Wybrane produkty.", "Trzy różne zakresy pokazane przez ich zatwierdzone znaczenie produktowe.",
+        "Produkt / 01", "czympojade.pl", "Funkcja", "Aplikacja transportowa do pracy z połączeniami i rozkładami.",
+        "Produkt / 02", "Przypominamy.com", "Funkcja", "Platforma powiadomień dla organizacji.",
+        "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych."
+      ]),
+      fit: Object.freeze([
+        "04 / Fit", "Warunki dobrego dopasowania.",
+        "Najlepszym początkiem jest konkretny proces oraz osoby, które znają jego codzienny przebieg i wyjątki.",
+        "Właściciel procesu", "Nazwana osoba podejmuje decyzje dotyczące reguł i priorytetów.",
+        "Wiedza domenowa", "Dostęp do użytkowników i osób odpowiedzialnych za wyjątki w procesie.",
+        "Dane źródłowe", "Możliwość rozpoznania źródeł, definicji oraz odpowiedzialności za jakość.",
+        "Odpowiedzialność za uruchomienie", "Ustalony sposób odbioru procesu i przekazania narzędzia do codziennej pracy."
+      ]),
+      contact: Object.freeze([
+        "05 / Kontakt", "Zacznijmy od procesu.",
+        "Opisz decyzję, przepływ pracy albo dane, które wymagają uporządkowania. To wystarczy, żeby rozpocząć rozmowę.",
+        "Opisz aplikację operacyjną"
+      ])
+    }),
+    footer: Object.freeze([
+      "© Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Kontakt"
+    ]),
+    footerLinks: Object.freeze([
+      Object.freeze(["/", "Strona główna"]),
+      Object.freeze(["/uslugi/transformacja-zakupow/", "Doradztwo"]),
+      Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]),
+      Object.freeze(["/lotnictwo/", "Lotnictwo"]),
+      Object.freeze(["/case-studies/", "Projekty"]),
+      Object.freeze(["/#contact", "Kontakt"])
+    ])
+  }),
+  en: Object.freeze({
+    documentTitle: "Operational applications · Paweł Mamcarz",
+    locale: "en_US",
+    skip: "Skip to content",
+    backLabel: "Back to top",
+    navigation: Object.freeze({
+      ariaLabel: "Main navigation",
+      logoHref: "/en/",
+      advisory: "Advisory",
+      submenu: Object.freeze([
+        Object.freeze(["/en/uslugi/transformacja-zakupow/", "Procurement transformation"]),
+        Object.freeze(["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"]),
+        Object.freeze(["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"])
+      ]),
+      primary: Object.freeze([
+        Object.freeze(["/en/aplikacje-operacyjne/", "Operational applications", true]),
+        Object.freeze(["/en/lotnictwo/", "Aviation", false]),
+        Object.freeze(["/en/case-studies/", "Projects", false]),
+        Object.freeze(["/en/wiedza/", "Knowledge", false]),
+        Object.freeze(["/en/#about", "About", false]),
+        Object.freeze(["/en/#contact", "Contact", false])
+      ]),
+      languageHref: "/aplikacje-operacyjne/",
+      languageLabel: "PL",
+      toggleLabel: "Navigation menu"
+    }),
+    hero: Object.freeze([
+      "Home", "/", "Operational applications", "Operational applications",
+      "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work."
+    ]),
+    sections: Object.freeze({
+      problem: Object.freeze([
+        "01 / Problem", "The interface starts with the process.",
+        "Decisions, data, roles and exceptions come first. Their arrangement shows what kind of tool the operation needs.",
+        "Procurement", "Procurement decisions, rules, supplier data and responsibility for each next step.",
+        "Field service", "Work orders, resources, documents and the handover of work between roles.",
+        "Aviation", "Qualifications, planning, documentation and operational responsibility."
+      ]),
+      delivery: Object.freeze([
+        "02 / Delivery", "From discovery to launch.",
+        "The order of work is part of the solution. Each stage closes a specific decision needed for the next step.",
+        "01 / Discovery", "Discovery", "The problem, users, decisions and constraints.",
+        "02 / Structure", "Data model", "Objects, sources, quality rules and responsibility.",
+        "03 / Flow", "Workflow", "States, roles, exceptions and a decision trail.",
+        "04 / Operation", "Launch", "Data preparation, process acceptance and entry into day-to-day work."
+      ]),
+      evidence: Object.freeze([
+        "03 / Evidence", "Selected products.", "Three different scopes, shown through their approved product meaning.",
+        "Product / 01", "czympojade.pl", "Function", "Transport application for working with connections and timetables.",
+        "Product / 02", "Przypominamy.com", "Function", "Notification platform for organisations.",
+        "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator."
+      ]),
+      fit: Object.freeze([
+        "04 / Fit", "Conditions for a good fit.",
+        "A useful starting point is a specific process and the people who know its daily flow and exceptions.",
+        "Process owner", "A named person decides on rules and priorities.",
+        "Domain knowledge", "Access to users and the people responsible for process exceptions.",
+        "Source data", "The ability to identify sources, definitions and responsibility for quality.",
+        "Launch responsibility", "An agreed way to accept the process and hand the tool into day-to-day work."
+      ]),
+      contact: Object.freeze([
+        "05 / Contact", "Start with the process.",
+        "Describe the decision, workflow or data that needs structure. That is enough to begin the conversation.",
+        "Describe the operational application"
+      ])
+    }),
+    footer: Object.freeze([
+      "© Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Contact"
+    ]),
+    footerLinks: Object.freeze([
+      Object.freeze(["/en/", "Home"]),
+      Object.freeze(["/en/uslugi/transformacja-zakupow/", "Advisory"]),
+      Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]),
+      Object.freeze(["/en/lotnictwo/", "Aviation"]),
+      Object.freeze(["/en/case-studies/", "Projects"]),
+      Object.freeze(["/en/#contact", "Contact"])
+    ])
+  })
+});
+
 const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact"];
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
@@ -2852,6 +3029,208 @@ function sameStringSet(actual, expected) {
   return actual.length === expected.length && expected.every((key) => actual.includes(key));
 }
 
+function literalContractText(parts) {
+  return normalize(parts.join(" "));
+}
+
+function exactElementAttributes(element, expected) {
+  return element !== undefined
+    && elementHasExactAttributeNames(element, new Set(Object.keys(expected)))
+    && Object.entries(expected).every(([name, value]) => elementAttribute(element, name) === value);
+}
+
+function expectedApplicationNavigationText(navigation) {
+  return [
+    "PM · Mamcarz.com",
+    navigation.advisory,
+    ...navigation.submenu.map(([, label]) => label),
+    ...navigation.primary.map(([, label]) => label),
+    navigation.languageLabel
+  ];
+}
+
+function expectedApplicationMainText(literals) {
+  return [
+    ...literals.hero,
+    ...APPLICATION_SECTIONS.flatMap((section) => literals.sections[section])
+  ];
+}
+
+function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
+  const page = APPLICATION_PAGE_CONTRACT[lang];
+  const literals = APPLICATION_LITERAL_CONTRACT[lang];
+  const heads = elementDescendants(parsedRoot, "head");
+  const head = heads.length === 1 ? heads[0] : null;
+  const expectedMetas = [
+    { charset: "UTF-8" },
+    { name: "viewport", content: "width=device-width, initial-scale=1.0" },
+    { name: "description", content: page.description },
+    { name: "author", content: "Paweł Mamcarz" },
+    { name: "robots", content: "index, follow" },
+    { property: "og:title", content: literals.documentTitle },
+    { property: "og:description", content: page.description },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: page.url },
+    { property: "og:image", content: "https://mamcarz.com/assets/img/og.jpg" },
+    { property: "og:image:alt", content: literals.documentTitle },
+    { property: "og:locale", content: literals.locale },
+    { property: "og:site_name", content: "Paweł Mamcarz" }
+  ];
+  const titles = head === null ? [] : directElementChildren(head, "title").filter(elementIsActiveResource);
+  const metas = head === null ? [] : directElementChildren(head, "meta").filter(elementIsActiveResource);
+  const valid = head !== null
+    && titles.length === 1
+    && decodeHtmlEntities(rawElementText(titles[0])).replace(/\s+/g, " ").trim() === literals.documentTitle
+    && metas.length === expectedMetas.length
+    && metas.every((meta, index) => exactElementAttributes(meta, expectedMetas[index]));
+  if (!valid) {
+    error(errors, "application-metadata", path, "requires the exact claim-safe Task 2 title and metadata set");
+  }
+}
+
+function verifyApplicationNavigation(path, parsedRoot, lang, errors) {
+  const expected = APPLICATION_LITERAL_CONTRACT[lang].navigation;
+  const elements = elementDescendants(parsedRoot);
+  const navs = elements.filter((element) => element.name === "nav" && elementHasClass(element, "site-nav") && pageElementIsActive(element));
+  const nav = navs.length === 1 ? navs[0] : null;
+  const overlays = elements.filter((element) => element.name === "div" && elementHasClass(element, "nav-overlay") && pageElementIsActive(element));
+  const children = directElementChildren(nav);
+  const logo = children[0];
+  const menu = children[1];
+  const language = children[2];
+  const toggle = children[3];
+  const menuItems = directElementChildren(menu, "li");
+  const advisoryDetails = directElementChildren(menuItems[0], "details");
+  const advisory = advisoryDetails.length === 1 ? advisoryDetails[0] : null;
+  const summaries = directElementChildren(advisory, "summary");
+  const submenus = directElementChildren(advisory, "ul");
+  const submenu = submenus.length === 1 ? submenus[0] : null;
+  const submenuItems = directElementChildren(submenu, "li");
+  const submenuLinks = submenuItems.map((item) => directElementChildren(item, "a"));
+  const primaryLinks = menuItems.slice(1).map((item) => directElementChildren(item, "a"));
+  const toggleSpans = directElementChildren(toggle, "span");
+  const validSubmenu = submenuItems.length === expected.submenu.length
+    && submenuLinks.every((links, index) => links.length === 1
+      && elementIsVisibleIfDisclosuresOpen(links[0])
+      && elementIsActiveResource(links[0])
+      && exactElementAttributes(links[0], { href: expected.submenu[index][0] })
+      && publishedStaticText(links[0]) === normalize(expected.submenu[index][1]));
+  const validPrimary = primaryLinks.length === expected.primary.length
+    && primaryLinks.every((links, index) => {
+      if (links.length !== 1 || !elementIsVisibleIfDisclosuresOpen(links[0]) || !elementIsActiveResource(links[0])) return false;
+      const [href, label, current] = expected.primary[index];
+      const attributes = current ? { href, "aria-current": "page" } : { href };
+      return exactElementAttributes(links[0], attributes) && staticVisibleText(links[0]) === normalize(label);
+    });
+  const valid = nav !== null
+    && overlays.length === 1
+    && exactElementAttributes(overlays[0], { class: "nav-overlay", id: "nav-overlay" })
+    && exactElementAttributes(nav, { class: "site-nav", "aria-label": expected.ariaLabel })
+    && children.length === 4
+    && logo?.name === "a"
+    && pageElementIsActive(logo)
+    && exactElementAttributes(logo, { href: expected.logoHref, class: "nav-logo" })
+    && staticVisibleText(logo) === normalize("PM · Mamcarz.com")
+    && menu?.name === "ul"
+    && elementIsVisibleIfDisclosuresOpen(menu)
+    && elementIsActiveResource(menu)
+    && exactElementAttributes(menu, { class: "nav-list", id: "nav-menu" })
+    && menuItems.length === expected.primary.length + 1
+    && advisory !== null
+    && elementIsVisibleIfDisclosuresOpen(advisory)
+    && elementIsActiveResource(advisory)
+    && exactElementAttributes(advisory, { class: "nav-group" })
+    && summaries.length === 1
+    && exactElementAttributes(summaries[0], {})
+    && staticVisibleText(summaries[0]) === normalize(expected.advisory)
+    && submenu !== null
+    && exactElementAttributes(submenu, { class: "nav-submenu" })
+    && validSubmenu
+    && validPrimary
+    && language?.name === "a"
+    && pageElementIsActive(language)
+    && exactElementAttributes(language, { href: expected.languageHref, class: "nav-lang" })
+    && staticVisibleText(language) === normalize(expected.languageLabel)
+    && toggle?.name === "button"
+    && pageElementIsActive(toggle)
+    && exactElementAttributes(toggle, {
+      class: "nav-toggle",
+      id: "nav-toggle",
+      "aria-label": expected.toggleLabel,
+      "aria-controls": "nav-menu",
+      "aria-expanded": "false"
+    })
+    && directElementChildren(toggle).length === 3
+    && toggleSpans.length === 3
+    && toggleSpans.every((span) => exactElementAttributes(span, {}) && staticVisibleText(span) === "")
+    && publishedStaticText(nav) === literalContractText(expectedApplicationNavigationText(expected));
+  if (!valid) {
+    error(errors, "application-navigation", path, "requires the exact localized v2 application navigation, native Advisory disclosure, active route and mobile toggle");
+  }
+  return nav;
+}
+
+function verifyApplicationShellCopy(path, parsedRoot, lang, main, nav, errors) {
+  const literals = APPLICATION_LITERAL_CONTRACT[lang];
+  const all = elementDescendants(parsedRoot);
+  const bodies = all.filter((element) => element.name === "body");
+  const body = bodies.length === 1 ? bodies[0] : null;
+  const children = directElementChildren(body);
+  const [skip, shellNav, overlay, back, shellMain, footer, script] = children;
+  const footerLinks = footer === undefined ? [] : elementDescendants(footer, "a").filter(pageElementIsActive);
+  const validFooter = footer?.name === "footer"
+    && pageElementIsActive(footer)
+    && exactElementAttributes(footer, { class: "site-footer" })
+    && footerLinks.length === literals.footerLinks.length + 1
+    && footerLinks.slice(1).every((link, index) => exactElementAttributes(link, { href: literals.footerLinks[index][0] })
+      && staticVisibleText(link) === normalize(literals.footerLinks[index][1]))
+    && publishedStaticText(footer) === literalContractText(literals.footer);
+  const expectedBodyText = [
+    literals.skip,
+    ...expectedApplicationNavigationText(literals.navigation),
+    "↑",
+    ...expectedApplicationMainText(literals),
+    ...literals.footer
+  ];
+  const valid = body !== null
+    && exactElementAttributes(body, { class: "applications-page", "data-page": "applications" })
+    && children.length === 7
+    && skip?.name === "a"
+    && pageElementIsActive(skip)
+    && exactElementAttributes(skip, { href: "#main", class: "skip-link" })
+    && staticVisibleText(skip) === normalize(literals.skip)
+    && shellNav === nav
+    && overlay?.name === "div"
+    && pageElementIsActive(overlay)
+    && exactElementAttributes(overlay, { class: "nav-overlay", id: "nav-overlay" })
+    && publishedStaticText(overlay) === ""
+    && back?.name === "button"
+    && pageElementIsActive(back)
+    && exactElementAttributes(back, { class: "back-to-top", id: "backToTop", "aria-label": literals.backLabel })
+    && staticVisibleText(back) === normalize("↑")
+    && shellMain === main
+    && validFooter
+    && script?.name === "script"
+    && elementIsActiveResource(script)
+    && publishedStaticText(body) === literalContractText(expectedBodyText);
+  if (!valid) {
+    error(errors, "application-shell-copy", path, "requires the exact claim-safe v2 body and footer shell with no additional page-owned copy");
+  }
+}
+
+function validApplicationLiteralLeaf(element, literal, approvedUrls) {
+  if (element === undefined || publishedStaticText(element) !== normalize(literal)) return false;
+  const children = directElementChildren(element);
+  if (children.length === 0) return true;
+  if (children.length !== 1 || children[0].name !== "a") return false;
+  const link = children[0];
+  return pageElementIsActive(link)
+    && exactElementAttributes(link, { href: elementAttribute(link, "href") })
+    && approvedUrls.has(elementAttribute(link, "href"))
+    && directElementChildren(link).length === 0
+    && publishedStaticText(link) === normalize(literal);
+}
+
 function verifyApplicationSchema(path, parsedRoot, lang, errors) {
   const expected = APPLICATION_PAGE_CONTRACT[lang];
   const scripts = elementDescendants(parsedRoot, "script")
@@ -2892,8 +3271,14 @@ function verifyApplicationSchema(path, parsedRoot, lang, errors) {
 
 function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   const expected = APPLICATION_PAGE_CONTRACT[lang];
+  const literals = APPLICATION_LITERAL_CONTRACT[lang];
   const all = elementDescendants(parsedRoot);
   const active = all.filter(pageElementIsActive);
+  verifyApplicationMetadata(path, parsedRoot, lang, errors);
+  const applicationNav = verifyApplicationNavigation(path, parsedRoot, lang, errors);
+  if (active.some((element) => element.attributes.has("style"))) {
+    error(errors, "application-inline-style", path, "active application-page elements must not use inline style");
+  }
   const bodies = all.filter((element) => element.name === "body");
   const body = bodies.length === 1 ? bodies[0] : null;
   if (body === null || elementAttribute(body, "data-page") !== "applications") {
@@ -2948,11 +3333,24 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
     error(errors, "application-sections", path, `requires exactly these five direct visible sections in order: ${APPLICATION_SECTIONS.join(", ")}`);
   }
   const sectionByName = new Map(sectionMarkers.map((section) => [elementAttribute(section, "data-section"), section]));
+  const directMainElements = directElementChildren(main);
+  const exactSectionCopy = APPLICATION_SECTIONS.every((section) => {
+    const element = sectionByName.get(section);
+    return element !== undefined && publishedStaticText(element) === literalContractText(literals.sections[section]);
+  });
+  const validContent = hero !== null
+    && publishedStaticText(hero) === literalContractText(literals.hero)
+    && directMainElements.length === APPLICATION_SECTIONS.length + 1
+    && directMainElements[0] === hero
+    && APPLICATION_SECTIONS.every((section, index) => directMainElements[index + 1] === sectionByName.get(section))
+    && exactSectionCopy
+    && publishedStaticText(main) === literalContractText(expectedApplicationMainText(literals));
+  if (!validContent) {
+    error(errors, "application-content", path, "requires the exact owner-approved Task 2 main copy and direct structure with no additions");
+  }
 
   const delivery = sectionByName.get("delivery");
-  const routeSequences = main === null
-    ? []
-    : elementDescendants(main).filter((element) => elementHasClass(element, "route-sequence"));
+  const routeSequences = active.filter((element) => elementHasClass(element, "route-sequence"));
   const routeSequence = routeSequences.length === 1 ? routeSequences[0] : null;
   const deliverySteps = routeSequence === null
     ? []
@@ -2981,12 +3379,16 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
     : elementDescendants(main).filter((element) => elementHasClass(element, "evidence-row"));
   const orderedEvidence = [];
   const usedEvidenceIds = new Set();
+  let exactEvidenceContract = evidenceRows.length === APPLICATION_EVIDENCE_CONTRACT.length;
+  let validEvidenceLinks = true;
   if (evidenceRows.length === 0
     || evidenceSection === undefined
     || evidenceRows.some((row) => !pageElementIsActive(row) || !elementIsWithin(row, evidenceSection))) {
     error(errors, "application-evidence-ids", path, "requires visible evidence rows inside the evidence section");
   }
-  for (const row of evidenceRows) {
+  for (const [index, row] of evidenceRows.entries()) {
+    const immutable = APPLICATION_EVIDENCE_CONTRACT[index];
+    const immutableCopy = immutable?.[lang];
     const rawIds = elementAttribute(row, "data-fact-ids");
     const ids = nonEmptyString(rawIds) ? rawIds.trim().split(/\s+/).filter(Boolean) : [];
     orderedEvidence.push(ids);
@@ -3011,12 +3413,67 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
         error(errors, "application-evidence-value", path, `${factId} must render its exact localized display meaning in the annotated row`);
       }
     }
+    const approvedUrls = new Set(ids.flatMap((factId) => records
+      .filter((fact) => fact.id === factId && fact.status === "approved" && isHttpUrl(fact.source_url))
+      .map((fact) => fact.source_url)));
+    const rowLinks = elementDescendants(row, "a");
+    if (rowLinks.some((link) => !pageElementIsActive(link) || !approvedUrls.has(elementAttribute(link, "href")))) {
+      validEvidenceLinks = false;
+    }
+    const rowChildren = directElementChildren(row);
+    const context = rowChildren[0];
+    const title = rowChildren[1];
+    const ledger = rowChildren[2];
+    const ledgerRows = directElementChildren(ledger, "div");
+    const ledgerLeaves = directElementChildren(ledgerRows[0]);
+    const registryName = immutable === undefined ? [] : records.filter((fact) => fact.id === immutable.ids[0]);
+    const registryMeaning = immutable === undefined ? [] : records.filter((fact) => fact.id === immutable.ids[1]);
+    const exactRegistry = immutable !== undefined
+      && registryName.length === 1
+      && registryMeaning.length === 1
+      && registryName[0].status === "approved"
+      && registryMeaning[0].status === "approved"
+      && registryName[0].display_pl === immutable.pl.name
+      && registryName[0].display_en === immutable.en.name
+      && registryMeaning[0].display_pl === immutable.pl.meaning
+      && registryMeaning[0].display_en === immutable.en.meaning
+      && APPLICATION_SURFACES.every((surface) => registryName[0].surfaces?.includes(surface) && registryMeaning[0].surfaces?.includes(surface));
+    exactEvidenceContract = exactEvidenceContract
+      && immutable !== undefined
+      && immutableCopy !== undefined
+      && rawIds === immutable.ids.join(" ")
+      && exactElementAttributes(row, { class: "evidence-row", "data-fact-ids": immutable.ids.join(" ") })
+      && rowChildren.length === 3
+      && context?.name === "p"
+      && exactElementAttributes(context, { class: "evidence-row__context" })
+      && directElementChildren(context).length === 0
+      && publishedStaticText(context) === normalize(immutableCopy.context)
+      && title?.name === "h3"
+      && exactElementAttributes(title, { class: "evidence-row__title" })
+      && validApplicationLiteralLeaf(title, immutableCopy.name, approvedUrls)
+      && ledger?.name === "dl"
+      && exactElementAttributes(ledger, { class: "evidence-row__ledger" })
+      && ledgerRows.length === 1
+      && exactElementAttributes(ledgerRows[0], {})
+      && ledgerLeaves.length === 2
+      && ledgerLeaves[0].name === "dt"
+      && exactElementAttributes(ledgerLeaves[0], {})
+      && directElementChildren(ledgerLeaves[0]).length === 0
+      && publishedStaticText(ledgerLeaves[0]) === normalize(immutableCopy.label)
+      && ledgerLeaves[1].name === "dd"
+      && exactElementAttributes(ledgerLeaves[1], {})
+      && validApplicationLiteralLeaf(ledgerLeaves[1], immutableCopy.meaning, approvedUrls)
+      && exactRegistry;
+  }
+  if (!exactEvidenceContract) {
+    error(errors, "application-evidence-contract", path, "requires the immutable ordered three-row, six-ID Task 2 evidence contract and exact registry literals");
+  }
+  if (!validEvidenceLinks) {
+    error(errors, "application-evidence-link", path, "evidence links must exactly match a non-null approved source_url on an associated fact");
   }
 
   const contactSection = sectionByName.get("contact");
-  const primaryCtas = main === null
-    ? []
-    : elementDescendants(main).filter((element) => elementHasClass(element, "btn-primary") && pageElementIsActive(element));
+  const primaryCtas = active.filter((element) => elementHasClass(element, "btn-primary"));
   if (contactSection === undefined
     || primaryCtas.length !== 1
     || primaryCtas[0].name !== "a"
@@ -3038,6 +3495,8 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
     const candidate = factStatusCandidates(fact, path).find((value) => published.includes(normalize(value)));
     if (candidate) error(errors, "application-fact-status", path, `${fact.id} has status ${fact.status} but publishes ${candidate}`);
   }
+
+  verifyApplicationShellCopy(path, parsedRoot, lang, main, applicationNav, errors);
 
   return orderedEvidence;
 }
