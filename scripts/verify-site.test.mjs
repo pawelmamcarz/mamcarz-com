@@ -1588,6 +1588,142 @@ test("Plan 2 Task 2 fix round 2 preserves case across exact page literals while 
   assert.ok(errorIds(coordinatedDrift).includes("application-evidence-contract"), coordinatedDrift.errors.join("\n"));
 });
 
+test("Plan 2 Task 2 fix round 3 exempts anchors only inside the three owned evidence rows", async () => {
+  const fakeRow = (href) => `<article class="evidence-row"><a href="${href}">Laundered link</a></article>`;
+  const cases = [
+    ["footer template external anchor", (html) => html.replace("</footer>", `<template>${fakeRow("https://example.com/unapproved")}</template></footer>`)],
+    ["footer noscript javascript anchor", (html) => html.replace("</footer>", `<noscript>${fakeRow("javascript:alert(1)")}</noscript></footer>`)],
+    ["footer hidden-container data anchor", (html) => html.replace("</footer>", `<div hidden>${fakeRow("data:text/html,claim")}</div></footer>`)]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-anchor-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const approvedUrl = "https://example.com/approved-product";
+  const approvedFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    source_url: approvedUrl,
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const approved = await applicationPageMutation({
+    facts: [fact(), approvedFact],
+    mutate: (html) => html.replace(
+      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
+    )
+  });
+  assert.deepEqual(approved.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 3 rejects every unmanifested behavior and visibility attribute", async () => {
+  const ledger = '<dl class="applications-ledger" aria-label="Obszary metody">';
+  const cases = [
+    ["role", (html) => html.replace("<dt>Procurement</dt>", '<dt role="button">Procurement</dt>')],
+    ["hidden owned copy", (html) => html.replace(ledger, '<dl class="applications-ledger" aria-label="Obszary metody" hidden>')],
+    ["inert owned copy", (html) => html.replace(ledger, '<dl class="applications-ledger" aria-label="Obszary metody" inert>')],
+    ["tabindex", (html) => html.replace("<dt>Procurement</dt>", '<dt tabindex="0">Procurement</dt>')],
+    ["contenteditable", (html) => html.replace("<dt>Procurement</dt>", '<dt contenteditable="true">Procurement</dt>')],
+    ["draggable", (html) => html.replace("<dt>Procurement</dt>", '<dt draggable="true">Procurement</dt>')],
+    ["spellcheck", (html) => html.replace("<dt>Procurement</dt>", '<dt spellcheck="false">Procurement</dt>')],
+    ["autofocus", (html) => html.replace("<dt>Procurement</dt>", '<dt autofocus>Procurement</dt>')],
+    ["disabled", (html) => html.replace("<dt>Procurement</dt>", '<dt disabled>Procurement</dt>')],
+    ["open disclosure", (html) => html.replace('<details class="nav-group">', '<details class="nav-group" open>')],
+    ["popover", (html) => html.replace("<dt>Procurement</dt>", '<dt popover="manual">Procurement</dt>')],
+    ["event handler", (html) => html.replace("<dt>Procurement</dt>", '<dt onclick="claim()">Procurement</dt>')],
+    ["inactive inline style", (html) => html.replace("</footer>", '<template><span style="display:none">Claim</span></template></footer>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-semantic-attributes"), `${label}: ${result.errors.join("\n")}`);
+  }
+  for (const label of ["hidden owned copy", "inert owned copy"]) {
+    const result = outcomes.find((outcome) => outcome.label === label)?.result;
+    assert.ok(errorIds(result).includes("application-content"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const unchanged = await applicationPageMutation();
+  assert.deepEqual(unchanged.errors, [], "the exact body, closed Advisory details and toggle attributes remain valid");
+});
+
+test("Plan 2 Task 2 fix round 3 compares state and reference tokens as undecoded raw values", async () => {
+  const cases = [
+    ["aria-hidden", (html) => html.replace('aria-hidden="true"', 'aria-hidden="tr&#117;e"')],
+    ["aria-current", (html) => html.replace('aria-current="page"', 'aria-current="pa&#103;e"')],
+    ["aria-expanded", (html) => html.replace('aria-expanded="false"', 'aria-expanded="fal&#115;e"')],
+    ["aria-controls", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="nav&#45;menu"')],
+    ["id", (html) => html.replace('class="nav-list" id="nav-menu"', 'class="nav-list" id="nav&#45;menu"')],
+    ["role token", (html) => html.replace("<dt>Procurement</dt>", '<dt role="but&#116;on">Procurement</dt>')],
+    ["tabindex token", (html) => html.replace('id="main" tabindex="-1"', 'id="main" tabindex="-&#49;"')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-semantic-attributes"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const unchanged = await applicationPageMutation();
+  assert.deepEqual(unchanged.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 3 compares metadata tokens raw and human fields semantically", async () => {
+  const cases = [
+    ["og:url default-ignorable entity", (html) => html.replace(
+      'content="https://mamcarz.com/aplikacje-operacyjne/"',
+      'content="https://mamcarz.com/aplikacje-operacyjne/&#8203;"'
+    )],
+    ["og:type entity", (html) => html.replace('content="website"', 'content="web&#115;ite"')],
+    ["robots whitespace", (html) => html.replace('content="index, follow"', 'content="index,  follow"')],
+    ["viewport entity", (html) => html.replace('content="width=device-width, initial-scale=1.0"', 'content="width=device-width, initial-scale=&#49;.0"')],
+    ["og:image default-ignorable entity", (html) => html.replace(
+      'content="https://mamcarz.com/assets/img/og.jpg"',
+      'content="https://mamcarz.com/assets/img/og.jpg&#8203;"'
+    )],
+    ["og:locale entity", (html) => html.replace('content="pl_PL"', 'content="pl&#95;PL"')],
+    ["hreflang whitespace", (html) => html.replace('rel="alternate" hreflang="pl"', 'rel="alternate" hreflang=" pl "')],
+    ["alternate rel whitespace", (html) => html.replace('rel="alternate" hreflang="pl"', 'rel="alternate " hreflang="pl"')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-metadata"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const humanEquivalent = await applicationPageMutation({
+    mutate: (html) => html
+      .replace(
+        "<title>Aplikacje operacyjne · Paweł Mamcarz</title>",
+        "<title>  Aplikacje   operacyjne · Pawe&#322; Mamcarz  </title>"
+      )
+      .replace(
+        'content="Aplikacje operacyjne · Paweł Mamcarz"',
+        'content="  Aplikacje   operacyjne · Pawe&#322; Mamcarz  "'
+      )
+      .replace(
+        '<meta name="description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
+        '<meta name="description" content="  Projektowanie  aplikacji operacyjnych wokół procesu, danych, odpowiedzialnos&#769;ci użytkowników i codziennej pracy.  ">'
+      )
+      .replace(
+        '<meta property="og:description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
+        '<meta property="og:description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialnos&#769;ci użytkowników i codziennej pracy.">'
+      )
+  });
+  assert.deepEqual(humanEquivalent.errors, []);
+});
+
 test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN product pair", async () => {
   const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
   const result = await runVerification({ root, scope: "pages", family: "applications" });

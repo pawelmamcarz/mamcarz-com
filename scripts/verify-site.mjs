@@ -3063,9 +3063,12 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
 const APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST = Object.freeze({
   pl: freezeApplicationManifest([
     { role: "site-nav", tag: "nav", attributes: { "aria-label": "Nawigacja główna" } },
+    { role: "nav-menu", tag: "ul", attributes: { id: "nav-menu" } },
     { role: "nav-current", tag: "a", attributes: { "aria-current": "page" } },
-    { role: "nav-toggle", tag: "button", attributes: { "aria-label": "Menu nawigacyjne", "aria-controls": "nav-menu", "aria-expanded": "false" } },
-    { role: "back-to-top", tag: "button", attributes: { "aria-label": "Wróć na górę" } },
+    { role: "nav-toggle", tag: "button", attributes: { id: "nav-toggle", "aria-label": "Menu nawigacyjne", "aria-controls": "nav-menu", "aria-expanded": "false" } },
+    { role: "nav-overlay", tag: "div", attributes: { id: "nav-overlay" } },
+    { role: "back-to-top", tag: "button", attributes: { id: "backToTop", "aria-label": "Wróć na górę" } },
+    { role: "main", tag: "main", attributes: { id: "main", tabindex: "-1" } },
     { role: "breadcrumb", tag: "nav", attributes: { "aria-label": "Okruszki" } },
     { role: "breadcrumb-separator", tag: "span", attributes: { "aria-hidden": "true" } },
     { role: "breadcrumb-current", tag: "span", attributes: { "aria-current": "page" } },
@@ -3077,9 +3080,12 @@ const APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST = Object.freeze({
   ]),
   en: freezeApplicationManifest([
     { role: "site-nav", tag: "nav", attributes: { "aria-label": "Main navigation" } },
+    { role: "nav-menu", tag: "ul", attributes: { id: "nav-menu" } },
     { role: "nav-current", tag: "a", attributes: { "aria-current": "page" } },
-    { role: "nav-toggle", tag: "button", attributes: { "aria-label": "Navigation menu", "aria-controls": "nav-menu", "aria-expanded": "false" } },
-    { role: "back-to-top", tag: "button", attributes: { "aria-label": "Back to top" } },
+    { role: "nav-toggle", tag: "button", attributes: { id: "nav-toggle", "aria-label": "Navigation menu", "aria-controls": "nav-menu", "aria-expanded": "false" } },
+    { role: "nav-overlay", tag: "div", attributes: { id: "nav-overlay" } },
+    { role: "back-to-top", tag: "button", attributes: { id: "backToTop", "aria-label": "Back to top" } },
+    { role: "main", tag: "main", attributes: { id: "main", tabindex: "-1" } },
     { role: "breadcrumb", tag: "nav", attributes: { "aria-label": "Breadcrumb" } },
     { role: "breadcrumb-separator", tag: "span", attributes: { "aria-hidden": "true" } },
     { role: "breadcrumb-current", tag: "span", attributes: { "aria-current": "page" } },
@@ -3116,16 +3122,25 @@ function rawElementText(element) {
   return text;
 }
 
+function applicationElementSuppressesOwnedCopy(element) {
+  return element.attributes.has("hidden")
+    || element.attributes.has("inert")
+    || elementHasHiddenInlineStyle(element)
+    || staticallyHiddenElements.has(element.name);
+}
+
 function publishedStaticText(node) {
   let text = "";
   const excluded = new Set(["script", "style", "template", "noscript"]);
-  const visit = (current) => {
+  const visit = (current, ancestorUnavailable = false) => {
+    const unavailable = ancestorUnavailable
+      || (current.type === "element" && applicationElementSuppressesOwnedCopy(current));
     if (current.type === "text") {
-      text += ` ${current.value}`;
+      if (!unavailable) text += ` ${current.value}`;
       return;
     }
     if (current.type === "element" && excluded.has(current.name)) return;
-    for (const child of current.children ?? []) visit(child);
+    for (const child of current.children ?? []) visit(child, unavailable);
   };
   visit(node);
   return normalizeExactHtmlLiteral(text);
@@ -3141,7 +3156,7 @@ function exactStaticVisibleText(node) {
       && current !== parent.children.find((child) => child.type === "element" && child.name === "summary");
     const hidden = ancestorHidden
       || hiddenByClosedDisclosure
-      || (current.type === "element" && !elementIsStaticallyVisible(current));
+      || (current.type === "element" && (current.attributes.has("inert") || !elementIsStaticallyVisible(current)));
     if (current.type === "text") {
       if (!hidden) text += current.value;
       return;
@@ -3173,13 +3188,23 @@ const APPLICATION_USER_FACING_ATTRIBUTES = new Set([
   "alt", "label", "placeholder", "srcdoc", "title", "value"
 ]);
 
+const APPLICATION_BEHAVIOR_STATE_ATTRIBUTES = new Set([
+  "accesskey", "autofocus", "autoplay", "checked", "contenteditable", "controls", "disabled", "download",
+  "draggable", "form", "formaction", "hidden", "id", "inert", "loop", "multiple", "muted", "open",
+  "popover", "readonly", "required", "selected", "spellcheck", "style", "tabindex", "target", "translate"
+]);
+
 const APPLICATION_NORMALIZED_SEMANTIC_TEXT_ATTRIBUTES = new Set([
   "alt", "aria-description", "aria-label", "aria-placeholder", "aria-roledescription", "aria-valuetext",
   "label", "placeholder", "title", "value"
 ]);
 
 function isApplicationSemanticAttribute(name) {
-  return name.startsWith("aria-") || APPLICATION_USER_FACING_ATTRIBUTES.has(name);
+  return name.startsWith("aria-")
+    || /^on[a-z]/.test(name)
+    || APPLICATION_USER_FACING_ATTRIBUTES.has(name)
+    || APPLICATION_BEHAVIOR_STATE_ATTRIBUTES.has(name)
+    || name === "role";
 }
 
 function exactApplicationAttributes(element, expected, normalizedNames = new Set()) {
@@ -3201,7 +3226,7 @@ function exactApplicationSemanticAttributes(element, expected) {
       const actualValue = actual.get(name) ?? "";
       return APPLICATION_NORMALIZED_SEMANTIC_TEXT_ATTRIBUTES.has(name)
         ? normalizeExactHtmlLiteral(actualValue) === normalizeExactLiteral(value)
-        : decodeHtmlEntities(actualValue) === value;
+        : actualValue === value;
     });
 }
 
@@ -3226,6 +3251,24 @@ function firstDescendantWithClass(node, name, className) {
   return node === undefined || node === null
     ? undefined
     : elementDescendants(node, name).find((element) => elementHasClass(element, className));
+}
+
+function applicationOwnedEvidenceRows(main) {
+  if (main === undefined || main === null) return [];
+  const evidenceSections = directElementChildren(main, "section")
+    .filter((section) => elementAttribute(section, "data-section") === "evidence");
+  if (evidenceSections.length !== 1) return [];
+  const shells = directElementChildren(evidenceSections[0], "div")
+    .filter((element) => elementHasClass(element, "section-shell"));
+  if (shells.length !== 1) return [];
+  const lists = directElementChildren(shells[0], "div")
+    .filter((element) => elementHasClass(element, "applications-evidence-list"));
+  if (lists.length !== 1) return [];
+  const rows = directElementChildren(lists[0], "article");
+  return rows.length === APPLICATION_EVIDENCE_CONTRACT.length
+    && rows.every((row) => elementHasClass(row, "evidence-row"))
+    ? rows
+    : [];
 }
 
 function applicationAnchorRoleNodes(body, nav, main, footer) {
@@ -3287,10 +3330,9 @@ function validApplicationAnchorLeaf(anchor, expected) {
   return false;
 }
 
-function verifyApplicationAnchorManifest(path, parsedRoot, lang, body, nav, main, footer, errors) {
+function verifyApplicationAnchorManifest(path, parsedRoot, lang, body, nav, main, footer, evidenceRows, errors) {
   const manifest = APPLICATION_ANCHOR_MANIFEST[lang];
   const roleNodes = applicationAnchorRoleNodes(body, nav, main, footer);
-  const evidenceRows = elementDescendants(parsedRoot).filter((element) => elementHasClass(element, "evidence-row"));
   const evidenceAnchors = new Set(elementDescendants(parsedRoot, "a")
     .filter((anchor) => evidenceRows.some((row) => elementIsWithin(anchor, row))));
   const actual = elementDescendants(parsedRoot, "a").filter((anchor) => !evidenceAnchors.has(anchor));
@@ -3306,8 +3348,10 @@ function verifyApplicationAnchorManifest(path, parsedRoot, lang, body, nav, main
 
 function applicationSemanticRoleNodes(body, nav, main, footer, anchorRoleNodes) {
   const navCurrent = anchorRoleNodes.find(({ role }) => role === "nav-primary-0")?.node;
-  const navToggle = directElementChildren(nav, "button").find((element) => elementAttribute(element, "id") === "nav-toggle");
-  const backToTop = directElementChildren(body, "button").find((element) => elementAttribute(element, "id") === "backToTop");
+  const navMenu = directElementChildren(nav, "ul").find((element) => elementHasClass(element, "nav-list"));
+  const navToggle = directElementChildren(nav, "button").find((element) => elementHasClass(element, "nav-toggle"));
+  const navOverlay = directElementChildren(body, "div").find((element) => elementHasClass(element, "nav-overlay"));
+  const backToTop = directElementChildren(body, "button").find((element) => elementHasClass(element, "back-to-top"));
   const breadcrumb = firstDescendantWithClass(main, "nav", "breadcrumb");
   const breadcrumbSpans = directElementChildren(breadcrumb, "span");
   const mainSections = main === undefined || main === null ? [] : elementDescendants(main, "section");
@@ -3317,9 +3361,12 @@ function applicationSemanticRoleNodes(body, nav, main, footer, anchorRoleNodes) 
   const footerSign = anchorRoleNodes.find(({ role }) => role === "footer-sign")?.node;
   return [
     ["site-nav", nav],
+    ["nav-menu", navMenu],
     ["nav-current", navCurrent],
     ["nav-toggle", navToggle],
+    ["nav-overlay", navOverlay],
     ["back-to-top", backToTop],
+    ["main", main],
     ["breadcrumb", breadcrumb],
     ["breadcrumb-separator", breadcrumbSpans[0]],
     ["breadcrumb-current", breadcrumbSpans[1]],
@@ -3353,27 +3400,42 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
   const heads = elementDescendants(parsedRoot, "head");
   const head = heads.length === 1 ? heads[0] : null;
   const expectedMetas = [
-    { charset: "UTF-8" },
-    { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-    { name: "description", content: page.description },
-    { name: "author", content: "Paweł Mamcarz" },
-    { name: "robots", content: "index, follow" },
-    { property: "og:title", content: literals.documentTitle },
-    { property: "og:description", content: page.description },
-    { property: "og:type", content: "website" },
-    { property: "og:url", content: page.url },
-    { property: "og:image", content: "https://mamcarz.com/assets/img/og.jpg" },
-    { property: "og:image:alt", content: literals.documentTitle },
-    { property: "og:locale", content: literals.locale },
-    { property: "og:site_name", content: "Paweł Mamcarz" }
+    { attributes: { charset: "UTF-8" }, contentType: "token" },
+    { attributes: { name: "viewport", content: "width=device-width, initial-scale=1.0" }, contentType: "token" },
+    { attributes: { name: "description", content: page.description }, contentType: "human" },
+    { attributes: { name: "author", content: "Paweł Mamcarz" }, contentType: "human" },
+    { attributes: { name: "robots", content: "index, follow" }, contentType: "token" },
+    { attributes: { property: "og:title", content: literals.documentTitle }, contentType: "human" },
+    { attributes: { property: "og:description", content: page.description }, contentType: "human" },
+    { attributes: { property: "og:type", content: "website" }, contentType: "token" },
+    { attributes: { property: "og:url", content: page.url }, contentType: "token" },
+    { attributes: { property: "og:image", content: "https://mamcarz.com/assets/img/og.jpg" }, contentType: "token" },
+    { attributes: { property: "og:image:alt", content: literals.documentTitle }, contentType: "human" },
+    { attributes: { property: "og:locale", content: literals.locale }, contentType: "token" },
+    { attributes: { property: "og:site_name", content: "Paweł Mamcarz" }, contentType: "human" }
+  ];
+  const expectedResources = [
+    { rel: "canonical", href: page.url },
+    { rel: "alternate", hreflang: "pl", href: APPLICATION_PAGE_CONTRACT.pl.url },
+    { rel: "alternate", hreflang: "en", href: APPLICATION_PAGE_CONTRACT.en.url },
+    { rel: "alternate", hreflang: "x-default", href: APPLICATION_PAGE_CONTRACT.pl.url }
   ];
   const titles = head === null ? [] : directElementChildren(head, "title").filter(elementIsActiveResource);
   const metas = head === null ? [] : directElementChildren(head, "meta").filter(elementIsActiveResource);
+  const headLinks = head === null ? [] : directElementChildren(head, "link");
+  const resourceLinks = headLinks.slice(0, expectedResources.length);
   const valid = head !== null
     && titles.length === 1
     && normalizeExactHtmlLiteral(rawElementText(titles[0])) === normalizeExactLiteral(literals.documentTitle)
     && metas.length === expectedMetas.length
-    && metas.every((meta, index) => exactApplicationAttributes(meta, expectedMetas[index], new Set(["content"])));
+    && metas.every((meta, index) => exactApplicationAttributes(
+      meta,
+      expectedMetas[index].attributes,
+      expectedMetas[index].contentType === "human" ? new Set(["content"]) : new Set()
+    ))
+    && resourceLinks.length === expectedResources.length
+    && resourceLinks.every((link, index) => elementIsActiveResource(link)
+      && exactApplicationAttributes(link, expectedResources[index]));
   if (!valid) {
     error(errors, "application-metadata", path, "requires the exact claim-safe Task 2 title and metadata set");
   }
@@ -3590,7 +3652,8 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
     error(errors, "application-shell", path, "requires the shared skip link, main focus target, nav overlay and site footer");
   }
   const applicationFooter = footers.length === 1 ? footers[0] : null;
-  verifyApplicationAnchorManifest(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, errors);
+  const evidenceRows = applicationOwnedEvidenceRows(main);
+  verifyApplicationAnchorManifest(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, evidenceRows, errors);
   verifyApplicationSemanticAttributes(path, parsedRoot, lang, body, applicationNav, main, applicationFooter, errors);
 
   const heroes = main === null
@@ -3669,9 +3732,6 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
   const factsById = new Map(records.filter((fact) => nonEmptyString(fact.id)).map((fact) => [fact.id, fact]));
   const evidenceSection = sectionByName.get("evidence");
-  const evidenceRows = main === null
-    ? []
-    : elementDescendants(main).filter((element) => elementHasClass(element, "evidence-row"));
   const orderedEvidence = [];
   const usedEvidenceIds = new Set();
   let exactEvidenceContract = evidenceRows.length === APPLICATION_EVIDENCE_CONTRACT.length;

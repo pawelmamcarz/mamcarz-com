@@ -63,6 +63,24 @@ Focused GREEN:
 - Immutable PL/EN semantic manifests pin all 12 current elements carrying `aria-*`, `alt`, `title`, `placeholder` or equivalent user-facing attributes. Unexpected attributes are rejected across every parsed descendant. Human-readable values allow Unicode-equivalent and whitespace-only formatting, while reference and state tokens remain exact.
 - Application-owned H1, lead, main, navigation, footer, evidence, schema and metadata literals now use a case-preserving NFKC, whitespace and default-ignorable comparator. Lowercasing remains limited to intentionally case-insensitive forbidden and security scans.
 
+### Fix round 3
+
+Focused RED:
+
+- Command: `node --test --test-name-pattern='Plan 2 Task 2 fix round 3' scripts/verify-site.test.mjs`.
+- Result before verifier hardening: 4 tests, 0 pass, 4 fail.
+- The four independent false greens reproduced an unlisted external anchor laundered through a fake evidence row in a footer template, an unmanifested `role="button"`, an entity-obfuscated `aria-hidden` state token and a default-ignorable entity appended to `og:url`.
+
+Focused GREEN:
+
+- The same command passes 4 tests, 4 pass, 0 fail.
+- The complete Task 2 focus passes 25 tests, 25 pass, 0 fail. Task 1 remains isolated and passes 36 tests, 36 pass, 0 fail.
+- Evidence anchor exemptions are now derived only from the exact three direct article rows owned by the direct `main > section[data-section="evidence"]` structure. Fake evidence classes elsewhere remain subject to the 21-anchor whole-document manifest. The exact approved associated `source_url` control still passes.
+- The semantic manifest now pins 16 exact nodes, including menu, toggle, overlay, back control and main IDs and state values. A fail-closed controlled-attribute set rejects unmanifested accessibility, behavior, visibility, focus, form-state, event-handler and inline-style attributes across active and inactive descendants.
+- Exact owned-copy collection excludes hidden and inert subtrees, so unavailable content cannot satisfy the main or shell literal contract. The intentionally closed Advisory disclosure remains valid because its source labels are still included by the navigation contract.
+- Human-readable attributes retain case-preserving Unicode, entity and whitespace equivalence. State and reference tokens, including `aria-hidden`, `aria-current`, `aria-expanded`, `aria-controls`, IDs, roles and `tabindex`, now compare their parsed source values without entity decoding, Unicode folding or whitespace normalization.
+- Metadata fields are explicitly typed. Human titles, descriptions, author and accessible image labels use the case-preserving human comparator; viewport, robots, Open Graph type, URLs, images, locale and canonical/hreflang resources compare raw exact values.
+
 ## Verification gates
 
 - `npm run verify:pages -- --family=applications`: PASS.
@@ -70,7 +88,7 @@ Focused GREEN:
 - `npm run verify:facts`: PASS.
 - `npm run verify:foundation`: PASS.
 - `npm run verify:site`: PASS.
-- `npm run test:verify-site`: PASS, 486 tests, 486 pass, 0 fail.
+- `npm run test:verify-site`: PASS, 490 tests, 490 pass, 0 fail.
 - `node --check scripts/verify-site.mjs`: PASS.
 - `node --check scripts/verify-site.test.mjs`: PASS.
 - `node --check assets/js/main.js`: PASS.
@@ -84,6 +102,8 @@ Focused GREEN:
 - The prior local Chrome review was not repeated because no product or stylesheet file changed in fix round 1.
 - Fix-round 2 diff inspection: the same product surfaces remain unchanged from `31d36bc4f4d24808d0f977375263e35f6b1401ee`; only the verifier, verifier tests and this report changed.
 - The browser review was not repeated in fix round 2 because the product and stylesheet remain byte-unchanged.
+- Fix-round 3 diff inspection: the PL/EN product pages, shared CSS, facts registry and browser script remain byte-unchanged from `fde212f476a542042f4c07598b8ab441abe814d2`; only the verifier, verifier tests and this report changed.
+- The browser review was not repeated in fix round 3 because no product or stylesheet file changed.
 
 ## Limitations
 
