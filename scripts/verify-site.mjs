@@ -141,6 +141,43 @@ const aboutAviationFactOrder = [
   "aviation.air_to_air_media"
 ];
 
+const localizedHomeRoutes = new Map([
+  ["/", "/en/"],
+  ["/#about", "/en/#about"],
+  ["/#contact", "/en/#contact"],
+  ["#main", "#main"],
+  ["#contact", "#contact"],
+  ["/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/"],
+  ["/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/"],
+  ["/uslugi/wdrozenie-sap-ariba", "/en/uslugi/wdrozenie-sap-ariba"],
+  ["/uslugi/doradztwo-zamowienia-publiczne/", "/en/uslugi/doradztwo-zamowienia-publiczne/"],
+  ["/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/"],
+  ["/lotnictwo/", "/en/lotnictwo/"],
+  ["/case-studies/", "/en/case-studies/"],
+  ["/case-studies", "/en/case-studies"],
+  ["/wiedza/", "/en/wiedza/"],
+  ["/procurement-2026/", "/procurement-2026/"]
+]);
+
+const englishHomeContract = {
+  headline: "From decision to an operational system.",
+  lead: "I lead procurement transformations, build operational applications and develop aviation ventures. I take work from a defined problem to a solution used in day-to-day operations.",
+  process: ["Diagnosis", "Strategy", "Implementation", "Value"],
+  domains: [
+    ["/en/uslugi/transformacja-zakupow/", "Advisory"],
+    ["/en/aplikacje-operacyjne/", "Operational applications"],
+    ["/en/lotnictwo/", "Aviation"]
+  ],
+  navigation: [
+    ["/en/aplikacje-operacyjne/", "Operational applications"],
+    ["/en/lotnictwo/", "Aviation"],
+    ["/en/case-studies/", "Projects"],
+    ["/en/wiedza/", "Knowledge"],
+    ["/en/#about", "About"],
+    ["/en/#contact", "Contact"]
+  ]
+};
+
 function activeHomepageBody(body) {
   return stripHtmlComments(body).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
 }
@@ -244,10 +281,23 @@ function verifyHomeStructures(activeBody, page, errors) {
   verifyAboutStructure(activeBody, page, errors);
   const process = sectionBlock(activeBody, { section: "process" });
   if (process) {
-    const routeSteps = openingTags(process.full, "article").filter((tag) => hasClass(tag, "route-sequence__step")).length;
+    const steps = tagBlocks(process.full, "article").filter((block) => hasClass(block.opening, "route-sequence__step"));
+    const routeSteps = steps.length;
     const articleClosings = (process.full.match(/<\/article\s*>/gi) ?? []).length;
     if (routeSteps !== 4 || articleClosings !== 4) {
       error(errors, "home-process-structure", page.path, `Process requires four matched route steps; found ${routeSteps} openings and ${articleClosings} closings`);
+    }
+    const expectedLabels = page.lang === "pl" ? ["Diagnoza", "Strategia", "Wdrożenie", "Wartość"] : englishHomeContract.process;
+    const labels = steps.map((step) => tagBlocks(step.full, "h3").map((heading) => renderedText(heading.content)));
+    const indexes = steps.map((step) => {
+      const label = tagBlocks(step.full, "p").find((paragraph) => hasClass(paragraph.opening, "section-index"));
+      return /^(\d{2})\s*\//.exec(renderedText(label?.content ?? ""))?.[1] ?? null;
+    });
+    const expectedIndexes = ["01", "02", "03", "04"];
+    if (labels.length !== expectedLabels.length
+      || labels.some((headings, index) => headings.length !== 1 || headings[0] !== normalize(expectedLabels[index]))
+      || indexes.some((value, index) => value !== expectedIndexes[index])) {
+      error(errors, "home-process-structure", page.path, "Process requires the exact localized ordered step labels and 01-04 indexes");
     }
   }
 
@@ -258,6 +308,14 @@ function verifyHomeStructures(activeBody, page, errors) {
     const localized = page.lang === "pl"
       ? { path: "/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Działanie", "Możliwy wynik"], name: "Zamówienia publiczne" }
       : { path: "/en/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Action", "Possible outcome"], name: "Public procurement" };
+    const evidenceRows = tagBlocks(skills.full, "article").filter((block) => hasClass(block.opening, "evidence-row"));
+    for (const [index, row] of evidenceRows.entries()) {
+      const labels = tagBlocks(row.full, "dt").map((block) => renderedText(block.content));
+      const expectedLabels = localized.labels.map(normalize);
+      if (labels.length !== expectedLabels.length || labels.some((label, labelIndex) => label !== expectedLabels[labelIndex])) {
+        error(errors, "home-skills-structure", page.path, `Skills evidence row ${index + 1} requires the exact ordered ledger labels: ${localized.labels.join(", ")}`);
+      }
+    }
     const serviceMarkers = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => attributeValue(tag, "data-service") === "public-procurement");
     const serviceArticles = tagBlocks(skills.full, "article").filter((block) => attributeValue(block.opening, "data-service") === "public-procurement");
     if (serviceMarkers.length !== 1 || serviceArticles.length !== 1) {
@@ -284,6 +342,18 @@ function verifyHomeStructures(activeBody, page, errors) {
   const validNavLabel = navProjects.length === 1 && renderedText(navProjects[0].content) === normalize(projects.label);
   const validFooterLabel = footerProjects.length === 1 && renderedText(footerProjects[0].content) === normalize(projects.label);
   if (!validNavLabel || !validFooterLabel) error(errors, projects.errorId, page.path, `${projects.language} navigation and footer must label the case-studies route as ${projects.label}`);
+
+  const contact = sectionBlock(activeBody, { section: "contact" });
+  if (contact) {
+    const expectedIntents = page.lang === "pl"
+      ? [["mailto:pawel@mamcarz.com?subject=Doradztwo", "Doradztwo"], ["mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna", "Aplikacja operacyjna"], ["mailto:pawel@mamcarz.com?subject=Lotnictwo", "Lotnictwo"]]
+      : [["mailto:pawel@mamcarz.com?subject=Advisory", "Advisory"], ["mailto:pawel@mamcarz.com?subject=Operational%20application", "Operational application"], ["mailto:pawel@mamcarz.com?subject=Aviation", "Aviation"]];
+    const intents = tagBlocks(contact.full, "a")
+      .map((block) => [attributeValue(block.opening, "href"), renderedText(block.content)])
+      .filter(([href]) => href?.startsWith("mailto:pawel@mamcarz.com?subject="));
+    const valid = intents.length === expectedIntents.length && expectedIntents.every(([href, label], index) => intents[index]?.[0] === href && intents[index]?.[1] === normalize(label));
+    if (!valid) error(errors, "home-contact-intents", page.path, "Contact requires the exact ordered localized Advisory, Operational application and Aviation mailto intents");
+  }
 }
 
 function verifyHomepageContent(body, page, errors) {
@@ -298,12 +368,139 @@ function verifyHomepageContent(body, page, errors) {
     if (index <= previousIndex) error(errors, "home-section-order", page.path, `marker ${marker} is out of order`);
     previousIndex = index;
   }
+  const actualMarkers = homepageMarkerSequence(activeBody);
+  if (!exactSequence(homepageMarkers, actualMarkers)) {
+    error(errors, "home-section-order", page.path, "homepage requires exactly the 11 ordered sections and two ordered CTA markers");
+  }
 
   const visible = renderedText(activeBody);
   for (const pattern of forbiddenHomepageCopy) {
     if (visible.includes(normalize(pattern))) error(errors, "home-forbidden-copy", page.path, `visible copy contains ${pattern}`);
   }
   return visible;
+}
+
+function exactSequence(first, second) {
+  return first.length === second.length && first.every((value, index) => value === second[index]);
+}
+
+function homepageMarkerSequence(activeBody) {
+  const markers = [];
+  const sectionIds = new Set(["hero", "process", "cases", "about", "education", "resume", "skills", "portfolio", "clients", "contact"]);
+  for (const tag of openingTags(activeBody, "[a-z][a-z0-9:-]*")) {
+    const tagName = /^<([a-z][a-z0-9:-]*)/i.exec(tag)?.[1].toLowerCase();
+    if (tagName !== "section" && tagName !== "aside") continue;
+    const id = attributeValue(tag, "id");
+    const section = attributeValue(tag, "data-section");
+    const cta = attributeValue(tag, "data-cta-after");
+    if (sectionIds.has(id)) markers.push(`id="${id}"`);
+    else if (section === "trust") markers.push('data-section="trust"');
+    else if (cta === "process" || cta === "cases") markers.push(`data-cta-after="${cta}"`);
+  }
+  return markers;
+}
+
+function annotatedFactSequence(activeBody) {
+  return openingTags(activeBody, "[a-z][a-z0-9:-]*")
+    .map((tag) => attributeValue(tag, "data-fact-id"))
+    .filter(nonEmptyString);
+}
+
+function processStepSequence(activeBody) {
+  const process = sectionBlock(activeBody, { section: "process" });
+  if (!process) return [];
+  return tagBlocks(process.full, "article")
+    .filter((block) => hasClass(block.opening, "route-sequence__step"))
+    .map((step) => {
+      const index = tagBlocks(step.full, "p").find((paragraph) => hasClass(paragraph.opening, "section-index"));
+      return /^(\d{2})\s*\//.exec(renderedText(index?.content ?? ""))?.[1] ?? "missing";
+    });
+}
+
+function evidenceRowSequence(activeBody) {
+  return tagBlocks(activeBody, "article")
+    .filter((block) => hasClass(block.opening, "evidence-row"))
+    .map((row) => JSON.stringify({
+      domain: attributeValue(row.opening, "data-domain") ?? "",
+      service: attributeValue(row.opening, "data-service") ?? "",
+      facts: annotatedFactSequence(row.full)
+    }));
+}
+
+function portfolioItemSequence(activeBody) {
+  const portfolio = sectionBlock(activeBody, { section: "portfolio" });
+  if (!portfolio) return [];
+  return tagBlocks(portfolio.full, "a")
+    .filter((block) => hasClass(block.opening, "pcard"))
+    .map((item) => annotatedFactSequence(item.full).join("|"));
+}
+
+function clientItemSequence(activeBody) {
+  const clients = sectionBlock(activeBody, { section: "clients" });
+  if (!clients) return [];
+  return openingTags(clients.full, "div")
+    .filter((tag) => hasClass(tag, "client-item"))
+    .map((tag) => attributeValue(tag, "data-fact-id") ?? "missing");
+}
+
+function pairedLinkSequence(activeBody) {
+  return tagBlocks(activeBody, "a")
+    .filter((link) => !hasClass(link.opening, "nav-lang"))
+    .map((link) => ({ href: attributeValue(link.opening, "href"), opening: link.opening }))
+    .filter((link) => nonEmptyString(link.href) && !link.href.startsWith("mailto:"));
+}
+
+function verifyEnglishHomeContract(activeBody, page, errors) {
+  if (page.lang !== "en") return;
+  const problems = [];
+  const hero = sectionBlock(activeBody, { section: "hero" });
+  const headline = hero ? tagBlocks(hero.full, "h1") : [];
+  const lead = hero ? tagBlocks(hero.full, "p").filter((paragraph) => hasClass(paragraph.opening, "hero-lead")) : [];
+  if (headline.length !== 1 || renderedText(headline[0]?.content ?? "") !== normalize(englishHomeContract.headline)) problems.push("hero headline");
+  if (lead.length !== 1 || renderedText(lead[0]?.content ?? "") !== normalize(englishHomeContract.lead)) problems.push("hero lead");
+  const domainNav = hero ? tagBlocks(hero.full, "nav").find((nav) => hasClass(nav.opening, "hero-tag")) : null;
+  const domainLinks = domainNav ? tagBlocks(domainNav.full, "a").map((link) => [attributeValue(link.opening, "href"), renderedText(link.content)]) : [];
+  if (domainLinks.length !== englishHomeContract.domains.length || englishHomeContract.domains.some(([href, label], index) => domainLinks[index]?.[0] !== href || domainLinks[index]?.[1] !== normalize(label))) problems.push("three equal domain routes");
+  const navigation = tagBlocks(activeBody, "nav").find((nav) => hasClass(nav.opening, "site-nav"));
+  const links = navigation ? tagBlocks(navigation.full, "a") : [];
+  if (englishHomeContract.navigation.some(([href, label]) => {
+    const matches = links.filter((link) => attributeValue(link.opening, "href") === href);
+    return matches.length !== 1 || renderedText(matches[0].content) !== normalize(label);
+  })) problems.push("navigation labels");
+  const advisory = navigation ? tagBlocks(navigation.full, "summary") : [];
+  if (advisory.length !== 1 || renderedText(advisory[0].content) !== normalize("Advisory")) problems.push("Advisory label");
+  if (problems.length > 0) error(errors, "home-en-contract", page.path, `English homepage contract mismatch: ${problems.join(", ")}`);
+}
+
+function verifyHomepageParity(plBody, enBody, errors) {
+  const comparisons = [
+    ["home-parity-sections", "section markers", homepageMarkerSequence(plBody), homepageMarkerSequence(enBody)],
+    ["home-parity-facts", "data-fact-id sequence", annotatedFactSequence(plBody), annotatedFactSequence(enBody)],
+    ["home-parity-process", "Process steps", processStepSequence(plBody), processStepSequence(enBody)],
+    ["home-parity-evidence-rows", "evidence rows", evidenceRowSequence(plBody), evidenceRowSequence(enBody)],
+    ["home-parity-portfolio", "Portfolio items", portfolioItemSequence(plBody), portfolioItemSequence(enBody)],
+    ["home-parity-clients", "Client items", clientItemSequence(plBody), clientItemSequence(enBody)]
+  ];
+  for (const [id, label, plSequence, enSequence] of comparisons) {
+    if (!exactSequence(plSequence, enSequence)) error(errors, id, "en/index.html", `${label} must exactly match the ordered Polish sequence`);
+  }
+
+  const plLinks = pairedLinkSequence(plBody);
+  const enLinks = pairedLinkSequence(enBody);
+  const expectedEnglishLinks = plLinks.map(({ href }) => {
+    if (/^https?:\/\//i.test(href)) return href;
+    return localizedHomeRoutes.get(href) ?? null;
+  });
+  const actualEnglishLinks = enLinks.map(({ href }) => href);
+  if (expectedEnglishLinks.some((href) => href === null) || !exactSequence(expectedEnglishLinks, actualEnglishLinks)) {
+    error(errors, "home-parity-links", "en/index.html", "ordered internal routes must use exact /en/ counterparts and external routes must remain unchanged");
+  }
+
+  const polishOnly = enLinks.filter(({ href }) => href === "/procurement-2026/");
+  const fakeTranslation = enLinks.some(({ href }) => href === "/en/procurement-2026/");
+  if (fakeTranslation || polishOnly.some(({ opening }) => attributeValue(opening, "lang") !== "pl")) {
+    error(errors, "home-en-pl-only-link", "en/index.html", "Procurement 2026 must link to the Polish route with lang=pl; a fake English route is forbidden");
+  }
 }
 
 function stripHtmlComments(html) {
@@ -1396,14 +1593,17 @@ function candidates(fact, language) {
 
 async function verifyHome(factData, context) {
   const pages = [{ path: "index.html", lang: "pl" }, { path: "en/index.html", lang: "en" }].filter((page) => context.lang === "all" || page.lang === context.lang);
+  const activeBodies = new Map();
   for (const page of pages) {
     const html = await read(context, page.path);
     if (html === null) continue;
     if ((html.match(/<h1\b/gi) ?? []).length !== 1) error(context.errors, "home-h1", page.path, "expected exactly one h1");
     const body = homepageBody(html);
     const activeBody = activeHomepageBody(body);
+    activeBodies.set(page.lang, activeBody);
     const visible = verifyHomepageContent(body, page, context.errors);
     verifyHomeStructures(activeBody, page, context.errors);
+    verifyEnglishHomeContract(activeBody, page, context.errors);
     verifyHomeFactPatterns(activeBody, page, context.errors);
     const records = Array.isArray(factData.facts) ? factData.facts : [];
     const byId = new Map(records.filter((fact) => nonEmptyString(fact?.id)).map((fact) => [fact.id, fact]));
@@ -1440,6 +1640,9 @@ async function verifyHome(factData, context) {
       }
       if (fact.status !== "approved" && published) error(context.errors, `fact-${fact.id}`, page.path, "non-approved fact is still published");
     }
+  }
+  if (context.lang === "all" && activeBodies.has("pl") && activeBodies.has("en")) {
+    verifyHomepageParity(activeBodies.get("pl"), activeBodies.get("en"), context.errors);
   }
 }
 

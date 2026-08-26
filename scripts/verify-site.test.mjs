@@ -46,7 +46,7 @@ const navigationFixture = {
         <li><a href="/en/aplikacje-operacyjne/">Operational applications</a></li>
         <li><a href="/en/lotnictwo/">Aviation</a></li>
         <li><a href="/en/case-studies/">Projects</a></li>
-        <li><a href="/en/wiedza/">Insights</a></li>
+        <li><a href="/en/wiedza/">Knowledge</a></li>
         <li><a href="/en/#about">About</a></li>
         <li><a href="/en/#contact">Contact</a></li>
       </ul>
@@ -147,7 +147,7 @@ function publicProcurementSkillsFixture(lang, { href, labels, outcome } = {}) {
     : { href: "/en/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Action", "Possible outcome"], title: "Public procurement" };
   const ledgerLabels = labels ?? [localized.labels[0], localized.labels[1], outcome ?? localized.labels[2]];
   const ledger = ledgerLabels.map((label) => `<div><dt>${label}</dt><dd>One</dd></div>`).join("");
-  return `<article data-service="public-procurement"><h3><a href="${href ?? localized.href}">${localized.title}</a></h3><dl>${ledger}</dl></article>`;
+  return `<article class="evidence-row" data-domain="advisory" data-service="public-procurement"><h3><a href="${href ?? localized.href}">${localized.title}</a></h3><dl>${ledger}</dl></article>`;
 }
 
 function replaceHomepageSection(html, sectionId, replacement) {
@@ -157,21 +157,35 @@ function replaceHomepageSection(html, sectionId, replacement) {
 function homepageFixture(lang, content) {
   const projectsHref = lang === "pl" ? "/case-studies" : "/en/case-studies";
   const projectsLabel = lang === "pl" ? "Projekty" : "Projects";
+  const processLabels = lang === "pl"
+    ? ["Diagnoza", "Strategia", "Wdrożenie", "Wartość"]
+    : ["Diagnosis", "Strategy", "Implementation", "Value"];
+  const contactIntents = lang === "pl"
+    ? [["Doradztwo", "Doradztwo"], ["Aplikacja operacyjna", "Aplikacja%20operacyjna"], ["Lotnictwo", "Lotnictwo"]]
+    : [["Advisory", "Advisory"], ["Operational application", "Operational%20application"], ["Aviation", "Aviation"]];
   return `${navigationFixture[lang]}<main>
     <section id="hero"><h1 data-fact-id="brand.promise">${content}</h1></section>
     <section data-section="trust"></section>
-    <section id="process"><article class="route-sequence__step"></article><article class="route-sequence__step"></article><article class="route-sequence__step"></article><article class="route-sequence__step"></article></section>
+    <section id="process">${processLabels.map((label, index) => `<article class="route-sequence__step"><p class="section-index">0${index + 1} / ${label}</p><h3>${label}</h3></article>`).join("")}</section>
     <aside data-cta-after="process"></aside>
     <section id="cases"></section>
     <aside data-cta-after="cases"></aside>
     <section id="about">${controlledAboutFixture(lang)}</section>
     <section id="education"></section>
     <section id="resume"></section>
-    <section id="skills">${publicProcurementSkillsFixture(lang)}</section>
+    <section id="skills"><article class="evidence-row" data-domain="applications"><h3>${lang === "pl" ? "Aplikacje operacyjne" : "Operational applications"}</h3><dl><div><dt>Problem</dt><dd>One</dd></div><div><dt>${lang === "pl" ? "Działanie" : "Action"}</dt><dd>Two</dd></div><div><dt>${lang === "pl" ? "Możliwy wynik" : "Possible outcome"}</dt><dd>Three</dd></div></dl></article>${publicProcurementSkillsFixture(lang)}</section>
     <section id="portfolio"></section>
     <section id="clients"></section>
-    <section id="contact"><a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
+    <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
   </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><input id="chat-input" maxlength="2000">`;
+}
+
+function parityInventoryFixture(lang) {
+  const title = (id, value) => `<div class="pcard__title" data-fact-id="${id}">${value}</div>`;
+  const client = (id, value) => `<div class="client-item" data-fact-id="${id}">${value}</div>`;
+  return homepageFixture(lang, lang === "pl" ? "Marka" : "Brand")
+    .replace('<section id="portfolio"></section>', `<section id="portfolio"><div class="portfolio-cards"><a class="pcard" href="https://alpha.example">${title("portfolio.alpha", "Alpha")}</a><a class="pcard" href="https://beta.example">${title("portfolio.beta", "Beta")}</a></div></section>`)
+    .replace('<section id="clients"></section>', `<section id="clients">${client("client.alpha", "Alpha Client")}${client("client.beta", "Beta Client")}</section>`);
 }
 
 function fact(overrides = {}) {
@@ -1176,7 +1190,157 @@ for (const [id, display_pl, display_en, pl, en] of heroes) {
         .replace('<section id="contact"><a', `<section id="contact"><p>${page}</p><a`);
       const root = await fixture({ facts: [fact(), review], [`${lang}Html`]: html });
       const result = await runVerification({ root, scope: "home", lang });
-      assert.deepEqual(errorIds(result), [`fact-${id}`]);
+      assert.deepEqual(errorIds(result).filter((errorId) => errorId.startsWith("fact-")), [`fact-${id}`]);
     });
   }
 }
+
+test("home parity rejects an extra English section marker", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace(
+    '<section data-section="trust"></section>',
+    '<section data-section="trust"></section><section data-section="trust"></section>'
+  );
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-parity-sections"));
+});
+
+test("home scope rejects the same duplicate section marker on both languages", async () => {
+  const duplicateTrust = (html) => html.replace(
+    '<section data-section="trust"></section>',
+    '<section data-section="trust"></section><section data-section="trust"></section>'
+  );
+  const root = await fixture({ plHtml: duplicateTrust(homepageFixture("pl", "Marka")), enHtml: duplicateTrust(homepageFixture("en", "Brand")) });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-section-order"));
+});
+
+const factSequenceMutations = {
+  missing: (html) => html.replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', ""),
+  extra: (html) => html.replace('<section id="contact">', '<section id="contact"><span data-fact-id="brand.promise">Brand</span>'),
+  reordered: (html) => html
+    .replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', "__PPL_H__")
+    .replace('<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>', '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>')
+    .replace("__PPL_H__", '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>'),
+  different: (html) => html.replace(
+    '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>',
+    '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>'
+  )
+};
+
+for (const [mutation, mutate] of Object.entries(factSequenceMutations)) {
+  test(`home parity rejects a ${mutation} English fact ID sequence`, async () => {
+    const root = await fixture({ enHtml: mutate(homepageFixture("en", "Brand")) });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-parity-facts"));
+  });
+}
+
+test("home parity rejects reordered Process step identities", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace("01 / Diagnosis", "02 / Diagnosis");
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-parity-process"));
+});
+
+test("home parity rejects a changed evidence-row sequence", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace('data-domain="applications"', 'data-domain="aviation"');
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-parity-evidence-rows"));
+});
+
+for (const [inventory, first, second, errorId] of [
+  ["portfolio", '<a class="pcard" href="https://alpha.example"><div class="pcard__title" data-fact-id="portfolio.alpha">Alpha</div></a>', '<a class="pcard" href="https://beta.example"><div class="pcard__title" data-fact-id="portfolio.beta">Beta</div></a>', "home-parity-portfolio"],
+  ["clients", '<div class="client-item" data-fact-id="client.alpha">Alpha Client</div>', '<div class="client-item" data-fact-id="client.beta">Beta Client</div>', "home-parity-clients"]
+]) {
+  test(`home parity rejects reordered ${inventory} items`, async () => {
+    const valid = parityInventoryFixture("en");
+    const enHtml = valid.replace(first, "__FIRST__").replace(second, first).replace("__FIRST__", second);
+    assert.notEqual(enHtml, valid);
+    const inventoryFacts = [
+      fact(),
+      fact({ id: "portfolio.alpha", value: "Alpha", display_pl: "Alpha", display_en: "Alpha" }),
+      fact({ id: "portfolio.beta", value: "Beta", display_pl: "Beta", display_en: "Beta" }),
+      fact({ id: "client.alpha", value: "Alpha Client", display_pl: "Alpha Client", display_en: "Alpha Client" }),
+      fact({ id: "client.beta", value: "Beta Client", display_pl: "Beta Client", display_en: "Beta Client" })
+    ];
+    const root = await fixture({ facts: inventoryFacts, plHtml: parityInventoryFixture("pl"), enHtml });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes(errorId));
+  });
+}
+
+for (const [variant, enHref] of [
+  ["Polish route", "/lotnictwo/"],
+  ["invented translation", "/en/aviation/"]
+]) {
+  test(`home parity rejects a ${variant} on an English direct link`, async () => {
+    const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/lotnictwo/">Lotnictwo</a></section>');
+    const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', `<section id="portfolio"><a href="${enHref}">Aviation</a></section>`);
+    const root = await fixture({ plHtml, enHtml });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-parity-links"));
+  });
+}
+
+test("home parity permits only the labelled Polish-only Procurement 2026 route", async () => {
+  const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/procurement-2026/">Procurement Process 2026</a></section>');
+  const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/procurement-2026/" lang="pl">Procurement Process 2026, Polish-language material</a></section>');
+  const root = await fixture({ plHtml, enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-parity-links"));
+  assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
+});
+
+test("home parity preserves the local skip-link target", async () => {
+  const plHtml = `<a href="#main">Przejdź do treści</a>${homepageFixture("pl", "Marka")}`;
+  const enHtml = `<a href="#main">Skip to main content</a>${homepageFixture("en", "Brand")}`;
+  const root = await fixture({ plHtml, enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-parity-links"));
+});
+
+for (const [variant, anchor] of [
+  ["fake English route", '<a href="/en/procurement-2026/">Procurement Process 2026</a>'],
+  ["missing language disclosure", '<a href="/procurement-2026/">Procurement Process 2026</a>']
+]) {
+  test(`home parity rejects the Procurement 2026 ${variant}`, async () => {
+    const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/procurement-2026/">Procurement Process 2026</a></section>');
+    const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', `<section id="portfolio">${anchor}</section>`);
+    const root = await fixture({ plHtml, enHtml });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes(variant === "fake English route" ? "home-parity-links" : "home-en-pl-only-link"));
+  });
+}
+
+test("home scope requires the fixed English hero thesis and lead", async () => {
+  const enHtml = homepageFixture("en", "Procurement that works.").replace(
+    "</h1>",
+    '</h1><p class="hero-lead">I combine systems and delivery.</p>'
+  );
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-en-contract"));
+});
+
+test("home scope requires the exact English Knowledge navigation label", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace('href="/en/wiedza/">Knowledge', 'href="/en/wiedza/">Insights');
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-en-contract"));
+});
+
+test("home scope requires every English Skills evidence row to use the exact ledger labels", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace("<dt>Action</dt>", "<dt>Approach</dt>");
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope requires the exact ordered English contact intents", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace("subject=Operational%20application", "subject=Applications");
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-contact-intents"));
+});
