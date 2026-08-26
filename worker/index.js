@@ -4,7 +4,8 @@ Kim jest Paweł Mamcarz:
 - Associate Partner CEE w apsolut Group (SAP Gold Partner, wielokrotny SAP Ariba MEE Partner of the Year, od marca 2026 część All for One Group SE)
 - 25+ lat doświadczenia w zakupach
 - Łączna wartość zrealizowanych projektów: 500 mln EUR.
-- Buduje region CEE od podstaw. 20+ wdrożeń SAP Ariba w Polsce, Czechach, Słowacji, Węgrzech i Rumunii
+- Buduje region CEE od podstaw w Polsce, Czechach, Słowacji, Węgrzech i Rumunii
+- 20+ wdrożeń SAP Ariba
 - Klienci: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PKN Orlen, PGE, PGNiG, PZU, Orange, PKP PLK, PKP Intercity, Adamed, CIECH, Lotte Wedel, Bank Millennium, Pfleiderer, Aeroflot, Hitachi Energy i inni
 
 Kariera:

@@ -1448,7 +1448,7 @@ function verifySurfaceRules(fact, index, publicSurfaces, errors) {
       continue;
     }
     const keys = Object.keys(rule);
-    if (keys.some((key) => !["approved_any", "forbidden"].includes(key))) {
+    if (keys.some((key) => !["approved_any", "forbidden", "match_mode", "controlled_any"].includes(key))) {
       error(errors, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} contains an unsupported key`);
     }
     if (fact.status === "approved") {
@@ -1458,6 +1458,15 @@ function verifySurfaceRules(fact, index, publicSurfaces, errors) {
     }
     if (Object.hasOwn(rule, "forbidden")) {
       verifyStringArray(rule.forbidden, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} forbidden must be a non-empty string array`, errors);
+    }
+    if (Object.hasOwn(rule, "match_mode") && rule.match_mode !== "line") {
+      error(errors, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} match_mode must be line`);
+    }
+    if (rule.match_mode === "line") {
+      verifyStringArray(rule.controlled_any, "fact-surface-rules", path, `facts[${index}] line rule ${surface} requires controlled_any`, errors);
+      if (surface.endsWith(".html")) error(errors, "fact-surface-rules", path, `facts[${index}] line rule ${surface} is not supported for HTML surfaces`);
+    } else if (Object.hasOwn(rule, "controlled_any")) {
+      error(errors, "fact-surface-rules", path, `facts[${index}] surface rule ${surface} controlled_any requires match_mode line`);
     }
   }
 }
@@ -1563,13 +1572,30 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function publicSurfaceSearchTexts(surface, text) {
+function normalizeClaimLine(line) {
+  return normalize(line).replace(/^(?:(?:>\s*)+|[-*+]\s+)/, "").trim();
+}
+
+function publicSurfaceSearchData(surface, text, errors) {
   if (surface.endsWith(".html")) {
     const parsed = parseStaticHtml(text);
-    return [normalize(stripHtmlComments(text)), staticVisibleText(parsed.root)];
+    return { texts: [normalize(stripHtmlComments(text)), staticVisibleText(parsed.root)], lineUnits: [] };
   }
-  if (surface.endsWith(".js")) return [normalize(stripJsComments(text))];
-  return [normalize(text)];
+  if (surface.endsWith(".js")) {
+    const lexical = tokenizeJavascriptForHtmlSinks(text);
+    for (const message of lexical.errors) error(errors, "fact-surface-js-lexical", surface, message);
+    const literalValues = lexical.tokens
+      .filter((token) => token.type === "string" && nonEmptyString(token.value))
+      .map((token) => token.value);
+    return {
+      texts: [normalize(stripJsComments(text)), ...literalValues.map(normalize)],
+      lineUnits: literalValues.flatMap((value) => value.split(/\r\n?|\n|\u2028|\u2029/)).map(normalizeClaimLine).filter(nonEmptyString)
+    };
+  }
+  return {
+    texts: [normalize(text)],
+    lineUnits: text.split(/\r\n?|\n|\u2028|\u2029/).map(normalizeClaimLine).filter(nonEmptyString)
+  };
 }
 
 function surfaceContains(searchTexts, candidate) {
@@ -1591,10 +1617,10 @@ async function verifyPublicFactSurfaces(factData, publicSurfaces, context) {
   for (const surface of publicSurfaces) {
     const text = await read(context, surface);
     if (text === null) continue;
-    const searchTexts = publicSurfaceSearchTexts(surface, text);
+    const searchData = publicSurfaceSearchData(surface, text, context.errors);
     for (const fact of records) {
       if (fact.status === "review" || fact.status === "retired") {
-        const published = factStatusCandidates(fact, surface).find((candidate) => surfaceContains(searchTexts, candidate));
+        const published = factStatusCandidates(fact, surface).find((candidate) => surfaceContains(searchData.texts, candidate));
         if (published) error(context.errors, "fact-surface-status", surface, `${fact.id} has status ${fact.status} but publishes ${published}`);
         continue;
       }
@@ -1602,9 +1628,18 @@ async function verifyPublicFactSurfaces(factData, publicSurfaces, context) {
       if (!Array.isArray(fact.surfaces) || !fact.surfaces.includes(surface)) continue;
       const rule = isPlainObject(fact.surface_rules?.[surface]) ? fact.surface_rules[surface] : null;
       if (!rule) continue;
-      const approved = Array.isArray(rule.approved_any) && rule.approved_any.some((candidate) => surfaceContains(searchTexts, candidate));
+      const approvedUnits = Array.isArray(rule.approved_any) ? rule.approved_any.map(normalizeClaimLine) : [];
+      const controlledTerms = Array.isArray(rule.controlled_any) ? rule.controlled_any.map(normalize) : [];
+      const controlledUnits = rule.match_mode === "line"
+        ? searchData.lineUnits.filter((unit) => controlledTerms.some((term) => unit.includes(term)))
+        : [];
+      const approved = rule.match_mode === "line"
+        ? controlledUnits.some((unit) => approvedUnits.includes(unit))
+        : Array.isArray(rule.approved_any) && rule.approved_any.some((candidate) => surfaceContains(searchData.texts, candidate));
       if (!approved) error(context.errors, "fact-surface-approved", surface, `${fact.id} is missing an exact approved surface claim`);
-      const forbidden = Array.isArray(rule.forbidden) ? rule.forbidden.find((candidate) => surfaceContains(searchTexts, candidate)) : null;
+      const unapprovedUnit = rule.match_mode === "line" ? controlledUnits.find((unit) => !approvedUnits.includes(unit)) : null;
+      if (unapprovedUnit) error(context.errors, "fact-surface-unapproved-unit", surface, `${fact.id} publishes an unapproved controlled line: ${unapprovedUnit}`);
+      const forbidden = Array.isArray(rule.forbidden) ? rule.forbidden.find((candidate) => surfaceContains(searchData.texts, candidate)) : null;
       if (forbidden) error(context.errors, "fact-surface-forbidden", surface, `${fact.id} publishes forbidden semantic variant ${forbidden}`);
     }
   }

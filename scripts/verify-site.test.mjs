@@ -304,6 +304,47 @@ function publicSurfaceOptions(surface, text) {
   throw new Error(`Unsupported public claim surface fixture: ${surface}`);
 }
 
+const productionFactSurfaceControls = {
+  llms: [
+    "Neutral context before the controlled claims.",
+    "25+ years of procurement experience.",
+    "Neutral context between the controlled claims.",
+    "20+ SAP Ariba implementations.",
+    "Neutral context after the controlled claims."
+  ].join("\n"),
+  llmsFull: [
+    "Neutral context before the controlled claims.",
+    "25+ years of procurement experience.",
+    "20+ SAP Ariba implementations.",
+    "Total value of delivered projects: EUR 500M.",
+    "Current aviation venture: akrobacja.com.",
+    "Voucher sales platform for aerobatic flights.",
+    "Neutral context after the controlled claims."
+  ].join("\n"),
+  worker: `const verifiedFacts = ${JSON.stringify([
+    "Neutral context before the controlled claims.",
+    "25+ lat doświadczenia w zakupach",
+    "20+ wdrożeń SAP Ariba",
+    "Łączna wartość zrealizowanych projektów: 500 mln EUR.",
+    "Aktualna marka działalności lotniczej: akrobacja.com.",
+    "Platforma sprzedaży voucherów na loty akrobacyjne.",
+    "Neutral context after the controlled claims."
+  ].join("\n"))};`
+};
+
+async function productionRegistryFixture(overrides = {}) {
+  const factData = await readFacts();
+  return fixture({
+    facts: factData.facts,
+    blocked_claims: factData.blocked_claims,
+    public_claim_surfaces: factData.public_claim_surfaces,
+    llms: productionFactSurfaceControls.llms,
+    llmsFull: productionFactSurfaceControls.llmsFull,
+    worker: productionFactSurfaceControls.worker,
+    ...overrides
+  });
+}
+
 async function verifyFixtureCss(css) {
   const root = await fixture({ css });
   return runVerification({ root, scope: "foundation" });
@@ -570,6 +611,108 @@ test("Plan 1 broad review accepts an exact approved surface claim without drift"
   const root = await fixture({ facts: [fact(), controlled], llms: approved });
   const result = await runVerification({ root, scope: "facts" });
   assert.ok(!errorIds(result).some((id) => id.startsWith("fact-surface-")), result.errors.join("\n"));
+});
+
+const productionRegistryBoundaryBypasses = [
+  {
+    label: "an Ariba count extended to Fieldglass and S/4HANA",
+    surface: "llms.txt",
+    options: {
+      llms: [
+        "25+ years of procurement experience.",
+        "20+ SAP Ariba implementations followed by SAP Fieldglass and SAP S/4HANA implementations."
+      ].join("\n")
+    },
+    expectedId: "fact-surface-unapproved-unit"
+  },
+  {
+    label: "an experience count extended with unapproved domain meaning",
+    surface: "llms.txt",
+    options: {
+      llms: [
+        "25+ years of procurement experience in strategic sourcing, SAP Ariba, and digital transformation.",
+        "20+ SAP Ariba implementations."
+      ].join("\n")
+    },
+    expectedId: "fact-surface-unapproved-unit"
+  },
+  {
+    label: "a second unsupported EUR 500M assertion",
+    surface: "llms-full.txt",
+    options: {
+      llmsFull: productionFactSurfaceControls.llmsFull.replace(
+        "Total value of delivered projects: EUR 500M.",
+        "Total value of delivered projects: EUR 500M. This means at least EUR 500M."
+      )
+    },
+    expectedId: "fact-surface-unapproved-unit"
+  },
+  {
+    label: "an independently phrased annual PLN portfolio",
+    surface: "llms.txt",
+    options: {
+      llms: `${productionFactSurfaceControls.llms}\nAnnual procurement portfolio was PLN 500 million per year.`
+    },
+    expectedId: "fact-surface-status"
+  }
+];
+
+for (const { label, surface, options, expectedId } of productionRegistryBoundaryBypasses) {
+  test(`Plan 1 broad review round 2 production registry rejects ${label}`, async () => {
+    const root = await productionRegistryFixture(options);
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith(`ERROR ${expectedId} ${surface}:`)),
+      result.errors.join("\n")
+    );
+  });
+}
+
+test("Plan 1 broad review round 2 production registry accepts exact controlled lines with surrounding prose", async () => {
+  const root = await productionRegistryFixture();
+  const result = await runVerification({ root, scope: "facts" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 1 broad review round 2 decodes a retired claim in a quoted JS literal", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\n${String.raw`const formerName = "WarsawFlight\u0053afety";`}`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status assets/js/main.js:")),
+    result.errors.join("\n")
+  );
+});
+
+test("Plan 1 broad review round 2 decodes a review claim in a static JS template literal", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\nconst responseSla = \`Paweł usually replies within a d\\u0061y\`;`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status assets/js/main.js:")),
+    result.errors.join("\n")
+  );
+});
+
+test("Plan 1 broad review round 2 keeps unrelated escaped JS literals safe", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\n${String.raw`const safeName = "WarsawFlight\u0052afety";`} const safeTemplate = \`reply within two days\`;`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 1 broad review round 2 facts scan fails closed on malformed JS", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\nconst broken = "unterminated;`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-js-lexical assets/js/main.js:")),
+    result.errors.join("\n")
+  );
 });
 
 test("missing fixture files report standardized file-read errors", async () => {

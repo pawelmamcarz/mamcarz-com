@@ -1,10 +1,16 @@
 # Paweł Mamcarz · Procurement Expert & SAP Ariba
 
-> Associate Partner CEE at apsolut Group (part of All for One Group SE). 25+ years of procurement experience across Central and Eastern Europe.
+> Associate Partner CEE at apsolut Group (part of All for One Group SE).
+
+25+ years of procurement experience.
 
 ## About
 
-Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year. His portfolio includes 20+ SAP Ariba implementations across Poland, Czech Republic, Slovakia, Hungary, and Romania for clients including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, and MOL.
+Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year.
+
+20+ SAP Ariba implementations.
+
+His work spans Poland, Czech Republic, Slovakia, Hungary, and Romania for clients including KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, and MOL.
 
 Before joining apsolut, he held senior roles at SAP Polska (SAP Ariba Senior Account Executive), PZU (Strategic Project Director), PwC (Vice Director, Advisory), PKP PLK (Board Advisor), PKP Intercity (Program Director), and PKN ORLEN (Procurement Department Head, CONNECT Platform Project Manager).
 
@@ -47,4 +53,8 @@ Languages: Polish (native), English (fluent), German (advanced), Russian (commun
 
 ## PL
 
-Paweł Mamcarz · ekspert zakupowy, konsultant ds. wdrożeń systemów zakupowych (SAP Ariba, Fieldglass, S/4HANA) i twórca aplikacji operacyjnych dla procurement, field service management oraz aviation. Associate Partner CEE w apsolut Group / All for One Group. 25+ lat doświadczenia w zakupach. Klienci obejmują ORLEN, KGHM, Żabkę Polska, PLL LOT, PGE, PZU, MOL i Motor Oil Hellas.
+Paweł Mamcarz · ekspert zakupowy, konsultant ds. wdrożeń systemów zakupowych (SAP Ariba, Fieldglass, S/4HANA) i twórca aplikacji operacyjnych dla procurement, field service management oraz aviation. Associate Partner CEE w apsolut Group / All for One Group.
+
+25+ lat doświadczenia w zakupach.
+
+Klienci obejmują ORLEN, KGHM, Żabkę Polska, PLL LOT, PGE, PZU, MOL i Motor Oil Hellas.
