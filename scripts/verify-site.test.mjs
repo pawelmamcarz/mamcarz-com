@@ -166,6 +166,8 @@ function homepageFixture(lang, content) {
     : [["Advisory", "Advisory"], ["Operational application", "Operational%20application"], ["Aviation", "Aviation"]];
   const skipLabel = lang === "pl" ? "Przejdź do treści" : "Skip to main content";
   return `<!doctype html><html lang="${lang}"><head>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person"}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite"}</script>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
     <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-1">
@@ -886,6 +888,105 @@ test("Task 7 round 3 probe catches optional methods and nested member-call prefi
     const result = await runVerification({ root, scope: "foundation" });
     assert.ok(errorIds(result).includes("js-inner-html"), label);
   }
+});
+
+const task7Round4FunctionExpressionSinks = [
+  ["generator function expression", "const result = function* () {} / (node.innerHTML = payload) / divisor;"],
+  ["named async-generator function expression", "const result = async function* generated() {} / (node.outerHTML = payload) / divisor;"]
+];
+
+for (const [label, mutation] of task7Round4FunctionExpressionSinks) {
+  test(`Task 7 round 4 rejects ${label} division sinks`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"));
+  });
+}
+
+const task7Round4FunctionDeclarationRegexControls = [
+  ["normal function declaration with a multiline header", "function /* header */ declared(\n  value = {}\n) {} /.innerHTML=/.test(value);"],
+  ["async function declaration", "async /* header */ function declaredAsync() {} /.outerHTML=/.test(value);"],
+  ["generator function declaration", "function* declaredGenerator() {} /.innerHTML=/.test(value);"],
+  ["async-generator function declaration", "async function* declaredAsyncGenerator() {} /.outerHTML=/.test(value);"]
+];
+
+for (const [label, control] of task7Round4FunctionDeclarationRegexControls) {
+  test(`Task 7 round 4 permits regex after ${label}`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"));
+  });
+}
+
+const task7Round4ClassExpressionSinks = [
+  ["named class expression with extends", "const result = class Extended extends Base {} / (node.innerHTML = payload) / divisor;"],
+  ["anonymous class expression with extends", "const result = class extends Base {} / (node.outerHTML = payload) / divisor;"],
+  ["class expression with a call in its extends expression", "const result = class Extended extends mixin(Base) {} / (node.innerHTML = payload) / divisor;"]
+];
+
+for (const [label, mutation] of task7Round4ClassExpressionSinks) {
+  test(`Task 7 round 4 rejects ${label} division sinks`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"));
+  });
+}
+
+const task7Round4ClassDeclarationRegexControls = [
+  ["class declaration with extends", "class Extended extends Base {} /.innerHTML=/.test(value);"],
+  ["class declaration with a call in its extends expression", "class ExtendedFactory extends mixin(Base) {} /.outerHTML=/.test(value);"],
+  ["class declaration with a multiline commented header", "class /* header */ ExtendedCommented\n  extends /* parent */ Base\n{} /.innerHTML=/.test(value);"]
+];
+
+for (const [label, control] of task7Round4ClassDeclarationRegexControls) {
+  test(`Task 7 round 4 permits regex after ${label}`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"));
+  });
+}
+
+test("Task 7 round 4 preserves declaration contexts after ASI line separators", async () => {
+  const controls = [
+    ["async function after multiline comment ASI", "completedValue /* statement\ncomplete */ async function declaredAfterAsi() {} /.innerHTML=/.test(value);"],
+    ["class after plain ASI", "completedValue\nclass DeclaredAfterAsi extends Base {} /.outerHTML=/.test(value);"]
+  ];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 4 probe catches an async-generator expression division sink", async () => {
+  const js = `${validBrowserScript}\nconst result = async function* /* generator */ generated(value = {}) { yield value; } / (getNode().outerHTML ||= payload) / divisor;`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 4 probe catches a class-expression extends division sink", async () => {
+  const js = `${validBrowserScript}\nconst result = class /* expression */ extends registry.getBase() { method() {} } / (getNode().innerHTML = payload) / divisor;`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 4 probe permits regex after multiline commented declarations", async () => {
+  const js = `${validBrowserScript}
+async /* function header */ function* declaredGenerator(
+  value = {}
+) /* function body */ { if (value) {} }
+/.innerHTML\\s*=/.test(text);
+class /* class header */ DeclaredExtended
+  extends /* heritage */ createBase(
+    Base
+  )
+{ method() {} }
+/.outerHTML\\s*=/.test(text);`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(!errorIds(result).includes("js-inner-html"));
 });
 
 test("Task 7 navigation clears an open mobile menu when entering desktop width", async () => {
@@ -2088,6 +2189,79 @@ const task7Round3ExactResourceMutations = [
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin data-decoy="true">'
   )]
 ];
+
+const task7Round4ScriptTopologyMutations = [
+  ["extra text/ecmascript inline script", (html) => html.replace(
+    "</body>",
+    '<script type="text/ecmascript">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra application/ecmascript inline script", (html) => html.replace(
+    "</body>",
+    '<script type="application/ecmascript">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra application/x-javascript inline script", (html) => html.replace(
+    "</body>",
+    '<script type="application/x-javascript">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra text/javascript1.5 inline script", (html) => html.replace(
+    "</body>",
+    '<script type="text/javascript1.5">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra text/livescript external script", (html) => html.replace(
+    "</body>",
+    '<script type="text/livescript" src="/assets/js/legacy.js"></script></body>'
+  )],
+  ["extra inline module script", (html) => html.replace(
+    "</body>",
+    '<script type="module">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra external module script", (html) => html.replace(
+    "</body>",
+    '<script type="module" src="/assets/js/module.js"></script></body>'
+  )],
+  ["extra untyped inline script", (html) => html.replace(
+    "</body>",
+    '<script>window.reviewExtra = true;</script></body>'
+  )],
+  ["extra unknown-MIME inline script", (html) => html.replace(
+    "</body>",
+    '<script type="application/x-review-decoy">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra unknown-MIME external script", (html) => html.replace(
+    "</body>",
+    '<script type="application/x-review-decoy" src="/assets/js/decoy.js"></script></body>'
+  )],
+  ["external JSON-LD decoy script", (html) => html.replace(
+    "</body>",
+    '<script type="application/ld+json" src="/assets/js/structured-data-decoy.js"></script></body>'
+  )],
+  ["inert template script decoy", (html) => html.replace(
+    "</body>",
+    '<template><script type="application/json">{"decoy":true}</script></template></body>'
+  )]
+];
+
+for (const lang of ["pl", "en"]) {
+  test(`Task 7 round 4 script topology accepts exactly two JSON-LD blocks and one main script on ${lang}`, async () => {
+    const root = await fixture({ [`${lang}Html`]: homepageFixture(lang, lang === "pl" ? "Marka" : "Brand") });
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(!errorIds(result).includes("home-cache-version"));
+  });
+  for (const [mutation, mutate] of task7Round4ScriptTopologyMutations) {
+    test(`Task 7 round 4 script topology rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes("home-cache-version"));
+    });
+  }
+}
+
+test("Task 7 round 4 probe rejects an extra obscure text/jscript script", async () => {
+  const result = await task7HomeMutation("pl", (html) => html.replace(
+    "</body>",
+    '<script type="text/jscript">window.obscureReviewExtra = true;</script></body>'
+  ));
+  assert.ok(errorIds(result).includes("home-cache-version"));
+});
 
 for (const lang of ["pl", "en"]) {
   test(`Task 7 round 3 exact resources accepts current controlled tags on ${lang}`, async () => {

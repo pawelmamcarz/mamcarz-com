@@ -244,7 +244,7 @@ function elementHasHiddenState(element) {
 }
 
 function elementIsStaticallyHidden(element) {
-  return elementHasHiddenState(element) || rawTextElements.has(element.name);
+  return elementHasHiddenState(element) || staticallyHiddenElements.has(element.name);
 }
 
 function elementIsStaticallyVisible(element) {
@@ -311,7 +311,8 @@ const homepageMarkers = [
 const forbiddenHomepageCopy = ["—", "nie tylko", "kompleksow", "innowacyjn", "realnie", "#1", "największ", "Polpharma"];
 const retiredHomepageAviationName = /(^|[^\p{L}\p{N}_])warsawflightsafety($|[^\p{L}\p{N}_])/u;
 const blockTextElements = new Set(["address", "article", "aside", "blockquote", "body", "br", "dd", "details", "dialog", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul"]);
-const rawTextElements = new Set(["script", "style", "template"]);
+const rawTextElements = new Set(["script", "style"]);
+const staticallyHiddenElements = new Set(["script", "style", "template"]);
 const voidHtmlElements = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
 
 const homeFactTags = ["a", "dd", "div", "h1", "h3", "li", "p", "span", "strong"];
@@ -658,20 +659,19 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
       && elementAttribute(element, "href") === expectedCss
       && elementIsActiveResource(element);
   });
-  const executableScriptTypes = new Set(["", "text/javascript", "application/javascript", "module"]);
   const scriptAttributeNames = new Set(["src", "defer"]);
-  const browserScriptNodes = elements.filter((element) => {
-    if (element.name !== "script") return false;
-    const type = element.attributes.has("type") ? normalize(elementAttribute(element, "type") ?? "") : "";
-    return (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js") || executableScriptTypes.has(type);
-  });
-  const validBrowserScripts = browserScriptNodes.filter((element) => elementHasExactAttributeNames(element, scriptAttributeNames)
+  const jsonLdAttributeNames = new Set(["type"]);
+  const scriptNodes = elements.filter((element) => element.name === "script");
+  const jsonLdScripts = scriptNodes.filter((element) => elementHasExactAttributeNames(element, jsonLdAttributeNames)
+    && normalize(elementAttribute(element, "type") ?? "") === "application/ld+json"
+    && elementIsActiveResource(element));
+  const validBrowserScripts = scriptNodes.filter((element) => elementHasExactAttributeNames(element, scriptAttributeNames)
     && elementAttribute(element, "src") === expectedJs
     && element.attributes.has("defer")
     && elementIsActiveResource(element));
   if (stylesheetNodes.length !== 1 || validStylesheets.length !== 1
-    || browserScriptNodes.length !== 1 || validBrowserScripts.length !== 1) {
-    error(errors, "home-cache-version", page.path, `homepage requires exactly one active ${expectedCss} stylesheet and one executable deferred ${expectedJs} script`);
+    || scriptNodes.length !== 3 || jsonLdScripts.length !== 2 || validBrowserScripts.length !== 1) {
+    error(errors, "home-cache-version", page.path, `homepage requires exactly one active ${expectedCss} stylesheet, two inline application/ld+json scripts and one deferred ${expectedJs} script`);
   }
 
   const expectedFontHrefs = new Set([
@@ -1067,32 +1067,17 @@ function tokenizeJavascriptForHtmlSinks(source) {
 
   const constructIsDeclaration = (index) => {
     const before = tokens[index - 1];
-    return !before || before.value === ";" || before.value === "{" || before.closesBlock;
-  };
-
-  const functionKindBeforeParenthesis = () => {
-    const last = tokens.length - 1;
-    const functionIndex = tokens[last]?.value === "function"
-      ? last
-      : (tokens[last]?.type === "identifier" && tokens[last - 1]?.value === "function" ? last - 1 : -1);
-    if (functionIndex === -1) return null;
-    return constructIsDeclaration(functionIndex) ? "function-declaration" : "function-expression";
-  };
-
-  const classKindBeforeBrace = () => {
-    const last = tokens.length - 1;
-    const classIndex = tokens[last]?.value === "class"
-      ? last
-      : (tokens[last]?.type === "identifier" && tokens[last - 1]?.value === "class" ? last - 1 : -1);
-    if (classIndex === -1) return null;
-    return constructIsDeclaration(classIndex) ? "block" : "expression";
+    const construct = tokens[index];
+    return !before
+      || before.value === ";"
+      || before.value === "{"
+      || before.closesBlock
+      || (construct?.lineBreakBefore && tokenCanEndExpression(before));
   };
 
   const braceKind = (previous) => {
     if (previous?.value === "=>" || previous?.closesFunction === "expression") return "expression";
     if (previous?.closesFunction === "declaration") return "block";
-    const classKind = classKindBeforeBrace();
-    if (classKind !== null) return classKind;
     if (!previous || previous.afterControlHead || previous.closesBlock || blockPrefixKeywords.has(previous.value)) return "block";
     if ([";", "{", ")"].includes(previous.value)) return "block";
     return "expression";
@@ -1158,6 +1143,9 @@ function tokenizeJavascriptForHtmlSinks(source) {
     let previous = null;
     const parenthesisKinds = [];
     const braceKinds = [];
+    const pendingFunctions = [];
+    const pendingClasses = [];
+    let bracketDepth = 0;
     let lineBreakBefore = false;
     const pushCode = (type, value, metadata = {}) => {
       const token = push(type, value, { lineBreakBefore, ...metadata });
@@ -1208,7 +1196,27 @@ function tokenizeJavascriptForHtmlSinks(source) {
       const codePoint = sourceCodePoint(source, index);
       if (character === "\\" || jsIdentifierStart.test(codePoint.value)) {
         const identifier = readJsIdentifier(source, index, errors);
+        const before = previous;
+        const tokenIndex = tokens.length;
+        const hadLineBreakBefore = lineBreakBefore;
         previous = pushCode("identifier", identifier.value);
+        if (identifier.value === "function" && ![".", "?."].includes(before?.value)) {
+          const asyncFunction = before?.type === "identifier" && before.value === "async" && !hadLineBreakBefore;
+          const constructIndex = asyncFunction ? tokenIndex - 1 : tokenIndex;
+          pendingFunctions.push({
+            kind: constructIsDeclaration(constructIndex) ? "declaration" : "expression",
+            parenthesisDepth: parenthesisKinds.length,
+            bracketDepth,
+            braceDepth: braceKinds.length
+          });
+        } else if (identifier.value === "class" && ![".", "?."].includes(before?.value)) {
+          pendingClasses.push({
+            kind: constructIsDeclaration(tokenIndex) ? "declaration" : "expression",
+            parenthesisDepth: parenthesisKinds.length,
+            bracketDepth,
+            braceDepth: braceKinds.length
+          });
+        }
         index = identifier.end > index ? identifier.end : codePoint.end;
         continue;
       }
@@ -1226,7 +1234,13 @@ function tokenizeJavascriptForHtmlSinks(source) {
       }
       const punctuator = jsPunctuators.find((candidate) => source.startsWith(candidate, index)) ?? character;
       if (punctuator === "(") {
-        const functionKind = functionKindBeforeParenthesis();
+        const pendingFunction = pendingFunctions.at(-1);
+        const functionKind = pendingFunction
+          && pendingFunction.parenthesisDepth === parenthesisKinds.length
+          && pendingFunction.bracketDepth === bracketDepth
+          && pendingFunction.braceDepth === braceKinds.length
+          ? `function-${pendingFunctions.pop().kind}`
+          : null;
         parenthesisKinds.push(previous?.type === "identifier" && regexControlHeadKeywords.has(previous.value)
           ? "control"
           : (functionKind ?? "normal"));
@@ -1238,13 +1252,26 @@ function tokenizeJavascriptForHtmlSinks(source) {
           closesFunction: kind === "function-expression" ? "expression" : (kind === "function-declaration" ? "declaration" : null)
         });
       } else if (punctuator === "{") {
+        const pendingClass = pendingClasses.at(-1);
+        const classKind = pendingClass
+          && pendingClass.parenthesisDepth === parenthesisKinds.length
+          && pendingClass.bracketDepth === bracketDepth
+          && pendingClass.braceDepth === braceKinds.length
+          ? (pendingClasses.pop().kind === "declaration" ? "block" : "expression")
+          : null;
         braceDepth += 1;
-        const kind = braceKind(previous);
+        const kind = classKind ?? braceKind(previous);
         braceKinds.push(kind);
         previous = pushCode("punctuator", punctuator);
       } else if (punctuator === "}") {
         if (braceDepth > 0) braceDepth -= 1;
         previous = pushCode("punctuator", punctuator, { closesBlock: braceKinds.pop() === "block" });
+      } else if (punctuator === "[") {
+        bracketDepth += 1;
+        previous = pushCode("punctuator", punctuator);
+      } else if (punctuator === "]") {
+        if (bracketDepth > 0) bracketDepth -= 1;
+        previous = pushCode("punctuator", punctuator);
       } else {
         previous = pushCode("punctuator", punctuator);
       }
