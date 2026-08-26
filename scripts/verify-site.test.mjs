@@ -88,7 +88,7 @@ function pageNavigationFixture(lang, pairedRoute) {
   return navigationFixture[lang].replace(currentLanguageLink, pairedLanguageLink);
 }
 
-function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title = "Page" }) {
+function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title = "Page", lead = "", dataPage = "fixture" }) {
   const route = lang === "pl" ? plRoute : enRoute;
   const pairedRoute = lang === "pl" ? enRoute : plRoute;
   return `<!doctype html><html lang="${lang}"><head>
@@ -99,20 +99,26 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
     <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2">
     ${head}
-  </head><body data-page="fixture">
+  </head><body data-page="${dataPage}">
     <a class="skip-link" href="#main">Skip</a>
     ${pageNavigationFixture(lang, pairedRoute)}
-    <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1></header>${body}</main>
+    <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
     <footer class="site-footer"><a href="mailto:pawel@mamcarz.com">Contact</a></footer>
     <script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script>
   </body></html>`;
 }
 
 function pagePairFiles(pair, overrides = {}) {
-  const [plFile, enFile, plRoute, enRoute] = pair;
+  const [plFile, enFile, plRoute, enRoute, family] = pair;
+  const defaultPl = family === "applications"
+    ? applicationPageFixture("pl")
+    : pageShellFixture({ lang: "pl", plRoute, enRoute, title: "Strona" });
+  const defaultEn = family === "applications"
+    ? applicationPageFixture("en")
+    : pageShellFixture({ lang: "en", plRoute, enRoute, title: "Page" });
   return {
-    [plFile]: overrides.pl ?? pageShellFixture({ lang: "pl", plRoute, enRoute, title: "Strona" }),
-    [enFile]: overrides.en ?? pageShellFixture({ lang: "en", plRoute, enRoute, title: "Page" })
+    [plFile]: overrides.pl ?? defaultPl,
+    [enFile]: overrides.en ?? defaultEn
   };
 }
 
@@ -126,7 +132,7 @@ async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
   delete remaining["en/index.html"];
   delete remaining["uslugi/wdrozenie-sap-ariba/index.html"];
   return fixture({
-    facts,
+    facts: withApplicationFacts(facts),
     plHtml,
     enHtml,
     serviceHtml,
@@ -404,6 +410,7 @@ const productionFactSurfaceControls = {
 
 async function productionRegistryFixture(overrides = {}) {
   const factData = await readFacts();
+  const { extraFiles = {}, ...fixtureOverrides } = overrides;
   return fixture({
     facts: factData.facts,
     blocked_claims: factData.blocked_claims,
@@ -411,7 +418,12 @@ async function productionRegistryFixture(overrides = {}) {
     llms: productionFactSurfaceControls.llms,
     llmsFull: productionFactSurfaceControls.llmsFull,
     worker: productionFactSurfaceControls.worker,
-    ...overrides
+    ...fixtureOverrides,
+    extraFiles: {
+      "aplikacje-operacyjne/index.html": applicationPageFixture("pl"),
+      "en/aplikacje-operacyjne/index.html": applicationPageFixture("en"),
+      ...extraFiles
+    }
   });
 }
 
@@ -422,13 +434,103 @@ async function verifyFixtureCss(css) {
 
 const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "applications");
 
+const applicationContract = {
+  pl: {
+    title: "Aplikacje operacyjne",
+    lead: "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji.",
+    description: "Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.",
+    url: "https://mamcarz.com/aplikacje-operacyjne/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna"
+  },
+  en: {
+    title: "Operational applications",
+    lead: "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work.",
+    description: "Operational application design around process, data, user responsibility and day-to-day work.",
+    url: "https://mamcarz.com/en/aplikacje-operacyjne/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Operational%20application"
+  }
+};
+
+const applicationEvidenceFacts = [
+  ["portfolio.czympojade_pl", "czympojade.pl", "czympojade.pl"],
+  ["portfolio.czympojade_pl.type", "Aplikacja transportowa do pracy z połączeniami i rozkładami.", "Transport application for working with connections and timetables."],
+  ["portfolio.przypominamy_com", "Przypominamy.com", "Przypominamy.com"],
+  ["portfolio.przypominamy_com.type", "Platforma powiadomień dla organizacji.", "Notification platform for organisations."],
+  ["portfolio.procuracost", "ProcuraCost", "ProcuraCost"],
+  ["portfolio.procuracost.type", "Kalkulator kosztów procedur zakupowych.", "Procurement procedure cost calculator."]
+];
+
+const applicationEvidenceRows = [
+  ["portfolio.czympojade_pl", "portfolio.czympojade_pl.type"],
+  ["portfolio.przypominamy_com", "portfolio.przypominamy_com.type"],
+  ["portfolio.procuracost", "portfolio.procuracost.type"]
+];
+
+function applicationFactRecords() {
+  const surfaces = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
+  return applicationEvidenceFacts.map(([id, displayPl, displayEn]) => fact({
+    id,
+    value: displayEn,
+    display_pl: displayPl,
+    display_en: displayEn,
+    surfaces,
+    status: "approved"
+  }));
+}
+
+function withApplicationFacts(records) {
+  const merged = [...(records ?? [fact()])];
+  for (const record of applicationFactRecords()) {
+    if (!merged.some((candidate) => candidate.id === record.id)) merged.push(record);
+  }
+  return merged;
+}
+
+function applicationSchemaFixture(lang) {
+  const copy = applicationContract[lang];
+  return `<script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: copy.title,
+    url: copy.url,
+    description: copy.description,
+    provider: { "@type": "Person", name: "Paweł Mamcarz" }
+  })}</script>`;
+}
+
+function applicationPageFixture(lang, { extraBody = "" } = {}) {
+  const copy = applicationContract[lang];
+  const [plRoute, enRoute] = applicationsPair.slice(2, 4);
+  const evidence = applicationEvidenceRows.map(([nameId, typeId]) => {
+    const name = applicationEvidenceFacts.find(([id]) => id === nameId)?.[lang === "pl" ? 1 : 2];
+    const type = applicationEvidenceFacts.find(([id]) => id === typeId)?.[lang === "pl" ? 1 : 2];
+    return `<article class="evidence-row" data-fact-ids="${nameId} ${typeId}"><h3 class="evidence-row__title">${name}</h3><dl class="evidence-row__ledger"><div><dt>${lang === "pl" ? "Funkcja" : "Function"}</dt><dd>${type}</dd></div></dl></article>`;
+  }).join("");
+  const body = `
+    <section data-section="problem"><h2>${lang === "pl" ? "Proces przed interfejsem" : "Process before interface"}</h2><dl class="applications-ledger"><div><dt>Procurement</dt><dd>Decisions and data</dd></div><div><dt>Field service</dt><dd>Resources and documents</dd></div><div><dt>Aviation</dt><dd>Operational responsibility</dd></div></dl></section>
+    <section data-section="delivery"><h2>${lang === "pl" ? "Droga do uruchomienia" : "Route to launch"}</h2><div class="route-sequence"><article class="route-sequence__step" data-step="discovery"><h3>Discovery</h3></article><article class="route-sequence__step" data-step="data-model"><h3>${lang === "pl" ? "Model danych" : "Data model"}</h3></article><article class="route-sequence__step" data-step="workflow"><h3>Workflow</h3></article><article class="route-sequence__step" data-step="launch"><h3>${lang === "pl" ? "Uruchomienie" : "Launch"}</h3></article></div></section>
+    <section data-section="evidence"><h2>${lang === "pl" ? "Wybrane produkty" : "Selected products"}</h2>${evidence}</section>
+    <section data-section="fit"><h2>${lang === "pl" ? "Warunki dobrego dopasowania" : "Conditions for a good fit"}</h2><dl class="applications-ledger"><div><dt>${lang === "pl" ? "Właściciel procesu" : "Process owner"}</dt><dd>Named responsibility</dd></div><div><dt>${lang === "pl" ? "Wiedza domenowa" : "Domain knowledge"}</dt><dd>Access to users</dd></div></dl></section>
+    ${extraBody}
+    <section data-section="contact"><h2>${lang === "pl" ? "Porozmawiajmy o procesie" : "Discuss the process"}</h2><a class="btn-primary" href="${copy.contactHref}">${lang === "pl" ? "Opisz aplikację operacyjną" : "Describe the operational application"}</a></section>`;
+  return pageShellFixture({
+    lang,
+    plRoute,
+    enRoute,
+    title: copy.title,
+    lead: copy.lead,
+    dataPage: "applications",
+    head: applicationSchemaFixture(lang),
+    body
+  });
+}
+
 async function applicationPageMutation({ lang = "pl", mutate = (html) => html, facts, body = "", extraFiles = {} } = {}) {
-  const [, , plRoute, enRoute] = applicationsPair;
-  const base = pageShellFixture({ lang, plRoute, enRoute, title: lang === "pl" ? "Aplikacje" : "Applications", body });
+  const base = applicationPageFixture(lang, { extraBody: body });
   const mutated = mutate(base);
   assert.notEqual(mutated, "", "application page mutation must leave a fixture document");
   const overrides = lang === "pl" ? { pl: mutated } : { en: mutated };
-  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair, overrides), facts, extraFiles });
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair, overrides), facts: withApplicationFacts(facts), extraFiles });
   return runVerification({ root, scope: "pages", family: "applications" });
 }
 
@@ -444,7 +546,7 @@ function movePageMetadata(html, destination) {
     assert.ok(moved.includes(tag), `fixture must contain ${tag}`);
     moved = moved.replace(tag, "");
   }
-  return moved.replace('<body data-page="fixture">', `<body data-page="fixture">${destination(metadata.join(""))}`);
+  return moved.replace('<body data-page="applications">', `<body data-page="applications">${destination(metadata.join(""))}`);
 }
 
 test("Plan 2 Task 1 uses the exact route manifest and accepts every declared family", async () => {
@@ -516,7 +618,7 @@ test("Plan 2 Task 1 accepts a complete paired shell and exposes bounded future h
 
 test("Plan 2 Task 1 counts only active h1 and main elements", async () => {
   const mutations = [
-    ["hidden h1 decoy", "page-h1", (html) => html.replace("<h1>Aplikacje</h1>", "<h1 hidden>Aplikacje</h1><template><h1>Aplikacje</h1></template>")],
+    ["hidden h1 decoy", "page-h1", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<h1 hidden>Aplikacje operacyjne</h1><template><h1>Aplikacje operacyjne</h1></template>")],
     ["duplicate visible h1", "page-h1", (html) => html.replace("</header>", "<h1>Drugi nagłówek</h1></header>")],
     ["hidden main decoy", "page-main", (html) => html.replace('<main id="main"', '<main hidden id="main"')],
     ["duplicate visible main", "page-main", (html) => html.replace('<footer class="site-footer">', '<main id="duplicate"><p>Duplicate</p></main><footer class="site-footer">')]
@@ -734,14 +836,14 @@ test("Plan 2 Task 1 fix round 1 requires the exact visible paired-language label
 
 test("Plan 2 Task 1 fix round 1 treats inline CSS and closed details as statically hidden", async () => {
   const cases = [
-    ["display none", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display:none">Aplikacje</h1>'), true],
-    ["mixed-case important display none", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="  DiSpLaY :  NoNe !IMPORTANT  ">Aplikacje</h1>'), true],
-    ["mixed-case visibility hidden", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style=" VISIBILITY : Hidden ">Aplikacje</h1>'), true],
-    ["hidden ancestor", (html) => html.replace("<h1>Aplikacje</h1>", "<div hidden><h1>Aplikacje</h1></div>"), true],
-    ["aria-hidden ancestor", (html) => html.replace("<h1>Aplikacje</h1>", '<div aria-hidden="true"><h1>Aplikacje</h1></div>'), true],
-    ["closed details", (html) => html.replace("<h1>Aplikacje</h1>", "<details><h1>Aplikacje</h1></details>"), true],
-    ["open details", (html) => html.replace("<h1>Aplikacje</h1>", "<details open><h1>Aplikacje</h1></details>"), false],
-    ["benign inline style", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="color: red">Aplikacje</h1>'), false]
+    ["display none", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display:none">Aplikacje operacyjne</h1>'), true],
+    ["mixed-case important display none", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="  DiSpLaY :  NoNe !IMPORTANT  ">Aplikacje operacyjne</h1>'), true],
+    ["mixed-case visibility hidden", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style=" VISIBILITY : Hidden ">Aplikacje operacyjne</h1>'), true],
+    ["hidden ancestor", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<div hidden><h1>Aplikacje operacyjne</h1></div>"), true],
+    ["aria-hidden ancestor", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<div aria-hidden="true"><h1>Aplikacje operacyjne</h1></div>'), true],
+    ["closed details", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<details><h1>Aplikacje operacyjne</h1></details>"), true],
+    ["open details", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<details open><h1>Aplikacje operacyjne</h1></details>"), false],
+    ["benign inline style", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="color: red">Aplikacje operacyjne</h1>'), false]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate, shouldFail]) => ({
     label,
@@ -820,11 +922,11 @@ test("Plan 2 Task 1 fix round 2 rejects nested, misordered and duplicate documen
   const moveHeadIntoBody = (html) => {
     const head = extractBlock(html, "<head>", "</head>");
     const withoutHead = html.slice(0, head.start) + html.slice(head.end);
-    return withoutHead.replace('<body data-page="fixture">', `<body data-page="fixture">${head.block}`);
+    return withoutHead.replace('<body data-page="applications">', `<body data-page="applications">${head.block}`);
   };
   const putBodyBeforeHead = (html) => {
     const head = extractBlock(html, "<head>", "</head>");
-    const body = extractBlock(html, '<body data-page="fixture">', "</body>");
+    const body = extractBlock(html, '<body data-page="applications">', "</body>");
     assert.ok(head.end <= body.start, "fixture head must precede body");
     return html.slice(0, head.start) + body.block + head.block + html.slice(body.end);
   };
@@ -832,12 +934,12 @@ test("Plan 2 Task 1 fix round 2 rejects nested, misordered and duplicate documen
     ["head nested in body", moveHeadIntoBody],
     ["body before head", putBodyBeforeHead],
     ["duplicate head", (html) => html.replace("</head>", "</head><head></head>")],
-    ["duplicate body", (html) => html.replace('<body data-page="fixture">', '<body></body><body data-page="fixture">')],
+    ["duplicate body", (html) => html.replace('<body data-page="applications">', '<body></body><body data-page="applications">')],
     ["duplicate html root", (html) => html.replace("</html>", "</html><html></html>")],
     ["body nested below div", (html) => html
-      .replace('<body data-page="fixture">', '<div><body data-page="fixture">')
+      .replace('<body data-page="applications">', '<div><body data-page="applications">')
       .replace("</body></html>", "</body></div></html>")],
-    ["missing body element", (html) => html.replace('<body data-page="fixture">', "").replace("</body>", "")]
+    ["missing body element", (html) => html.replace('<body data-page="applications">', "").replace("</body>", "")]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
     label,
@@ -867,7 +969,7 @@ test("Plan 2 Task 1 fix round 2 decodes and comment-normalizes hidden inline sty
   const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
     label,
     shouldFail,
-    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje</h1>", `<h1 ${style}>Aplikacje</h1>`) })
+    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje operacyjne</h1>", `<h1 ${style}>Aplikacje operacyjne</h1>`) })
   })));
   for (const { label, shouldFail, result } of outcomes) {
     assert.equal(errorIds(result).includes("page-h1"), shouldFail, label);
@@ -943,7 +1045,7 @@ test("Plan 2 Task 1 fix round 3 decodes browser numeric references and CSS escap
   const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
     label,
     shouldFail,
-    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje</h1>", `<h1 ${style}>Aplikacje</h1>`) })
+    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje operacyjne</h1>", `<h1 ${style}>Aplikacje operacyjne</h1>`) })
   })));
   const mismatches = outcomes
     .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
@@ -956,12 +1058,12 @@ test("Plan 2 Task 1 fix round 4 honors exact-case named references in rendered t
   const cases = [
     ["exact whitespace names in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&Tab;EN&NewLine;</a>`), "page-language", false],
     ["invalid whitespace name case in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&TAB;EN&NEWLINE;</a>`), "page-language", true],
-    ["exact lowercase colon hides the heading", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&colon;none">Aplikacje</h1>'), "page-h1", true],
-    ["invalid uppercase colon leaves the heading visible", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&COLON;none">Aplikacje</h1>'), "page-h1", false],
-    ["exact lowercase bsol exposes a CSS escape", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="d&bsol;69splay:none">Aplikacje</h1>'), "page-h1", true],
-    ["invalid uppercase bsol remains literal", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="d&BSOL;69splay:none">Aplikacje</h1>'), "page-h1", false],
-    ["numeric to named reference stays one pass", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&#38;colon;none">Aplikacje</h1>'), "page-h1", false],
-    ["named to numeric reference stays one pass", (html) => html.replace("<h1>Aplikacje</h1>", '<h1 style="display&AMP;#58;none">Aplikacje</h1>'), "page-h1", false]
+    ["exact lowercase colon hides the heading", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&colon;none">Aplikacje operacyjne</h1>'), "page-h1", true],
+    ["invalid uppercase colon leaves the heading visible", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&COLON;none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["exact lowercase bsol exposes a CSS escape", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="d&bsol;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", true],
+    ["invalid uppercase bsol remains literal", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="d&BSOL;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["numeric to named reference stays one pass", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&#38;colon;none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["named to numeric reference stays one pass", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", '<h1 style="display&AMP;#58;none">Aplikacje operacyjne</h1>'), "page-h1", false]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate, expectedId, shouldFail]) => ({
     label,
@@ -1020,7 +1122,7 @@ test("Plan 2 Task 1 fix round 4 fails closed on unterminated CSS strings and pre
   const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
     label,
     shouldFail,
-    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje</h1>", `<h1 ${style}>Aplikacje</h1>`) })
+    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje operacyjne</h1>", `<h1 ${style}>Aplikacje operacyjne</h1>`) })
   })));
   const mismatches = outcomes
     .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
@@ -1078,6 +1180,153 @@ test("Plan 2 Task 1 fix round 5 preserves inactive wrappers and disclosure-open 
   });
   assert.equal(errorIds(valid).includes("page-language"), false, valid.errors.join("\n"));
   assert.equal(errorIds(valid).includes("page-navigation"), false, valid.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 requires the exact localized application identity and opening lead", async () => {
+  const cases = [
+    ["wrong Polish H1", "pl", "application-h1", (html) => html.replace("<h1>Aplikacje operacyjne</h1>", "<h1>Aplikacje</h1>")],
+    ["wrong English H1", "en", "application-h1", (html) => html.replace("<h1>Operational applications</h1>", "<h1>Applications</h1>")],
+    ["changed Polish lead", "pl", "application-lead", (html) => html.replace(applicationContract.pl.lead, "Buduję aplikacje dla firm.")],
+    ["hidden English lead with a template decoy", "en", "application-lead", (html) => html.replace(
+      `<p class="page-lead">${applicationContract.en.lead}</p>`,
+      `<p class="page-lead" hidden>${applicationContract.en.lead}</p><template><p class="page-lead">${applicationContract.en.lead}</p></template>`
+    )],
+    ["wrong page identity", "pl", "application-data-page", (html) => html.replace('data-page="applications"', 'data-page="services"')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await applicationPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 requires exactly five direct visible section markers in order", async () => {
+  const problemPattern = /<section data-section="problem">[\s\S]*?<\/section>/;
+  const deliveryPattern = /<section data-section="delivery">[\s\S]*?<\/section>/;
+  const cases = [
+    ["missing marker", (html) => html.replace('data-section="problem"', 'data-purpose="problem"')],
+    ["hidden marker", (html) => html.replace('<section data-section="problem">', '<section data-section="problem" hidden>')],
+    ["duplicate marker", (html) => html.replace('<section data-section="problem">', '<section data-section="problem"></section><section data-section="problem">')],
+    ["template decoy", (html) => html.replace(problemPattern, (block) => `<template>${block}</template>`)],
+    ["wrong order", (html) => {
+      const problem = html.match(problemPattern)?.[0];
+      const delivery = html.match(deliveryPattern)?.[0];
+      assert.ok(problem && delivery);
+      return html.replace(problem, "__PROBLEM__").replace(delivery, problem).replace("__PROBLEM__", delivery);
+    }]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-sections"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 requires the real four-step delivery sequence", async () => {
+  const mutations = [
+    (html) => html.replace('data-step="data-model"', 'data-step="workflow"'),
+    (html) => html.replace("<h3>Model danych</h3>", "<h3>Architektura</h3>"),
+    (html) => html.replace('class="route-sequence"', 'class="delivery-list"')
+  ];
+  for (const mutate of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-delivery"), result.errors.join("\n"));
+  }
+});
+
+test("Plan 2 Task 2 accepts only one direct purpose-only Service schema", async () => {
+  const validSchema = applicationSchemaFixture("pl");
+  const forbiddenFieldSchema = validSchema.replace('"provider":', '"offers":{},"provider":');
+  const wrongTypeSchema = validSchema.replace('"@type":"Service"', '"@type":"Person"');
+  const cases = [
+    ["forbidden field", (html) => html.replace(validSchema, forbiddenFieldSchema)],
+    ["wrong active type with hidden valid decoy", (html) => html.replace(validSchema, `${wrongTypeSchema}<template>${validSchema}</template>`)],
+    ["duplicate schema", (html) => html.replace(validSchema, `${validSchema}${validSchema}`)],
+    ["schema outside head", (html) => html.replace(validSchema, "").replace("</main>", `${validSchema}</main>`)]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-schema"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 binds every evidence row to approved paired surfaces and localized displays", async () => {
+  const missingIds = await applicationPageMutation({
+    mutate: (html) => html.replace(' data-fact-ids="portfolio.czympojade_pl portfolio.czympojade_pl.type"', "")
+  });
+  assert.ok(errorIds(missingIds).includes("application-evidence-ids"), missingIds.errors.join("\n"));
+
+  const missingPairedSurface = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    surfaces: ["aplikacje-operacyjne/index.html"]
+  });
+  const surfaceResult = await applicationPageMutation({ facts: [fact(), missingPairedSurface] });
+  assert.ok(errorIds(surfaceResult).includes("application-evidence-surface"), surfaceResult.errors.join("\n"));
+
+  const wrongDisplay = await applicationPageMutation({
+    mutate: (html) => html.replace(">czympojade.pl</h3>", ">Transport tool</h3>")
+  });
+  assert.ok(errorIds(wrongDisplay).includes("application-evidence-value"), wrongDisplay.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 requires identical ordered evidence IDs across PL and EN", async () => {
+  const result = await applicationPageMutation({
+    lang: "en",
+    mutate: (html) => html
+      .replace("portfolio.czympojade_pl portfolio.czympojade_pl.type", "__FIRST__")
+      .replace("portfolio.przypominamy_com portfolio.przypominamy_com.type", "portfolio.czympojade_pl portfolio.czympojade_pl.type")
+      .replace("__FIRST__", "portfolio.przypominamy_com portfolio.przypominamy_com.type")
+  });
+  assert.ok(errorIds(result).includes("application-evidence-parity"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 requires one localized primary mailto intent in contact", async () => {
+  for (const lang of ["pl", "en"]) {
+    const expected = applicationContract[lang].contactHref;
+    const result = await applicationPageMutation({
+      lang,
+      mutate: (html) => html
+        .replace(`href="${expected}"`, 'href="mailto:pawel@mamcarz.com?subject=General"')
+        .replace("</section></main>", `<a href="${expected}" hidden>Decoy</a></section></main>`)
+    });
+    assert.ok(errorIds(result).includes("application-contact"), `${lang}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 rejects generic software-house and AI-tell copy", async () => {
+  const cases = [
+    ["generic software house", "application-positioning", "Jesteśmy software house dla każdej branży."],
+    ["not just", "application-copy", "We build not just tools but seamless experiences."],
+    ["encoded em dash", "application-copy", "Proces &mdash; technologia."],
+    ["blocked client", "application-copy", "Polpharma"]
+  ];
+  for (const [label, expectedId, copy] of cases) {
+    const result = await applicationPageMutation({ body: `<p>${copy}</p>` });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 rejects visible review and retired fact meanings without annotations", async () => {
+  for (const status of ["review", "retired"]) {
+    const display = `${status} application claim`;
+    const unsafe = fact({
+      id: `application.${status}`,
+      value: display,
+      display_pl: display,
+      display_en: display,
+      surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"],
+      status
+    });
+    const result = await applicationPageMutation({ facts: [fact(), unsafe], body: `<p>${display}</p>` });
+    assert.ok(errorIds(result).includes("application-fact-status"), `${status}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 accepts a complete mirrored application contract", async () => {
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(result.errors, []);
 });
 
 test("readFacts reads fixtures without starting CLI verification", async () => {

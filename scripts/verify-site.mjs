@@ -242,6 +242,8 @@ function parseStaticHtml(html) {
         cursor = html.length;
         break;
       }
+      const rawText = { type: "text", value: html.slice(cursor, match.index), parent: node };
+      node.children.push(rawText);
       cursor = match.index + match[0].length;
       continue;
     }
@@ -2785,6 +2787,267 @@ function verifyFactIds(path, parsedRoot, factData, errors) {
   }
 }
 
+const APPLICATION_PAGE_CONTRACT = {
+  pl: {
+    path: "aplikacje-operacyjne/index.html",
+    title: "Aplikacje operacyjne",
+    lead: "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji.",
+    description: "Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.",
+    url: "https://mamcarz.com/aplikacje-operacyjne/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna",
+    deliveryLabels: ["Discovery", "Model danych", "Workflow", "Uruchomienie"]
+  },
+  en: {
+    path: "en/aplikacje-operacyjne/index.html",
+    title: "Operational applications",
+    lead: "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work.",
+    description: "Operational application design around process, data, user responsibility and day-to-day work.",
+    url: "https://mamcarz.com/en/aplikacje-operacyjne/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Operational%20application",
+    deliveryLabels: ["Discovery", "Data model", "Workflow", "Launch"]
+  }
+};
+
+const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact"];
+const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
+const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
+
+function directElementChildren(node, name = null) {
+  return (node?.children ?? []).filter((child) => child.type === "element" && (name === null || child.name === name));
+}
+
+function elementIsWithin(element, ancestor) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (current === ancestor) return true;
+  }
+  return false;
+}
+
+function rawElementText(element) {
+  let text = "";
+  const visit = (node) => {
+    if (node.type === "text") text += node.value;
+    else for (const child of node.children ?? []) visit(child);
+  };
+  visit(element);
+  return text;
+}
+
+function publishedStaticText(node) {
+  let text = "";
+  const excluded = new Set(["script", "style", "template", "noscript"]);
+  const visit = (current) => {
+    if (current.type === "text") {
+      text += ` ${current.value}`;
+      return;
+    }
+    if (current.type === "element" && excluded.has(current.name)) return;
+    for (const child of current.children ?? []) visit(child);
+  };
+  visit(node);
+  return normalize(decodeHtmlEntities(text));
+}
+
+function sameStringSet(actual, expected) {
+  return actual.length === expected.length && expected.every((key) => actual.includes(key));
+}
+
+function verifyApplicationSchema(path, parsedRoot, lang, errors) {
+  const expected = APPLICATION_PAGE_CONTRACT[lang];
+  const scripts = elementDescendants(parsedRoot, "script")
+    .filter((script) => normalize(elementAttribute(script, "type") ?? "") === "application/ld+json");
+  const heads = elementDescendants(parsedRoot, "head");
+  const script = scripts[0];
+  const validLocation = scripts.length === 1
+    && heads.length === 1
+    && script?.parent === heads[0]
+    && elementIsActiveResource(script)
+    && elementHasExactAttributeNames(script, new Set(["type"]));
+  let schema = null;
+  if (validLocation) {
+    try {
+      schema = JSON.parse(rawElementText(script));
+    } catch {
+      schema = null;
+    }
+  }
+  const keys = isPlainObject(schema) ? Object.keys(schema) : [];
+  const provider = isPlainObject(schema?.provider) ? schema.provider : null;
+  const valid = validLocation
+    && isPlainObject(schema)
+    && sameStringSet(keys, ["@context", "@type", "name", "url", "description", "provider"])
+    && schema["@context"] === "https://schema.org"
+    && schema["@type"] === "Service"
+    && schema.name === expected.title
+    && schema.url === expected.url
+    && schema.description === expected.description
+    && provider !== null
+    && sameStringSet(Object.keys(provider), ["@type", "name"])
+    && provider["@type"] === "Person"
+    && provider.name === "Paweł Mamcarz";
+  if (!valid) {
+    error(errors, "application-schema", path, "requires one direct purpose-only Service JSON-LD object with the localized page identity and Paweł Mamcarz as provider");
+  }
+}
+
+function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
+  const expected = APPLICATION_PAGE_CONTRACT[lang];
+  const all = elementDescendants(parsedRoot);
+  const active = all.filter(pageElementIsActive);
+  const bodies = all.filter((element) => element.name === "body");
+  const body = bodies.length === 1 ? bodies[0] : null;
+  if (body === null || elementAttribute(body, "data-page") !== "applications") {
+    error(errors, "application-data-page", path, 'body must use data-page="applications"');
+  }
+
+  const mains = active.filter((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  const main = mains.length === 1 ? mains[0] : null;
+  const skipLinks = active.filter((element) => element.name === "a" && elementHasClass(element, "skip-link") && elementAttribute(element, "href") === "#main");
+  const overlays = active.filter((element) => element.name === "div" && elementHasClass(element, "nav-overlay") && elementAttribute(element, "id") === "nav-overlay");
+  const footers = active.filter((element) => element.name === "footer" && elementHasClass(element, "site-footer"));
+  if (main === null
+    || elementAttribute(main, "tabindex") !== "-1"
+    || skipLinks.length !== 1
+    || overlays.length !== 1
+    || footers.length !== 1) {
+    error(errors, "application-shell", path, "requires the shared skip link, main focus target, nav overlay and site footer");
+  }
+
+  const heroes = main === null
+    ? []
+    : directElementChildren(main, "header").filter((element) => elementHasClass(element, "page-hero") && pageElementIsActive(element));
+  const hero = heroes.length === 1 ? heroes[0] : null;
+  const headings = main === null ? [] : elementDescendants(main, "h1").filter(pageElementIsActive);
+  if (hero === null
+    || headings.length !== 1
+    || !elementIsWithin(headings[0], hero)
+    || staticVisibleText(headings[0]) !== normalize(expected.title)) {
+    error(errors, "application-h1", path, `requires exact localized h1: ${expected.title}`);
+  }
+  const leads = main === null
+    ? []
+    : elementDescendants(main).filter((element) => elementHasClass(element, "page-lead") && pageElementIsActive(element));
+  if (hero === null
+    || leads.length !== 1
+    || !elementIsWithin(leads[0], hero)
+    || staticVisibleText(leads[0]) !== normalize(expected.lead)) {
+    error(errors, "application-lead", path, "requires the exact localized opening lead in the page hero");
+  }
+
+  const sectionMarkers = main === null
+    ? []
+    : elementDescendants(main).filter((element) => element.attributes.has("data-section"));
+  const directSections = main === null ? [] : directElementChildren(main, "section");
+  const sectionNames = sectionMarkers.map((section) => elementAttribute(section, "data-section"));
+  const validSections = sectionMarkers.length === APPLICATION_SECTIONS.length
+    && directSections.length === APPLICATION_SECTIONS.length
+    && sectionMarkers.every((section) => section.name === "section" && section.parent === main && pageElementIsActive(section))
+    && sectionMarkers.every((section, index) => section === directSections[index])
+    && sectionNames.every((name, index) => name === APPLICATION_SECTIONS[index]);
+  if (!validSections) {
+    error(errors, "application-sections", path, `requires exactly these five direct visible sections in order: ${APPLICATION_SECTIONS.join(", ")}`);
+  }
+  const sectionByName = new Map(sectionMarkers.map((section) => [elementAttribute(section, "data-section"), section]));
+
+  const delivery = sectionByName.get("delivery");
+  const routeSequences = main === null
+    ? []
+    : elementDescendants(main).filter((element) => elementHasClass(element, "route-sequence"));
+  const routeSequence = routeSequences.length === 1 ? routeSequences[0] : null;
+  const deliverySteps = routeSequence === null
+    ? []
+    : elementDescendants(routeSequence).filter((element) => elementHasClass(element, "route-sequence__step"));
+  const validDelivery = delivery !== undefined
+    && routeSequence !== null
+    && elementIsWithin(routeSequence, delivery)
+    && pageElementIsActive(routeSequence)
+    && deliverySteps.length === APPLICATION_DELIVERY_STEPS.length
+    && deliverySteps.every((step, index) => step.parent === routeSequence
+      && pageElementIsActive(step)
+      && elementAttribute(step, "data-step") === APPLICATION_DELIVERY_STEPS[index]
+      && elementDescendants(step, "h3").filter(pageElementIsActive).length === 1
+      && staticVisibleText(elementDescendants(step, "h3").filter(pageElementIsActive)[0]) === normalize(expected.deliveryLabels[index]));
+  if (!validDelivery) {
+    error(errors, "application-delivery", path, "route sequence must be Discovery, data model, workflow and launch");
+  }
+
+  verifyApplicationSchema(path, parsedRoot, lang, errors);
+
+  const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
+  const factsById = new Map(records.filter((fact) => nonEmptyString(fact.id)).map((fact) => [fact.id, fact]));
+  const evidenceSection = sectionByName.get("evidence");
+  const evidenceRows = main === null
+    ? []
+    : elementDescendants(main).filter((element) => elementHasClass(element, "evidence-row"));
+  const orderedEvidence = [];
+  const usedEvidenceIds = new Set();
+  if (evidenceRows.length === 0
+    || evidenceSection === undefined
+    || evidenceRows.some((row) => !pageElementIsActive(row) || !elementIsWithin(row, evidenceSection))) {
+    error(errors, "application-evidence-ids", path, "requires visible evidence rows inside the evidence section");
+  }
+  for (const row of evidenceRows) {
+    const rawIds = elementAttribute(row, "data-fact-ids");
+    const ids = nonEmptyString(rawIds) ? rawIds.trim().split(/\s+/).filter(Boolean) : [];
+    orderedEvidence.push(ids);
+    if (ids.length === 0
+      || new Set(ids).size !== ids.length
+      || ids.some((factId) => usedEvidenceIds.has(factId))) {
+      error(errors, "application-evidence-ids", path, "every evidence row needs unique exact data-fact-ids tokens");
+    }
+    for (const factId of ids) usedEvidenceIds.add(factId);
+    const rowText = staticVisibleText(row);
+    for (const factId of ids) {
+      const fact = factsById.get(factId);
+      if (!fact || fact.status !== "approved") {
+        error(errors, "application-evidence-ids", path, `${factId} must identify an approved fact`);
+        continue;
+      }
+      if (!Array.isArray(fact.surfaces) || APPLICATION_SURFACES.some((surface) => !fact.surfaces.includes(surface))) {
+        error(errors, "application-evidence-surface", path, `${factId} must approve both application page surfaces`);
+      }
+      const display = lang === "pl" ? fact.display_pl : fact.display_en;
+      if (!nonEmptyString(display) || !rowText.includes(normalize(display))) {
+        error(errors, "application-evidence-value", path, `${factId} must render its exact localized display meaning in the annotated row`);
+      }
+    }
+  }
+
+  const contactSection = sectionByName.get("contact");
+  const primaryCtas = main === null
+    ? []
+    : elementDescendants(main).filter((element) => elementHasClass(element, "btn-primary") && pageElementIsActive(element));
+  if (contactSection === undefined
+    || primaryCtas.length !== 1
+    || primaryCtas[0].name !== "a"
+    || !elementIsWithin(primaryCtas[0], contactSection)
+    || elementAttribute(primaryCtas[0], "href") !== expected.contactHref) {
+    error(errors, "application-contact", path, "requires one localized primary mailto CTA inside contact");
+  }
+
+  const published = body === null ? "" : publishedStaticText(body);
+  const genericPositioning = ["software house", "dom programistycz", "zespół programistycz", "team of developers", "development agency"];
+  if (genericPositioning.some((candidate) => published.includes(candidate))) {
+    error(errors, "application-positioning", path, "must not position the service as a generic software house");
+  }
+  const forbiddenCopy = ["—", "nie tylko", "not just", "kompleksow", "comprehensive", "innowacyjn", "innovative", "realnie", "seamless", "unlock", "leverage", "polpharma"];
+  if (forbiddenCopy.some((candidate) => published.includes(candidate))) {
+    error(errors, "application-copy", path, "contains forbidden review, client or generic AI-style copy");
+  }
+  for (const fact of records.filter((record) => record.status === "review" || record.status === "retired")) {
+    const candidate = factStatusCandidates(fact, path).find((value) => published.includes(normalize(value)));
+    if (candidate) error(errors, "application-fact-status", path, `${fact.id} has status ${fact.status} but publishes ${candidate}`);
+  }
+
+  return orderedEvidence;
+}
+
+function verifyApplicationParity(plEvidence, enEvidence, errors) {
+  if (JSON.stringify(plEvidence) !== JSON.stringify(enEvidence)) {
+    error(errors, "application-evidence-parity", "aplikacje-operacyjne/index.html", "PL and EN must use the same ordered evidence fact IDs");
+  }
+}
+
 function routeToFile(urlPath) {
   const clean = urlPath.split(/[?#]/)[0];
   if (clean === "/") return "index.html";
@@ -2900,13 +3163,18 @@ async function verifyArtifacts(_factData, context) {
 
 async function verifyPages(factData, family, context) {
   const selectedPairs = ROUTE_PAIRS.filter((pair) => family === "all" || pair[4] === family);
-  for (const [plFile, enFile, plRoute, enRoute] of selectedPairs) {
+  for (const [plFile, enFile, plRoute, enRoute, routeFamily] of selectedPairs) {
     const pl = await readRequired(context, plFile, "route-file");
     const en = await readRequired(context, enFile, "route-file");
     const plRoot = verifyPageShell(plFile, pl, "pl", plRoute, enRoute, context.errors);
     const enRoot = verifyPageShell(enFile, en, "en", enRoute, plRoute, context.errors);
     verifyFactIds(plFile, plRoot, factData, context.errors);
     verifyFactIds(enFile, enRoot, factData, context.errors);
+    if (routeFamily === "applications") {
+      const plEvidence = verifyApplicationPage(plFile, plRoot, "pl", factData, context.errors);
+      const enEvidence = verifyApplicationPage(enFile, enRoot, "en", factData, context.errors);
+      verifyApplicationParity(plEvidence, enEvidence, context.errors);
+    }
     await verifyLocalLinks(plFile, plRoot, family, context);
     await verifyLocalLinks(enFile, enRoot, family, context);
   }
