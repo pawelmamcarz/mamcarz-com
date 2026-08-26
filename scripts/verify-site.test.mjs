@@ -161,8 +161,9 @@ function pagePairFiles(pair, overrides = {}) {
   };
 }
 
-async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
+async function pageArchitectureFixture({ files, facts, public_claim_surfaces, extraFiles = {} } = {}) {
   const completeManifest = files === undefined;
+  const currentFactData = completeManifest && (facts === undefined || public_claim_surfaces === undefined) ? await readFacts() : null;
   const routeFiles = files ?? Object.assign({}, ...plan2RoutePairs.map((pair) => pagePairFiles(pair)));
   const remaining = { ...routeFiles, ...extraFiles };
   const plHtml = remaining["index.html"];
@@ -172,7 +173,8 @@ async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
   delete remaining["en/index.html"];
   delete remaining["uslugi/wdrozenie-sap-ariba/index.html"];
   return fixture({
-    facts: withApplicationFacts(completeManifest && facts === undefined ? (await readFacts()).facts : facts),
+    facts: withApplicationFacts(completeManifest && facts === undefined ? currentFactData.facts : facts),
+    public_claim_surfaces: public_claim_surfaces ?? (completeManifest ? currentFactData.public_claim_surfaces : publicClaimSurfaceFixture),
     plHtml,
     enHtml,
     serviceHtml,
@@ -471,6 +473,10 @@ async function productionRegistryFixture(overrides = {}) {
     serviceHtml: serviceProductHtml.ariba.pl,
     ...fixtureOverrides,
     extraFiles: {
+      "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+      "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
+      "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
+      "assets/img/signature.png": "fixture-image",
       "uslugi/transformacja-zakupow/index.html": serviceProductHtml.transformation.pl,
       "en/uslugi/transformacja-zakupow/index.html": serviceProductHtml.transformation.en,
       "en/uslugi/wdrozenie-sap-ariba/index.html": serviceProductHtml.ariba.en,
@@ -517,8 +523,28 @@ async function servicePageMutation({ key = "transformation", lang = "pl", mutate
       en: pairKey === key && lang === "en" ? mutate(pairHtml.en) : pairHtml.en
     });
   }));
-  const root = await pageArchitectureFixture({ files, facts });
+  const root = await pageArchitectureFixture({ files, facts, public_claim_surfaces: factData.public_claim_surfaces });
   return runVerification({ root, scope: "pages", family: "services" });
+}
+
+async function serviceRegistryMutation({ mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
+  const factData = await readFacts();
+  const root = await productionRegistryFixture({
+    facts: mutateFacts(structuredClone(factData.facts)),
+    public_claim_surfaces: mutateSurfaces(structuredClone(factData.public_claim_surfaces))
+  });
+  const [pages, facts, all] = await Promise.all([
+    runVerification({ root, scope: "pages", family: "services" }),
+    runVerification({ root, scope: "facts" }),
+    runVerification({ root, scope: "all" })
+  ]);
+  return { pages, facts, all };
+}
+
+function assertServiceRegistryInventoryErrors(results, label) {
+  for (const [scope, result] of Object.entries(results)) {
+    assert.ok(errorIds(result).includes("service-registry-inventory"), `${label}, ${scope}: ${result.errors.join("\n")}`);
+  }
 }
 
 const knowledgeContract = Object.freeze({
@@ -2773,6 +2799,55 @@ test("Plan 2 Task 5 rejects coordinated page and mutable-registry fact drift", a
       : record)
   });
   assert.ok(errorIds(result).includes("service-fact-contract"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 5 fix round 1 rejects an unrelated fact authorized for a service surface in every relevant scope", async () => {
+  const results = await serviceRegistryMutation({
+    mutateFacts: (facts) => facts.map((record) => record.id === "brand.promise"
+      ? { ...record, surfaces: [...record.surfaces, "uslugi/transformacja-zakupow/index.html"] }
+      : record)
+  });
+  assertServiceRegistryInventoryErrors(results, "unrelated service authorization");
+});
+
+test("Plan 2 Task 5 fix round 1 rejects a new approved fact authorized for a service pair in every relevant scope", async () => {
+  const results = await serviceRegistryMutation({
+    mutateFacts: (facts) => [...facts, {
+      id: "client.fabricated",
+      value: "Fabricated Client",
+      display_pl: "Fabricated Client",
+      display_en: "Fabricated Client",
+      kind: "constant",
+      as_of: null,
+      source_type: "owner_verified",
+      source_label: "Mutation fixture only",
+      source_url: null,
+      surfaces: ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html"],
+      status: "approved"
+    }]
+  });
+  assertServiceRegistryInventoryErrors(results, "fabricated approved service fact");
+});
+
+test("Plan 2 Task 5 fix round 1 owns the exact ordered public service-surface inventory in every relevant scope", async () => {
+  const plTransformation = "uslugi/transformacja-zakupow/index.html";
+  const enTransformation = "en/uslugi/transformacja-zakupow/index.html";
+  const mutations = [
+    ["missing", (surfaces) => surfaces.filter((surface) => surface !== plTransformation)],
+    ["extra typo", (surfaces) => [...surfaces, "uslugi/transformacja-zakupow/index.htm"]],
+    ["duplicate", (surfaces) => [...surfaces, plTransformation]],
+    ["reordered", (surfaces) => {
+      const next = [...surfaces];
+      const plIndex = next.indexOf(plTransformation);
+      const enIndex = next.indexOf(enTransformation);
+      [next[plIndex], next[enIndex]] = [next[enIndex], next[plIndex]];
+      return next;
+    }]
+  ];
+  for (const [label, mutateSurfaces] of mutations) {
+    const results = await serviceRegistryMutation({ mutateSurfaces });
+    assertServiceRegistryInventoryErrors(results, label);
+  }
 });
 
 test("readFacts reads fixtures without starting CLI verification", async () => {

@@ -40,10 +40,10 @@ The reference to four countries is the exact approved immutable ORLEN fact. No o
 
 ### Public procurement advisory: 4 facts
 
-1. `career.pkp.organization`: `PKP Polskie Linie Kolejowe S.A.`
-2. `career.pkp.dates`: `06.2013 – 09.2015`
-3. `career.pkp.title`: PL `Doradca Zarządu`; EN `Board Advisor`
-4. `career.pkp.responsibility`: PL `Negocjowałem umowę ramową z SAP AG dla grupy PKP.`; EN `I negotiated an SAP AG framework agreement for the PKP Group.`
+1. `career.pkp_plk.organization`: `PKP Polskie Linie Kolejowe S.A.`
+2. `career.pkp_plk.dates`: `06.2013 – 09.2015`
+3. `career.pkp_plk.title`: PL `Doradca Zarządu`; EN `Board Advisor`
+4. `career.pkp_plk.responsibility`: PL `Negocjowałem umowę ramową z SAP AG dla grupy PKP.`; EN `I negotiated an SAP AG framework agreement for the PKP Group.`
 
 ## SAP product taxonomy and official-source note
 
@@ -133,3 +133,59 @@ Implementation commits before this report:
 4. `2b574141a7838ee9a079a4b2eba599aaa073edfe` — `test: harden advisory service contracts`
 
 No push, merge, deployment, production access, asset generation or external-site access occurred.
+
+## Fix round 1: exact service registry ownership
+
+This review round changed only `scripts/verify-site.mjs`, `scripts/verify-site.test.mjs` and this report. The six service HTML files, `assets/css/style.css`, `content/site-facts.json` and `assets/js/main.js` remain byte-identical to `c71fe35007338af686dc7e6ec375e294d1a29afb`. Browser inspection was therefore not repeated.
+
+### Dedicated RED
+
+Three real registry reproductions were written before the verifier change. Each required the new dedicated `service-registry-inventory` ID in `pages/services`, `facts` and `scope=all`:
+
+```text
+unrelated brand.promise authorized for a transformation surface: fail
+new approved client.fabricated authorized for both transformation surfaces: fail
+missing, typo, duplicate or reordered service entry in public_claim_surfaces: fail
+Fix round 1 focused: 0/3, exit 1
+```
+
+The first RED output also reported missing local fixture assets during the pages run. These did not satisfy or mask the dedicated assertion. The production-registry fixture was completed with the existing favicon, font and signature targets before final GREEN; no product asset changed.
+
+### Implemented contract
+
+- The exact six service paths and their approved fact-ID sets are derived from immutable `SERVICE_FACT_CONTRACT` data.
+- Every registry record is reverse-scanned for each service path. Each actual fact-ID multiset must equal the immutable approved set, so unrelated, fabricated and duplicate authorizations fail.
+- Every immutable Task 5 record must occur once and retain its exact complete `surfaces` array, including its legitimate non-service surfaces.
+- `public_claim_surfaces` must equal the exact ordered service-aware inventory: the existing home, application, aviation, LLMS, worker and browser-script surfaces plus the six service paths. Missing, extra, typo, duplicate and reordered entries fail.
+- The contract runs under `pages/services`, `pages/all`, `facts` and `scope=all`, while fixtures with no service state remain governed by their existing contracts.
+
+### GREEN and carried verification
+
+```text
+Fix round 1: 3/3, exit 0
+Task 5 including prior mutations: 6/6, exit 0
+Task 4: 18/18, exit 0
+Task 3: 10/10, exit 0
+Task 2: 34/34, exit 0
+Task 1: 36/36, exit 0
+Full verifier: 532/532, 0 failures, exit 0, 57.14 s
+```
+
+Fresh family and repository gates all returned exit 0:
+
+```text
+npm run verify:pages -- --family=services
+npm run verify:pages -- --family=knowledge
+npm run verify:pages -- --family=aviation
+npm run verify:pages -- --family=applications
+npm run verify:home
+npm run verify:facts
+npm run verify:foundation
+npm run verify:site
+node --check scripts/verify-site.mjs
+node --check scripts/verify-site.test.mjs
+node --check assets/js/main.js
+git diff --check
+```
+
+No push, merge, deployment, production access, external browsing, asset work or product Browser mutation occurred.

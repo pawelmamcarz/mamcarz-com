@@ -5306,6 +5306,20 @@ const SERVICE_SURFACES = Object.freeze({
   ariba: Object.freeze(["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html"]),
   publicProcurement: Object.freeze(["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html"])
 });
+const SERVICE_SURFACE_LIST = Object.freeze(Object.values(SERVICE_SURFACES).flat());
+const SERVICE_PUBLIC_SURFACE_CONTRACT = Object.freeze([
+  "index.html",
+  "en/index.html",
+  "aplikacje-operacyjne/index.html",
+  "en/aplikacje-operacyjne/index.html",
+  "lotnictwo/index.html",
+  "en/lotnictwo/index.html",
+  ...SERVICE_SURFACE_LIST,
+  "llms.txt",
+  "llms-full.txt",
+  "worker/index.js",
+  "assets/js/main.js"
+]);
 
 const SERVICE_CONTRACTS = Object.freeze({
   transformation: Object.freeze({
@@ -5414,6 +5428,46 @@ const SERVICE_FACT_CONTRACT = Object.freeze([
   ["career.pkp_plk.title", "Board Advisor", "Doradca Zarządu", "Board Advisor", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
   ["career.pkp_plk.responsibility", "SAP AG framework agreement negotiation for the PKP Group", "Negocjowałem umowę ramową z SAP AG dla grupy PKP.", "I negotiated an SAP AG framework agreement for the PKP Group.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]]
 ].map(([id, value, display_pl, display_en, source_label, surfaces]) => Object.freeze({ id, value, display_pl, display_en, kind: "constant", as_of: null, source_type: "owner_verified", source_label, source_url: null, surfaces: Object.freeze(surfaces), status: "approved" })));
+
+function verifyServiceRegistryInventory(factData, errors) {
+  const records = Array.isArray(factData.facts) ? factData.facts : [];
+  const publicSurfaces = Array.isArray(factData.public_claim_surfaces) ? factData.public_claim_surfaces : [];
+  const contractIds = new Set(SERVICE_FACT_CONTRACT.map((record) => record.id));
+  const ownsServiceState = records.some((record) => contractIds.has(record?.id)
+      || (Array.isArray(record?.surfaces) && record.surfaces.some((surface) => SERVICE_SURFACE_LIST.includes(surface))))
+    || publicSurfaces.some((surface) => SERVICE_SURFACE_LIST.includes(surface));
+  if (!ownsServiceState) return;
+
+  const failures = [];
+  if (JSON.stringify(publicSurfaces) !== JSON.stringify(SERVICE_PUBLIC_SURFACE_CONTRACT)) {
+    failures.push("public_claim_surfaces must equal the exact ordered service-aware public surface contract");
+  }
+
+  for (const surface of SERVICE_SURFACE_LIST) {
+    const expectedIds = SERVICE_FACT_CONTRACT
+      .filter((record) => record.status === "approved" && record.surfaces.includes(surface))
+      .map((record) => record.id)
+      .sort();
+    const actualIds = records
+      .filter((record) => Array.isArray(record?.surfaces) && record.surfaces.includes(surface))
+      .map((record) => record.id)
+      .sort();
+    if (JSON.stringify(actualIds) !== JSON.stringify(expectedIds)) {
+      failures.push(`${surface} must authorize exactly ${expectedIds.join(", ")}`);
+    }
+  }
+
+  for (const expected of SERVICE_FACT_CONTRACT) {
+    const matches = records.filter((record) => record?.id === expected.id);
+    if (matches.length !== 1 || JSON.stringify(matches[0].surfaces) !== JSON.stringify(expected.surfaces)) {
+      failures.push(`${expected.id} must retain its exact complete surface inventory`);
+    }
+  }
+
+  if (failures.length > 0) {
+    error(errors, "service-registry-inventory", "content/site-facts.json", failures.join("; "));
+  }
+}
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
   transformation: Object.freeze({ pl: "82b2912f18ff5358172be88b20c4f18535f35a7fe074d651d5817327b7da0f4f", en: "c8cc4b2b57ba437248dd2ad3d641de4a20230da4e82fad73f04b37296835704f" }),
@@ -5717,6 +5771,7 @@ async function verifyArtifacts(_factData, context) {
 
 async function verifyPages(factData, family, context) {
   const selectedPairs = ROUTE_PAIRS.filter((pair) => family === "all" || pair[4] === family);
+  if (family === "services" || family === "all") verifyServiceRegistryInventory(factData, context.errors);
   for (const [plFile, enFile, plRoute, enRoute, routeFamily] of selectedPairs) {
     const pl = await readRequired(context, plFile, "route-file");
     const en = await readRequired(context, enFile, "route-file");
@@ -5829,6 +5884,7 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   else if (!validFamily) error(errors, "cli-family", "scripts/verify-site.mjs", `unsupported family ${family}`);
   const facts = await readFacts({ root, onError: (id, path, message) => error(errors, id, path, message) });
   if (scope === "facts" || scope === "all") {
+    verifyServiceRegistryInventory(facts, errors);
     const publicSurfaces = verifyPublicSurfaceInventory(facts, errors);
     const factIds = verifyFactSchema(facts, publicSurfaces, errors);
     verifyBlockedSchema(facts, factIds, errors);
