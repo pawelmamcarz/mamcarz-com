@@ -954,6 +954,45 @@ for (const [hiddenKind, retiredCopy] of [
   });
 }
 
+for (const [rawTextElement, rawText] of [
+  ["script", '<script>const marker = "<!--";</script>'],
+  ["style", '<style>.marker::before { content: "<!--"; }</style>']
+]) {
+  test(`home parser hardening keeps visible retired copy after valid ${rawTextElement} raw text`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${rawText}<p>WarsawFlightSafety</p></main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+    assert.ok(!errorIds(result).includes("home-html-syntax"));
+  });
+}
+
+for (const [suppressedElement, suppressedCopy] of [
+  ["script", '<script>const formerName = "WarsawFlightSafety";</script>'],
+  ["style", '<style>.former-name::before { content: "WarsawFlightSafety"; }</style>'],
+  ["template", "<template><p>WarsawFlightSafety</p></template>"]
+]) {
+  test(`home parser hardening ignores valid retired copy inside ${suppressedElement}`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${suppressedCopy}</main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+    assert.ok(!errorIds(result).includes("home-html-syntax"));
+  });
+}
+
+for (const [malformedState, malformedHtml] of [
+  ["unterminated comment", "<!--><p>WarsawFlightSafety</p>"],
+  ["unterminated opening tag", '<p title="broken'],
+  ["unterminated raw-text element", '<script>const marker = "x";'],
+  ["unclosed element", "<p>Visible copy"],
+  ["mismatched closing tag", "<p>Visible copy</div>"]
+]) {
+  test(`home parser hardening fails closed on ${malformedState}`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${malformedHtml}</main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(errorIds(result).includes("home-html-syntax"));
+  });
+}
+
 test("home scope rejects an approved fact annotation with the wrong localized value", async () => {
   const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
   const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Wrong client</div></section>');
@@ -1456,6 +1495,48 @@ test("home visibility hardening resists an aria-hidden disclosure decoy beside a
   ));
   const result = await runVerification({ root, scope: "home" });
   assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+});
+
+test("home parser hardening reads Procurement href only from the real anchor attribute", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a title=\'href="/procurement-2026/"\' href="/en/procurement-2026/" lang="pl" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  assert.ok(errorIds(result).includes("home-parity-links"));
+});
+
+test("home parser hardening preserves a valid Procurement href after a quoted greater-than sign", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a title="Decision > tool" href="/procurement-2026/" lang="pl" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
+  assert.ok(!errorIds(result).includes("home-parity-links"));
+  assert.ok(!errorIds(result).includes("home-html-syntax"));
+});
+
+test("home parser hardening resists comment and anchor decoys inside raw script text", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    "</main>",
+    `<script>const decoy = '<a href="/en/procurement-2026/"> <!--';</script><p>WarsawFlight<strong>Safety</strong></p></main>`
+  ));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+  assert.ok(!errorIds(result).includes("home-html-syntax"));
+});
+
+test("home parser hardening resists fake routes in multiple quoted attributes", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a title="Decision > href=\'/procurement-2026/\'" data-route=\'href="/procurement-2026/"\' href="/en/procurement-2026/" lang="pl" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  assert.ok(errorIds(result).includes("home-parity-links"));
+  assert.ok(!errorIds(result).includes("home-html-syntax"));
 });
 
 test("home parity preserves the local skip-link target", async () => {

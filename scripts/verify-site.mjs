@@ -68,56 +68,6 @@ function renderedText(html) {
     .replace(/<[^>]+>/g, " ")));
 }
 
-function htmlTokens(html) {
-  const tokens = [];
-  let cursor = 0;
-  while (cursor < html.length) {
-    const opening = html.indexOf("<", cursor);
-    if (opening === -1) {
-      tokens.push({ type: "text", value: html.slice(cursor) });
-      break;
-    }
-    if (opening > cursor) tokens.push({ type: "text", value: html.slice(cursor, opening) });
-    if (html.startsWith("<!--", opening)) {
-      const commentEnd = html.indexOf("-->", opening + 4);
-      const end = commentEnd === -1 ? html.length : commentEnd + 3;
-      tokens.push({ type: "comment", value: html.slice(opening, end) });
-      cursor = end;
-      continue;
-    }
-    let quote = null;
-    let end = opening + 1;
-    for (; end < html.length; end += 1) {
-      const character = html[end];
-      if (quote !== null) {
-        if (character === quote) quote = null;
-      } else if (character === "\"" || character === "'") {
-        quote = character;
-      } else if (character === ">") {
-        break;
-      }
-    }
-    if (end >= html.length) {
-      tokens.push({ type: "text", value: html.slice(opening) });
-      break;
-    }
-    tokens.push({ type: "tag", value: html.slice(opening, end + 1) });
-    cursor = end + 1;
-  }
-  return tokens;
-}
-
-function htmlTagInfo(tag) {
-  const match = /^<\s*(\/?)\s*([a-z][a-z0-9:-]*)\b/i.exec(tag);
-  if (!match) return null;
-  const name = match[2].toLowerCase();
-  return {
-    name,
-    closing: match[1] === "/",
-    selfClosing: /\/\s*>$/.test(tag) || voidHtmlElements.has(name)
-  };
-}
-
 function openingTagAttributes(openingTag) {
   const attributes = new Map();
   const tag = /^<\s*[a-z][a-z0-9:-]*/i.exec(openingTag);
@@ -156,56 +106,163 @@ function openingTagAttributes(openingTag) {
   return attributes;
 }
 
-function isStaticallyHidden(openingTag) {
-  const attributes = openingTagAttributes(openingTag);
-  return attributes.has("hidden") || normalize(attributes.get("aria-hidden") ?? "") === "true";
-}
-
-function staticVisibleHtml(html) {
-  const stack = [];
-  let invisibleDepth = 0;
-  let output = "";
-  for (const token of htmlTokens(html)) {
-    if (token.type === "comment") continue;
-    if (token.type === "text") {
-      if (invisibleDepth === 0) output += token.value;
-      continue;
-    }
-    const info = htmlTagInfo(token.value);
-    if (!info) continue;
-    if (info.closing) {
-      const matchingIndex = stack.findLastIndex((entry) => entry.name === info.name);
-      const closingIsVisible = invisibleDepth === 0;
-      if (matchingIndex === -1) {
-        if (closingIsVisible) output += token.value;
-        continue;
-      }
-      for (let index = stack.length - 1; index >= matchingIndex; index -= 1) {
-        if (stack[index].selfInvisible) invisibleDepth -= 1;
-      }
-      stack.length = matchingIndex;
-      if (closingIsVisible) output += token.value;
-      continue;
-    }
-    const selfInvisible = isStaticallyHidden(token.value) || suppressedTextElements.has(info.name);
-    if (invisibleDepth === 0 && !selfInvisible) output += token.value;
-    if (!info.selfClosing) {
-      stack.push({ name: info.name, selfInvisible });
-      if (selfInvisible) invisibleDepth += 1;
+function scanHtmlTagEnd(html, opening) {
+  let quote = null;
+  for (let index = opening + 1; index < html.length; index += 1) {
+    const character = html[index];
+    if (quote !== null) {
+      if (character === quote) quote = null;
+    } else if (character === "\"" || character === "'") {
+      quote = character;
+    } else if (character === ">") {
+      return index;
     }
   }
-  return output;
+  return -1;
 }
 
-function staticVisibleText(html) {
+function parsedTag(openingTag) {
+  const match = /^<\s*(\/?)\s*([a-z][a-z0-9:-]*)\b/i.exec(openingTag);
+  if (!match) return null;
+  const name = match[2].toLowerCase();
+  return {
+    name,
+    closing: match[1] === "/",
+    selfClosing: voidHtmlElements.has(name) || (/\/\s*>$/.test(openingTag) && !rawTextElements.has(name)),
+    attributes: match[1] === "/" ? new Map() : openingTagAttributes(openingTag)
+  };
+}
+
+function parseStaticHtml(html) {
+  const root = { type: "root", name: "#root", attributes: new Map(), children: [], parent: null };
+  const stack = [root];
+  const errors = [];
+  const append = (node) => {
+    node.parent = stack[stack.length - 1];
+    node.parent.children.push(node);
+  };
+  let cursor = 0;
+  while (cursor < html.length) {
+    const opening = html.indexOf("<", cursor);
+    if (opening === -1) {
+      if (cursor < html.length) append({ type: "text", value: html.slice(cursor) });
+      break;
+    }
+    if (opening > cursor) append({ type: "text", value: html.slice(cursor, opening) });
+    if (html.startsWith("<!--", opening)) {
+      const commentEnd = html.indexOf("-->", opening + 4);
+      if (commentEnd === -1) {
+        errors.push(`unterminated comment at offset ${opening}`);
+        cursor = html.length;
+        break;
+      }
+      cursor = commentEnd + 3;
+      continue;
+    }
+    const tagEnd = scanHtmlTagEnd(html, opening);
+    if (tagEnd === -1) {
+      errors.push(`unterminated tag at offset ${opening}`);
+      cursor = html.length;
+      break;
+    }
+    const source = html.slice(opening, tagEnd + 1);
+    if (/^<!doctype\b/i.test(source)) {
+      cursor = tagEnd + 1;
+      continue;
+    }
+    const tag = parsedTag(source);
+    if (!tag) {
+      errors.push(`malformed tag at offset ${opening}`);
+      cursor = tagEnd + 1;
+      continue;
+    }
+    if (tag.closing) {
+      const current = stack[stack.length - 1];
+      if (current.name === tag.name) {
+        stack.pop();
+      } else {
+        errors.push(`mismatched closing tag </${tag.name}> at offset ${opening}`);
+        let matchingIndex = -1;
+        for (let index = stack.length - 1; index > 0; index -= 1) {
+          if (stack[index].name === tag.name) {
+            matchingIndex = index;
+            break;
+          }
+        }
+        if (matchingIndex !== -1) stack.length = matchingIndex;
+      }
+      cursor = tagEnd + 1;
+      continue;
+    }
+    const node = { type: "element", name: tag.name, attributes: tag.attributes, children: [], parent: null };
+    append(node);
+    cursor = tagEnd + 1;
+    if (rawTextElements.has(tag.name) && !tag.selfClosing) {
+      const closing = new RegExp(`<\\/\\s*${escapeRegExp(tag.name)}\\s*>`, "ig");
+      closing.lastIndex = cursor;
+      const match = closing.exec(html);
+      if (!match) {
+        errors.push(`unterminated raw-text element <${tag.name}> at offset ${opening}`);
+        cursor = html.length;
+        break;
+      }
+      cursor = match.index + match[0].length;
+      continue;
+    }
+    if (!tag.selfClosing) stack.push(node);
+  }
+  for (const unclosed of stack.slice(1).reverse()) errors.push(`unclosed element <${unclosed.name}>`);
+  return { root, errors };
+}
+
+function elementAttribute(element, name) {
+  return element.attributes.get(name.toLowerCase()) ?? null;
+}
+
+function elementHasClass(element, className) {
+  return (elementAttribute(element, "class") ?? "").split(/\s+/).includes(className);
+}
+
+function elementDescendants(node, name = null) {
+  const descendants = [];
+  for (const child of node.children ?? []) {
+    if (child.type !== "element") continue;
+    if (name === null || child.name === name) descendants.push(child);
+    descendants.push(...elementDescendants(child, name));
+  }
+  return descendants;
+}
+
+function htmlBodyRoot(parsedRoot) {
+  const bodies = elementDescendants(parsedRoot, "body");
+  return bodies.length === 1 ? bodies[0] : parsedRoot;
+}
+
+function elementIsStaticallyHidden(element) {
+  return element.attributes.has("hidden") || normalize(elementAttribute(element, "aria-hidden") ?? "") === "true" || rawTextElements.has(element.name);
+}
+
+function elementIsStaticallyVisible(element) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (elementIsStaticallyHidden(current)) return false;
+  }
+  return true;
+}
+
+function staticVisibleText(node) {
   let text = "";
-  for (const token of htmlTokens(staticVisibleHtml(html))) {
-    if (token.type === "text") text += token.value;
-    else if (token.type === "tag") {
-      const info = htmlTagInfo(token.value);
-      if (info && blockTextElements.has(info.name)) text += " ";
+  const visit = (current, ancestorHidden = false) => {
+    if (current.type === "text") {
+      if (!ancestorHidden) text += current.value;
+      return;
     }
-  }
+    const hidden = ancestorHidden || (current.type === "element" && elementIsStaticallyHidden(current));
+    const block = current.type === "element" && blockTextElements.has(current.name);
+    if (!hidden && block) text += " ";
+    for (const child of current.children ?? []) visit(child, hidden);
+    if (!hidden && block) text += " ";
+  };
+  visit(node);
   return normalize(decodeHtmlEntities(text));
 }
 
@@ -232,7 +289,7 @@ const homepageMarkers = [
 const forbiddenHomepageCopy = ["—", "nie tylko", "kompleksow", "innowacyjn", "realnie", "#1", "największ", "Polpharma"];
 const retiredHomepageAviationName = /(^|[^\p{L}\p{N}_])warsawflightsafety($|[^\p{L}\p{N}_])/u;
 const blockTextElements = new Set(["address", "article", "aside", "blockquote", "body", "br", "dd", "details", "dialog", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul"]);
-const suppressedTextElements = new Set(["script", "style", "template"]);
+const rawTextElements = new Set(["script", "style", "template"]);
 const voidHtmlElements = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
 
 const homeFactTags = ["a", "dd", "div", "h1", "h3", "li", "p", "span", "strong"];
@@ -501,7 +558,7 @@ function verifyHomeStructures(activeBody, page, errors) {
   }
 }
 
-function verifyHomepageContent(body, page, errors) {
+function verifyHomepageContent(body, parsedBody, page, errors) {
   const activeBody = activeHomepageBody(body);
   let previousIndex = -1;
   for (const marker of homepageMarkers) {
@@ -518,7 +575,7 @@ function verifyHomepageContent(body, page, errors) {
     error(errors, "home-section-order", page.path, "homepage requires exactly the 11 ordered sections and two ordered CTA markers");
   }
 
-  const visible = staticVisibleText(body);
+  const visible = staticVisibleText(parsedBody);
   for (const pattern of forbiddenHomepageCopy) {
     if (visible.includes(normalize(pattern))) error(errors, "home-forbidden-copy", page.path, `visible copy contains ${pattern}`);
   }
@@ -591,30 +648,34 @@ function clientItemSequence(activeBody) {
     .map((tag) => attributeValue(tag, "data-fact-id") ?? "missing");
 }
 
-function pairedLinkSequence(activeBody) {
-  return tagBlocks(activeBody, "a")
-    .filter((link) => !hasClass(link.opening, "nav-lang"))
-    .map((link) => ({ href: attributeValue(link.opening, "href"), opening: link.opening }))
+function pairedLinkSequence(parsedBody) {
+  return elementDescendants(parsedBody, "a")
+    .filter((link) => !elementHasClass(link, "nav-lang"))
+    .map((link) => ({ href: elementAttribute(link, "href") }))
     .filter((link) => nonEmptyString(link.href) && !link.href.startsWith("mailto:"));
 }
 
-function verifyEnglishPolishOnlyLink(activeBody, page, errors) {
+function verifyEnglishPolishOnlyLink(parsedBody, page, errors) {
   if (page.lang !== "en") return;
-  const findProcurementAnchors = (html) => tagBlocks(html, "a").filter((link) => {
-    const href = attributeValue(link.opening, "href");
+  const procurementAnchors = elementDescendants(parsedBody, "a").filter((link) => {
+    const href = elementAttribute(link, "href");
+    const factIds = [link, ...elementDescendants(link)]
+      .map((element) => elementAttribute(element, "data-fact-id"))
+      .filter(nonEmptyString);
     return href === "/procurement-2026/"
       || href === "/en/procurement-2026/"
-      || annotatedFactSequence(link.full).includes("portfolio.procurement_process_2026");
+      || factIds.includes("portfolio.procurement_process_2026");
   });
-  const procurementAnchors = findProcurementAnchors(activeBody);
   if (procurementAnchors.length === 0) return;
-  const visibleProcurementAnchors = findProcurementAnchors(staticVisibleHtml(activeBody));
-  const validPolishOnly = procurementAnchors.length === 1 && visibleProcurementAnchors.length === 1 && visibleProcurementAnchors.every(({ opening, content }) => {
-    const disclosureLabels = tagBlocks(content, "div").filter((block) => hasClass(block.opening, "pcard__link"));
-    return attributeValue(opening, "href") === "/procurement-2026/"
-      && attributeValue(opening, "lang") === "pl"
+  const visibleProcurementAnchors = procurementAnchors.filter(elementIsStaticallyVisible);
+  const validPolishOnly = procurementAnchors.length === 1 && visibleProcurementAnchors.length === 1 && visibleProcurementAnchors.every((anchor) => {
+    const disclosureLabels = elementDescendants(anchor, "div")
+      .filter((element) => elementHasClass(element, "pcard__link"))
+      .filter(elementIsStaticallyVisible);
+    return elementAttribute(anchor, "href") === "/procurement-2026/"
+      && elementAttribute(anchor, "lang") === "pl"
       && disclosureLabels.length === 1
-      && staticVisibleText(disclosureLabels[0].content) === normalize("Open project in Polish");
+      && staticVisibleText(disclosureLabels[0]) === normalize("Open project in Polish");
   });
   if (!validPolishOnly) {
     error(errors, "home-en-pl-only-link", page.path, "Procurement 2026 requires the exact Polish route, lang=pl and visible Open project in Polish label on that anchor; a fake English route is forbidden");
@@ -643,7 +704,7 @@ function verifyEnglishHomeContract(activeBody, page, errors) {
   if (problems.length > 0) error(errors, "home-en-contract", page.path, `English homepage contract mismatch: ${problems.join(", ")}`);
 }
 
-function verifyHomepageParity(plBody, enBody, errors) {
+function verifyHomepageParity(plBody, enBody, plParsedBody, enParsedBody, errors) {
   const comparisons = [
     ["home-parity-sections", "section markers", homepageMarkerSequence(plBody), homepageMarkerSequence(enBody)],
     ["home-parity-facts", "data-fact-id sequence", annotatedFactSequence(plBody), annotatedFactSequence(enBody)],
@@ -656,8 +717,8 @@ function verifyHomepageParity(plBody, enBody, errors) {
     if (!exactSequence(plSequence, enSequence)) error(errors, id, "en/index.html", `${label} must exactly match the ordered Polish sequence`);
   }
 
-  const plLinks = pairedLinkSequence(plBody);
-  const enLinks = pairedLinkSequence(enBody);
+  const plLinks = pairedLinkSequence(plParsedBody);
+  const enLinks = pairedLinkSequence(enParsedBody);
   const expectedEnglishLinks = plLinks.map(({ href }) => {
     if (/^https?:\/\//i.test(href)) return href;
     return localizedHomeRoutes.get(href) ?? null;
@@ -1760,17 +1821,22 @@ function candidates(fact, language) {
 async function verifyHome(factData, context) {
   const pages = [{ path: "index.html", lang: "pl" }, { path: "en/index.html", lang: "en" }].filter((page) => context.lang === "all" || page.lang === context.lang);
   const activeBodies = new Map();
+  const parsedBodies = new Map();
   for (const page of pages) {
     const html = await read(context, page.path);
     if (html === null) continue;
     if ((html.match(/<h1\b/gi) ?? []).length !== 1) error(context.errors, "home-h1", page.path, "expected exactly one h1");
+    const parsed = parseStaticHtml(html);
+    for (const syntaxError of parsed.errors) error(context.errors, "home-html-syntax", page.path, syntaxError);
+    const parsedBody = htmlBodyRoot(parsed.root);
+    parsedBodies.set(page.lang, parsedBody);
     const body = homepageBody(html);
     const activeBody = activeHomepageBody(body);
     activeBodies.set(page.lang, activeBody);
-    const visible = verifyHomepageContent(body, page, context.errors);
+    const visible = verifyHomepageContent(body, parsedBody, page, context.errors);
     verifyHomeStructures(activeBody, page, context.errors);
     verifyEnglishHomeContract(activeBody, page, context.errors);
-    verifyEnglishPolishOnlyLink(activeBody, page, context.errors);
+    verifyEnglishPolishOnlyLink(parsedBody, page, context.errors);
     verifyHomeFactPatterns(activeBody, page, context.errors);
     const records = Array.isArray(factData.facts) ? factData.facts : [];
     const byId = new Map(records.filter((fact) => nonEmptyString(fact?.id)).map((fact) => [fact.id, fact]));
@@ -1808,8 +1874,8 @@ async function verifyHome(factData, context) {
       if (fact.status !== "approved" && published) error(context.errors, `fact-${fact.id}`, page.path, "non-approved fact is still published");
     }
   }
-  if (context.lang === "all" && activeBodies.has("pl") && activeBodies.has("en")) {
-    verifyHomepageParity(activeBodies.get("pl"), activeBodies.get("en"), context.errors);
+  if (context.lang === "all" && activeBodies.has("pl") && activeBodies.has("en") && parsedBodies.has("pl") && parsedBodies.has("en")) {
+    verifyHomepageParity(activeBodies.get("pl"), activeBodies.get("en"), parsedBodies.get("pl"), parsedBodies.get("en"), context.errors);
   }
 }
 
