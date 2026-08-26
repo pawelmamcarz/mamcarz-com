@@ -4283,11 +4283,338 @@ const AVIATION_FACT_ORDER = Object.freeze([
   "portfolio.filmolot_pl.type"
 ]);
 
+const AVIATION_SURFACES = Object.freeze(["lotnictwo/index.html", "en/lotnictwo/index.html"]);
+const AVIATION_FACT_CONTRACT = Object.freeze([
+  Object.freeze({ id: "aviation.ppl_h", value: "PPL(H)", display_pl: "PPL(H)", display_en: "PPL(H)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
+  Object.freeze({ id: "aviation.ppl_a", value: "PPL(A)", display_pl: "PPL(A)", display_en: "PPL(A)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
+  Object.freeze({ id: "aviation.aerobatics_rating", value: "aerobatics rating", display_pl: "uprawnienia do akrobacji", display_en: "aerobatics rating", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
+  Object.freeze({ id: "aviation.diverse_extreme_team", value: "Demonstration pilot, Diverse Extreme Team, 2013", display_pl: "pilot pokazowy Diverse Extreme Team (2013)", display_en: "display pilot for the Diverse Extreme Team (2013)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "aviation.forum_photographer", value: "Press photographer for Forum Agency", display_pl: "fotograf prasowy agencji Forum", display_en: "Press photographer with Forum Agency", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "aviation.air_to_air_media", value: "air-to-air, video and drone production", display_pl: "sesje air-to-air, realizacje wideo i dronem", display_en: "air-to-air shoots, video and drone production", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 aviation history, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
+  Object.freeze({ id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
+  Object.freeze({ id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt", "worker/index.js"], status: "approved" }),
+  Object.freeze({ id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed portfolio project, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES], status: "approved" })
+]);
+
+const AVIATION_NAVIGATION_CONTRACT = Object.freeze({
+  pl: Object.freeze({
+    ariaLabel: "Nawigacja główna", logoHref: "/", advisory: "Doradztwo",
+    submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
+    primary: [["/aplikacje-operacyjne/", "Aplikacje operacyjne", false], ["/lotnictwo/", "Lotnictwo", true], ["/case-studies/", "Projekty", false], ["/wiedza/", "Wiedza", false], ["/#about", "O mnie", false], ["/#contact", "Kontakt", false]],
+    languageHref: "/en/lotnictwo/", languageLabel: "EN", toggleLabel: "Menu nawigacyjne"
+  }),
+  en: Object.freeze({
+    ariaLabel: "Main navigation", logoHref: "/en/", advisory: "Advisory",
+    submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
+    primary: [["/en/aplikacje-operacyjne/", "Operational applications", false], ["/en/lotnictwo/", "Aviation", true], ["/en/case-studies/", "Projects", false], ["/en/wiedza/", "Knowledge", false], ["/en/#about", "About", false], ["/en/#contact", "Contact", false]],
+    languageHref: "/lotnictwo/", languageLabel: "PL", toggleLabel: "Navigation menu"
+  })
+});
+
+const AVIATION_RESOURCE_LINKS = Object.freeze({
+  pl: Object.freeze([
+    { rel: "canonical", href: "https://mamcarz.com/lotnictwo/" },
+    { rel: "alternate", hreflang: "pl", href: "https://mamcarz.com/lotnictwo/" },
+    { rel: "alternate", hreflang: "en", href: "https://mamcarz.com/en/lotnictwo/" },
+    { rel: "alternate", hreflang: "x-default", href: "https://mamcarz.com/lotnictwo/" },
+    { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
+    { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" }
+  ]),
+  en: Object.freeze([
+    { rel: "canonical", href: "https://mamcarz.com/en/lotnictwo/" },
+    { rel: "alternate", hreflang: "pl", href: "https://mamcarz.com/lotnictwo/" },
+    { rel: "alternate", hreflang: "en", href: "https://mamcarz.com/en/lotnictwo/" },
+    { rel: "alternate", hreflang: "x-default", href: "https://mamcarz.com/lotnictwo/" },
+    { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
+    { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" }
+  ])
+});
+
+const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
+  pl: Object.freeze({ elementCount: 188, digest: "93d27c7cb2ecb91124170dfcdaa3a77ebff517ee589f39cbf6da22881b449a94" }),
+  en: Object.freeze({ elementCount: 188, digest: "d9dd69eb2611de9324f218e23ec88827232621e1397e7221a35cd142c4a856dc" })
+});
+
+const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
+  pl: Object.freeze([
+    "Przejdź do treści", "PM", "· Mamcarz.com", "Doradztwo", "Transformacja zakupów", "Wdrożenie SAP Ariba", "Zamówienia publiczne", "Aplikacje operacyjne", "Lotnictwo", "Projekty", "Wiedza", "O mnie", "Kontakt", "EN", "↑",
+    "Strona główna", "/", "Lotnictwo", "FLIGHT PLAN / CORE ROUTE 03", "Lotnictwo", AVIATION_PAGE_CONTRACT.pl.lead,
+    "01", "OPS", "Operacje", "Decyzje zapisane w procedurze.", "Zakres zaczyna się od ról, warunków i punktów decyzyjnych. Ich kolejność wyznacza sposób pracy.", "Licencja", "PPL(H)", "Licencja", "PPL(A)",
+    "02", "SAFE", "Szkolenie i bezpieczeństwo", "Standard przed wykonaniem.", "Przygotowanie obejmuje kryteria, komunikację i odpowiedzialność za każdy etap pracy.", "Zakres", "uprawnienia do akrobacji", "Doświadczenie", "pilot pokazowy Diverse Extreme Team (2013)",
+    "03", "MEDIA", "Media", "Obraz podporządkowany zadaniu.", "Plan ujęć, podział odpowiedzialności i wykonanie tworzą jeden przebieg pracy.", "Fotografia", "fotograf prasowy agencji Forum", "Realizacja", "sesje air-to-air, realizacje wideo i dronem",
+    "04", "DATA", "Software", "Proces przeniesiony do narzędzia.", "Software porządkuje dane, kolejne stany i odpowiedzialność. Interfejs wynika z przebiegu pracy.", "WEJŚCIE", "Procedura", "PRZEPŁYW", "Dane i decyzje", "WYJŚCIE", "Ślad działania",
+    "05", "LOG", "Projekty", "Rejestr przedsięwzięć lotniczych.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
+    "06", "COMMS", "Kontakt", "Ustalmy zakres i odpowiedzialność.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
+    "© Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Kontakt"
+  ]),
+  en: Object.freeze([
+    "Skip to content", "PM", "· Mamcarz.com", "Advisory", "Procurement transformation", "SAP Ariba implementation", "Public procurement", "Operational applications", "Aviation", "Projects", "Knowledge", "About", "Contact", "PL", "↑",
+    "Home", "/", "Aviation", "FLIGHT PLAN / CORE ROUTE 03", "Aviation", AVIATION_PAGE_CONTRACT.en.lead,
+    "01", "OPS", "Operations", "Decisions recorded in procedure.", "The scope starts with roles, conditions and decision points. Their sequence determines the working method.", "Licence", "PPL(H)", "Licence", "PPL(A)",
+    "02", "SAFE", "Training and safety", "The standard comes before execution.", "Preparation covers criteria, communication and responsibility for each stage of work.", "Scope", "aerobatics rating", "Experience", "display pilot for the Diverse Extreme Team (2013)",
+    "03", "MEDIA", "Media", "The image follows the task.", "Shot planning, assigned responsibility and execution form one working sequence.", "Photography", "Press photographer with Forum Agency", "Production", "air-to-air shoots, video and drone production",
+    "04", "DATA", "Software", "The process transferred into a tool.", "Software organises data, consecutive states and responsibility. The interface follows the working process.", "INPUT", "Procedure", "FLOW", "Data and decisions", "OUTPUT", "Action trail",
+    "05", "LOG", "Projects", "Aviation venture register.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
+    "06", "COMMS", "Contact", "Set the scope and responsibility.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
+    "© Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Contact"
+  ])
+});
+
+const AVIATION_COMMENTS = Object.freeze(["NAV", "HERO", "OPERATIONS", "TRAINING AND SAFETY", "MEDIA", "SOFTWARE", "VENTURES", "CONTACT", "FOOTER"]);
+
+function verifyAviationFactContract(path, factData, errors) {
+  const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
+  const immutableKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "surfaces", "status"];
+  const valid = AVIATION_FACT_CONTRACT.every((expected) => {
+    const matches = records.filter((record) => record.id === expected.id);
+    if (matches.length !== 1) return false;
+    const actual = matches[0];
+    return immutableKeys.every((key) => Array.isArray(expected[key])
+      ? JSON.stringify(actual[key]) === JSON.stringify(expected[key])
+      : actual[key] === expected[key]);
+  });
+  if (!valid) {
+    error(errors, "aviation-fact-contract", path, "requires the immutable owner-approved values, provenance, state and exact surfaces for all eleven Task 3 facts");
+  }
+}
+
+function aviationBodyTextLeaves(body) {
+  return documentNodeDescendants(body)
+    .filter((node) => node.type === "text" && node.value.trim().length > 0)
+    .filter((node) => {
+      for (let current = node.parent; current?.type === "element"; current = current.parent) {
+        if (current.name === "script" || current.name === "style") return false;
+      }
+      return true;
+    })
+    .map((node) => normalizeExactHtmlLiteral(node.value));
+}
+
+function aviationCanonicalScanCorpus(parsedRoot) {
+  let structuralText = "";
+  const rawSurfaces = [];
+  const visit = (node) => {
+    if (node.type === "text") {
+      structuralText += node.value;
+      return;
+    }
+    if (node.type === "comment") {
+      rawSurfaces.push(node.value);
+      return;
+    }
+    const block = node.type === "element" && blockTextElements.has(node.name);
+    if (block) structuralText += " ";
+    if (node.type === "element") {
+      for (const value of node.attributes.values()) if (typeof value === "string") rawSurfaces.push(value);
+    }
+    for (const child of node.children ?? []) visit(child);
+    if (block) structuralText += " ";
+  };
+  visit(parsedRoot);
+  return [structuralText, ...rawSurfaces].map((value) => normalize(decodeHtmlEntities(value)));
+}
+
+function verifyAviationTextContract(path, parsedRoot, lang, body, errors) {
+  const leaves = aviationBodyTextLeaves(body);
+  const expectedLeaves = AVIATION_BODY_TEXT_LEAVES[lang].map(normalizeExactLiteral);
+  const comments = documentNodeDescendants(parsedRoot)
+    .filter((node) => node.type === "comment")
+    .map((node) => normalizeExactHtmlLiteral(node.value));
+  if (JSON.stringify(leaves) !== JSON.stringify(expectedLeaves)
+    || JSON.stringify(comments) !== JSON.stringify(AVIATION_COMMENTS)) {
+    error(errors, "aviation-text-contract", path, "requires the complete localized Task 3 text-leaf and comment inventory with no unowned factual copy");
+  }
+}
+
+function verifyAviationNavigation(path, parsedRoot, lang, errors) {
+  const expected = AVIATION_NAVIGATION_CONTRACT[lang];
+  const elements = elementDescendants(parsedRoot);
+  const navs = elements.filter((element) => element.name === "nav" && elementHasClass(element, "site-nav") && pageElementIsActive(element));
+  const nav = navs.length === 1 ? navs[0] : null;
+  const children = directElementChildren(nav);
+  const [logo, menu, language, toggle] = children;
+  const menuItems = directElementChildren(menu, "li");
+  const advisory = directElementChildren(menuItems[0], "details")[0];
+  const summary = directElementChildren(advisory, "summary")[0];
+  const submenu = directElementChildren(advisory, "ul")[0];
+  const submenuItems = directElementChildren(submenu, "li");
+  const submenuLinks = submenuItems.map((item) => directElementChildren(item, "a"));
+  const primaryLinks = menuItems.slice(1).map((item) => directElementChildren(item, "a"));
+  const toggleSpans = directElementChildren(toggle, "span");
+  const submenuValid = submenuItems.length === expected.submenu.length
+    && submenuLinks.every((links, index) => links.length === 1
+      && exactElementAttributes(links[0], { href: expected.submenu[index][0] })
+      && publishedStaticText(links[0]) === normalizeExactLiteral(expected.submenu[index][1]));
+  const primaryValid = primaryLinks.length === expected.primary.length
+    && primaryLinks.every((links, index) => {
+      const [href, label, current] = expected.primary[index];
+      return links.length === 1
+        && exactApplicationAttributes(links[0], current ? { href, "aria-current": "page" } : { href })
+        && exactStaticVisibleText(links[0]) === normalizeExactLiteral(label);
+    });
+  const valid = nav !== null
+    && exactApplicationAttributes(nav, { class: "site-nav", "aria-label": expected.ariaLabel }, new Set(["aria-label"]))
+    && children.length === 4
+    && logo?.name === "a"
+    && exactElementAttributes(logo, { href: expected.logoHref, class: "nav-logo" })
+    && exactStaticVisibleText(logo) === normalizeExactLiteral("PM · Mamcarz.com")
+    && menu?.name === "ul"
+    && exactElementAttributes(menu, { class: "nav-list", id: "nav-menu" })
+    && menuItems.length === expected.primary.length + 1
+    && advisory?.name === "details"
+    && exactElementAttributes(advisory, { class: "nav-group" })
+    && summary?.name === "summary"
+    && exactElementAttributes(summary, {})
+    && exactStaticVisibleText(summary) === normalizeExactLiteral(expected.advisory)
+    && submenu?.name === "ul"
+    && exactElementAttributes(submenu, { class: "nav-submenu" })
+    && submenuValid
+    && primaryValid
+    && language?.name === "a"
+    && exactElementAttributes(language, { href: expected.languageHref, class: "nav-lang" })
+    && exactStaticVisibleText(language) === normalizeExactLiteral(expected.languageLabel)
+    && toggle?.name === "button"
+    && exactApplicationAttributes(toggle, { class: "nav-toggle", id: "nav-toggle", "aria-label": expected.toggleLabel, "aria-controls": "nav-menu", "aria-expanded": "false" }, new Set(["aria-label"]))
+    && directElementChildren(toggle).length === 3
+    && toggleSpans.length === 3
+    && toggleSpans.every((span) => exactElementAttributes(span, {}) && exactStaticVisibleText(span) === "");
+  if (!valid) {
+    error(errors, "aviation-shell", path, "requires the exact localized navigation, current aviation route and closed mobile disclosure semantics");
+  }
+  return nav;
+}
+
+function verifyAviationDocumentBoundary(path, parsedRoot, errors) {
+  const nodes = documentNodeDescendants(parsedRoot);
+  const doctypes = nodes.filter((node) => node.type === "doctype");
+  const significant = parsedRoot.children.filter((node) => node.type !== "comment" && (node.type !== "text" || node.value.trim().length > 0));
+  const html = significant.find((node) => node.type === "element" && node.name === "html");
+  if (doctypes.length !== 1
+    || doctypes[0].parent !== parsedRoot
+    || !/^<!doctype\s+html\s*>$/i.test(doctypes[0].source)
+    || significant.length !== 2
+    || significant[0] !== doctypes[0]
+    || significant[1] !== html) {
+    error(errors, "aviation-document-boundary", path, "requires one HTML5 doctype and one owned html root with no published nodes outside it");
+  }
+}
+
+function aviationExpectedAnchorHrefs(lang) {
+  const navigation = AVIATION_NAVIGATION_CONTRACT[lang];
+  const home = navigation.logoHref;
+  const footer = lang === "pl"
+    ? ["/", "/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/#contact"]
+    : ["/en/", "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/#contact"];
+  return [
+    "#main", home,
+    ...navigation.submenu.map(([href]) => href),
+    ...navigation.primary.map(([href]) => href),
+    navigation.languageHref,
+    home,
+    AVIATION_PAGE_CONTRACT[lang].contactHref,
+    home,
+    ...footer
+  ];
+}
+
+function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, errors) {
+  const all = elementDescendants(parsedRoot);
+  const head = all.filter((element) => element.name === "head")[0] ?? null;
+  const links = all.filter((element) => element.name === "link");
+  const expectedLinks = AVIATION_RESOURCE_LINKS[lang];
+  const linksValid = links.length === expectedLinks.length
+    && links.every((link, index) => link.parent === head && exactApplicationResourceAttributes(link, expectedLinks[index]));
+  const scripts = all.filter((element) => element.name === "script");
+  const bodyChildren = directElementChildren(body);
+  const scriptsValid = scripts.length === 2
+    && scripts[0]?.parent === head
+    && exactApplicationResourceAttributes(scripts[0], { type: "application/ld+json" })
+    && scripts[1]?.parent === body
+    && bodyChildren.at(-1) === scripts[1]
+    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260825-flightplan-2", defer: null })
+    && rawElementText(scripts[1]).trim() === "";
+  const pictures = all.filter((element) => element.name === "picture");
+  const sources = all.filter((element) => element.name === "source");
+  const images = all.filter((element) => element.name === "img");
+  const venturePicture = pictures[0];
+  const ventureImage = images.find((image) => elementHasClass(image.parent, "aviation-venture-image"));
+  const footerSign = all.find((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
+  const signature = images.find((image) => image.parent === footerSign);
+  const mediaValid = pictures.length === 1
+    && exactApplicationResourceAttributes(venturePicture, { class: "aviation-venture-image" })
+    && sources.length === 1
+    && sources[0].parent === venturePicture
+    && exactApplicationResourceAttributes(sources[0], { type: "image/webp", srcset: "/assets/img/portfolio/akrobacja.webp" })
+    && images.length === 2
+    && ventureImage?.parent === venturePicture
+    && exactApplicationResourceAttributes(ventureImage, { src: "/assets/img/portfolio/akrobacja.jpg", alt: lang === "pl" ? "Widok projektu akrobacja.com" : "View of the akrobacja.com project", width: "1400", height: "492", loading: "lazy", decoding: "async" })
+    && footerSign !== undefined
+    && elementIsWithin(footerSign, footer)
+    && exactApplicationResourceAttributes(signature, { src: "/assets/img/signature.png", alt: "", width: "160", loading: "lazy" });
+  const anchors = all.filter((element) => element.name === "a");
+  const anchorsValid = JSON.stringify(anchors.map((anchor) => browserNormalizedUrl(elementAttribute(anchor, "href")))) === JSON.stringify(aviationExpectedAnchorHrefs(lang));
+  const forbiddenTags = new Set([...APPLICATION_ZERO_RESOURCE_TAGS].filter((name) => name !== "picture" && name !== "source"));
+  const resourceAttributesValid = all.every((element) => {
+    const names = [...element.attributes.keys()].filter((name) => APPLICATION_RESOURCE_ATTRIBUTE_NAMES.has(name));
+    return names.length === 0 || new Set(["a", "link", "script", "img", "source"]).has(element.name);
+  });
+  const valid = linksValid
+    && scriptsValid
+    && mediaValid
+    && anchorsValid
+    && all.filter((element) => forbiddenTags.has(element.name)).length === 0
+    && all.filter((element) => element.name === "style").length === 0
+    && all.filter((element) => element.attributes.has("style")).length === 0
+    && resourceAttributesValid;
+  if (!valid) {
+    error(errors, "aviation-resource-census", path, "requires the exact local links, scripts, Akrobacja picture, signature image and zero other resource or inline-style surfaces");
+  }
+}
+
+function verifyAviationShell(path, parsedRoot, lang, body, main, nav, errors) {
+  const children = directElementChildren(body);
+  const [skip, shellNav, overlay, back, shellMain, footer, script] = children;
+  const valid = exactElementAttributes(body, { class: "aviation-page", "data-page": "aviation" })
+    && children.length === 7
+    && skip?.name === "a"
+    && exactElementAttributes(skip, { href: "#main", class: "skip-link" })
+    && shellNav === nav
+    && overlay?.name === "div"
+    && exactElementAttributes(overlay, { class: "nav-overlay", id: "nav-overlay" })
+    && back?.name === "button"
+    && exactApplicationAttributes(back, { class: "back-to-top", id: "backToTop", "aria-label": lang === "pl" ? "Wróć na górę" : "Back to top" }, new Set(["aria-label"]))
+    && shellMain === main
+    && exactElementAttributes(main, { id: "main", tabindex: "-1" })
+    && footer?.name === "footer"
+    && exactElementAttributes(footer, { class: "site-footer" })
+    && script?.name === "script";
+  if (!valid) error(errors, "aviation-shell", path, "requires the exact localized seven-part Flight Plan body shell");
+  verifyAviationTextContract(path, parsedRoot, lang, body, errors);
+  verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, errors);
+}
+
+function verifyAviationDocumentManifest(path, parsedRoot, lang, errors) {
+  const actual = applicationDocumentManifestDigest(parsedRoot);
+  const expected = AVIATION_DOCUMENT_MANIFEST[lang];
+  if (actual.elementCount !== expected.elementCount || actual.digest !== expected.digest) {
+    error(errors, "aviation-document-manifest", path, `requires the exact Task 3 element and attribute manifest; actual-manifest=${lang}:${actual.elementCount}:${actual.digest}`);
+  }
+}
+
 function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
   const expected = AVIATION_PAGE_CONTRACT[lang];
   const all = elementDescendants(parsedRoot);
   const body = htmlBodyRoot(parsedRoot);
   const main = all.find((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  verifyAviationFactContract(path, factData, errors);
+  verifyAviationDocumentBoundary(path, parsedRoot, errors);
+  const aviationNav = verifyAviationNavigation(path, parsedRoot, lang, errors);
   if (body === null || elementAttribute(body, "data-page") !== "aviation") {
     error(errors, "aviation-data-page", path, 'body must use data-page="aviation"');
   }
@@ -4300,14 +4627,15 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
     error(errors, "aviation-lead", path, "requires the exact owner-approved aviation lead");
   }
   const directSections = directElementChildren(main, "section");
-  const sectionNames = directSections.map((section) => elementAttribute(section, "data-section"));
+  const sectionMarkers = all.filter((element) => element.attributes.has("data-section"));
+  const sectionNames = sectionMarkers.map((section) => elementAttribute(section, "data-section"));
   if (JSON.stringify(sectionNames) !== JSON.stringify(AVIATION_SECTION_ORDER)
-    || directSections.some((section) => !pageElementIsActive(section))) {
+    || sectionMarkers.length !== directSections.length
+    || sectionMarkers.some((section, index) => section !== directSections[index] || !pageElementIsActive(section))) {
     error(errors, "aviation-sections", path, "requires six direct visible operating sectors exactly once and in order");
   }
 
-  const records = Array.isArray(factData.facts) ? factData.facts.filter(isPlainObject) : [];
-  const byId = new Map(records.map((record) => [record.id, record]));
+  const byId = new Map(AVIATION_FACT_CONTRACT.map((record) => [record.id, record]));
   const factElements = all.filter((element) => element.attributes.has("data-fact-id"));
   const factIds = factElements.map((element) => elementAttribute(element, "data-fact-id"));
   let factsValid = JSON.stringify(factIds) === JSON.stringify(AVIATION_FACT_ORDER);
@@ -4359,22 +4687,32 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
   }
 
   const ctas = all.filter((element) => elementHasClass(element, "btn-primary") && pageElementIsActive(element));
+  const mailtoAnchors = all.filter((element) => element.name === "a" && /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? ""));
+  const conversionControls = all.filter((element) => (element.name === "a" || element.name === "button")
+    && ["btn-primary", "btn-secondary", "btn-ghost", "cta-link"].some((className) => elementHasClass(element, className)));
   const contact = directSections.find((section) => elementAttribute(section, "data-section") === "contact");
-  if (ctas.length !== 1 || ctas[0].name !== "a" || elementAttribute(ctas[0], "href") !== expected.contactHref || !elementIsWithin(ctas[0], contact)) {
+  if (ctas.length !== 1
+    || mailtoAnchors.length !== 1
+    || conversionControls.length !== 1
+    || ctas[0] !== mailtoAnchors[0]
+    || ctas[0] !== conversionControls[0]
+    || ctas[0].name !== "a"
+    || !exactElementAttributes(ctas[0], { class: "btn-primary", href: expected.contactHref })
+    || publishedStaticText(ctas[0]) !== normalizeExactLiteral(lang === "pl" ? "Porozmawiaj o projekcie lotniczym" : "Discuss an aviation project")
+    || !elementIsWithin(ctas[0], contact)) {
     error(errors, "aviation-contact", path, "requires exactly one localized mailto CTA inside contact");
   }
 
-  const rawPublished = normalize(documentNodeDescendants(parsedRoot)
-    .map((node) => node.type === "comment" ? node.value : node.type === "text" ? node.value : node.type === "element" ? [...node.attributes.values()].filter((value) => typeof value === "string").join(" ") : "")
-    .join(" "));
-  const forbidden = /warsaw\s*flight\s*safety|pasja\s+po\s+godzinach|po\s+godzinach|outside\s+work|after[ -]?hours?|side[ -]?project|\binstruktor\b|\binstructor\b|\bato\b|\boperator\b|commercial[ -]?pilot|pilot\s+komercyjny|\bszko(?:ła|ly|le)\b|\bschool\b|\bavailable\b|\bdostępn|\bprice\b|\bcena\b|market[ -]?leader|lider\s+rynku/i;
-  if (forbidden.test(rawPublished)) {
+  const forbidden = /warsaw[\s-]*flight[\s-]*safety|pasja\s+po\s+godzinach|po\s+godzinach|outside\s+work|beyond\s+work|after[ -]?hours?|side[ -]?project|\binstruktor\b|\binstructor\b|\bato\b|\boperator\b|commercial[ -]?pilot|pilot\s+komercyjny|\bszko(?:ła|ły|le)\b|\bschool\b|\bavailab(?:le|ility)\b|\bdostępn|\bpric(?:e|es|ing)\b|\bcen(?:a|y|nik)\b|market[ -]?leader|lider\s+rynku/;
+  if (aviationCanonicalScanCorpus(parsedRoot).some((surface) => forbidden.test(surface))) {
     error(errors, "aviation-forbidden-copy", path, "contains retired, side-activity or unsupported aviation claim language");
   }
   const anchors = all.filter((element) => element.name === "a");
   if (anchors.some((anchor) => /^https?:\/\//i.test(browserNormalizedUrl(elementAttribute(anchor, "href")) ?? ""))) {
     error(errors, "aviation-external-link", path, "aviation pages may not invent or publish an external venture URL");
   }
+  verifyAviationShell(path, parsedRoot, lang, body, main, aviationNav, errors);
+  verifyAviationDocumentManifest(path, parsedRoot, lang, errors);
 }
 
 async function verifyAviationHomepageLinks(context) {

@@ -505,30 +505,20 @@ function applicationFactRecords() {
 }
 
 function aviationFactRecords() {
-  const surfaces = ["lotnictwo/index.html", "en/lotnictwo/index.html"];
   const records = [
-    ["aviation.ppl_h", "PPL(H)", "PPL(H)"],
-    ["aviation.ppl_a", "PPL(A)", "PPL(A)"],
-    ["aviation.aerobatics_rating", "uprawnienia do akrobacji", "aerobatics rating"],
-    ["aviation.diverse_extreme_team", "pilot pokazowy Diverse Extreme Team (2013)", "display pilot for the Diverse Extreme Team (2013)"],
-    ["aviation.forum_photographer", "fotograf prasowy agencji Forum", "Press photographer with Forum Agency"],
-    ["aviation.air_to_air_media", "sesje air-to-air, realizacje wideo i dronem", "air-to-air shoots, video and drone production"],
-    ["portfolio.akrobacja_com", "akrobacja.com", "akrobacja.com"],
-    ["portfolio.akrobacja_com.current_status", "Aktualna marka działalności lotniczej", "Current aviation venture"],
-    ["portfolio.akrobacja_com.type", "Platforma sprzedaży voucherów na loty akrobacyjne.", "Voucher sales platform for aerobatic flights."],
-    ["portfolio.filmolot_pl", "FilmoLot.pl", "FilmoLot.pl"],
-    ["portfolio.filmolot_pl.type", "Lotnictwo · fotografia i wideo", "Aviation · photography and video"]
+    { id: "aviation.ppl_h", value: "PPL(H)", display_pl: "PPL(H)", display_en: "PPL(H)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "aviation.ppl_a", value: "PPL(A)", display_pl: "PPL(A)", display_en: "PPL(A)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "aviation.aerobatics_rating", value: "aerobatics rating", display_pl: "uprawnienia do akrobacji", display_en: "aerobatics rating", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "aviation.diverse_extreme_team", value: "Demonstration pilot, Diverse Extreme Team, 2013", display_pl: "pilot pokazowy Diverse Extreme Team (2013)", display_en: "display pilot for the Diverse Extreme Team (2013)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.forum_photographer", value: "Press photographer for Forum Agency", display_pl: "fotograf prasowy agencji Forum", display_en: "Press photographer with Forum Agency", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.air_to_air_media", value: "air-to-air, video and drone production", display_pl: "sesje air-to-air, realizacje wideo i dronem", display_en: "air-to-air shoots, video and drone production", source_label: "Owner-confirmed pre-Task-5 aviation history, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] },
+    { id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", source_label: "Owner confirmed portfolio project, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] },
+    { id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] }
   ];
-  return records.map(([id, displayPl, displayEn]) => fact({
-    id,
-    value: displayEn,
-    display_pl: displayPl,
-    display_en: displayEn,
-    surfaces,
-    status: "approved",
-    source_url: null,
-    ...(id === "portfolio.akrobacja_com.current_status" ? { kind: "dated", as_of: "2026-08-26" } : {})
-  }));
+  return records.map((record) => fact({ status: "approved", source_url: null, ...record }));
 }
 
 function withApplicationFacts(records) {
@@ -581,7 +571,7 @@ async function genericAviationPageMutation({ lang = "pl" } = {}) {
   return runVerification({ root, scope: "pages", family: "aviation" });
 }
 
-async function aviationPageMutation({ lang = "pl", mutate = (html) => html } = {}) {
+async function aviationPageMutation({ lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts } = {}) {
   const [factData, pl, en] = await Promise.all([
     readFacts(),
     readFile(resolve("lotnictwo/index.html"), "utf8"),
@@ -589,14 +579,16 @@ async function aviationPageMutation({ lang = "pl", mutate = (html) => html } = {
   ]);
   const current = lang === "pl" ? pl : en;
   const mutated = mutate(current);
+  const facts = mutateFacts(structuredClone(factData.facts));
   assert.notEqual(mutated, "", "aviation mutation must leave a fixture document");
+  assert.ok(Array.isArray(facts), "aviation fact mutation must leave a fact array");
   const files = pagePairFiles(aviationPair, {
     pl: lang === "pl" ? mutated : pl,
     en: lang === "en" ? mutated : en
   });
   const root = await pageArchitectureFixture({
     files,
-    facts: factData.facts,
+    facts,
     extraFiles: {
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg"
@@ -2065,6 +2057,110 @@ test("Plan 2 Task 3 rejects retired, inferred and externally linked venture copy
     const ids = errorIds(result);
     assert.ok(ids.includes("aviation-forbidden-copy") || ids.includes("aviation-external-link"), result.errors.join("\n"));
   }
+});
+
+test("Plan 2 Task 3 fix round 1 pins immutable aviation records and every factual text surface", async () => {
+  const unannotated = await aviationPageMutation({
+    mutate: (html) => html.replace("</main>", "<p>TVP, Samos, Chios and ATAM.</p></main>")
+  });
+  assert.ok(errorIds(unannotated).includes("aviation-text-contract"), unannotated.errors.join("\n"));
+
+  const coordinated = await aviationPageMutation({
+    mutate: (html) => html.replace("fotograf prasowy agencji Forum", "fotograf TVP na Samos, Chios i ATAM"),
+    mutateFacts: (facts) => facts.map((record) => record.id === "aviation.forum_photographer"
+      ? { ...record, value: "TVP photographer at Samos, Chios and ATAM", display_pl: "fotograf TVP na Samos, Chios i ATAM" }
+      : record)
+  });
+  assert.ok(errorIds(coordinated).includes("aviation-fact-contract"), coordinated.errors.join("\n"));
+
+  const immutableFields = [
+    ["value", "coordinated registry value"],
+    ["source_type", "internal_evidence"],
+    ["source_label", "Coordinated provenance drift"],
+    ["surfaces", ["lotnictwo/index.html", "en/lotnictwo/index.html"]],
+    ["kind", "constant"],
+    ["as_of", "2026-08-25"]
+  ];
+  for (const [field, value] of immutableFields) {
+    const result = await aviationPageMutation({
+      mutateFacts: (facts) => facts.map((record) => record.id === "portfolio.akrobacja_com.current_status"
+        ? { ...record, [field]: value }
+        : record)
+    });
+    assert.ok(errorIds(result).includes("aviation-fact-contract"), `${field}: ${result.errors.join("\n")}`);
+  }
+
+  for (const factId of aviationFactRecords().map((record) => record.id)) {
+    const result = await aviationPageMutation({
+      mutateFacts: (facts) => facts.map((record) => record.id === factId
+        ? { ...record, source_label: `Mutable source for ${factId}` }
+        : record)
+    });
+    assert.ok(errorIds(result).includes("aviation-fact-contract"), `${factId}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 canonicalizes retired and prohibited claims across every document surface", async () => {
+  const additions = [
+    ["encoded retired brand", "<p>Warsaw&#70;lightSafety</p>"],
+    ["inline split credential", "<p>Certified instruc<span>tor</span> services.</p>"],
+    ["default-ignorable inline split", "<p>Certified Instruc<span>\u200B</span>TOR services.</p>"],
+    ["mixed-case whitespace retired brand", "<p>WARSAW\n FLIGHT&nbsp; SAFETY</p>"],
+    ["encoded comment credential", "<!-- Certified instruc&#x74;or services -->"],
+    ["inactive split credential", "<template><p>Commercial pi<span>lot</span> services</p></template>"],
+    ["encoded attribute credential", "<p data-note=\"Certified instruc&#116;or services\">Neutral</p>"],
+    ["unsupported status claim", "<p>Current school with prices and availability</p>"],
+    ["unsupported operator leadership", "<p>ATO operator certificate and market leader</p>"]
+  ];
+  for (const [label, addition] of additions) {
+    const result = await aviationPageMutation({ mutate: (html) => html.replace("</main>", `${addition}</main>`) });
+    assert.ok(errorIds(result).includes("aviation-forbidden-copy"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 owns every aviation resource and style surface", async () => {
+  const mutations = [
+    ["external image", (html) => html.replace("</footer>", '<img src="https://example.com/claim.png" alt=""></footer>')],
+    ["extra local image", (html) => html.replace("</footer>", '<img src="/assets/img/portfolio/akrobacja.jpg" alt=""></footer>')],
+    ["extra picture source", (html) => html.replace("</picture>", '<source srcset="https://example.com/claim.webp"></picture>')],
+    ["inline style element", (html) => html.replace("</footer>", "<style>.claim{background:linear-gradient(red,blue);box-shadow:0 0 1rem red}</style></footer>")],
+    ["inline style attribute", (html) => html.replace('class="page-title"', 'class="page-title" style="background:linear-gradient(red, blue)"')],
+    ["extra executable script", (html) => html.replace("</body>", "<script>globalThis.claim=true</script></body>")],
+    ["external iframe", (html) => html.replace("</footer>", '<iframe src="https://example.com/claim"></iframe></footer>')]
+  ];
+  for (const [label, mutate] of mutations) {
+    const result = await aviationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("aviation-resource-census"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 owns localized navigation and disclosure semantics", async () => {
+  const mutations = [
+    ["removed current route", (html) => html.replace(' href="/lotnictwo/" aria-current="page"', ' href="/lotnictwo/"')],
+    ["expanded mobile menu", (html) => html.replace('aria-expanded="false"', 'aria-expanded="true"')],
+    ["wrong toggle control", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="other-menu"')],
+    ["open advisory disclosure", (html) => html.replace('<details class="nav-group">', '<details class="nav-group" open>')],
+    ["wrong localized label", (html) => html.replace('aria-label="Nawigacja główna"', 'aria-label="Navigation"')]
+  ];
+  for (const [label, mutate] of mutations) {
+    const result = await aviationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("aviation-shell"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 inventories global section and conversion cardinality", async () => {
+  const nestedSection = await aviationPageMutation({
+    mutate: (html) => html.replace(
+      '<div class="section-shell aviation-sector__grid">',
+      '<div class="section-shell aviation-sector__grid"><section data-section="operations"></section>'
+    )
+  });
+  assert.ok(errorIds(nestedSection).includes("aviation-sections"), nestedSection.errors.join("\n"));
+
+  const extraMailto = await aviationPageMutation({
+    mutate: (html) => html.replace("</main>", '<a href="mailto:other@example.com">Other contact</a></main>')
+  });
+  assert.ok(errorIds(extraMailto).includes("aviation-contact"), extraMailto.errors.join("\n"));
 });
 
 test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {
