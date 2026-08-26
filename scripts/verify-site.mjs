@@ -76,7 +76,7 @@ function normalize(text) {
 
 function decodeHtmlEntities(text) {
   return text
-    .replace(/&#(x[0-9a-f]+|\d+);/gi, (_match, entity) => {
+    .replace(/&#(x[0-9a-f]+|\d+);?/gi, (_match, entity) => {
       const codePoint = Number.parseInt(entity.slice(0, 1).toLowerCase() === "x" ? entity.slice(1) : entity, entity.slice(0, 1).toLowerCase() === "x" ? 16 : 10);
       return codePoint > 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "�";
     })
@@ -276,7 +276,11 @@ function elementHasHiddenInlineStyle(element) {
   if (!nonEmptyString(style)) return false;
   const commentScan = stripCssComments(decodeHtmlEntities(style));
   if (commentScan.unterminatedCommentAt !== -1) return true;
-  const declarations = parseDeclarations(commentScan.css);
+  if (decodeCssEscapesChecked(commentScan.css).malformedEscapeAt !== -1) return true;
+  const declarations = new Map([...parseDeclarations(commentScan.css)].map(([property, value]) => [
+    decodeCssEscapes(property).trim().toLowerCase(),
+    decodeCssEscapes(value)
+  ]));
   const valueWithoutImportant = (property) => normalize(declarations.get(property) ?? "").replace(/\s*!\s*important\s*$/, "");
   return valueWithoutImportant("display") === "none"
     || new Set(["hidden", "collapse"]).has(valueWithoutImportant("visibility"));
@@ -1859,10 +1863,11 @@ function parseDeclarations(body) {
   return declarations;
 }
 
-function decodeCssEscapes(source) {
+function decodeCssEscapesChecked(source) {
   let decoded = "";
   let quote = null;
   let escaped = false;
+  let malformedEscapeAt = -1;
   for (let index = 0; index < source.length; index += 1) {
     const character = source[index];
     if (quote !== null) {
@@ -1889,12 +1894,18 @@ function decodeCssEscapes(source) {
       continue;
     }
     const escapedCharacter = source[index + 1];
-    if (escapedCharacter !== undefined && !/[\r\n\f]/.test(escapedCharacter)) {
+    if (escapedCharacter === undefined || /[\r\n\f]/.test(escapedCharacter)) {
+      if (malformedEscapeAt === -1) malformedEscapeAt = index;
+    } else {
       decoded += escapedCharacter;
       index += 1;
     }
   }
-  return decoded;
+  return { decoded, malformedEscapeAt };
+}
+
+function decodeCssEscapes(source) {
+  return decodeCssEscapesChecked(source).decoded;
 }
 
 function textOutsideCssStrings(source) {
@@ -2773,6 +2784,40 @@ function browserNormalizedUrl(value) {
   return typeof value === "string" ? trimBrowserUrlWhitespace(decodeHtmlEntities(value)) : null;
 }
 
+function srcsetCandidateUrls(value) {
+  const input = decodeHtmlEntities(value);
+  const urls = [];
+  let cursor = 0;
+  const isWhitespace = (character) => character !== undefined && /[\u0009-\u000d\u0020]/.test(character);
+  while (cursor < input.length) {
+    while (cursor < input.length && (isWhitespace(input[cursor]) || input[cursor] === ",")) cursor += 1;
+    if (cursor >= input.length) break;
+
+    const urlStart = cursor;
+    while (cursor < input.length && !isWhitespace(input[cursor])) cursor += 1;
+    let url = input.slice(urlStart, cursor);
+    if (url.endsWith(",")) {
+      url = url.replace(/,+$/, "");
+      if (url.length > 0) urls.push(url);
+      continue;
+    }
+    urls.push(url);
+
+    let parentheses = 0;
+    while (cursor < input.length) {
+      const character = input[cursor];
+      if (character === "(") parentheses += 1;
+      else if (character === ")" && parentheses > 0) parentheses -= 1;
+      else if (character === "," && parentheses === 0) {
+        cursor += 1;
+        break;
+      }
+      cursor += 1;
+    }
+  }
+  return urls;
+}
+
 function rootRelativeReference(value) {
   return nonEmptyString(value) && value.startsWith("/") && !value.startsWith("//");
 }
@@ -2785,8 +2830,7 @@ function elementLocalReferences(element) {
   }
   const srcset = elementAttribute(element, "srcset");
   if (nonEmptyString(srcset)) {
-    for (const candidate of decodeHtmlEntities(srcset).split(",")) {
-      const value = trimBrowserUrlWhitespace(candidate)?.split(/[\u0009-\u000d\u0020]+/)[0];
+    for (const value of srcsetCandidateUrls(srcset)) {
       if (rootRelativeReference(value)) references.push({ attribute: "srcset", url: value });
     }
   }

@@ -893,6 +893,64 @@ test("Plan 2 Task 1 fix round 2 decodes the complete srcset before candidate spl
   assert.equal(missing.length, 3, missing.join("\n"));
 });
 
+test("Plan 2 Task 1 fix round 3 parses complete srcset URLs without comma false positives", async () => {
+  const body = `
+    <img srcset="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ 1x" alt="">
+    <img srcset="https://cdn.example.com/a,/missing-external.webp 1x" alt="">
+    <img srcset="//cdn.example.com/a,/missing-protocol-relative.webp 1x" alt="">
+    <img srcset="/assets/img/image,wide.webp 2x" alt="">
+    <img srcset="/assets/img/ordinary-a.jpg 1x, /missing-ordinary-b.jpg 2x" alt="">
+    <img srcset="/assets/img/no-descriptor-a.jpg, /missing-no-descriptor-b.jpg" alt="">
+    <img srcset="/assets/img/multiple-descriptors.jpg 480w 320h, /missing-after-multiple.webp 2x" alt="">
+    <img srcset=",,, /missing-leading.webp 1x,, /missing-after-empty.webp 2x,," alt="">`;
+  const result = await applicationPageMutation({
+    body,
+    extraFiles: {
+      "assets/img/image,wide.webp": "comma-bearing local image fixture",
+      "assets/img/ordinary-a.jpg": "ordinary candidate fixture",
+      "assets/img/no-descriptor-a.jpg": "no-descriptor candidate fixture",
+      "assets/img/multiple-descriptors.jpg": "multiple-descriptor candidate fixture"
+    }
+  });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  const expectedTargets = [
+    "missing-ordinary-b.jpg",
+    "missing-no-descriptor-b.jpg",
+    "missing-after-multiple.webp",
+    "missing-leading.webp",
+    "missing-after-empty.webp"
+  ];
+  assert.equal(missing.length, expectedTargets.length, missing.join("\n"));
+  for (const target of expectedTargets) assert.ok(missing.some((entry) => entry.includes(target)), target);
+});
+
+test("Plan 2 Task 1 fix round 3 decodes browser numeric references and CSS escapes in hidden styles", async () => {
+  const cases = [
+    ["decimal colon without semicolon", 'style="display&#58none"', true],
+    ["hex colon without semicolon", 'style="visibility&#x3Ahidden"', true],
+    ["decimal colon with semicolon", 'style="display&#58;none"', true],
+    ["hex colon with semicolon", 'style="visibility&#x3A;hidden"', true],
+    ["escaped property", 'style="d\\69splay:none"', true],
+    ["escaped property with terminator", 'style="d\\69 splay:none"', true],
+    ["escaped value with terminator", 'style="display:n\\6f ne"', true],
+    ["mixed-case escaped property", 'style="D\\69SPLAY:NoNe !IMPORTANT"', true],
+    ["simple escaped property character", 'style="displa\\y:none"', true],
+    ["trailing escape", 'style="color:red\\"', true],
+    ["escape before newline", 'style="color:red\\\n"', true],
+    ["one-pass entity control", 'style="d&amp;#92;69splay:none"', false],
+    ["benign quoted backslash", 'style="font-family: \'C:\\Fonts\'; color:red"', false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace("<h1>Aplikacje</h1>", `<h1 ${style}>Aplikacje</h1>`) })
+  })));
+  const mismatches = outcomes
+    .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `visibility mismatches: ${mismatches.join(", ")}`);
+});
+
 test("readFacts reads fixtures without starting CLI verification", async () => {
   const root = await fixture();
   const data = await readFacts({ root });
