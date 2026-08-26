@@ -24,6 +24,11 @@ const projectProductHtml = {
   pl: await readFile(resolve("case-studies/index.html"), "utf8"),
   en: await readFile(resolve("en/case-studies/index.html"), "utf8")
 };
+const speakingProductHtml = {
+  pl: await readFile(resolve("wystapienia/index.html"), "utf8"),
+  en: await readFile(resolve("en/wystapienia/index.html"), "utf8")
+};
+const procurementParentProductHtml = await readFile(resolve("procurement-2026/index.html"), "utf8");
 const serviceProductHtml = Object.freeze({
   transformation: Object.freeze({
     pl: await readFile(resolve("uslugi/transformacja-zakupow/index.html"), "utf8"),
@@ -147,6 +152,8 @@ function pagePairFiles(pair, overrides = {}) {
       ? aviationProductHtml.pl
     : family === "projects"
       ? projectProductHtml.pl
+    : family === "speaking"
+      ? speakingProductHtml.pl
     : family === "knowledge"
       ? knowledgePageFixture("pl")
     : family === "services"
@@ -158,6 +165,8 @@ function pagePairFiles(pair, overrides = {}) {
       ? aviationProductHtml.en
     : family === "projects"
       ? projectProductHtml.en
+    : family === "speaking"
+      ? speakingProductHtml.en
     : family === "knowledge"
       ? knowledgePageFixture("en")
     : family === "services"
@@ -193,7 +202,11 @@ async function pageArchitectureFixture({ files, facts, public_claim_surfaces, ex
       "assets/img/signature.png": "fixture-image",
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
-      "procurement-2026/index.html": "<!doctype html><html><body>PL resource</body></html>",
+      "procurement-2026/index.html": procurementParentProductHtml,
+      "diagrams/infographic.html": "<!doctype html><title>Infographic</title>",
+      "diagrams/diagram1_universal.html": "<!doctype html><title>Process</title>",
+      "diagrams/diagram2_ariba.html": "<!doctype html><title>Ariba</title>",
+      "diagrams/diagram3_maturity.html": "<!doctype html><title>Maturity</title>",
       "infographic_procurement_2026_EN.html": "<!doctype html><html><body>EN resource</body></html>",
       ...remaining
     }
@@ -496,6 +509,8 @@ async function productionRegistryFixture(overrides = {}) {
       "en/lotnictwo/index.html": aviationProductHtml.en,
       "case-studies/index.html": projectProductHtml.pl,
       "en/case-studies/index.html": projectProductHtml.en,
+      "wystapienia/index.html": speakingProductHtml.pl,
+      "en/wystapienia/index.html": speakingProductHtml.en,
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
       ...extraFiles
@@ -524,6 +539,31 @@ const serviceFactIdFixture = new Set([
 ]);
 const serviceSurfaceFixture = new Set(servicePairs.flatMap(([plFile, enFile]) => [plFile, enFile]));
 const projectsPair = plan2RoutePairs.find((pair) => pair[4] === "projects");
+const speakingPair = plan2RoutePairs.find((pair) => pair[4] === "speaking");
+const speakingSurfaceFixture = new Set(["wystapienia/index.html", "en/wystapienia/index.html"]);
+
+async function speakingPageMutation({ lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces, mutateProcurement = (html) => html } = {}) {
+  const factData = await readFacts();
+  const current = speakingProductHtml[lang];
+  const changed = mutate(current);
+  const files = pagePairFiles(speakingPair, {
+    pl: lang === "pl" ? changed : speakingProductHtml.pl,
+    en: lang === "en" ? changed : speakingProductHtml.en
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    facts: mutateFacts(structuredClone(factData.facts)),
+    public_claim_surfaces: mutateSurfaces(structuredClone(factData.public_claim_surfaces)),
+    extraFiles: {
+      "procurement-2026/index.html": mutateProcurement(procurementParentProductHtml),
+      "diagrams/infographic.html": "<!doctype html><title>Infographic</title>",
+      "diagrams/diagram1_universal.html": "<!doctype html><title>Process</title>",
+      "diagrams/diagram2_ariba.html": "<!doctype html><title>Ariba</title>",
+      "diagrams/diagram3_maturity.html": "<!doctype html><title>Maturity</title>"
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "speaking" });
+}
 
 async function projectPageMutation({ lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
   const factData = await readFacts();
@@ -944,7 +984,7 @@ test("Plan 2 Task 1 accepts a complete paired shell and exposes bounded future h
   const root = await pageArchitectureFixture();
   const result = await runVerification({ root, scope: "pages", family: "all" });
   assert.deepEqual(result.errors, []);
-  assert.deepEqual(result.deferred, ["procurement-parent-contract", "artifacts-contract"]);
+  assert.deepEqual(result.deferred, ["artifacts-contract"]);
 });
 
 test("Plan 2 Task 1 counts only active h1 and main elements", async () => {
@@ -2892,6 +2932,73 @@ test("Plan 2 Task 6 rejects wholesale removal of all 31 facts and both Projects 
     mutateSurfaces: (surfaces) => surfaces.filter((surface) => !projectSurfaceFixture.has(surface))
   });
   assertProjectRegistryInventoryErrors(results, "wholesale Projects registry removal");
+});
+
+test("Plan 2 Task 7 accepts only the exact bilingual Speaking programme and PL-only Procurement parent", async () => {
+  const result = await speakingPageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 7 rejects Speaking identity, programme, claims, controls, schema and resources drift", async () => {
+  const cases = [
+    ["legacy organization count", "pl", "speaking-claim-boundary", (html) => html.replace("</main>", "<!-- ponad 100 organizacji --></main>")],
+    ["entity-split language claim", "en", "speaking-claim-boundary", (html) => html.replace("</main>", "<template>Polish, Eng&#108;ish, German</template></main>")],
+    ["university collaboration", "pl", "speaking-claim-boundary", (html) => html.replace("</main>", "<!-- współpracuję z uczelniami --></main>")],
+    ["client claim", "en", "speaking-claim-boundary", (html) => html.replace("</main>", "<template>ORLEN client result</template></main>")],
+    ["default-ignorable count", "en", "speaking-claim-boundary", (html) => html.replace("</main>", "<!-- 1\u200B00+ organisations --></main>")],
+    ["duplicate group", "en", "speaking-groups", (html) => html.replace('data-section="formats"', 'data-section="topics"')],
+    ["duplicate topic", "pl", "speaking-programme", (html) => html.replace('data-topic="leadership"', 'data-topic="transformation"')],
+    ["reordered format", "en", "speaking-programme", (html) => html.replace('data-format="panel"', 'data-format="talk"')],
+    ["hidden audience", "pl", "speaking-programme", (html) => html.replace('data-audience="teams"', 'hidden data-audience="teams"')],
+    ["extra CTA", "en", "speaking-controls", (html) => html.replace("</main>", '<a class="btn-primary" href="/#contact">Contact</a></main>')],
+    ["external image", "pl", "speaking-resource-census", (html) => html.replace("</main>", '<img src="https://example.com/stage.jpg" alt="Stage"></main>')],
+    ["extra form", "pl", "speaking-resource-census", (html) => html.replace("</main>", '<form><button>Send</button></form></main>')],
+    ["inline style", "en", "speaking-resource-census", (html) => html.replace('<body class="speaking-page"', '<body style="color:red" class="speaking-page"')],
+    ["schema result", "pl", "speaking-schema", (html) => html.replace('"inLanguage":"pl"', '"inLanguage":"pl","result":"success"')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await speakingPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 7 rejects Speaking fact attachment and public-surface removal", async () => {
+  const factData = await readFacts();
+  const approved = factData.facts.find((record) => record.status === "approved");
+  const attached = await speakingPageMutation({
+    mutateFacts: (facts) => facts.map((record) => record.id === approved.id ? { ...record, surfaces: [...record.surfaces, "wystapienia/index.html"] } : record)
+  });
+  assert.ok(errorIds(attached).includes("speaking-registry-inventory"), attached.errors.join("\n"));
+
+  const coordinated = await speakingPageMutation({
+    mutate: (html) => html.replace("</main>", `<p data-fact-id="${approved.id}">${approved.display_pl}</p></main>`),
+    mutateFacts: (facts) => facts.map((record) => record.id === approved.id ? { ...record, surfaces: [...record.surfaces, "wystapienia/index.html"] } : record)
+  });
+  assert.ok(errorIds(coordinated).includes("speaking-registry-inventory"), coordinated.errors.join("\n"));
+  assert.ok(errorIds(coordinated).includes("speaking-fact-inventory"), coordinated.errors.join("\n"));
+
+  const removed = await speakingPageMutation({
+    mutateSurfaces: (surfaces) => surfaces.filter((surface) => !speakingSurfaceFixture.has(surface))
+  });
+  assert.ok(errorIds(removed).includes("speaking-registry-inventory"), removed.errors.join("\n"));
+});
+
+test("Plan 2 Task 7 rejects Procurement route, hreflang and iframe inventory drift", async () => {
+  const cases = [
+    ["fake EN route", "procurement-route-boundary", (html) => html.replace("</body>", "<!-- /en/procurement%2D2026/ --></body>")],
+    ["split fake EN route", "procurement-route-boundary", (html) => html.replace("</body>", "<!-- /en/procure --><template>ment-2026/</template></body>")],
+    ["EN hreflang", "procurement-hreflang", (html) => html.replace('<link rel="alternate" hreflang="x-default"', '<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/procurement-2026/">\n<link rel="alternate" hreflang="x-default"')],
+    ["language-link hreflang", "procurement-language-link", (html) => html.replace('href="/en/wiedza/" class="nav-lang"', 'href="/en/wiedza/" hreflang="en" class="nav-lang"')],
+    ["changed iframe title", "procurement-iframes", (html) => html.replace('title="SAP Ariba Module Mapping"', 'title="Ariba mapping"')],
+    ["reordered iframe", "procurement-iframes", (html) => html.replace('/diagrams/diagram1_universal.html', '/diagrams/diagram2_ariba.html')],
+    ["missing iframe", "procurement-iframes", (html) => html.replace(/<iframe class="procurement-frame procurement-frame--maturity"[^>]*><\/iframe>/, '')],
+    ["extra iframe", "procurement-resource-census", (html) => html.replace("</main>", '<iframe src="/diagrams/infographic.html" title="Extra"></iframe></main>')],
+    ["inline style", "procurement-resource-census", (html) => html.replace('<section class="procurement-artifacts"', '<section style="display:block" class="procurement-artifacts"')]
+  ];
+  for (const [label, expectedId, mutateProcurement] of cases) {
+    const result = await speakingPageMutation({ mutateProcurement });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
 });
 
 test("Plan 2 Task 2 accepts a complete mirrored application contract", async () => {

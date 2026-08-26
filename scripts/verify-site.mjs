@@ -12,6 +12,7 @@ const statuses = new Set(["approved", "review", "retired"]);
 const blockedKeys = ["id", "pattern", "forbidden_contexts", "reason"];
 const requiredPublicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"];
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
+const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
 
 const ROUTE_PAIRS = [
   ["index.html", "en/index.html", "/", "/en/", "home"],
@@ -5562,6 +5563,7 @@ const SERVICE_PUBLIC_SURFACE_CONTRACT = Object.freeze([
   "en/lotnictwo/index.html",
   "case-studies/index.html",
   "en/case-studies/index.html",
+  ...SPEAKING_SURFACES,
   ...SERVICE_SURFACE_LIST,
   "llms.txt",
   "llms-full.txt",
@@ -6018,9 +6020,266 @@ function addDeferred(context, contract) {
   if (!context.deferred.includes(contract)) context.deferred.push(contract);
 }
 
+const SPEAKING_GROUP_ORDER = Object.freeze(["topics", "formats", "audience", "contact"]);
+const SPEAKING_CONTRACT = Object.freeze({
+  pl: Object.freeze({
+    title: "Wystąpienia",
+    lead: "Temat i format dobieram do decyzji, z którą mierzy się publiczność. Zakres, czas i materiały ustalamy dopiero po poznaniu kontekstu wydarzenia.",
+    url: "https://mamcarz.com/wystapienia/",
+    description: "Temat i format dobieram do decyzji, z którą mierzy się publiczność. Zakres, czas i materiały ustalamy dopiero po poznaniu kontekstu wydarzenia.",
+    topics: Object.freeze([
+      ["transformation", "Transformacja zakupów", "Model operacyjny, role, procesy, dane i technologia."],
+      ["ariba", "SAP Ariba", "Decyzje procesowe, zakres wdrożenia, integracje, testy i uruchomienie."],
+      ["digital", "Digital procurement", "Przejście od projektu procesu do działającego środowiska operacyjnego."],
+      ["public-procurement", "Zamówienia publiczne i technologia", "Struktura decyzji, odpowiedzialności, dokumentów i narzędzi."],
+      ["leadership", "Przywództwo w zmianie", "Porządkowanie odpowiedzialności, komunikacji i tempa wdrożenia."]
+    ]),
+    formats: Object.freeze([
+      ["talk", "Wystąpienie", "Skoncentrowana teza i uporządkowany materiał dla wspólnej sesji."],
+      ["panel", "Panel", "Rozmowa prowadzona wokół pytań i decyzji istotnych dla odbiorców."],
+      ["workshop", "Warsztat", "Praca na problemie, procesie lub scenariuszu wskazanym przez organizatora."],
+      ["lecture", "Wykład", "Materiał osadzony w programie i poziomie przygotowania grupy."]
+    ]),
+    audiences: Object.freeze([["conferences", "Konferencje i fora branżowe"], ["teams", "Zespoły zakupowe i projektowe"], ["universities", "Uczelnie i programy executive"]]),
+    contactHeading: "Najpierw kontekst",
+    contactText: "W wiadomości podaj temat, odbiorców i cel wydarzenia. Format i zakres ustalimy na tej podstawie.",
+    ctaHref: "mailto:pawel@mamcarz.com?subject=Wyst%C4%85pienie",
+    ctaLabel: "Napisz o wystąpieniu"
+  }),
+  en: Object.freeze({
+    title: "Speaking",
+    lead: "I shape the topic and format around the decision facing the audience. Scope, timing and materials are agreed only after the event context is clear.",
+    url: "https://mamcarz.com/en/wystapienia/",
+    description: "I shape the topic and format around the decision facing the audience. Scope, timing and materials are agreed only after the event context is clear.",
+    topics: Object.freeze([
+      ["transformation", "Procurement transformation", "Operating model, roles, processes, data and technology."],
+      ["ariba", "SAP Ariba", "Process decisions, implementation scope, integrations, testing and launch."],
+      ["digital", "Digital procurement", "Moving from process design to an operational environment."],
+      ["public-procurement", "Public procurement and technology", "The structure of decisions, responsibilities, documents and tools."],
+      ["leadership", "Leading change", "Structuring accountability, communication and implementation pace."]
+    ]),
+    formats: Object.freeze([
+      ["talk", "Talk", "A focused thesis and structured material for a shared session."],
+      ["panel", "Panel", "A discussion built around the questions and decisions that matter to the audience."],
+      ["workshop", "Workshop", "Work on a problem, process or scenario selected by the organiser."],
+      ["lecture", "Lecture", "Material aligned with the programme and the group's level of preparation."]
+    ]),
+    audiences: Object.freeze([["conferences", "Industry conferences and forums"], ["teams", "Procurement and project teams"], ["universities", "Universities and executive programmes"]]),
+    contactHeading: "Context first",
+    contactText: "In your message, include the topic, audience and purpose of the event. We will define the format and scope from there.",
+    ctaHref: "mailto:pawel@mamcarz.com?subject=Speaking%20enquiry",
+    ctaLabel: "Write about a speaking enquiry"
+  })
+});
+
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "b4a32b29d12037ca671437a36a6b46c9cc14d68723517d6e2a66e5eba5374c74", en: "22479b7cb849f2a94179be26b02300875525b77226a7649de7d91dc62b131d04" });
+
+function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
+  const records = Array.isArray(factData.facts) ? factData.facts : [];
+  const surfaces = Array.isArray(factData.public_claim_surfaces) ? factData.public_claim_surfaces : [];
+  const ownsState = surfaces.some((surface) => SPEAKING_SURFACES.includes(surface))
+    || records.some((record) => Array.isArray(record?.surfaces) && record.surfaces.some((surface) => SPEAKING_SURFACES.includes(surface)));
+  if (!required && !ownsState) return;
+  const failures = [];
+  if (JSON.stringify(surfaces) !== JSON.stringify(SERVICE_PUBLIC_SURFACE_CONTRACT)) failures.push("public_claim_surfaces must equal the exact Speaking-aware ordered contract");
+  for (const surface of SPEAKING_SURFACES) {
+    const ids = records.filter((record) => Array.isArray(record?.surfaces) && record.surfaces.includes(surface)).map((record) => record.id);
+    if (ids.length !== 0) failures.push(`${surface} must have an empty reverse fact inventory`);
+  }
+  if (failures.length) error(errors, "speaking-registry-inventory", "content/site-facts.json", failures.join("; "));
+}
+
+function exactLabeledEntries(section, attribute, expected) {
+  const nodes = section ? elementDescendants(section).filter((element) => element.attributes.has(attribute)) : [];
+  return nodes.length === expected.length && nodes.every((node, index) => {
+    const headings = elementDescendants(node).filter((element) => element.name === "h3");
+    const paragraphs = elementDescendants(node).filter((element) => element.name === "p");
+    return elementAttribute(node, attribute) === expected[index][0]
+      && headings.length === 1
+      && publishedStaticText(headings[0]) === normalizeExactLiteral(expected[index][1])
+      && (expected[index].length === 2 || (paragraphs.length === 1 && publishedStaticText(paragraphs[0]) === normalizeExactLiteral(expected[index][2])))
+      && pageElementIsActive(node);
+  });
+}
+
+function verifySpeakingSchema(path, parsedRoot, lang, errors) {
+  const contract = SPEAKING_CONTRACT[lang];
+  const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
+  let actual = null;
+  try { actual = scripts.length === 1 ? JSON.parse(rawElementText(scripts[0])) : null; } catch { actual = null; }
+  const expected = { "@context": "https://schema.org", "@type": "WebPage", name: contract.title, url: contract.url, description: contract.description, inLanguage: lang };
+  if (!sameJsonContract(actual, expected)) error(errors, "speaking-schema", path, "requires one exact bounded localized WebPage schema");
+}
+
+function verifySpeakingClaimBoundary(path, parsedRoot, errors) {
+  const nodes = documentNodeDescendants(parsedRoot);
+  const corpus = normalizeExactHtmlLiteral(nodes.map((node) => {
+    if (node.type === "text" || node.type === "comment") return node.value;
+    if (node.type !== "element") return "";
+    return `${node.name} ${[...node.attributes].map(([name, value]) => `${name} ${value ?? ""}`).join(" ")}`;
+  }).join(" ")).replace(/[^\p{L}\p{N}+#]+/gu, " ");
+  const compact = normalizeExactHtmlLiteral(nodes.filter((node) => node.type === "text" || node.type === "comment").map((node) => node.value).join("")).replace(/[^\p{L}\p{N}]+/gu, "");
+  const forbidden = [
+    /\b100\s*(?:\+|organizac|organisation)/i, /\b25\s*\+/, /\b(?:30\s*(?:[-–]\s*60)|2\s*(?:[-–]\s*4)|8\s*(?:[-–]\s*16)|30)\s*(?:min|h|hours?|godzin)/i,
+    /polish\s+english\s+german|polski\s+angielski\s+niemiecki/i,
+    /współprac[^\s]*\s+z\s+uczelni|partner[^\s]*\s+with\s+universit/i,
+    /works?\s+in\s+practice|działa\w*\s+w\s+praktyce|lessons?\s+learned/i,
+    /\borlen\b|\bkghm\b|żabka|pll\s+lot|motor\s+oil|polpharma|warsaw\s*flight\s*safety/i,
+    /successful|sukces|result|rezultat|outcome|wynik|available|dostępn/i
+  ];
+  if (forbidden.some((pattern) => pattern.test(corpus)) || /warsawflightsafety|polpharma/i.test(compact)) {
+    error(errors, "speaking-claim-boundary", path, "forbids legacy counts, durations, delivery-language, collaboration, client, result, status and retired-brand claims across active and inactive source");
+  }
+}
+
+function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
+  const all = elementDescendants(parsedRoot);
+  const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "img", "object", "picture", "source", "style", "video"]);
+  const invalidAnchor = all.filter((element) => element.name === "a").some((anchor) => {
+    const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
+  });
+  const scripts = all.filter((element) => element.name === "script");
+  const validScripts = scripts.length === 2
+    && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+  if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts) {
+    error(errors, "speaking-resource-census", path, "forbids images, embeds, forms, external URLs, inline styles, extra scripts or controls");
+  }
+}
+
+function verifySpeakingPage(path, parsedRoot, lang, errors) {
+  const contract = SPEAKING_CONTRACT[lang];
+  const all = elementDescendants(parsedRoot);
+  const body = htmlBodyRoot(parsedRoot);
+  const main = all.find((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  if (elementAttribute(body, "data-page") !== "speaking") error(errors, "speaking-shell", path, 'body must use data-page="speaking"');
+  const h1s = all.filter((element) => element.name === "h1" && pageElementIsActive(element));
+  const leads = all.filter((element) => elementHasClass(element, "page-lead") && pageElementIsActive(element));
+  if (h1s.length !== 1 || publishedStaticText(h1s[0]) !== normalizeExactLiteral(contract.title)) error(errors, "speaking-h1", path, "requires exact localized Speaking identity");
+  if (leads.length !== 1 || publishedStaticText(leads[0]) !== normalizeExactLiteral(contract.lead)) error(errors, "speaking-lead", path, "requires exact localized event-context lead");
+  const groups = all.filter((element) => element.attributes.has("data-section"));
+  const direct = directElementChildren(main, "section");
+  if (JSON.stringify(groups.map((group) => elementAttribute(group, "data-section"))) !== JSON.stringify(SPEAKING_GROUP_ORDER)
+    || direct.length !== 4 || !direct.every((section, index) => section === groups[index] && pageElementIsActive(section))) {
+    error(errors, "speaking-groups", path, "requires exactly four direct ordered visible groups");
+  }
+  const byId = new Map(groups.map((group) => [elementAttribute(group, "data-section"), group]));
+  if (!exactLabeledEntries(byId.get("topics"), "data-topic", contract.topics)
+    || !exactLabeledEntries(byId.get("formats"), "data-format", contract.formats)
+    || !exactLabeledEntries(byId.get("audience"), "data-audience", contract.audiences)) {
+    error(errors, "speaking-programme", path, "requires the exact localized ordered topic, format and audience manifests");
+  }
+  const contact = byId.get("contact");
+  const contactH2 = contact ? elementDescendants(contact, "h2") : [];
+  const contactP = contact ? elementDescendants(contact, "p").filter((element) => publishedStaticText(element) === normalizeExactLiteral(contract.contactText)) : [];
+  if (contactH2.length !== 1 || publishedStaticText(contactH2[0]) !== normalizeExactLiteral(contract.contactHeading)
+    || contactP.length !== 1 || publishedStaticText(contactP[0]) !== normalizeExactLiteral(contract.contactText)) {
+    error(errors, "speaking-contact", path, "requires exact localized context-first contact copy");
+  }
+  const controls = all.filter((element) => (element.name === "a" || element.name === "button")
+    && (elementHasClass(element, "btn-primary") || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
+  if (controls.length !== 1 || controls[0].name !== "a" || !elementIsWithin(controls[0], contact)
+    || elementAttribute(controls[0], "href") !== contract.ctaHref || publishedStaticText(controls[0]) !== normalizeExactLiteral(contract.ctaLabel)) {
+    error(errors, "speaking-controls", path, "requires one exact localized contextual mail CTA");
+  }
+  const factNodes = all.filter((element) => element.attributes.has("data-fact-id"));
+  if (factNodes.length) error(errors, "speaking-fact-inventory", path, "Speaking pages must render no registry fact rows");
+  const current = all.filter((element) => element.name === "a" && elementAttribute(element, "aria-current") === "page");
+  const expectedCurrent = lang === "pl" ? "/wiedza/" : "/en/wiedza/";
+  if (current.length !== 1 || elementAttribute(current[0], "href") !== expectedCurrent) error(errors, "speaking-shell", path, "requires Knowledge as the sole current local navigation route");
+  verifySpeakingSchema(path, parsedRoot, lang, errors);
+  verifySpeakingResourceCensus(path, parsedRoot, contract, errors);
+  verifySpeakingClaimBoundary(path, parsedRoot, errors);
+  const digest = serviceDocumentDigest(parsedRoot);
+  if (digest !== SPEAKING_DOCUMENT_MANIFEST[lang]) error(errors, "speaking-document-manifest", path, `requires exact full-document manifest; actual ${digest}`);
+}
+
+const PROCUREMENT_PARENT = Object.freeze({
+  title: "Procurement Process 2026",
+  lead: "Interaktywny model procesu zakupowego. Poniżej znajdują się cztery materiały tworzące jego strukturę.",
+  url: "https://mamcarz.com/procurement-2026/",
+  ctaHref: "mailto:pawel@mamcarz.com?subject=Procurement%20Process%202026",
+  iframes: Object.freeze([
+    ["/diagrams/infographic.html", "Procurement 2026 · infographic", "Infografika: od cyklu do orkiestracji", "Materiał w języku angielskim"],
+    ["/diagrams/diagram1_universal.html", "Procurement Process 2026 · interaktywny diagram", "Diagram procesu zakupowego", null],
+    ["/diagrams/diagram2_ariba.html", "SAP Ariba Module Mapping", "Mapowanie modułów SAP Ariba", null],
+    ["/diagrams/diagram3_maturity.html", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", null]
+  ])
+});
+const PROCUREMENT_DOCUMENT_MANIFEST = "e7b21099ae1ae9feb1bf6a0c0a7a8396eb75da6219712102af11b6c3ae742208";
+
+function verifyProcurementSchema(parsedRoot, errors) {
+  const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
+  let actual = null;
+  try { actual = scripts.length === 1 ? JSON.parse(rawElementText(scripts[0])) : null; } catch { actual = null; }
+  const expected = { "@context": "https://schema.org", "@type": "WebPage", name: PROCUREMENT_PARENT.title, url: PROCUREMENT_PARENT.url, description: PROCUREMENT_PARENT.lead, inLanguage: "pl" };
+  if (!sameJsonContract(actual, expected)) error(errors, "procurement-schema", "procurement-2026/index.html", "requires one exact bounded Polish WebPage schema");
+}
+
 async function verifyProcurementParent(_factData, context) {
-  // Task 7 owns the substantive PL-only parent-page contract.
-  addDeferred(context, "procurement-parent-contract");
+  const path = "procurement-2026/index.html";
+  const html = await readRequired(context, path, "procurement-file");
+  const parsedRoot = parseStaticHtml(html).root;
+  const all = elementDescendants(parsedRoot);
+  const body = htmlBodyRoot(parsedRoot);
+  const main = all.find((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  if (elementAttribute(body, "data-page") !== "procurement-parent") error(context.errors, "procurement-shell", path, 'body must use data-page="procurement-parent"');
+  const h1s = all.filter((element) => element.name === "h1" && pageElementIsActive(element));
+  const leads = all.filter((element) => elementHasClass(element, "page-lead") && pageElementIsActive(element));
+  if (h1s.length !== 1 || publishedStaticText(h1s[0]) !== PROCUREMENT_PARENT.title || leads.length !== 1 || publishedStaticText(leads[0]) !== normalizeExactLiteral(PROCUREMENT_PARENT.lead)) {
+    error(context.errors, "procurement-identity", path, "requires exact Procurement Process 2026 identity and lead");
+  }
+  const head = directElementChildren(directElementChildren(parsedRoot, "html")[0], "head")[0];
+  const canonical = head ? directElementChildren(head, "link").filter((link) => elementAttribute(link, "rel") === "canonical") : [];
+  const alternates = head ? directElementChildren(head, "link").filter((link) => elementAttribute(link, "rel") === "alternate") : [];
+  const actualAlternates = alternates.map((link) => [elementAttribute(link, "hreflang"), elementAttribute(link, "href")]);
+  if (canonical.length !== 1 || elementAttribute(canonical[0], "href") !== PROCUREMENT_PARENT.url
+    || JSON.stringify(actualAlternates) !== JSON.stringify([["pl", PROCUREMENT_PARENT.url], ["x-default", PROCUREMENT_PARENT.url]])) {
+    error(context.errors, "procurement-hreflang", path, "requires canonical plus only pl and x-default alternates");
+  }
+  const languageLinks = all.filter((element) => element.name === "a" && elementHasClass(element, "nav-lang"));
+  if (languageLinks.length !== 1 || elementAttribute(languageLinks[0], "href") !== "/en/wiedza/" || languageLinks[0].attributes.has("hreflang") || publishedStaticText(languageLinks[0]) !== "EN") {
+    error(context.errors, "procurement-language-link", path, "requires visible EN reader link to /en/wiedza/ without hreflang");
+  }
+  const sourceCorpus = documentNodeDescendants(parsedRoot).map((node) => node.type === "element"
+    ? [...node.attributes.values()].join(" ")
+    : (node.value ?? "")).join(" ");
+  if (knowledgeHasBannedRoute(sourceCorpus) || knowledgeInactiveUrlViolation(parsedRoot) || knowledgeUrlPropertyViolation(parsedRoot)) {
+    error(context.errors, "procurement-route-boundary", path, "forbids any active, encoded or inactive /en/procurement-2026/ route");
+  }
+  const artifactSections = directElementChildren(main, "section").filter((element) => elementHasClass(element, "procurement-artifacts"));
+  const artifacts = artifactSections.length === 1 ? elementDescendants(artifactSections[0]).filter((element) => element.attributes.has("data-artifact")) : [];
+  const frames = all.filter((element) => element.name === "iframe");
+  const exactFrames = frames.length === 4 && frames.every((frame, index) => elementAttribute(frame, "src") === PROCUREMENT_PARENT.iframes[index][0]
+    && elementAttribute(frame, "title") === PROCUREMENT_PARENT.iframes[index][1]
+    && elementIsWithin(frame, artifacts[index]));
+  const exactArtifacts = artifacts.length === 4 && artifacts.every((artifact, index) => {
+    const headings = elementDescendants(artifact, "h2");
+    const labels = elementDescendants(artifact).filter((element) => elementHasClass(element, "artifact-language"));
+    return elementAttribute(artifact, "data-artifact") === String(index + 1)
+      && headings.length === 1 && publishedStaticText(headings[0]) === normalizeExactLiteral(PROCUREMENT_PARENT.iframes[index][2])
+      && (PROCUREMENT_PARENT.iframes[index][3] ? labels.length === 1 && publishedStaticText(labels[0]) === normalizeExactLiteral(PROCUREMENT_PARENT.iframes[index][3]) : labels.length === 0);
+  });
+  if (artifactSections.length !== 1 || !exactFrames || !exactArtifacts) error(context.errors, "procurement-iframes", path, "requires one exact four-artifact dossier with preserved source, order, title, heading and English label");
+  const controls = all.filter((element) => (element.name === "a" || element.name === "button")
+    && (elementHasClass(element, "btn-primary") || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
+  if (controls.length !== 1 || controls[0].name !== "a" || elementAttribute(controls[0], "href") !== PROCUREMENT_PARENT.ctaHref) error(context.errors, "procurement-controls", path, "requires one contextual Procurement mail CTA");
+  const forbiddenTags = new Set(["audio", "base", "embed", "form", "img", "object", "picture", "source", "style", "video"]);
+  const invalidAnchor = all.filter((element) => element.name === "a").some((anchor) => {
+    const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== PROCUREMENT_PARENT.ctaHref);
+  });
+  const scripts = all.filter((element) => element.name === "script");
+  const validScripts = scripts.length === 2
+    && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer")).length === 1;
+  if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)))
+    || invalidAnchor || !validScripts || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames");
+  verifyProcurementSchema(parsedRoot, context.errors);
+  const digest = serviceDocumentDigest(parsedRoot);
+  if (digest !== PROCUREMENT_DOCUMENT_MANIFEST) error(context.errors, "procurement-document-manifest", path, `requires exact full-document manifest; actual ${digest}`);
+  await verifyLocalLinks(path, parsedRoot, "speaking", context);
 }
 
 async function verifyArtifacts(_factData, context) {
@@ -6061,6 +6320,15 @@ async function verifyPages(factData, family, context) {
       const plEvidence = verifyProjectPage(plFile, plRoot, "pl", factData, context.errors);
       const enEvidence = verifyProjectPage(enFile, enRoot, "en", factData, context.errors);
       verifyProjectParity(plEvidence, enEvidence, context.errors);
+    }
+    if (routeFamily === "speaking") {
+      const speakingActive = elementAttribute(htmlBodyRoot(plRoot), "data-page") === "speaking"
+        && elementAttribute(htmlBodyRoot(enRoot), "data-page") === "speaking";
+      verifySpeakingRegistryInventory(factData, context.errors, { required: speakingActive });
+      if (speakingActive) {
+        verifySpeakingPage(plFile, plRoot, "pl", context.errors);
+        verifySpeakingPage(enFile, enRoot, "en", context.errors);
+      }
     }
     await verifyLocalLinks(plFile, plRoot, family, context);
     await verifyLocalLinks(enFile, enRoot, family, context);
@@ -6151,8 +6419,12 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   if (scope === "facts" || scope === "all") {
     const completeServiceContext = await hasCompleteServiceDocumentContext(root);
     const completeProjectContext = await hasCompleteProjectDocumentContext(root);
+    const completeSpeakingContext = await Promise.all(SPEAKING_SURFACES.map(async (path) => {
+      try { return (await stat(resolve(root, path))).isFile(); } catch { return false; }
+    })).then((items) => items.every(Boolean));
     verifyServiceRegistryInventory(facts, errors, { required: completeServiceContext });
     verifyProjectRegistryInventory(facts, errors, { required: completeProjectContext });
+    verifySpeakingRegistryInventory(facts, errors, { required: completeSpeakingContext });
     const publicSurfaces = verifyPublicSurfaceInventory(facts, errors);
     const factIds = verifyFactSchema(facts, publicSurfaces, errors);
     verifyBlockedSchema(facts, factIds, errors);
