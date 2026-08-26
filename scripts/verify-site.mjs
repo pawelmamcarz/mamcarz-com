@@ -4715,6 +4715,199 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
   verifyAviationDocumentManifest(path, parsedRoot, lang, errors);
 }
 
+const KNOWLEDGE_CONTRACT = Object.freeze({
+  pl: Object.freeze({
+    title: "Wiedza",
+    purpose: "Analizy, wystąpienia i narzędzia, które porządkują decyzje w procurement, technologii i operacjach.",
+    url: "https://mamcarz.com/wiedza/",
+    ctaHref: "/#contact",
+    ctaLabel: "Przejdź do kontaktu",
+    resources: Object.freeze([
+      Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Model interaktywny", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null }),
+      Object.freeze({ href: "/wystapienia/", title: "Wystąpienia i wykłady", type: "Wystąpienia i wykłady", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null })
+    ])
+  }),
+  en: Object.freeze({
+    title: "Insights",
+    purpose: "Analysis, talks and tools that clarify decisions in procurement, technology and operations.",
+    url: "https://mamcarz.com/en/wiedza/",
+    ctaHref: "/en/#contact",
+    ctaLabel: "Go to contact",
+    resources: Object.freeze([
+      Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement 2026: From Traditional Cycle to AI Orchestration", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
+      Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
+      Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Interactive model", language: "Polish", status: "Polish-language resource", inLanguage: "pl", lang: "pl" })
+    ])
+  })
+});
+
+function sameJsonContract(actual, expected) {
+  if (Array.isArray(expected)) {
+    return Array.isArray(actual)
+      && actual.length === expected.length
+      && expected.every((value, index) => sameJsonContract(actual[index], value));
+  }
+  if (isPlainObject(expected)) {
+    return isPlainObject(actual)
+      && sameStringSet(Object.keys(actual), Object.keys(expected))
+      && Object.entries(expected).every(([key, value]) => sameJsonContract(actual[key], value));
+  }
+  return actual === expected;
+}
+
+function knowledgeSchema(contract, lang) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: contract.title,
+    url: contract.url,
+    description: contract.purpose,
+    inLanguage: lang,
+    hasPart: contract.resources.map((resource) => ({
+      "@type": "CreativeWork",
+      name: resource.title,
+      url: `https://mamcarz.com${resource.href}`,
+      inLanguage: resource.inLanguage
+    }))
+  };
+}
+
+function verifyKnowledgeBoundary(path, parsedRoot, errors) {
+  const nodes = documentNodeDescendants(parsedRoot);
+  const elements = nodes.filter((node) => node.type === "element");
+  const canonicalCorpus = normalizeExactHtmlLiteral(nodes.map((node) => {
+    if (node.type === "text" || node.type === "comment") return node.value;
+    if (node.type !== "element") return node.source ?? "";
+    return `${node.name} ${[...node.attributes.entries()].map(([name, value]) => `${name}=${value ?? ""}`).join(" ")}`;
+  }).join(" "));
+  const externalAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
+    const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#"));
+  });
+  const forbiddenResources = elements.filter((element) => new Set([
+    "audio", "base", "embed", "form", "iframe", "object", "picture", "source", "style", "video"
+  ]).has(element.name));
+  const inlineStyles = elements.filter((element) => element.attributes.has("style"));
+  const dateElements = elements.filter((element) => element.name === "time"
+    || [...element.attributes.keys()].some((name) => /^(?:datetime|datepublished|datemodified|data-date)$/i.test(name)));
+  const extraScripts = elements.filter((element) => element.name === "script"
+    && elementAttribute(element, "type") !== "application/ld+json"
+    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-2");
+  if (canonicalCorpus.includes("/en/procurement-2026/")
+    || /datepublished|datemodified/.test(canonicalCorpus)
+    || externalAnchors.length > 0
+    || forbiddenResources.length > 0
+    || inlineStyles.length > 0
+    || dateElements.length > 0
+    || extraScripts.length > 0) {
+    error(errors, "knowledge-boundary", path, "requires internal links only, no fake English Procurement route, dates, inline styles or unowned resources");
+  }
+}
+
+function verifyKnowledgePage(path, parsedRoot, lang, errors) {
+  const contract = KNOWLEDGE_CONTRACT[lang];
+  const all = elementDescendants(parsedRoot);
+  const body = htmlBodyRoot(parsedRoot);
+  const main = all.find((element) => element.name === "main" && elementAttribute(element, "id") === "main");
+  if (elementAttribute(body, "data-page") !== "knowledge") {
+    error(errors, "knowledge-shell", path, 'body must use data-page="knowledge"');
+  }
+
+  const h1s = all.filter((element) => element.name === "h1" && pageElementIsActive(element));
+  if (h1s.length !== 1 || publishedStaticText(h1s[0]) !== normalizeExactLiteral(contract.title)) {
+    error(errors, "knowledge-h1", path, "requires the exact localized Knowledge h1");
+  }
+  const purposes = all.filter((element) => elementHasClass(element, "page-lead") && pageElementIsActive(element));
+  if (purposes.length !== 1 || publishedStaticText(purposes[0]) !== normalizeExactLiteral(contract.purpose)) {
+    error(errors, "knowledge-purpose", path, "requires the exact localized purpose statement");
+  }
+
+  const sectionMarkers = all.filter((element) => element.attributes.has("data-section"));
+  const directSections = directElementChildren(main, "section");
+  const resourcesSection = sectionMarkers.find((section) => elementAttribute(section, "data-section") === "resources");
+  if (sectionMarkers.length !== 1
+    || directSections.length !== 1
+    || directSections[0] !== resourcesSection
+    || !pageElementIsActive(resourcesSection)) {
+    error(errors, "knowledge-sections", path, "requires one direct visible resources section and no other data-section marker");
+  }
+
+  const resources = all.filter((element) => element.attributes.has("data-resource"));
+  let resourcesValid = resources.length === contract.resources.length
+    && resources.every((resource) => resource.name === "article"
+      && resource.parent === resourcesSection
+      && pageElementIsActive(resource));
+  for (const [index, expected] of contract.resources.entries()) {
+    const resource = resources[index];
+    if (!resource) {
+      resourcesValid = false;
+      continue;
+    }
+    const anchors = elementDescendants(resource, "a");
+    const anchor = anchors[0];
+    const metadata = elementDescendants(resource).filter((element) => element.attributes.has("data-meta"));
+    const metaNames = metadata.map((element) => elementAttribute(element, "data-meta"));
+    const metaValues = metadata.map((element) => publishedStaticText(element));
+    resourcesValid = resourcesValid
+      && anchors.length === 1
+      && pageElementIsActive(anchor)
+      && elementAttribute(anchor, "href") === expected.href
+      && elementAttribute(anchor, "lang") === expected.lang
+      && publishedStaticText(anchor) === normalizeExactLiteral(expected.title)
+      && JSON.stringify(metaNames) === JSON.stringify(["type", "language", "status"])
+      && JSON.stringify(metaValues) === JSON.stringify([expected.type, expected.language, expected.status].map(normalizeExactLiteral))
+      && metadata.every(pageElementIsActive);
+  }
+  if (!resourcesValid) {
+    error(errors, "knowledge-resources", path, "requires the exact immutable ordered visible resource manifest");
+  }
+  if (lang === "en") {
+    const polish = resources[2];
+    const anchor = polish ? elementDescendants(polish, "a")[0] : null;
+    const status = polish ? elementDescendants(polish).find((element) => elementAttribute(element, "data-meta") === "status") : null;
+    if (!anchor
+      || elementAttribute(anchor, "href") !== "/procurement-2026/"
+      || elementAttribute(anchor, "lang") !== "pl"
+      || publishedStaticText(status) !== "Polish-language resource") {
+      error(errors, "knowledge-polish-resource", path, "English hub must visibly disclose the Polish resource and use raw lang=pl");
+    }
+  }
+
+  const schemaScripts = all.filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
+  let schema = null;
+  try { schema = schemaScripts.length === 1 ? JSON.parse(rawElementText(schemaScripts[0])) : null; } catch { schema = null; }
+  if (!sameJsonContract(schema, knowledgeSchema(contract, lang))) {
+    error(errors, "knowledge-schema", path, "requires one bounded CollectionPage whose hasPart exactly mirrors the immutable visible inventory");
+  }
+
+  const conversionControls = all.filter((element) => (element.name === "a" || element.name === "button")
+    && ["btn-primary", "btn-secondary", "btn-ghost", "cta-link"].some((className) => elementHasClass(element, className)));
+  const mailtoAnchors = all.filter((element) => element.name === "a" && /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? ""));
+  const cta = conversionControls[0];
+  const contact = directElementChildren(main, "aside").filter((element) => elementHasClass(element, "knowledge-contact"));
+  const contactControls = contact.length === 1
+    ? elementDescendants(contact[0]).filter((element) => element.name === "a" || element.name === "button")
+    : [];
+  if (conversionControls.length !== 1
+    || mailtoAnchors.length !== 0
+    || contact.length !== 1
+    || contactControls.length !== 1
+    || cta?.name !== "a"
+    || !elementIsWithin(cta, contact[0])
+    || elementAttribute(cta, "href") !== contract.ctaHref
+    || publishedStaticText(cta) !== normalizeExactLiteral(contract.ctaLabel)) {
+    error(errors, "knowledge-contact", path, "requires one exact localized internal contact CTA and no second conversion control");
+  }
+
+  const nav = all.find((element) => element.name === "nav" && elementHasClass(element, "site-nav") && pageElementIsActive(element));
+  const current = nav ? elementDescendants(nav, "a").filter((anchor) => elementAttribute(anchor, "aria-current") === "page") : [];
+  const expectedRoute = lang === "pl" ? "/wiedza/" : "/en/wiedza/";
+  if (current.length !== 1 || elementAttribute(current[0], "href") !== expectedRoute) {
+    error(errors, "knowledge-shell", path, "requires Knowledge as the single current route in the localized v2 navigation");
+  }
+  verifyKnowledgeBoundary(path, parsedRoot, errors);
+}
+
 async function verifyAviationHomepageLinks(context) {
   for (const [path, href] of [["index.html", "/lotnictwo/"], ["en/index.html", "/en/lotnictwo/"]]) {
     const html = await readRequired(context, path, "aviation-home-link");
@@ -4855,6 +5048,10 @@ async function verifyPages(factData, family, context) {
     if (routeFamily === "aviation") {
       verifyAviationPage(plFile, plRoot, "pl", factData, context.errors);
       verifyAviationPage(enFile, enRoot, "en", factData, context.errors);
+    }
+    if (routeFamily === "knowledge") {
+      verifyKnowledgePage(plFile, plRoot, "pl", context.errors);
+      verifyKnowledgePage(enFile, enRoot, "en", context.errors);
     }
     await verifyLocalLinks(plFile, plRoot, family, context);
     await verifyLocalLinks(enFile, enRoot, family, context);

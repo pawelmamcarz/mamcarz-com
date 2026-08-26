@@ -122,11 +122,15 @@ function pagePairFiles(pair, overrides = {}) {
     ? applicationPageFixture("pl")
     : family === "aviation"
       ? aviationProductHtml.pl
+    : family === "knowledge"
+      ? knowledgePageFixture("pl")
     : pageShellFixture({ lang: "pl", plRoute, enRoute, title: "Strona" });
   const defaultEn = family === "applications"
     ? applicationPageFixture("en")
     : family === "aviation"
       ? aviationProductHtml.en
+    : family === "knowledge"
+      ? knowledgePageFixture("en")
     : pageShellFixture({ lang: "en", plRoute, enRoute, title: "Page" });
   return {
     [plFile]: overrides.pl ?? defaultPl,
@@ -155,6 +159,8 @@ async function pageArchitectureFixture({ files, facts, extraFiles = {} } = {}) {
       "assets/img/signature.png": "fixture-image",
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      "procurement-2026/index.html": "<!doctype html><html><body>PL resource</body></html>",
+      "infographic_procurement_2026_EN.html": "<!doctype html><html><body>EN resource</body></html>",
       ...remaining
     }
   });
@@ -459,6 +465,91 @@ async function verifyFixtureCss(css) {
 const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "applications");
 const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "projects");
 const aviationPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
+const knowledgePair = plan2RoutePairs.find((pair) => pair[4] === "knowledge");
+
+const knowledgeContract = Object.freeze({
+  pl: Object.freeze({
+    title: "Wiedza",
+    purpose: "Analizy, wystąpienia i narzędzia, które porządkują decyzje w procurement, technologii i operacjach.",
+    ctaHref: "/#contact",
+    ctaLabel: "Przejdź do kontaktu",
+    resources: Object.freeze([
+      Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Model interaktywny", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl" }),
+      Object.freeze({ href: "/wystapienia/", title: "Wystąpienia i wykłady", type: "Wystąpienia i wykłady", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl" })
+    ])
+  }),
+  en: Object.freeze({
+    title: "Insights",
+    purpose: "Analysis, talks and tools that clarify decisions in procurement, technology and operations.",
+    ctaHref: "/en/#contact",
+    ctaLabel: "Go to contact",
+    resources: Object.freeze([
+      Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement 2026: From Traditional Cycle to AI Orchestration", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en" }),
+      Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en" }),
+      Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Interactive model", language: "Polish", status: "Polish-language resource", inLanguage: "pl", lang: "pl" })
+    ])
+  })
+});
+
+function knowledgePageFixture(lang) {
+  const contract = knowledgeContract[lang];
+  const [,, plRoute, enRoute] = knowledgePair;
+  const url = `https://mamcarz.com${lang === "pl" ? plRoute : enRoute}`;
+  const resources = contract.resources.map((resource, index) => `
+    <article class="knowledge-entry" data-resource>
+      <span class="knowledge-entry__number" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+      <h2 class="knowledge-entry__title"><a href="${resource.href}"${resource.lang ? ` lang="${resource.lang}"` : ""}>${resource.title}</a></h2>
+      <dl class="knowledge-entry__meta">
+        <div><dt>${lang === "pl" ? "Typ" : "Type"}</dt><dd data-meta="type">${resource.type}</dd></div>
+        <div><dt>${lang === "pl" ? "Język" : "Language"}</dt><dd data-meta="language">${resource.language}</dd></div>
+        <div><dt>Status</dt><dd data-meta="status">${resource.status}</dd></div>
+      </dl>
+    </article>`).join("");
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: contract.title,
+    url,
+    description: contract.purpose,
+    inLanguage: lang,
+    hasPart: contract.resources.map((resource) => ({
+      "@type": "CreativeWork",
+      name: resource.title,
+      url: `https://mamcarz.com${resource.href}`,
+      inLanguage: resource.inLanguage
+    }))
+  };
+  const body = `<section class="knowledge-index" data-section="resources">${resources}</section>
+    <aside class="knowledge-contact"><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></aside>`;
+  return pageShellFixture({
+    lang,
+    plRoute,
+    enRoute,
+    title: contract.title,
+    lead: contract.purpose,
+    dataPage: "knowledge",
+    head: `<script type="application/ld+json">${JSON.stringify(schema)}</script>`,
+    body
+  }).replace('<footer class="site-footer"><a href="mailto:pawel@mamcarz.com">Contact</a></footer>', '<footer class="site-footer"><a href="/">Home</a></footer>').replace(
+    lang === "pl" ? '<a href="/wiedza/">Wiedza</a>' : '<a href="/en/wiedza/">Knowledge</a>',
+    lang === "pl" ? '<a href="/wiedza/" aria-current="page">Wiedza</a>' : '<a href="/en/wiedza/" aria-current="page">Knowledge</a>'
+  );
+}
+
+async function knowledgePageMutation({ lang = "pl", mutate = (html) => html, mutatePair = null } = {}) {
+  const files = pagePairFiles(knowledgePair, {
+    pl: mutatePair ? mutatePair(knowledgePageFixture("pl"), "pl") : (lang === "pl" ? mutate(knowledgePageFixture("pl")) : knowledgePageFixture("pl")),
+    en: mutatePair ? mutatePair(knowledgePageFixture("en"), "en") : (lang === "en" ? mutate(knowledgePageFixture("en")) : knowledgePageFixture("en"))
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    extraFiles: {
+      "procurement-2026/index.html": "<!doctype html><html><body>PL resource</body></html>",
+      "infographic_procurement_2026_EN.html": "<!doctype html><html><body>EN resource</body></html>"
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "knowledge" });
+}
 
 const applicationContract = {
   pl: {
@@ -2161,6 +2252,110 @@ test("Plan 2 Task 3 fix round 1 inventories global section and conversion cardin
     mutate: (html) => html.replace("</main>", '<a href="mailto:other@example.com">Other contact</a></main>')
   });
   assert.ok(errorIds(extraMailto).includes("aviation-contact"), extraMailto.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 requires the exact Knowledge identity and purpose", async () => {
+  const result = await knowledgePageMutation({
+    mutate: (html) => html
+      .replace('<h1>Wiedza</h1>', '<h1>Biblioteka</h1>')
+      .replace(`<p class="page-lead">${knowledgeContract.pl.purpose}</p>`, '<p class="page-lead">Regularnie publikowane materiały dla liderów.</p>')
+  });
+  const ids = errorIds(result);
+  assert.ok(ids.includes("knowledge-h1"), result.errors.join("\n"));
+  assert.ok(ids.includes("knowledge-purpose"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 accepts the complete bilingual Knowledge contract", async () => {
+  const result = await knowledgePageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 4 pins the immutable ordered resource manifests", async () => {
+  const cases = [
+    ["wrong href", "pl", (html) => html.replace('href="/procurement-2026/"', 'href="/en/procurement-2026/"')],
+    ["wrong title", "pl", (html) => html.replace('>Procurement Process 2026</a>', '>Procurement Trends 2026</a>')],
+    ["wrong type", "pl", (html) => html.replace('Model interaktywny', 'Raport')],
+    ["wrong language", "en", (html) => html.replace('data-meta="language">Polish', 'data-meta="language">English')],
+    ["wrong status", "en", (html) => html.replace('Polish-language resource', 'On-site resource')],
+    ["hidden item", "en", (html) => html.replace('<article class="knowledge-entry" data-resource>', '<article class="knowledge-entry" data-resource hidden>')],
+    ["extra item", "pl", (html) => html.replace('</section>', '<article class="knowledge-entry" data-resource><a href="/">Extra</a></article></section>')]
+  ];
+  for (const [label, lang, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes("knowledge-resources"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 binds the Polish-only EN resource disclosure and raw lang attribute", async () => {
+  const cases = [
+    ["missing disclosure", (html) => html.replace('Polish-language resource', 'On-site resource')],
+    ["missing lang", (html) => html.replace(' href="/procurement-2026/" lang="pl"', ' href="/procurement-2026/"')],
+    ["wrong lang", (html) => html.replace('lang="pl">Procurement Process 2026', 'lang="en">Procurement Process 2026')],
+    ["entity-obfuscated lang", (html) => html.replace('lang="pl">Procurement Process 2026', 'lang="p&#108;">Procurement Process 2026')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-polish-resource"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 rejects invented routes, dates and external resource URLs on every document surface", async () => {
+  const cases = [
+    ["fake EN route in comment", "en", (html) => html.replace('</main>', '<!-- /en/procurement-2026/ --></main>')],
+    ["invented visible date", "pl", (html) => html.replace('</main>', '<time datetime="2026-08-26">26.08.2026</time></main>')],
+    ["invented schema date", "en", (html) => html.replace('"hasPart"', '"datePublished":"2026-08-26","hasPart"')],
+    ["external anchor", "pl", (html) => html.replace('</main>', '<a href="https://example.com/report">Report</a></main>')],
+    ["external schema URL", "en", (html) => html.replace('https://mamcarz.com/infographic_procurement_2026_EN.html', 'https://example.com/report')]
+  ];
+  for (const [label, lang, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes("knowledge-boundary") || errorIds(result).includes("knowledge-schema"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 requires one direct resources section and one exact internal CTA", async () => {
+  const cases = [
+    ["nested resources marker", (html) => html.replace('<section class="knowledge-index" data-section="resources">', '<section class="knowledge-index" data-section="resources"><div data-section="resources"></div>'), "knowledge-sections"],
+    ["duplicate CTA", (html) => html.replace('</aside>', '<a href="/#contact">Przejdź do kontaktu</a></aside>'), "knowledge-contact"],
+    ["external CTA", (html) => html.replace('href="/#contact"', 'href="mailto:pawel@mamcarz.com"'), "knowledge-contact"]
+  ];
+  for (const [label, mutate, expected] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 binds CollectionPage hasPart one-to-one to the visible inventory", async () => {
+  const cases = [
+    ["wrong schema language", (html) => html.replace('"inLanguage":"pl","hasPart"', '"inLanguage":"en","hasPart"')],
+    ["extra schema key", (html) => html.replace('"@type":"CollectionPage"', '"@type":"CollectionPage","author":{"@type":"Person"}')],
+    ["missing hasPart", (html) => html.replace(/,"hasPart":\[[\s\S]*?\](?=}<\/script>)/, '')],
+    ["coordinated visible and schema drift", (html) => html.replaceAll('Procurement Process 2026', 'Procurement Futures 2026')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes("knowledge-schema"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 rejects coordinated PL and EN resource drift", async () => {
+  const result = await knowledgePageMutation({
+    mutatePair: (html) => html.replaceAll('Procurement Process 2026', 'Procurement Futures 2026')
+  });
+  assert.ok(errorIds(result).includes("knowledge-schema") || errorIds(result).includes("knowledge-resources"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 rejects shell, metadata and inactive-content laundering", async () => {
+  const cases = [
+    ["wrong current nav", "pl", (html) => html.replace(' href="/wiedza/" aria-current="page"', ' href="/wiedza/"')],
+    ["hidden resource decoy", "en", (html) => html.replace('</main>', '<template><article data-resource><a href="/">Extra</a></article></template></main>')],
+    ["metadata canonical drift", "pl", (html) => html.replace('https://mamcarz.com/wiedza/', 'https://mamcarz.com/wiedza-old/')]
+  ];
+  for (const [label, lang, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang, mutate });
+    const ids = errorIds(result);
+    assert.ok(ids.includes("knowledge-shell") || ids.includes("knowledge-boundary") || ids.includes("knowledge-resources") || ids.includes("page-canonical"), `${label}: ${result.errors.join("\n")}`);
+  }
 });
 
 test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {

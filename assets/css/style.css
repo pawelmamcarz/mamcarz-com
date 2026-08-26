@@ -1476,6 +1476,29 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 .aviation-contact__inner { display: grid; grid-template-columns: 112px minmax(0, 1fr) minmax(320px, 0.8fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; padding-block: clamp(4rem, 8vw, 7rem); }
 .aviation-contact__action p { margin-bottom: 1.5rem; color: var(--ink-secondary); }
 
+/* KNOWLEDGE RESEARCH INDEX */
+.knowledge-hero { min-height: min(56svh, 620px); }
+.knowledge-kicker { margin: 0 0 1.25rem; color: var(--signal-dark); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; }
+.knowledge-index { border-bottom: var(--line-strong); background: var(--white); }
+.knowledge-index__head { display: flex; align-items: end; justify-content: space-between; gap: 2rem; padding-block: clamp(2.5rem, 5vw, 4.5rem); border-bottom: 3px solid var(--runway-ink); }
+.knowledge-index__head .section-label { margin: 0; }
+.knowledge-index__head > p:last-child { margin: 0; color: var(--ink-secondary); }
+.knowledge-entry { position: relative; display: grid; width: min(100% - (2 * var(--page-gutter)), var(--content-max)); min-width: 0; margin-inline: auto; grid-template-columns: 112px minmax(0, 1.45fr) minmax(330px, 0.75fr); border-bottom: var(--line); }
+.knowledge-entry::before { position: absolute; top: -1px; bottom: -1px; left: 0; width: 4px; background: var(--signal); content: ''; }
+.knowledge-entry__number { padding: clamp(1.8rem, 4vw, 3.25rem) 1rem clamp(1.8rem, 4vw, 3.25rem) 1.5rem; color: var(--muted); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; }
+.knowledge-entry__title { min-width: 0; padding: clamp(1.8rem, 4vw, 3.25rem); border-left: var(--line); font-size: clamp(2rem, 4vw, 4.2rem); letter-spacing: -0.025em; }
+.knowledge-entry__title a { display: inline; text-decoration-color: var(--signal); text-decoration-thickness: 2px; text-underline-offset: 0.14em; overflow-wrap: anywhere; }
+.knowledge-entry__title a:hover { color: var(--signal-dark); }
+.knowledge-entry__meta { display: grid; align-content: center; margin: 0; padding: clamp(1.5rem, 3vw, 2.5rem); border-left: var(--line-strong); }
+.knowledge-entry__meta > div { display: grid; grid-template-columns: minmax(88px, 0.72fr) minmax(0, 1.28fr); gap: 1rem; padding: 0.65rem 0; border-bottom: var(--line); }
+.knowledge-entry__meta > div:last-child { border-bottom: 0; }
+.knowledge-entry__meta dt { color: var(--muted); font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.knowledge-entry__meta dd { margin: 0; font-size: 0.9rem; font-weight: 500; }
+.knowledge-contact { background: var(--sky-band); }
+.knowledge-contact__inner { display: grid; align-items: center; gap: clamp(1.5rem, 4vw, 4rem); grid-template-columns: minmax(170px, 0.7fr) minmax(0, 1.6fr) auto; padding-block: clamp(3rem, 6vw, 5.5rem); }
+.knowledge-contact__inner > p { margin: 0; color: var(--ink-secondary); }
+.knowledge-contact__label { color: var(--runway-ink) !important; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; }
+
 .page-content {
   width: min(100% - (2 * var(--page-gutter)), var(--content-max));
   margin-inline: auto;
@@ -1904,6 +1927,9 @@ footer :focus-visible,
   .aviation-dispatch-note,
   .aviation-contact__action { grid-column: 2; }
 
+  .knowledge-entry { grid-template-columns: 88px minmax(0, 1fr); }
+  .knowledge-entry__meta { grid-column: 2; border-top: var(--line); border-left: var(--line); }
+
   .process-grid,
   .resume-edu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
@@ -2092,6 +2118,14 @@ footer :focus-visible,
   .aviation-venture-dossier { grid-template-columns: minmax(0, 1fr); }
   .aviation-venture-image { grid-row: auto; border-right: 0; border-bottom: var(--line-strong); }
   .aviation-venture-image img { min-height: 220px; }
+
+  .knowledge-index__head { align-items: flex-start; flex-direction: column; gap: 0.75rem; }
+  .knowledge-entry { grid-template-columns: 52px minmax(0, 1fr); }
+  .knowledge-entry__number { padding: 1.5rem 0.65rem 1.5rem 0.9rem; }
+  .knowledge-entry__title { padding: 1.5rem 1rem; font-size: clamp(1.8rem, 9vw, 3rem); }
+  .knowledge-entry__meta { grid-column: 1 / -1; border-left: 0; }
+  .knowledge-entry__meta > div { grid-template-columns: 86px minmax(0, 1fr); }
+  .knowledge-contact__inner { align-items: start; grid-template-columns: minmax(0, 1fr); }
 
   .application-delivery .route-sequence {
     width: 100%;
