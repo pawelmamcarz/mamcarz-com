@@ -40,6 +40,108 @@ const artifactProductHtml = Object.freeze(Object.fromEntries(await Promise.all(
   artifactPaths.map(async (path) => [path, await readFile(resolve(path), "utf8")])
 )));
 const artifactFaviconLink = '<link rel="icon" type="image/svg+xml" href="/favicon.svg">';
+const approvedArtifactSemanticCopy = Object.freeze({
+  "diagrams/diagram1_universal.html": {
+    titles: ["Procurement process reference model"],
+    kickers: ["Reference model", "Decision index"],
+    headings: [["h1", "Procurement process reference model"], ["h2", "Explore fifteen logical records"]],
+    captions: [["figcaption", "The geometry groups a real sequence and optional lenses. Labels, state and descriptions are repeated in the adjacent control index."]],
+    prose: [],
+    svgText: [
+      ["title", "Grouped procurement process geometry"],
+      ["desc", "Strategic steps occupy the upper route, operational steps occupy the lower route, and scenario lenses surround the sequence. The adjacent fifteen-button index provides the full text alternative and keyboard controls."],
+      ["text", "PROCUREMENT"], ["text", "REFERENCE"], ["text", "SELECT A RECORD"],
+      ["text", "STRATEGIC SEQUENCE"], ["text", "OPERATIONAL SEQUENCE"]
+    ],
+    tableText: []
+  },
+  "diagrams/diagram2_ariba.html": {
+    titles: ["Conceptual SAP procurement map"],
+    kickers: ["Workshop vocabulary"],
+    headings: [["h1", "Conceptual SAP procurement map"], ["h2", "Strategic sequence"], ["h2", "Operational sequence"], ["h2", "Scenario lenses"]],
+    captions: [],
+    prose: [
+      "Five ordered decision areas before operational buying.",
+      "Five ordered areas from stated need to invoice and payment decisions.",
+      "Five cross-process questions that require implementation-specific validation."
+    ],
+    svgText: [],
+    tableText: []
+  },
+  "diagrams/diagram3_maturity.html": {
+    titles: ["Editable procurement maturity scenario"],
+    kickers: ["Editable example"],
+    headings: [["h1", "Editable procurement maturity scenario"], ["h2", "Scenario score"], ["h3", "Largest scenario gaps"]],
+    captions: [],
+    prose: ["Scale: 1 initial, 2 developing, 3 defined, 4 managed, 5 optimised for this illustrative scenario."],
+    svgText: [],
+    tableText: []
+  },
+  "diagrams/infographic.html": {
+    titles: ["Procurement process reference model and scenario lenses"],
+    kickers: ["Reference and scenario"],
+    headings: [["h1", "Procurement process: reference model and scenario lenses"], ["h2", "Reference model"], ["h2", "Illustrative target-state scenario"], ["h2", "Model boundaries"]],
+    captions: [["caption", "Scenario lenses to validate"]],
+    prose: [
+      "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+      "Use the comparison as an agenda for validation, not as a product or compliance statement."
+    ],
+    svgText: [],
+    tableText: [
+      ["th", "Lens"], ["th", "Reference model"], ["th", "Illustrative target-state scenario"],
+      ["th", "Decision boundary"], ["td", "Named process stage and ownership question"], ["td", "Decision rights, exceptions and escalation to define"],
+      ["th", "Control boundary"], ["td", "Inputs and handoffs to define"], ["td", "Data, automation, control and evidence choices"]
+    ]
+  },
+  "infographic_procurement_2026_EN.html": {
+    titles: ["Procurement process reference model and scenario lenses"],
+    kickers: ["Reference and scenario"],
+    headings: [["h1", "Procurement process: reference model and scenario lenses"], ["h2", "Reference model"], ["h2", "Illustrative target-state scenario"], ["h2", "Model boundaries"]],
+    captions: [["caption", "Scenario lenses to validate"]],
+    prose: [
+      "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+      "Use the comparison as an agenda for validation, not as a product or compliance statement."
+    ],
+    svgText: [],
+    tableText: [
+      ["th", "Lens"], ["th", "Reference model"], ["th", "Illustrative target-state scenario"],
+      ["th", "Decision boundary"], ["td", "Named process stage and ownership question"], ["td", "Decision rights, exceptions and escalation to define"],
+      ["th", "Control boundary"], ["td", "Inputs and handoffs to define"], ["td", "Data, automation, control and evidence choices"]
+    ]
+  }
+});
+
+function sourceSemanticText(value) {
+  return value.replaceAll("&amp;", "&").replace(/\s+/g, " ").trim();
+}
+
+function sourceTagText(source, pattern) {
+  return [...source.matchAll(pattern)].map((match) => sourceSemanticText(match.at(-1)));
+}
+
+function testOwnedArtifactSemanticCopy(path, html) {
+  const headings = sourceTagText(html, /<h1\b[^>]*>([^<]+)<\/h1>/gi).map((text) => ["h1", text]);
+  if (path === "diagrams/diagram1_universal.html") {
+    headings.push(...sourceTagText(html, /<h2 id="process-workbench-title">([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+  } else if (path === "diagrams/diagram2_ariba.html") {
+    headings.push(...sourceTagText(html, /<header class="model-group__heading">[\s\S]*?<h2>([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+  } else if (path === "diagrams/diagram3_maturity.html") {
+    headings.push(...sourceTagText(html, /<h2 id="scenario-summary-title">([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+    headings.push(...sourceTagText(html, /<h3\b[^>]*>([^<]+)<\/h3>/gi).map((text) => ["h3", text]));
+  } else {
+    headings.push(...sourceTagText(html, /<h2\b[^>]*>([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+  }
+  const svg = /<svg\b[^>]*>([\s\S]*?)<\/svg>/i.exec(html)?.[1] ?? "";
+  return {
+    titles: sourceTagText(html, /<title>([^<]+)<\/title>/gi),
+    kickers: sourceTagText(html, /<p class="artifact-kicker">([^<]+)<\/p>/gi),
+    headings,
+    captions: [...html.matchAll(/<(figcaption|caption)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])]),
+    prose: sourceTagText(html, /<p(?: class="scenario-scale")?>([^<]+)<\/p>/gi),
+    svgText: [...svg.matchAll(/<(title|desc|text)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])]),
+    tableText: [...html.matchAll(/<(th|td)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])])
+  };
+}
 
 function round2ArtifactHtml(path, html) {
   let updated = html.includes(artifactFaviconLink)
@@ -5896,6 +5998,130 @@ test("Plan 2 Task 8 fix round 2 rejects dynamic external scripts and stylesheet-
     const result = await artifactFamilyMutation({ path, mutate, overrides });
     assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
   }
+});
+
+test("Plan 2 Task 8 fix round 3 rejects a pointer override nested in supports", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", "@supports(display:grid){.process-map svg{pointer-events:none!important}}</style>")
+  });
+  assert.ok(errorIds(result).includes("process-pointer-hit"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects a hidden disclaimer nested in supports", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", "@supports(display:grid){.artifact-disclaimer{display:none!important}}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-visibility"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 fails closed on a malformed conditional CSS rule", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", "@supports(display:grid){.artifact-disclaimer{display:none!important}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-style"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 accepts current artifacts and reviewed visible formatting", async () => {
+  const current = await artifactFamilyMutation();
+  assert.deepEqual(current.errors, [], current.errors.join("\n"));
+
+  const legitimate = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace(
+      "</style>",
+      "@supports(display:grid){.artifact-disclaimer{display:block;opacity:1}}</style>"
+    )
+  });
+  assert.deepEqual(legitimate.errors, [], legitimate.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects custom-property display indirection", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", ".artifact-disclaimer{--hide:none;display:var(--hide)!important}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-visibility"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects calculated zero opacity", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", ".artifact-disclaimer{opacity:calc(0)!important}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-visibility"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects template-literal and bracket-spelled dynamic external scripts", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const payload = [
+    "    const remote = document.createElement(`script`);",
+    "    remote[`src`] = `https://example.com/payload.js`;",
+    "    document.head.append(remote);"
+  ].join("\n");
+  const result = await artifactFamilyMutation({
+    path,
+    mutate: (html) => html.replace("  </script>", `${payload}\n  </script>`)
+  });
+  assert.ok(errorIds(result).includes("artifact-resource"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 independently owns the complete static semantic-copy manifest", async () => {
+  for (const [path, expected] of Object.entries(approvedArtifactSemanticCopy)) {
+    assert.deepEqual(testOwnedArtifactSemanticCopy(path, artifactProductHtml[path]), expected, `${path} independent semantic copy`);
+  }
+
+  const path = "diagrams/infographic.html";
+  const coordinatedProductMutation = artifactProductHtml[path].replace("Scenario lenses to validate", "Scenario dimensions to validate");
+  const verifierSource = await readFile(modulePath, "utf8");
+  const coordinatedVerifierMutation = verifierSource.replaceAll("Scenario lenses to validate", "Scenario dimensions to validate");
+  assert.notEqual(coordinatedProductMutation, artifactProductHtml[path], "caption product mutation must apply");
+  assert.notEqual(coordinatedVerifierMutation, verifierSource, "caption verifier mutation must apply");
+  assert.notDeepEqual(testOwnedArtifactSemanticCopy(path, coordinatedProductMutation), approvedArtifactSemanticCopy[path], "test-owned manifest must kill coordinated product and verifier drift");
+});
+
+test("Plan 2 Task 8 fix round 3 requires the exact per-path h1 in the semantic manifest", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const result = await artifactFamilyMutation({
+    path,
+    mutate: (html) => html.replace("<h1>Procurement process reference model</h1>", "<h1>SAP Ariba guarantees lower procurement costs</h1>")
+  });
+  assert.ok(errorIds(result).includes("artifact-heading"), result.errors.join("\n"));
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 owns remaining non-model section headings", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram2_ariba.html",
+    mutate: (html) => html.replace("<h2>Strategic sequence</h2>", "<h2>Strategic workflow</h2>")
+  });
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 owns semantic figure and table captions", async () => {
+  const mutated = artifactProductHtml["diagrams/infographic.html"].replace(
+    "<caption>Scenario lenses to validate</caption>",
+    "<caption>Scenario dimensions to validate</caption>"
+  );
+  const result = await artifactFamilyMutation({ overrides: {
+    "diagrams/infographic.html": mutated,
+    "infographic_procurement_2026_EN.html": mutated
+  } });
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 owns ordinary intro and boundary prose", async () => {
+  const mutated = artifactProductHtml["diagrams/infographic.html"].replace(
+    "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+    "The sequence lists seven handoffs. It does not prescribe a system, automation level or control design."
+  );
+  const result = await artifactFamilyMutation({ overrides: {
+    "diagrams/infographic.html": mutated,
+    "infographic_procurement_2026_EN.html": mutated
+  } });
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
 });
 
 test("Plan 2 Task 8 fix round 2 requires one exact owned local favicon in every artifact", async () => {

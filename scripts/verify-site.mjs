@@ -1974,6 +1974,41 @@ function parseDeclarations(body) {
   return declarations;
 }
 
+function cssStructureIsBalanced(source) {
+  const commentScan = stripCssComments(source);
+  if (commentScan.unterminatedCommentAt !== -1) return false;
+  const stack = [];
+  const matchingOpening = new Map([["}", "{"], [")", "("], ["]", "["]]);
+  let quote = null;
+  let escaped = false;
+  for (const character of commentScan.css) {
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if (new Set(["{", "(", "["]).has(character)) {
+      stack.push(character);
+      continue;
+    }
+    if (matchingOpening.has(character) && stack.pop() !== matchingOpening.get(character)) return false;
+  }
+  return quote === null && !escaped && stack.length === 0;
+}
+
 function decodeCssEscapesChecked(source) {
   let decoded = "";
   let quote = null;
@@ -2054,9 +2089,12 @@ export function parseCssRules(source, media = [], rules = []) {
     const body = source.slice(opening + 1, closing);
     const normalizedPrelude = prelude.replace(/\s+/g, " ");
     const atRule = /^@([a-z-]+)/i.exec(normalizedPrelude);
-    if (atRule?.[1].toLowerCase() === "media") {
+    const atRuleName = atRule?.[1].toLowerCase();
+    if (atRuleName === "media") {
       const mediaPrelude = `@media${normalizedPrelude.slice(atRule[0].length)}`;
       parseCssRules(body, [...media, mediaPrelude], rules);
+    } else if (atRuleName === "supports") {
+      parseCssRules(body, media, rules);
     } else {
       const selectors = prelude.startsWith("@") ? [] : splitCssTopLevel(prelude, ",").map((selector) => selector.trim().replace(/\s+/g, " ")).filter(Boolean);
       rules.push({ prelude: normalizedPrelude, selectors, declarations: parseDeclarations(body), media });
@@ -6293,6 +6331,83 @@ const ARTIFACT_COMMON_DISCLAIMER = "This is a conceptual procurement operating m
 const ARTIFACT_PRODUCT_DISCLAIMER = "Product names are model labels. Verify availability, scope and licensing for the relevant SAP landscape.";
 const ARTIFACT_TOOLBAR_LABEL = "Back to the Polish Procurement 2026 page";
 const ARTIFACT_FAVICON_PATH = "/favicon.svg";
+const ARTIFACT_HEADINGS = Object.freeze({
+  "diagrams/diagram1_universal.html": "Procurement process reference model",
+  "diagrams/diagram2_ariba.html": "Conceptual SAP procurement map",
+  "diagrams/diagram3_maturity.html": "Editable procurement maturity scenario",
+  "diagrams/infographic.html": "Procurement process: reference model and scenario lenses",
+  "infographic_procurement_2026_EN.html": "Procurement process: reference model and scenario lenses"
+});
+const ARTIFACT_SEMANTIC_COPY = Object.freeze({
+  "diagrams/diagram1_universal.html": {
+    titles: ["Procurement process reference model"],
+    kickers: ["Reference model", "Decision index"],
+    headings: [["h1", "Procurement process reference model"], ["h2", "Explore fifteen logical records"]],
+    captions: [["figcaption", "The geometry groups a real sequence and optional lenses. Labels, state and descriptions are repeated in the adjacent control index."]],
+    prose: [],
+    svgText: [
+      ["title", "Grouped procurement process geometry"],
+      ["desc", "Strategic steps occupy the upper route, operational steps occupy the lower route, and scenario lenses surround the sequence. The adjacent fifteen-button index provides the full text alternative and keyboard controls."],
+      ["text", "PROCUREMENT"], ["text", "REFERENCE"], ["text", "SELECT A RECORD"],
+      ["text", "STRATEGIC SEQUENCE"], ["text", "OPERATIONAL SEQUENCE"]
+    ],
+    tableText: []
+  },
+  "diagrams/diagram2_ariba.html": {
+    titles: ["Conceptual SAP procurement map"],
+    kickers: ["Workshop vocabulary"],
+    headings: [["h1", "Conceptual SAP procurement map"], ["h2", "Strategic sequence"], ["h2", "Operational sequence"], ["h2", "Scenario lenses"]],
+    captions: [],
+    prose: [
+      "Five ordered decision areas before operational buying.",
+      "Five ordered areas from stated need to invoice and payment decisions.",
+      "Five cross-process questions that require implementation-specific validation."
+    ],
+    svgText: [],
+    tableText: []
+  },
+  "diagrams/diagram3_maturity.html": {
+    titles: ["Editable procurement maturity scenario"],
+    kickers: ["Editable example"],
+    headings: [["h1", "Editable procurement maturity scenario"], ["h2", "Scenario score"], ["h3", "Largest scenario gaps"]],
+    captions: [],
+    prose: ["Scale: 1 initial, 2 developing, 3 defined, 4 managed, 5 optimised for this illustrative scenario."],
+    svgText: [],
+    tableText: []
+  },
+  "diagrams/infographic.html": {
+    titles: ["Procurement process reference model and scenario lenses"],
+    kickers: ["Reference and scenario"],
+    headings: [["h1", "Procurement process: reference model and scenario lenses"], ["h2", "Reference model"], ["h2", "Illustrative target-state scenario"], ["h2", "Model boundaries"]],
+    captions: [["caption", "Scenario lenses to validate"]],
+    prose: [
+      "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+      "Use the comparison as an agenda for validation, not as a product or compliance statement."
+    ],
+    svgText: [],
+    tableText: [
+      ["th", "Lens"], ["th", "Reference model"], ["th", "Illustrative target-state scenario"],
+      ["th", "Decision boundary"], ["td", "Named process stage and ownership question"], ["td", "Decision rights, exceptions and escalation to define"],
+      ["th", "Control boundary"], ["td", "Inputs and handoffs to define"], ["td", "Data, automation, control and evidence choices"]
+    ]
+  },
+  "infographic_procurement_2026_EN.html": {
+    titles: ["Procurement process reference model and scenario lenses"],
+    kickers: ["Reference and scenario"],
+    headings: [["h1", "Procurement process: reference model and scenario lenses"], ["h2", "Reference model"], ["h2", "Illustrative target-state scenario"], ["h2", "Model boundaries"]],
+    captions: [["caption", "Scenario lenses to validate"]],
+    prose: [
+      "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+      "Use the comparison as an agenda for validation, not as a product or compliance statement."
+    ],
+    svgText: [],
+    tableText: [
+      ["th", "Lens"], ["th", "Reference model"], ["th", "Illustrative target-state scenario"],
+      ["th", "Decision boundary"], ["td", "Named process stage and ownership question"], ["td", "Decision rights, exceptions and escalation to define"],
+      ["th", "Control boundary"], ["td", "Inputs and handoffs to define"], ["td", "Data, automation, control and evidence choices"]
+    ]
+  }
+});
 const ARTIFACT_LEADS = Object.freeze({
   "diagrams/diagram1_universal.html": "A workshop view of strategic and operational steps with five scenario lenses. Select a labelled record to inspect its decision boundary.",
   "diagrams/diagram2_ariba.html": "A static vocabulary for discussing a landscape. Each placement is a workshop hypothesis to verify for the organisation, not an implementation bill of materials or portfolio snapshot.",
@@ -6497,9 +6612,9 @@ async function verifyArtifactResources(path, html, parsedRoot, styleText, contex
     || /(?:https?:)?\/\//i.test(styleText)
     || /data\s*:/i.test(styleText);
   const scriptText = all.filter((element) => element.name === "script").map((script) => rawElementText(script)).join("\n");
-  const invalidDynamicScript = /(?:document\s*\.\s*)?createElement\s*\(\s*["']script["']\s*\)/i.test(scriptText)
-    || /\.\s*src\s*=\s*["'](?:https?:)?\/\//i.test(scriptText)
-    || /setAttribute\s*\(\s*["']src["']\s*,\s*["'](?:https?:)?\/\//i.test(scriptText);
+  const normalizedScriptMembers = scriptText.replace(/\[\s*(["'`])([a-z_$][\w$]*)\1\s*\]/gi, ".$2");
+  const invalidDynamicScript = /(?:document\s*\.\s*)?createElement\s*\(\s*(["'`])(?:script|iframe|object|embed|img|link|source)\1\s*\)/i.test(normalizedScriptMembers)
+    || /["'`](?:https?:)?\/\//i.test(normalizedScriptMembers);
   if (invalidResource || invalidCss || invalidDynamicScript || /<\s*(?:iframe|embed|object)\b/i.test(html)) {
     error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests, the exact local favicon and the parent return link");
   }
@@ -6527,14 +6642,24 @@ function decodedArtifactCssDeclarations(rule) {
 }
 
 function verifyArtifactStylesheetVisibility(path, rules, errors) {
-  const hidden = rules.some((rule) => {
+  const visibleDisplayValues = new Set(["block", "flex", "grid", "inline-flex"]);
+  const preservesVisibility = (property, value) => {
+    if (property === "display") return visibleDisplayValues.has(value);
+    if (property === "visibility") return value === "visible";
+    if (property === "content-visibility") return new Set(["auto", "visible"]).has(value);
+    if (property === "opacity") {
+      const literal = /^(\d+(?:\.\d+)?|\.\d+)(%)?$/.exec(value);
+      if (literal === null) return false;
+      const amount = Number.parseFloat(literal[1]);
+      return Number.isFinite(amount) && amount > 0 && amount <= (literal[2] ? 100 : 1);
+    }
+    return true;
+  };
+  const hiddenOrUnreviewable = rules.some((rule) => {
     const declarations = decodedArtifactCssDeclarations(rule);
-    return declarations.some(([property, value]) => (property === "display" && value === "none")
-      || (property === "visibility" && new Set(["hidden", "collapse"]).has(value))
-      || (property === "content-visibility" && value === "hidden")
-      || (property === "opacity" && /^0(?:\.0+)?%?$/.test(value)));
+    return declarations.some(([property, value]) => !preservesVisibility(property, value));
   });
-  if (hidden) error(errors, "artifact-visibility", path, "forbids stylesheet rules that hide required toolbar, disclaimer or artifact content");
+  if (hiddenOrUnreviewable) error(errors, "artifact-visibility", path, "forbids hidden or unreviewable visibility-sensitive declarations in artifact styles");
 }
 
 function verifyArtifactSafety(path, html, parsedRoot, styleText, errors) {
@@ -6550,6 +6675,33 @@ function verifyArtifactSafety(path, html, parsedRoot, styleText, errors) {
   const unsafeCss = /(?:linear|radial|conic)-gradient\s*\(|text-shadow\s*:|box-shadow\s*:|drop-shadow\s*\(|backdrop-filter\s*:|filter\s*:|blur\s*\(|@keyframes\b|animation\s*:|:hover[^{}]*\{[^{}]*transform\s*:[^{}]*(?:scale|translate)/is.test(styleText);
   if (duplicateAttributes || new Set(ids).size !== ids.length || unsafeElement || unsafeSource || unsafeCss) {
     error(errors, "artifact-safety", path, "forbids duplicate IDs/attributes, hidden decoys, inline behavior/style, unsafe DOM sinks and prohibited visual effects");
+  }
+}
+
+function verifyArtifactSemanticCopy(path, all, head, errors) {
+  const modelContainers = all.filter((element) => ["process-detail", "model-cell", "maturity-dimension"]
+    .some((className) => elementHasClass(element, className)));
+  const belongsToOwnedModel = (element) => modelContainers.some((container) => elementIsWithin(element, container));
+  const headings = all.filter((element) => new Set(["h1", "h2", "h3"]).has(element.name) && !belongsToOwnedModel(element))
+    .map((element) => [element.name, publishedStaticText(element)]);
+  const excludedProseClasses = ["artifact-kicker", "artifact-lead", "artifact-disclaimer", "artifact-product-disclaimer"];
+  const svgElements = all.filter((element) => element.name === "svg");
+  const actual = {
+    titles: head ? directElementChildren(head, "title").map((element) => publishedStaticText(element)) : [],
+    kickers: all.filter((element) => element.name === "p" && elementHasClass(element, "artifact-kicker")).map((element) => publishedStaticText(element)),
+    headings,
+    captions: all.filter((element) => new Set(["figcaption", "caption"]).has(element.name)).map((element) => [element.name, publishedStaticText(element)]),
+    prose: all.filter((element) => element.name === "p"
+      && !belongsToOwnedModel(element)
+      && !excludedProseClasses.some((className) => elementHasClass(element, className)))
+      .map((element) => publishedStaticText(element)),
+    svgText: all.filter((element) => new Set(["title", "desc", "text"]).has(element.name)
+      && svgElements.some((svg) => elementIsWithin(element, svg)))
+      .map((element) => [element.name, publishedStaticText(element)]),
+    tableText: all.filter((element) => new Set(["th", "td"]).has(element.name)).map((element) => [element.name, publishedStaticText(element)])
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(ARTIFACT_SEMANTIC_COPY[path])) {
+    error(errors, "artifact-copy-manifest", path, "requires the exact reviewed non-model semantic copy for this artifact path");
   }
 }
 
@@ -6578,6 +6730,9 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
     || h1s.length !== 1 || !nonEmptyString(publishedStaticText(h1s[0]))) {
     error(context.errors, "artifact-document", path, "requires one complete English HTML5 document, title, viewport and visible h1");
   }
+  if (h1s.length !== 1 || publishedStaticText(h1s[0]) !== ARTIFACT_HEADINGS[path]) {
+    error(context.errors, "artifact-heading", path, "requires the exact reviewed artifact h1 for this path");
+  }
   if (!body || elementAttribute(body, "data-artifact") !== expectedArtifact
     || all.filter((element) => element.attributes.has("data-artifact")).length !== 1) {
     error(context.errors, "artifact-manifest", path, `body must be the sole data-artifact owner with value ${expectedArtifact}`);
@@ -6605,13 +6760,15 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
   const styles = head ? directElementChildren(head, "style") : [];
   const styleText = styles.length === 1 ? rawElementText(styles[0]) : "";
   const rules = parseCssRules(styleText);
-  if (styles.length !== 1 || Object.entries(ARTIFACT_TOKENS).some(([property, value]) => propertyValue(rules, ":root", property) !== value)) {
-    error(context.errors, "artifact-style", path, "requires the exact five local Flight Plan artifact tokens");
+  if (styles.length !== 1 || !cssStructureIsBalanced(styleText)
+    || Object.entries(ARTIFACT_TOKENS).some(([property, value]) => propertyValue(rules, ":root", property) !== value)) {
+    error(context.errors, "artifact-style", path, "requires balanced local CSS and the exact five Flight Plan artifact tokens");
   }
   const leads = all.filter((element) => elementHasClass(element, "artifact-lead") && pageElementIsActive(element));
   if (leads.length !== 1 || publishedStaticText(leads[0]) !== ARTIFACT_LEADS[path]) {
     error(context.errors, "artifact-copy", path, "requires the exact reviewed claim-safe artifact lead");
   }
+  verifyArtifactSemanticCopy(path, all, head, context.errors);
   verifyArtifactSafety(path, html, root, styleText, context.errors);
   verifyArtifactStylesheetVisibility(path, rules, context.errors);
   verifyArtifactClaimBoundary(path, html, root, context.errors);
