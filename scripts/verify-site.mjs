@@ -788,7 +788,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "01",
     "occurrence": 1,
     "ownerText": "01",
-    "containerSignature": "body{class=\"knowledge-page\",data-page=\"knowledge\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"knowledge-index\",data-section=\"resources\"}>article{class=\"knowledge-entry\",data-resource=null}>span{aria-hidden=\"true\",class=\"knowledge-entry__number\"}|parentText=\"01 Procurement 2026: From Traditional Cycle to AI Orchestration TypeInfographic LanguageEnglish StatusOn-site resource\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\",class=\\\"knowledge-entry__number\\\"}\",\"01\"],[\"h2{class=\\\"knowledge-entry__title\\\"}\",\"Procurement 2026: From Traditional Cycle to AI Orchestration\"],[\"dl{class=\\\"knowledge-entry__meta\\\"}\",\"TypeInfographic LanguageEnglish StatusOn-site resource\"]]"
+    "containerSignature": "body{class=\"knowledge-page\",data-page=\"knowledge\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"knowledge-index\",data-section=\"resources\"}>article{class=\"knowledge-entry\",data-resource=null}>span{aria-hidden=\"true\",class=\"knowledge-entry__number\"}|parentText=\"01 Procurement process reference model and scenario lenses TypeInfographic LanguageEnglish StatusOn-site resource\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\",class=\\\"knowledge-entry__number\\\"}\",\"01\"],[\"h2{class=\\\"knowledge-entry__title\\\"}\",\"Procurement process reference model and scenario lenses\"],[\"dl{class=\\\"knowledge-entry__meta\\\"}\",\"TypeInfographic LanguageEnglish StatusOn-site resource\"]]"
   },
   {
     "file": "en/wiedza/index.html",
@@ -2321,8 +2321,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     error(errors, "home-hero-image", page.path, "visible hero requires one visible image with explicit positive width and height plus fetchpriority=high");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-2";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-2";
+  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
+  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
   const stylesheetAttributeNames = new Set(["rel", "href"]);
   const stylesheetNodes = elements.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -2347,8 +2347,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     && element.attributes.has("defer")
     && elementIsActiveResource(element));
   if (stylesheetNodes.length !== 1 || validStylesheets.length !== 1
-    || scriptNodes.length !== 3 || jsonLdScripts.length !== 2 || validBrowserScripts.length !== 1) {
-    error(errors, "home-cache-version", page.path, `homepage requires exactly one active ${expectedCss} stylesheet, two inline application/ld+json scripts and one deferred ${expectedJs} script`);
+    || scriptNodes.length !== 2 || jsonLdScripts.length !== 1 || validBrowserScripts.length !== 1) {
+    error(errors, "home-cache-version", page.path, `homepage requires exactly one active ${expectedCss} stylesheet, one inline application/ld+json graph and one deferred ${expectedJs} script`);
   }
 
   const expectedFontHrefs = new Set([
@@ -4407,7 +4407,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-hreflang", path, "requires exact active pl, en and x-default hreflang entries for the real route pair");
   }
 
-  const expectedStylesheet = "/assets/css/style.css?v=20260825-flightplan-2";
+  const expectedStylesheet = "/assets/css/style.css?v=20260825-flightplan-3";
   const links = elements.filter((element) => element.name === "link");
   const stylesheetCandidates = links.filter((element) => elementAttributeTokens(element, "rel").includes("stylesheet")
     || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
@@ -4416,7 +4416,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-stylesheet", path, `requires one active shared stylesheet ${expectedStylesheet}`);
   }
 
-  const expectedScript = "/assets/js/main.js?v=20260825-flightplan-2";
+  const expectedScript = "/assets/js/main.js?v=20260825-flightplan-3";
   const scriptCandidates = elements.filter((element) => element.name === "script" && element.attributes.has("src"));
   const validScripts = scriptCandidates.filter((element) => elementHasExactAttributeNames(element, new Set(["src", "defer"]))
     && elementAttribute(element, "src") === expectedScript
@@ -4776,8 +4776,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 188, digest: "0030be7e27f7fde6f7320dbc86686c01fd4863e5843d574b9ea2fc65577f9446" }),
-  en: Object.freeze({ elementCount: 188, digest: "c5b2ca2065f213a1b086c65c672757876a08cb02aa648b02a594f724594d44d3" })
+  pl: Object.freeze({ elementCount: 189, digest: "08d1b9fbc78a0e99702c63fc90d0450c2684da2da8e53cec771daf710d32e31d" }),
+  en: Object.freeze({ elementCount: 189, digest: "305891223310b7e755323fd3f4b8ea49bbcee17ad89a843f31103454bd48dcec" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -4788,7 +4788,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" })
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
   ]),
   en: Object.freeze([
     Object.freeze({ rel: "canonical", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
@@ -4798,7 +4798,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" })
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
   ])
 });
 const APPLICATION_ZERO_RESOURCE_TAGS = new Set([
@@ -5084,7 +5084,7 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
     && exactApplicationResourceAttributes(schema, { type: "application/ld+json" })
     && external?.parent === body
     && bodyChildren.at(-1) === external
-    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260825-flightplan-2", defer: null })
+    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
     && rawElementText(external).trim() === "";
 
   const footerSigns = all.filter((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
@@ -5365,6 +5365,7 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
     { attributes: { property: "og:image", content: "https://mamcarz.com/assets/img/og.jpg" }, contentType: "token" },
     { attributes: { property: "og:image:alt", content: literals.documentTitle }, contentType: "human" },
     { attributes: { property: "og:locale", content: literals.locale }, contentType: "token" },
+    { attributes: { property: "og:locale:alternate", content: lang === "pl" ? "en_US" : "pl_PL" }, contentType: "token" },
     { attributes: { property: "og:site_name", content: "Paweł Mamcarz" }, contentType: "human" }
   ];
   const expectedResources = [
@@ -5377,12 +5378,12 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
   ];
   const expectedHeadTags = [
     "meta", "meta", "title", "meta", "meta", "meta",
     "link", "link", "link", "link",
-    "meta", "meta", "meta", "meta", "meta", "meta", "meta", "meta",
+    "meta", "meta", "meta", "meta", "meta", "meta", "meta", "meta", "meta",
     "script", "link", "link", "link", "link"
   ];
   const rootElements = directElementChildren(parsedRoot);
@@ -5600,9 +5601,8 @@ function verifyApplicationSchema(path, parsedRoot, lang, errors) {
     && schema.url === expected.url
     && sameExactLiteral(schema.description, expected.description)
     && provider !== null
-    && sameStringSet(Object.keys(provider), ["@type", "name"])
-    && provider["@type"] === "Person"
-    && sameExactLiteral(provider.name, "Paweł Mamcarz");
+    && sameStringSet(Object.keys(provider), ["@id"])
+    && provider["@id"] === "https://mamcarz.com/#person";
   if (!valid) {
     error(errors, "application-schema", path, "requires one direct purpose-only Service JSON-LD object with the localized page identity and Paweł Mamcarz as provider");
   }
@@ -5923,7 +5923,7 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
   ]),
   en: Object.freeze([
     { rel: "canonical", href: "https://mamcarz.com/en/lotnictwo/" },
@@ -5933,13 +5933,13 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
   ])
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 190, digest: "e14c132c6b5af56bd13909c60fdefb0a37e62604de261b143c68ee2933d03117" }),
-  en: Object.freeze({ elementCount: 190, digest: "6e31b5ca03ae114affc63f534ee6e80550f75339c25430a0e26c87203be20d7a" })
+  pl: Object.freeze({ elementCount: 191, digest: "6f3322042e7ed934dbf3bb32f146f6e109738dcc4e87dc67c7ce8882baae11fc" }),
+  en: Object.freeze({ elementCount: 191, digest: "1dc4dd1da65ae07f05b6e81176d6f53424d114eb53d4284c7d672f662a2bfccd" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -6138,7 +6138,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(scripts[0], { type: "application/ld+json" })
     && scripts[1]?.parent === body
     && bodyChildren.at(-1) === scripts[1]
-    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260825-flightplan-2", defer: null })
+    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
     && rawElementText(scripts[1]).trim() === "";
   const pictures = all.filter((element) => element.name === "picture");
   const sources = all.filter((element) => element.name === "source");
@@ -6281,9 +6281,8 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
     || schema.url !== expected.url
     || schema.description !== expected.description
     || !isPlainObject(provider)
-    || !sameStringSet(Object.keys(provider), ["@type", "name"])
-    || provider["@type"] !== "Person"
-    || provider.name !== "Paweł Mamcarz") {
+    || !sameStringSet(Object.keys(provider), ["@id"])
+    || provider["@id"] !== "https://mamcarz.com/#person") {
     error(errors, "aviation-schema", path, "requires one localized claim-safe Service schema with provider only");
   }
 
@@ -6351,7 +6350,7 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     primary: Object.freeze([["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]]),
     footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"]]),
     resources: Object.freeze([
-      Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement 2026: From Traditional Cycle to AI Orchestration", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
+      Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement process reference model and scenario lenses", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
       Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
       Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Interactive model", language: "Polish", status: "Polish-language resource", inLanguage: "pl", lang: "pl" })
     ])
@@ -6361,19 +6360,19 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
 const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
   pl: Object.freeze([
     "https://mamcarz.com/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-2",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
     "/procurement-2026/", "/wystapienia/", "/#contact", "/", "/assets/img/signature.png", "/", "/uslugi/transformacja-zakupow/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/assets/js/main.js?v=20260825-flightplan-2"
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
   ]),
   en: Object.freeze([
     "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-2",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
     "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
     "/infographic_procurement_2026_EN.html", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
-    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/assets/js/main.js?v=20260825-flightplan-2"
+    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
   ])
 });
 
@@ -6417,7 +6416,8 @@ function knowledgeDocumentMarkup(contract, lang) {
   const submenu = contract.submenu.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script></body></html>`;
+  const alternateLocale = lang === "pl" ? "en_US" : "pl_PL";
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -6446,13 +6446,7 @@ function knowledgeSchema(contract, lang) {
     name: contract.title,
     url: contract.url,
     description: contract.purpose,
-    inLanguage: lang,
-    hasPart: contract.resources.map((resource) => ({
-      "@type": "CreativeWork",
-      name: resource.title,
-      url: `https://mamcarz.com${resource.href}`,
-      inLanguage: resource.inLanguage
-    }))
+    inLanguage: lang
   };
 }
 
@@ -6665,7 +6659,7 @@ function knowledgeHasDateBoundaryViolation(parsedRoot) {
   }
 
   const approvedTitles = new Set([
-    "Procurement 2026: From Traditional Cycle to AI Orchestration",
+    "Procurement process reference model and scenario lenses",
     "Procurement Process 2026"
   ]);
   const approvedUrls = new Set([
@@ -6773,7 +6767,7 @@ function verifyKnowledgeBoundary(path, parsedRoot, errors) {
     || [...element.attributes.keys()].some((name) => /^(?:datetime|datepublished|datemodified|data-date)$/i.test(name)));
   const extraScripts = elements.filter((element) => element.name === "script"
     && elementAttribute(element, "type") !== "application/ld+json"
-    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-2");
+    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-3");
   const inactiveUrlViolation = knowledgeInactiveUrlViolation(parsedRoot);
   const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot) || inactiveUrlViolation;
   if (bannedRoute) {
@@ -6874,7 +6868,7 @@ function verifyKnowledgePage(path, parsedRoot, lang, errors) {
   let schema = null;
   try { schema = schemaScripts.length === 1 ? JSON.parse(rawElementText(schemaScripts[0])) : null; } catch { schema = null; }
   if (!sameJsonContract(schema, knowledgeSchema(contract, lang))) {
-    error(errors, "knowledge-schema", path, "requires one bounded CollectionPage whose hasPart exactly mirrors the immutable visible inventory");
+    error(errors, "knowledge-schema", path, "requires one exact bounded CollectionPage for the visible page identity without inferred entities");
   }
 
   const conversionControls = all.filter((element) => (element.name === "a" || element.name === "button")
@@ -6967,7 +6961,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "5b9b51c965db16dfc3314b57d41c262076973cc58e46be19d403d4997cd903fc", en: "e511ca93cbcaa2c50e94fd7099af0cad4bafd6d28df8504c97bd39d998954f73" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "58d57aeaaaeb1df6f4e6a55ad546db65d73a940b5bc17cba9b6981ff1529dc22", en: "13ba10e60708b2379f4ed1faf67819c7817526e6c2f8bd611fee8ea18ae46fa3" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7014,27 +7008,19 @@ function verifyProjectSchema(path, parsedRoot, lang, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
   let actual = null;
   try { actual = scripts.length === 1 ? JSON.parse(rawElementText(scripts[0])) : null; } catch { actual = null; }
-  const names = PROJECT_STRUCTURE.flatMap((group) => group.projects.map((project) => {
-    const fact = PROJECT_FACT_CONTRACT.find((record) => record.id === project.facts[0]);
-    return fact[lang === "pl" ? "display_pl" : "display_en"];
-  }));
   const expected = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: contract.title,
     url: contract.url,
     description: contract.lead,
+    inLanguage: lang,
     mainEntity: {
       "@type": "ItemList",
-      itemListElement: PROJECT_IDS.map((id, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        name: names[index],
-        url: `${contract.url}#${id}`
-      }))
+      itemListElement: plan3ProjectSchemaRows(parsedRoot, contract.url)
     }
   };
-  if (!sameJsonContract(actual, expected)) error(errors, "project-schema", path, "requires one exact bounded CollectionPage with a 12-item name, position and local-fragment ItemList only");
+  if (!sameJsonContract(actual, expected)) error(errors, "project-schema", path, "requires one exact bounded localized CollectionPage with a 12-item visible name, description and local-fragment ItemList only");
 }
 
 function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
@@ -7044,7 +7030,7 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = elements.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   const invalidAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
     return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
@@ -7340,9 +7326,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "13d5e946545d212ca2763242962f753c316ce5d5ccc5f52ddf515ba0d8da1fde", en: "6d53556149ca00f68fa0c3dd51afcb9b4c8e968d9a00bd04407f2d28a0c907db" }),
-  ariba: Object.freeze({ pl: "a1974b5ba5affc228b38c8afdd277a38cb74d7bdf6e87478f677454c8b9f2f08", en: "2979c9d690e7447d2917d6cfe86b067ca2f5698aa0bccdf3c726e32ac78939ea" }),
-  publicProcurement: Object.freeze({ pl: "2a60ae7c00aef9b6f412fbe35f71c5a65a1162589ae193ad3af532a6ae3dcf25", en: "87e7bc40ed677276c7bf326272c6a9abdb7b4044ff865be6acdf7614346b5b22" })
+  transformation: Object.freeze({ pl: "6f95f286b5e8975418ef587dafdaeaea11df006f963ee4bce5a94c1806f4ae60", en: "314fea33c827a9ae0465b653ef8c1f9beb006a3eda1d07d56b2838cb5fc53e31" }),
+  ariba: Object.freeze({ pl: "73d75ff44382f05e5f0b2b80f8a3839cf51ff6e7135cdb434ca8f681aff3b685", en: "88c42d6e762b0f157d4500bca917e0ecf5bca84f62ae004b6dd83737152f57f9" }),
+  publicProcurement: Object.freeze({ pl: "411e129e8b2db8cf4920e9c0c74ea7a037e4838b5770aac2b0db5dfdf072e83e", en: "24c327fa2c0716a3ed558d1dd21fb2dfd1cb3272d342e5ece14270cd4e31b877" })
 });
 
 function serviceKeyForPath(path) {
@@ -7413,7 +7399,7 @@ function verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors) {
   const extraExecutable = elements.filter((element) => element.name === "script").some((script) => {
     const type = elementAttribute(script, "type");
     const src = elementAttribute(script, "src");
-    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer")));
+    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")));
   });
   const externalAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
@@ -7434,7 +7420,7 @@ function verifyServiceSchema(path, parsedRoot, contract, errors) {
     name: contract.title,
     url: contract.url,
     description: contract.description,
-    provider: { "@type": "Person", name: "Paweł Mamcarz" }
+    provider: { "@id": "https://mamcarz.com/#person" }
   };
   if (!sameJsonContract(schema, expected)) error(errors, "service-schema", path, "requires one exact localized Service schema with name, URL, purpose and Paweł Mamcarz provider only");
 }
@@ -7724,7 +7710,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "74c0c2efb484ac210b14ca67df8127b22aee10d1f9c113420ff99ce879c382e8", en: "521e93bf03fb436d4ccabc832a1196d7c29f5511e84719730ede63ffcc700167" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "4d520eb2ec5a26f6f0138934c499fc3420a76fb8007cdd459d478c54b731d451", en: "c7a18036660bda80d22d8e1f5f0b8f001dfee209f376d34b6ccd81e34ece634f" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -7768,8 +7754,8 @@ function verifySpeakingSchema(path, parsedRoot, lang, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
   let actual = null;
   try { actual = scripts.length === 1 ? JSON.parse(rawElementText(scripts[0])) : null; } catch { actual = null; }
-  const expected = { "@context": "https://schema.org", "@type": "WebPage", name: contract.title, url: contract.url, description: contract.description, inLanguage: lang };
-  if (!sameJsonContract(actual, expected)) error(errors, "speaking-schema", path, "requires one exact bounded localized WebPage schema");
+  const expected = { "@context": "https://schema.org", "@type": "CollectionPage", name: contract.title, url: contract.url, description: contract.description, inLanguage: lang };
+  if (!sameJsonContract(actual, expected)) error(errors, "speaking-schema", path, "requires one exact bounded localized CollectionPage schema");
 }
 
 function verifySpeakingClaimBoundary(path, parsedRoot, errors) {
@@ -7923,7 +7909,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature || !validRecordingAssets) {
     error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and canonical YouTube link; forbids embeds, forms, inline styles, extra scripts or controls");
   }
@@ -7992,14 +7978,14 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity.html", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", null]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "5e34a84d5953e997a20a6ce0128a8863234e2f8e06b0c9358baab9995edcc080";
+const PROCUREMENT_DOCUMENT_MANIFEST = "4877bac0b1fa68631923a2167ed23a8e0d4e6df54cd76c3b49bb18a9902636d2";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
   let actual = null;
   try { actual = scripts.length === 1 ? JSON.parse(rawElementText(scripts[0])) : null; } catch { actual = null; }
-  const expected = { "@context": "https://schema.org", "@type": "WebPage", name: PROCUREMENT_PARENT.title, url: PROCUREMENT_PARENT.url, description: PROCUREMENT_PARENT.lead, inLanguage: "pl" };
-  if (!sameJsonContract(actual, expected)) error(errors, "procurement-schema", "procurement-2026/index.html", "requires one exact bounded Polish WebPage schema");
+  const expected = { "@context": "https://schema.org", "@type": "Article", headline: PROCUREMENT_PARENT.title, url: PROCUREMENT_PARENT.url, description: PROCUREMENT_PARENT.lead, inLanguage: "pl", author: { "@id": "https://mamcarz.com/#person" } };
+  if (!sameJsonContract(actual, expected)) error(errors, "procurement-schema", "procurement-2026/index.html", "requires one exact bounded Polish Article schema without invented dates");
 }
 
 async function verifyProcurementParent(_factData, context) {
@@ -8067,7 +8053,7 @@ async function verifyProcurementParent(_factData, context) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer")).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)))
     || invalidAnchor || !validScripts || !validSignature || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames plus the exact footer signature image");
   verifyProcurementSchema(parsedRoot, context.errors);
@@ -8085,7 +8071,7 @@ const ARTIFACT_FILES = Object.freeze([
 ]);
 const ARTIFACT_COMMON_DISCLAIMER = "This is a conceptual procurement operating model. Capability descriptions and scores are illustrative target-state assumptions, not claims about current product availability, legal compliance or a measured organisation.";
 const ARTIFACT_PRODUCT_DISCLAIMER = "Product names are model labels. Verify availability, scope and licensing for the relevant SAP landscape.";
-const ARTIFACT_TOOLBAR_LABEL = "Back to the Polish Procurement 2026 page";
+const ARTIFACT_TOOLBAR_LABEL = "Back to Insights";
 const ARTIFACT_FAVICON_PATH = "/favicon.svg";
 const ARTIFACT_HEADINGS = Object.freeze({
   "diagrams/diagram1_universal.html": "Procurement process reference model",
@@ -8294,11 +8280,11 @@ const INFOGRAPHIC_NOTES = Object.freeze([
 // behavior-specific contracts below. Values are filled from the reviewed
 // implementation, never derived from a mutable digest.
 const ARTIFACT_CENSUS = Object.freeze({
-  "diagrams/diagram1_universal.html": Object.freeze({ elements: 74, tags: Object.freeze({ a: 1, body: 1, button: 15, circle: 7, desc: 1, div: 2, figcaption: 1, figure: 1, h1: 1, h2: 2, head: 1, header: 2, html: 1, link: 1, main: 1, meta: 2, nav: 1, p: 6, path: 14, rect: 1, script: 1, section: 2, style: 1, svg: 1, text: 5, title: 2 }), attributes: Object.freeze({ "aria-controls": 15, "aria-label": 2, "aria-labelledby": 4, "aria-live": 1, "aria-pressed": 15, charset: 1, class: 55, content: 1, cx: 7, cy: 7, d: 14, "data-artifact": 1, "data-description": 15, "data-record-id": 35, "data-record-kind": 15, fill: 22, height: 1, href: 2, id: 6, lang: 1, name: 1, r: 7, rel: 1, role: 2, stroke: 22, "stroke-width": 22, target: 1, "text-anchor": 5, type: 16, viewbox: 1, width: 1, x: 6, xmlns: 1, y: 6 }) }),
-  "diagrams/diagram2_ariba.html": Object.freeze({ elements: 156, tags: Object.freeze({ a: 1, article: 15, body: 1, div: 19, h1: 1, h2: 3, h3: 15, head: 1, header: 4, html: 1, li: 33, link: 1, main: 1, meta: 2, nav: 1, p: 37, section: 3, style: 1, title: 1, ul: 15 }), attributes: Object.freeze({ "aria-label": 1, charset: 1, class: 110, content: 1, "data-artifact": 1, "data-feature-label": 6, "data-map-group": 3, "data-marker": 15, "data-model-label": 11, "data-product-name": 16, "data-record-id": 15, href: 2, lang: 1, name: 1, rel: 1, target: 1, type: 1 }) }),
-  "diagrams/diagram3_maturity.html": Object.freeze({ elements: 292, tags: Object.freeze({ a: 1, body: 1, dd: 5, div: 22, dl: 1, dt: 5, fieldset: 16, form: 1, h1: 1, h2: 9, h3: 1, head: 1, header: 1, html: 1, input: 80, label: 80, legend: 16, li: 4, link: 1, main: 1, meta: 2, nav: 1, ol: 1, output: 8, p: 12, script: 1, section: 9, span: 8, style: 1, title: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 1, "aria-live": 1, charset: 1, checked: 16, class: 130, content: 1, "data-artifact": 1, "data-baseline": 8, "data-dimension": 8, "data-side": 16, "data-target": 8, for: 80, href: 2, id: 87, lang: 1, name: 81, rel: 1, target: 1, type: 81, value: 80 }) }),
-  "diagrams/infographic.html": Object.freeze({ elements: 52, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, link: 1, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 2, id: 3, lang: 1, name: 1, rel: 1, scope: 5, target: 1, type: 1 }) }),
-  "infographic_procurement_2026_EN.html": Object.freeze({ elements: 52, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, link: 1, main: 1, meta: 2, nav: 1, ol: 1, p: 5, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 1, "data-artifact": 1, "data-stage": 7, href: 2, id: 3, lang: 1, name: 1, rel: 1, scope: 5, target: 1, type: 1 }) })
+  "diagrams/diagram1_universal.html": Object.freeze({ elements: 88, tags: Object.freeze({ a: 1, body: 1, button: 15, circle: 7, desc: 1, div: 2, figcaption: 1, figure: 1, h1: 1, h2: 2, head: 1, header: 2, html: 1, link: 4, main: 1, meta: 12, nav: 1, p: 6, path: 14, rect: 1, script: 2, section: 2, style: 1, svg: 1, text: 5, title: 2 }), attributes: Object.freeze({ "aria-controls": 15, "aria-label": 2, "aria-labelledby": 4, "aria-live": 1, "aria-pressed": 15, charset: 1, class: 55, content: 11, cx: 7, cy: 7, d: 14, "data-artifact": 1, "data-description": 15, "data-record-id": 35, "data-record-kind": 15, fill: 22, height: 1, href: 5, hreflang: 2, id: 6, lang: 1, name: 4, property: 7, r: 7, rel: 4, role: 2, stroke: 22, "stroke-width": 22, target: 1, "text-anchor": 5, type: 17, viewbox: 1, width: 1, x: 6, xmlns: 1, y: 6 }) }),
+  "diagrams/diagram2_ariba.html": Object.freeze({ elements: 170, tags: Object.freeze({ a: 1, article: 15, body: 1, div: 19, h1: 1, h2: 3, h3: 15, head: 1, header: 4, html: 1, li: 33, link: 4, main: 1, meta: 12, nav: 1, p: 37, script: 1, section: 3, style: 1, title: 1, ul: 15 }), attributes: Object.freeze({ "aria-label": 1, charset: 1, class: 110, content: 11, "data-artifact": 1, "data-feature-label": 6, "data-map-group": 3, "data-marker": 15, "data-model-label": 11, "data-product-name": 16, "data-record-id": 15, href: 5, hreflang: 2, lang: 1, name: 4, property: 7, rel: 4, target: 1, type: 2 }) }),
+  "diagrams/diagram3_maturity.html": Object.freeze({ elements: 306, tags: Object.freeze({ a: 1, body: 1, dd: 5, div: 22, dl: 1, dt: 5, fieldset: 16, form: 1, h1: 1, h2: 9, h3: 1, head: 1, header: 1, html: 1, input: 80, label: 80, legend: 16, li: 4, link: 4, main: 1, meta: 12, nav: 1, ol: 1, output: 8, p: 12, script: 2, section: 9, span: 8, style: 1, title: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 1, "aria-live": 1, charset: 1, checked: 16, class: 130, content: 11, "data-artifact": 1, "data-baseline": 8, "data-dimension": 8, "data-side": 16, "data-target": 8, for: 80, href: 5, hreflang: 2, id: 87, lang: 1, name: 84, property: 7, rel: 4, target: 1, type: 82, value: 80 }) }),
+  "diagrams/infographic.html": Object.freeze({ elements: 66, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, link: 4, main: 1, meta: 12, nav: 1, ol: 1, p: 5, script: 1, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 11, "data-artifact": 1, "data-stage": 7, href: 5, hreflang: 2, id: 3, lang: 1, name: 4, property: 7, rel: 4, scope: 5, target: 1, type: 2 }) }),
+  "infographic_procurement_2026_EN.html": Object.freeze({ elements: 66, tags: Object.freeze({ a: 1, body: 1, caption: 1, h1: 1, h2: 3, head: 1, header: 1, html: 1, li: 10, link: 4, main: 1, meta: 12, nav: 1, ol: 1, p: 5, script: 1, section: 3, style: 1, table: 1, tbody: 1, td: 4, th: 5, thead: 1, title: 1, tr: 3, ul: 1 }), attributes: Object.freeze({ "aria-label": 2, "aria-labelledby": 3, charset: 1, class: 21, content: 11, "data-artifact": 1, "data-stage": 7, href: 5, hreflang: 2, id: 3, lang: 1, name: 4, property: 7, rel: 4, scope: 5, target: 1, type: 2 }) })
 });
 
 function artifactCensus(parsedRoot) {
@@ -8364,25 +8350,29 @@ async function verifyArtifactResources(path, html, parsedRoot, styleText, contex
   ]);
   const resourceAttributes = new Set(["action", "background", "cite", "data", "formaction", "manifest", "ping", "poster", "profile", "src", "srcdoc", "srcset", "usemap", "xlink:href"]);
   const exactFavicon = (element) => exactActiveLink(element, { rel: "icon", type: "image/svg+xml", href: ARTIFACT_FAVICON_PATH });
+  const metadataLink = (element) => element.name === "link"
+    && elementAttributeTokens(element, "rel").length === 1
+    && ["canonical", "alternate"].includes(elementAttributeTokens(element, "rel")[0]);
   const invalidResource = all.some((element) => forbiddenTags.has(element.name)
     || [...element.attributes].some(([name, value]) => resourceAttributes.has(name) && nonEmptyString(value))
-    || (element.name !== "a" && !exactFavicon(element) && element.attributes.has("href"))
-    || (element.name === "link" && !exactFavicon(element))
+    || (element.name !== "a" && !exactFavicon(element) && !metadataLink(element) && element.attributes.has("href"))
+    || (element.name === "link" && !exactFavicon(element) && !metadataLink(element))
     || (element.name === "script" && element.attributes.has("src")));
   const cssUrls = [...styleText.matchAll(/url\(\s*(["']?)([^"')]+)\1\s*\)/gi)].map((match) => decodeCssEscapes(match[2].trim()));
   const invalidCss = /@import\b/i.test(styleText)
     || cssUrls.some((url) => !ARTIFACT_FONT_PATHS.has(url))
     || /(?:https?:)?\/\//i.test(styleText)
     || /data\s*:/i.test(styleText);
-  const scriptText = all.filter((element) => element.name === "script").map((script) => rawElementText(script)).join("\n");
-  const scriptHashes = all.filter((element) => element.name === "script")
+  const executableScripts = all.filter((element) => element.name === "script" && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
+  const scriptText = executableScripts.map((script) => rawElementText(script)).join("\n");
+  const scriptHashes = executableScripts
     .map((script) => createHash("sha256").update(rawElementText(script)).digest("hex"));
   const ownsInlineScripts = JSON.stringify(scriptHashes) === JSON.stringify(ARTIFACT_INLINE_SCRIPT_HASHES[path]);
   const normalizedScriptMembers = scriptText.replace(/\[\s*(["'`])([a-z_$][\w$]*)\1\s*\]/gi, ".$2");
   const invalidDynamicScript = /(?:document\s*\.\s*)?createElement\s*\(\s*(["'`])(?:script|iframe|object|embed|img|link|source)\1\s*\)/i.test(normalizedScriptMembers)
     || /["'`](?:https?:)?\/\//i.test(normalizedScriptMembers);
   if (invalidResource || invalidCss || invalidDynamicScript || !ownsInlineScripts || /<\s*(?:iframe|embed|object)\b/i.test(html)) {
-    error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests, exact per-path inline scripts, the exact local favicon and the parent return link");
+    error(context.errors, "artifact-resource", path, "allows only the three approved local WOFF2 font requests, exact per-path executable scripts, bounded JSON-LD, the exact local favicon and the Insights return link");
   }
   for (const fontPath of new Set(cssUrls)) {
     try {
@@ -8585,7 +8575,7 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
     || htmlElements.length !== 1 || elementAttribute(htmlElement, "lang") !== "en"
     || heads.length !== 1 || bodies.length !== 1
     || titles.length !== 1 || !nonEmptyString(publishedStaticText(titles[0]))
-    || charset.length !== 1 || viewport.length !== 1 || meta.length !== 2
+    || charset.length !== 1 || viewport.length !== 1 || meta.length !== 12
     || h1s.length !== 1 || !nonEmptyString(publishedStaticText(h1s[0]))) {
     error(context.errors, "artifact-document", path, "requires one complete English HTML5 document, title, viewport and visible h1");
   }
@@ -8596,11 +8586,12 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
     || all.filter((element) => element.attributes.has("data-artifact")).length !== 1) {
     error(context.errors, "artifact-manifest", path, `body must be the sole data-artifact owner with value ${expectedArtifact}`);
   }
-  const faviconLinks = head ? directElementChildren(head, "link") : [];
+  const headLinks = head ? directElementChildren(head, "link") : [];
+  const faviconLinks = headLinks.filter((element) => elementAttributeTokens(element, "rel").includes("icon"));
   const allLinks = all.filter((element) => element.name === "link");
-  if (faviconLinks.length !== 1 || allLinks.length !== 1
+  if (faviconLinks.length !== 1 || allLinks.length !== 4 || headLinks.length !== 4
     || !exactActiveLink(faviconLinks[0], { rel: "icon", type: "image/svg+xml", href: ARTIFACT_FAVICON_PATH })) {
-    error(context.errors, "artifact-favicon", path, "requires exactly one active local SVG favicon declaration in head");
+    error(context.errors, "artifact-favicon", path, "requires exactly one active local SVG favicon alongside the exact canonical and language links");
   }
   const toolbars = all.filter((element) => element.name === "nav" && elementHasClass(element, "artifact-toolbar") && pageElementIsActive(element));
   const links = toolbars.length === 1 ? directElementChildren(toolbars[0], "a").filter(pageElementIsActive) : [];
@@ -8608,9 +8599,9 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
   if (toolbars.length !== 1
     || !exactElementAttributes(toolbars[0], { class: "artifact-toolbar", "aria-label": "Artifact navigation" })
     || links.length !== 1 || allAnchors.length !== 1
-    || !exactElementAttributes(links[0], { href: "/procurement-2026/", target: "_top" })
+    || !exactElementAttributes(links[0], { href: "/en/wiedza/", target: "_top" })
     || publishedStaticText(links[0]) !== ARTIFACT_TOOLBAR_LABEL) {
-    error(context.errors, "artifact-toolbar", path, "requires one visible exact return toolbar and honest Polish-parent label");
+    error(context.errors, "artifact-toolbar", path, "requires one visible exact return toolbar to the English Insights index");
   }
   const disclaimers = all.filter((element) => elementHasClass(element, "artifact-disclaimer") && pageElementIsActive(element));
   if (disclaimers.length !== 1 || publishedStaticText(disclaimers[0]) !== ARTIFACT_COMMON_DISCLAIMER) {
@@ -8705,7 +8696,7 @@ function verifyProcessArtifact(path, artifact, errors) {
     || !elementIsWithin(panelTitle[0], panels[0])) {
     error(errors, "process-controls", path, "requires 15 exact logical buttons and one named polite detail region");
   }
-  const scripts = all.filter((element) => element.name === "script");
+  const scripts = all.filter((element) => element.name === "script" && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const script = scripts.length === 1 ? rawElementText(scripts[0]) : "";
   const interactionFragments = [
     'event.key !== "Enter" && event.key !== " "',
@@ -8771,7 +8762,7 @@ function verifyAribaMapArtifact(path, artifact, errors) {
   if (productDisclaimers.length !== 1 || publishedStaticText(productDisclaimers[0]) !== ARTIFACT_PRODUCT_DISCLAIMER) {
     error(errors, "artifact-disclaimer", path, "requires the exact SAP product-label disclaimer once");
   }
-  const scripts = all.filter((element) => element.name === "script");
+  const scripts = all.filter((element) => element.name === "script" && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const fakeControls = cells.some((cell) => cell.attributes.has("tabindex") || cell.attributes.has("role"))
     || all.some((element) => element.name === "button" || element.name === "input")
     || scripts.length > 0;
@@ -8825,7 +8816,7 @@ function verifyMaturityArtifact(path, artifact, errors) {
   if (!controlsValid || !/\.scale-choice\s*\{[^}]*min-block-size:\s*44px;[^}]*min-inline-size:\s*44px;/s.test(styleText)) {
     error(errors, "maturity-controls", path, "requires 16 native radio groups, 80 values from 1 through 5 and 44px labelled targets");
   }
-  const scripts = all.filter((element) => element.name === "script");
+  const scripts = all.filter((element) => element.name === "script" && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const script = scripts.length === 1 ? rawElementText(scripts[0]) : "";
   const formulaFragments = [
     "baselineTotal / dimensions.length",
@@ -8894,7 +8885,8 @@ function verifyInfographicArtifact(path, artifact, errors) {
     || headers.some((header) => !new Set(["col", "row"]).has(elementAttribute(header, "scope")))) {
     error(errors, "infographic-model", path, "requires the exact seven-stage reference sequence, scenario framing, notes and semantic comparison table");
   }
-  if (all.some((element) => element.name === "script" || element.name === "svg")
+  if (all.some((element) => element.name === "svg"
+      || (element.name === "script" && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json"))
     || !/@media\s*\(max-width:\s*760px\)/i.test(styleText)
     || /overflow\s*:\s*hidden/i.test(styleText)
     || /min-width\s*:\s*[1-9]\d*px/i.test(styleText)) {
@@ -8961,8 +8953,11 @@ async function verifyArtifacts(_factData, context) {
   if (maturity?.body) verifyMaturityArtifact("diagrams/diagram3_maturity.html", maturity, context.errors);
   if (embeddedInfographic?.body) verifyInfographicArtifact("diagrams/infographic.html", embeddedInfographic, context.errors);
   if (standaloneInfographic?.body) verifyInfographicArtifact("infographic_procurement_2026_EN.html", standaloneInfographic, context.errors);
-  if (files.get("diagrams/infographic.html") !== files.get("infographic_procurement_2026_EN.html")) {
-    error(context.errors, "infographic-parity", "diagrams/infographic.html", "embedded and standalone infographic files must be byte-for-byte identical");
+  const normalizeInfographicSelf = (source) => source
+    .replaceAll("https://mamcarz.com/diagrams/infographic.html", "https://mamcarz.com/{INFOGRAPHIC_SELF}")
+    .replaceAll("https://mamcarz.com/infographic_procurement_2026_EN.html", "https://mamcarz.com/{INFOGRAPHIC_SELF}");
+  if (normalizeInfographicSelf(files.get("diagrams/infographic.html")) !== normalizeInfographicSelf(files.get("infographic_procurement_2026_EN.html"))) {
+    error(context.errors, "infographic-parity", "diagrams/infographic.html", "embedded and standalone infographic files must be identical apart from their truthful self canonical URLs");
   }
 }
 
@@ -9218,10 +9213,10 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
   const sharedScripts = scripts.filter((element) => element.attributes.has("src") || (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
   const inlineExecutable = scripts.filter((element) => !element.attributes.has("src") && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const resourceValid = stylesheets.length === 1
-    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-2" })
+    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
     && elementIsActiveResource(stylesheets[0])
     && sharedScripts.length === 1
-    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260825-flightplan-2", defer: null })
+    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
     && elementIsActiveResource(sharedScripts[0])
     && rawElementText(sharedScripts[0]).trim() === ""
     && elementDescendants(parsedRoot, "style").length === 0
@@ -9981,8 +9976,66 @@ function plan3PresentationAudit(file, body, units, numericTokensByUnit, errors) 
   return approvedByUnit;
 }
 
-function plan3PresentationNumber(unit, token, approvedByUnit) {
+function plan3AncestorHasClass(element, className) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (elementHasClass(current, className)) return true;
+  }
+  return false;
+}
+
+function plan3ReviewedStaticNumber(path, unit, token) {
+  const owner = unit.element;
+  const ownerText = unit.text;
+  if (token.value === "2026"
+    && elementHasClass(owner, "footer-copy")
+    && ownerText === "© 2026 Paweł Mamcarz · mamcarz.com") return true;
+
+  if (SERVICE_SURFACE_LIST.includes(path)
+    && plan3AncestorHasClass(owner, "service-scope-register")
+    && new Set(["S2P", "P2P", "S/4HANA"]).has(token.value)) return true;
+
+  if (PROJECT_SURFACES.includes(path)) {
+    if (elementHasClass(owner, "projects-kicker")
+      && token.value === "12"
+      && new Set(["EVIDENCE REGISTER / 12 POZYCJI", "EVIDENCE REGISTER / 12 ENTRIES"]).has(ownerText)) return true;
+    if (elementHasClass(owner, "project-row__rail")
+      && /^(?:A-0[1-5]|P-0[1-5]|L-0[1-2])$/.test(token.value)
+      && ownerText === token.value) return true;
+    if (token.value === "2026-08-26"
+      && owner.name === "time"
+      && elementAttribute(owner, "datetime") === "2026-08-26"
+      && owner.parent?.type === "element"
+      && directElementChildren(owner.parent).some((element) => elementAttribute(element, "data-fact-id") === "portfolio.akrobacja_com.current_status")) return true;
+  }
+
+  if (AVIATION_SURFACES.includes(path)) {
+    if (elementHasClass(owner, "aviation-venture-entry__code")
+      && new Set(["PROJECT / A01", "PROJECT / M02"]).has(ownerText)
+      && new Set(["A01", "M02"]).has(token.value)) return true;
+    if (token.value === "2026-08-26"
+      && owner.name === "span"
+      && new Set(["Stan na 2026-08-26", "As of 2026-08-26"]).has(ownerText)
+      && owner.parent?.type === "element"
+      && directElementChildren(owner.parent).some((element) => elementAttribute(element, "data-fact-id") === "portfolio.akrobacja_com.current_status")) return true;
+  }
+
+  if (new Set(["wiedza/index.html", "en/wiedza/index.html"]).has(path)) {
+    if (elementHasClass(owner, "knowledge-kicker")
+      && new Set(["RESEARCH INDEX / 02 ENTRIES", "RESEARCH INDEX / 03 ENTRIES"]).has(ownerText)
+      && new Set(["02", "03"]).has(token.value)) return true;
+    if (token.value === "2026" && ownerText === "Procurement Process 2026" && owner.name === "a") return true;
+  }
+
+  if (path === "procurement-2026/index.html") {
+    if (token.value === "2026" && ownerText === "Procurement Process 2026") return true;
+    if (token.value === "04" && elementHasClass(owner, "procurement-kicker") && ownerText === "ARTIFACT DOSSIER / 04 MATERIAŁY") return true;
+  }
+  return false;
+}
+
+function plan3PresentationNumber(path, unit, token, approvedByUnit) {
   if (token.value === "404" && token.presentationText === "404") return true;
+  if (plan3ReviewedStaticNumber(path, unit, token)) return true;
   return /^(?:0[1-9]|1[01])$/u.test(token.value)
     && (approvedByUnit.get(unit)?.has(plan3PresentationTokenKey(token)) ?? false);
 }
@@ -9997,6 +10050,25 @@ function plan3DynamicOccurrenceIsNegated(text, occurrence) {
   if (!/^(?:active|aktywn)/iu.test(occurrence.value)) return false;
   const prefix = text.slice(0, occurrence.start);
   return new RegExp(`(?:^|[^${PLAN3_TOKEN_CHARACTER}])(?:not|nie)(?:\\s+|-)$`, "iu").test(prefix);
+}
+
+function plan3ReviewedNonClaimDynamic(path, owner) {
+  if (AVIATION_SURFACES.includes(path)
+    && owner?.name === "span"
+    && new Set(["Stan na 2026-08-26", "As of 2026-08-26"]).has(publishedStaticText(owner))
+    && owner.parent?.type === "element"
+    && elementHasClass(owner.parent, "aviation-status-line")
+    && directElementChildren(owner.parent).some((element) => elementAttribute(element, "data-fact-id") === "portfolio.akrobacja_com.current_status")) return true;
+  if (path === "en/uslugi/transformacja-zakupow/index.html"
+    && owner?.name === "p"
+    && publishedStaticText(owner) === "Current process, spend, roles and data."
+    && owner.parent?.type === "element"
+    && elementAttribute(owner.parent, "data-method-step") === "1") return true;
+  return path === "en/wystapienia/index.html"
+    && owner?.name === "h3"
+    && publishedStaticText(owner) === "Leading change"
+    && owner.parent?.parent?.type === "element"
+    && elementAttribute(owner.parent.parent, "data-topic") === "leadership";
 }
 
 function plan3PublicDynamicOccurrences(publicCopy, units) {
@@ -10085,11 +10157,13 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
     if (pattern.test(publicCopy.text)) error(errors, "copy-rejected", path, `visible copy matches ${pattern}`);
   }
 
-  for (const unit of units) {
-    const unownedNumbers = numericTokensByUnit.get(unit).filter((token) => !plan3PresentationNumber(unit, token, approvedPresentationNumbers)
-      && !plan3FactOwnsOccurrence(unit, token, markers, markerRepresentations, state, path, entry.lang));
-    if (unownedNumbers.length > 0) {
-      error(errors, "fact-visible-number", path, `${plan3ElementPath(unit.element)} has unowned numeric tokens: ${unownedNumbers.map(({ value }) => value).join(", ")}`);
+  if (!PLAN3_ARTIFACT_FILES.has(path)) {
+    for (const unit of units) {
+      const unownedNumbers = numericTokensByUnit.get(unit).filter((token) => !plan3PresentationNumber(path, unit, token, approvedPresentationNumbers)
+        && !plan3FactOwnsOccurrence(unit, token, markers, markerRepresentations, state, path, entry.lang));
+      if (unownedNumbers.length > 0) {
+        error(errors, "fact-visible-number", path, `${plan3ElementPath(unit.element)} has unowned numeric tokens: ${unownedNumbers.map(({ value }) => value).join(", ")}`);
+      }
     }
   }
 
@@ -10097,15 +10171,18 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
       && nonEmptyString(fact.as_of)
       && isIsoDate(fact.as_of)
       && fact.as_of <= PLAN3_VALIDATION_DATE
-      && plan3DirectHttpsUrl(fact.source_url);
+      && (plan3DirectHttpsUrl(fact.source_url) || (fact.source_type === "owner_verified" && fact.source_url === null));
   const dynamicByOwner = new Map();
-  for (const occurrence of plan3PublicDynamicOccurrences(publicCopy, units)) {
-    if (plan3FactOwnsOccurrence(publicCopy, occurrence, markers, markerRepresentations, state, path, entry.lang, dynamicPredicate)) continue;
-    const owner = plan3OccurrenceOwner(publicCopy, occurrence);
-    if (owner === null) continue;
-    const occurrences = dynamicByOwner.get(owner) ?? [];
-    occurrences.push(occurrence);
-    dynamicByOwner.set(owner, occurrences);
+  if (!PLAN3_ARTIFACT_FILES.has(path)) {
+    for (const occurrence of plan3PublicDynamicOccurrences(publicCopy, units)) {
+      if (plan3FactOwnsOccurrence(publicCopy, occurrence, markers, markerRepresentations, state, path, entry.lang, dynamicPredicate)) continue;
+      const owner = plan3OccurrenceOwner(publicCopy, occurrence);
+      if (owner === null) continue;
+      if (plan3ReviewedNonClaimDynamic(path, owner)) continue;
+      const occurrences = dynamicByOwner.get(owner) ?? [];
+      occurrences.push(occurrence);
+      dynamicByOwner.set(owner, occurrences);
+    }
   }
   for (const [owner, occurrences] of dynamicByOwner) {
     error(errors, "fact-dynamic-claim", path, `${plan3ElementPath(owner)} has dynamic copy outside an exact approved dated display: ${occurrences.map(({ value }) => value).join(", ")}`);
@@ -10181,6 +10258,139 @@ function plan3SchemaTypes(value, types = new Set()) {
   else if (Array.isArray(type)) type.filter(nonEmptyString).forEach((item) => types.add(item));
   for (const nested of Object.values(value)) plan3SchemaTypes(nested, types);
   return types;
+}
+
+function plan3SchemaObjects(value, objects = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) plan3SchemaObjects(item, objects);
+    return objects;
+  }
+  if (!isPlainObject(value)) return objects;
+  objects.push(value);
+  for (const nested of Object.values(value)) plan3SchemaObjects(nested, objects);
+  return objects;
+}
+
+function plan3SchemaCoreKeys(value) {
+  return Object.keys(value).filter((key) => key !== "@context");
+}
+
+function plan3SchemaHasExactCore(value, expected) {
+  return isPlainObject(value)
+    && sameStringSet(plan3SchemaCoreKeys(value), Object.keys(expected))
+    && Object.entries(expected).every(([key, item]) => sameJsonContract(value[key], item));
+}
+
+function plan3ProjectSchemaRows(parsedRoot, canonical) {
+  return plan3DocumentElements(parsedRoot)
+    .filter((element) => element.attributes.has("data-project-id"))
+    .map((row) => {
+      const id = elementAttribute(row, "data-project-id");
+      const headings = elementDescendants(row, "h3").filter((element) => plan3ElementInActualPublicBody(element, parsedRoot));
+      const descriptions = elementDescendants(row, "dd")
+        .filter((element) => plan3ElementInActualPublicBody(element, parsedRoot))
+        .map((element) => publishedStaticText(element))
+        .filter(nonEmptyString);
+      return {
+        "@type": "ListItem",
+        position: 0,
+        name: headings.length === 1 ? publishedStaticText(headings[0]) : "",
+        url: `${canonical}#${id}`,
+        description: descriptions.join(" · ")
+      };
+    })
+    .map((row, index) => ({ ...row, position: index + 1 }));
+}
+
+function plan3VerifyConservativeSchema(entry, roots, parsedRoot, identity, errors) {
+  const fail = (message) => error(errors, "metadata-schema", entry.file, message);
+  const expectedCanonical = `https://mamcarz.com${entry.route}`;
+  const objects = plan3SchemaObjects(roots);
+  const schemaTypes = plan3SchemaTypes(roots);
+  const contextValid = objects.some((value) => value["@context"] === "https://schema.org");
+  const bannedProperties = new Set([
+    "aggregateRating", "reviewCount", "priceRange", "offers", "worksFor", "areaServed", "serviceArea",
+    "award", "awards", "audience", "maximumAttendeeCapacity", "eventAttendanceMode", "location", "venue",
+    "startDate", "endDate", "datePublished", "dateModified"
+  ]);
+  const banned = objects.flatMap((value) => Object.keys(value).filter((key) => bannedProperties.has(key)));
+  if (!contextValid || banned.length > 0) {
+    fail(`requires https://schema.org context and forbids speculative rich properties${banned.length ? `: ${[...new Set(banned)].join(", ")}` : ""}`);
+    return;
+  }
+
+  if (entry.file === "index.html" || entry.file === "en/index.html") {
+    const expected = {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebSite", "@id": "https://mamcarz.com/#website", url: "https://mamcarz.com/", name: "Paweł Mamcarz" },
+        { "@type": "Person", "@id": "https://mamcarz.com/#person", name: "Paweł Mamcarz", url: "https://mamcarz.com/" }
+      ]
+    };
+    if (roots.length !== 1 || !sameJsonContract(roots[0], expected)) fail("home requires the exact connected WebSite and Person @graph with stable identifiers");
+    return;
+  }
+
+  const mainType = entry.schema[0];
+  const mainNodes = objects.filter((value) => value["@type"] === mainType);
+  const allowedTypes = mainType === "CollectionPage" && entry.schema.includes("ItemList")
+    ? new Set(["CollectionPage", "ItemList", "ListItem"])
+    : new Set([mainType]);
+  if (mainNodes.length !== 1 || [...schemaTypes].some((type) => !allowedTypes.has(type))) {
+    fail(`requires exactly one conservative ${mainType} identity and no unrelated schema types`);
+    return;
+  }
+  const main = mainNodes[0];
+
+  if (mainType === "Service") {
+    const expected = {
+      "@type": "Service",
+      name: identity.h1,
+      url: expectedCanonical,
+      description: identity.description,
+      provider: { "@id": "https://mamcarz.com/#person" }
+    };
+    if (!plan3SchemaHasExactCore(main, expected)) fail("Service must match the localized H1, canonical and description and reference only the approved Person identity");
+    return;
+  }
+
+  if (mainType === "CollectionPage" && entry.schema.includes("ItemList")) {
+    const items = plan3ProjectSchemaRows(parsedRoot, expectedCanonical);
+    const expected = {
+      "@type": "CollectionPage",
+      name: identity.h1,
+      url: expectedCanonical,
+      description: identity.description,
+      inLanguage: entry.lang,
+      mainEntity: { "@type": "ItemList", itemListElement: items }
+    };
+    if (!plan3SchemaHasExactCore(main, expected)) fail("Projects require a localized CollectionPage and an ItemList derived only from the visible approved project rows");
+    return;
+  }
+
+  if (mainType === "CollectionPage") {
+    const expected = { "@type": "CollectionPage", name: identity.h1, url: expectedCanonical, description: identity.description, inLanguage: entry.lang };
+    if (!plan3SchemaHasExactCore(main, expected)) fail("CollectionPage must match the localized visible route identity without inferred events or claims");
+    return;
+  }
+
+  if (mainType === "Article") {
+    const expected = {
+      "@type": "Article",
+      headline: identity.h1,
+      url: expectedCanonical,
+      description: identity.description,
+      inLanguage: entry.lang,
+      author: { "@id": "https://mamcarz.com/#person" }
+    };
+    if (!plan3SchemaHasExactCore(main, expected)) fail("Article must match the visible route identity and omit unapproved publication or modification dates");
+    return;
+  }
+
+  if (mainType === "CreativeWork") {
+    const expected = { "@type": "CreativeWork", name: identity.h1, url: expectedCanonical, description: identity.description, inLanguage: entry.lang };
+    if (!plan3SchemaHasExactCore(main, expected)) fail("CreativeWork must match the visible helper identity without inferred audience, venue or results");
+  }
 }
 
 function plan3ExpectedHreflang(entry) {
@@ -10264,10 +10474,16 @@ async function verifyMetadata(factData, context) {
       error(context.errors, "metadata-og-locale", entry.file, `paired page requires alternate OG locale ${wantedAlternate}`);
     }
 
-    const schemaTypes = plan3SchemaTypes(parseJsonLd(entry.file, parsed.root, context.errors));
-    for (const expected of entry.schema) {
-      if (!schemaTypes.has(expected)) error(context.errors, "metadata-schema", entry.file, `missing conservative Schema.org type ${expected}`);
+    const titleText = titles.length === 1 ? normalizeExactHtmlLiteral(rawElementText(titles[0])) : "";
+    const h1Text = headings.length === 1 ? publishedStaticText(headings[0]) : "";
+    const expectedOgType = entry.schema.includes("Article") ? "article" : "website";
+    if (ogValues.get("og:title") !== titleText
+      || ogValues.get("og:description") !== description.value
+      || ogValues.get("og:type") !== expectedOgType) {
+      error(context.errors, "metadata-og-content", entry.file, `OG title and description must match the document metadata and og:type must equal ${expectedOgType}`);
     }
+    const schemaRoots = parseJsonLd(entry.file, parsed.root, context.errors);
+    plan3VerifyConservativeSchema(entry, schemaRoots, parsed.root, { h1: h1Text, description: description.value }, context.errors);
 
     if (!PLAN3_ARTIFACT_FILES.has(entry.file)) {
       const stylesheets = all.filter((element) => element.name === "link" && (elementAttributeTokens(element, "rel").includes("stylesheet") || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")));
