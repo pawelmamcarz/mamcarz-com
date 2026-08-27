@@ -6898,3 +6898,62 @@ test("Plan 2 Task 10 freezes the exact conservative llms-full correction", async
     "llms-full.txt must differ from the Task 9 base only by the two approved conservative corrections"
   );
 });
+
+test("Plan 2 Task 10 fix round 1 rejects the reviewer's later horizontal-footer media override", async () => {
+  const css = `${foundationCss}\n@media (min-width: 760px) {
+  footer.site-footer { padding-inline-end: var(--page-gutter); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 1 rejects the reviewer's higher-specificity current-route override", async () => {
+  const css = `${foundationCss}\nnav .nav-logo[aria-current="page"],
+nav .nav-list a[aria-current="page"],
+nav .nav-links a[aria-current="page"],
+nav .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary {
+  color: var(--panel);
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 1 rejects adjacent footer cascade bypasses", async (t) => {
+  const cases = [
+    ["later equal-specificity horizontal override", `${foundationCss}\n@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter); } }`],
+    ["later overlapping max-width override", `${foundationCss}\n@media (max-width: 1000px) { .site-footer { padding-inline-end: var(--page-gutter); } }`],
+    ["later selector-list member override", `${foundationCss}\n@media (min-width: 760px) { .unrelated, footer.site-footer { padding-inline-end: var(--page-gutter); } }`],
+    ["lower-specificity important override", `${foundationCss}\n@media (min-width: 760px) { footer { padding-inline-end: var(--page-gutter) !important; } }`],
+    ["same-block earlier important override", `${foundationCss}\n@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter) !important; padding-inline-end: calc(var(--page-gutter) + 64px); } }`],
+    ["mobile reset override", `${foundationCss}\n@media (max-width: 759px) { footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); } }`]
+  ];
+  for (const [label, css] of cases) await t.test(label, async () => {
+    const result = await verifyFixtureCss(css);
+    assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 2 Task 10 fix round 1 rejects adjacent semantic-current cascade bypasses", async (t) => {
+  const cases = [
+    ["later equal-specificity logo override", `${foundationCss}\n[class~="nav-logo"][aria-current="page"] { color: var(--panel); }`],
+    ["later selector-list member override", `${foundationCss}\n.unrelated, nav .nav-list a[aria-current="page"] { color: var(--panel); }`],
+    ["lower-specificity important override", `${foundationCss}\na[aria-current="page"] { color: var(--panel) !important; }`],
+    ["same-block earlier important override", `${foundationCss}\n.nav-logo[aria-current="page"] { color: var(--panel) !important; color: var(--signal-dark); }`],
+    ["earlier higher-specificity override", `nav .nav-logo[aria-current="page"] { color: var(--panel); }\n${foundationCss}`],
+    ["open service summary competes with its current leaf", `${foundationCss}\nnav .nav-group:has(.nav-submenu a[aria-current="page"]) > summary { color: var(--signal-dark); }`]
+  ];
+  for (const [label, css] of cases) await t.test(label, async () => {
+    const result = await verifyFixtureCss(css);
+    assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 2 Task 10 fix round 1 permits unrelated cascade declarations and an earlier equal-specificity rule", async () => {
+  const css = `.nav-logo[aria-current="page"] { color: var(--panel); }
+${foundationCss}
+@media (min-width: 760px) { .other-footer { padding-inline-end: 0; } }
+.utility-nav a[aria-current="page"] { color: var(--panel); }`;
+  const result = await verifyFixtureCss(css);
+  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
+  assert.equal(errorIds(result).includes("css-current-route"), false, result.errors.join("\n"));
+});
