@@ -69,7 +69,23 @@ const PLAN3_REJECTED_COPY = Object.freeze([
   /\binnowacyjn(?:y|a|e|ie|ych)?\b/iu,
   /\binnovative\b/iu
 ]);
-const PLAN3_DYNAMIC_COPY = /#\s*1\b|\bnajwiększ(?:y|a|e|ym|ych)?\b|\blargest\b|\bwiodąc(?:y|a|e|ym|ych)?\b|\bleading\b|\baktywn(?:y|a|e|ie|ych)?\b|\bactive\b|\bcurrently\b|\b(?:as of|stan na|według stanu na|czerwiec|june)\b[^.!?\n]{0,80}\b\d{4}\b/iu;
+const PLAN3_PL_NAJWIEKSZY_ENDING = "(?:zymi|zych|zego|zemu|zej|zym|zą|zy|za|ze)";
+const PLAN3_PL_PARTICIPLE_ENDING = "(?:ymi|ych|ego|emu|ej|ym|ą|y|a|e)";
+const PLAN3_PL_CURRENT_ENDING = "(?:ymi|ych|ego|emu|ie|ej|ym|ą|i|y|a|e)";
+const PLAN3_DYNAMIC_COPY = new RegExp([
+  "#\\s*1(?![\\p{L}\\p{N}_])",
+  `(?<!\\p{L})(?:najwięks${PLAN3_PL_NAJWIEKSZY_ENDING}|najwięksi)(?!\\p{L})`,
+  "(?<!\\p{L})largest(?!\\p{L})",
+  `(?<!\\p{L})wiodąc${PLAN3_PL_PARTICIPLE_ENDING}(?!\\p{L})`,
+  "(?<!\\p{L})leading(?!\\p{L})",
+  `(?<!\\p{L})aktywn${PLAN3_PL_CURRENT_ENDING}(?!\\p{L})`,
+  `(?<!\\p{L})aktualn${PLAN3_PL_CURRENT_ENDING}(?!\\p{L})`,
+  `(?<!\\p{L})obecn${PLAN3_PL_CURRENT_ENDING}(?!\\p{L})`,
+  "(?<!\\p{L})active(?!\\p{L})",
+  "(?<!\\p{L})currently(?!\\p{L})",
+  "(?<!\\p{L})current(?:\\s+|-)status(?!\\p{L})",
+  "(?<!\\p{L})(?:as of|stan na|według stanu na|czerwiec|june)(?!\\p{L})[^.!?\\n]{0,80}(?<!\\p{N})\\d{4}(?!\\p{N})"
+].join("|"), "iu");
 
 const VALID_FAMILIES = new Set([
   "all", "home", "services", "applications", "aviation",
@@ -7895,6 +7911,21 @@ function plan3CopyOwner(element) {
   return null;
 }
 
+function plan3HasMeaningfulDirectText(element) {
+  return (element.children ?? []).some((child) => child.type === "text" && nonEmptyString(normalizeExactHtmlLiteral(child.value)));
+}
+
+function plan3SemanticCopyOwner(element) {
+  const block = plan3CopyOwner(element);
+  if (block === null) return null;
+  let owner = null;
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (plan3HasMeaningfulDirectText(current)) owner = current;
+    if (current === block) break;
+  }
+  return owner;
+}
+
 function plan3NodeWithin(node, element) {
   for (let current = node?.parent; current?.type === "element"; current = current.parent) {
     if (current === element) return true;
@@ -7915,18 +7946,21 @@ function plan3CopyUnits(body) {
     unit.raw += value;
     if (fragment !== null) unit.fragments.push(fragment);
   };
-  const visit = (node, owner = null) => {
+  const visit = (node) => {
     if (node.type === "element" && !plan3ElementPublishesCopy(node)) return;
     if (node.type === "text") {
-      if (owner === null || node.parent?.type !== "element" || !plan3ElementPublishesCopy(node.parent)) return;
+      if (node.parent?.type !== "element" || !plan3ElementPublishesCopy(node.parent)) return;
+      const owner = plan3SemanticCopyOwner(node.parent);
+      if (owner === null) return;
       append(owner, node.value, node);
       return;
     }
-    const nextOwner = node.type === "element" && blockTextElements.has(node.name) ? node : owner;
-    const separatesOwner = owner !== null && nextOwner !== owner;
-    if (separatesOwner) append(owner, " ");
-    for (const child of node.children ?? []) visit(child, nextOwner);
-    if (separatesOwner) append(owner, " ");
+    const boundaryOwner = node.type === "element" && blockTextElements.has(node.name) && node.parent?.type === "element"
+      ? plan3SemanticCopyOwner(node.parent)
+      : null;
+    if (boundaryOwner !== null) append(boundaryOwner, " ");
+    for (const child of node.children ?? []) visit(child);
+    if (boundaryOwner !== null) append(boundaryOwner, " ");
   };
   visit(body);
   return units
@@ -7941,9 +7975,12 @@ function plan3UnitElementText(unit, element) {
 }
 
 function plan3UnitFactMarkers(unit) {
-  return [unit.element, ...elementDescendants(unit.element)]
-    .filter((element) => (element === unit.element || plan3CopyOwner(element) === unit.element)
-      && plan3ElementPublishesCopy(element)
+  const candidates = new Set([unit.element, ...elementDescendants(unit.element)]);
+  for (let current = unit.element.parent; current?.type === "element" && !blockTextElements.has(current.name); current = current.parent) {
+    candidates.add(current);
+  }
+  return [...candidates]
+    .filter((element) => plan3ElementPublishesCopy(element)
       && (element.attributes.has("data-fact-id") || element.attributes.has("data-fact-ids")));
 }
 
@@ -8004,6 +8041,31 @@ function plan3NumericTokens(text) {
   return tokens;
 }
 
+function plan3UnitFragmentRanges(unit) {
+  const ranges = [];
+  let cursor = 0;
+  for (const fragment of unit.fragments) {
+    const text = normalizeExactHtmlLiteral(fragment.value);
+    if (!nonEmptyString(text)) continue;
+    const start = unit.text.indexOf(text, cursor);
+    if (start === -1) return [];
+    ranges.push({ text, start, end: start + text.length });
+    cursor = start + text.length;
+  }
+  return ranges;
+}
+
+function plan3UnitNumericTokens(unit) {
+  const ranges = plan3UnitFragmentRanges(unit);
+  if (ranges.length === 0) return plan3NumericTokens(unit.text).map((token) => ({ ...token, presentationText: unit.text }));
+  return ranges.flatMap((range) => plan3NumericTokens(range.text).map((token) => ({
+    ...token,
+    start: range.start + token.start,
+    end: range.start + token.end,
+    presentationText: range.text
+  })));
+}
+
 function plan3PresentationNumber(text, token) {
   if (token.value === "404" && text === "404") return true;
   if (!/^(?:0[1-9]|1[01])$/.test(token.value)) return false;
@@ -8011,24 +8073,6 @@ function plan3PresentationNumber(text, token) {
   return new RegExp(`^${escaped}$`).test(text)
     || new RegExp(`^${escaped}\\s*\\/\\s*[^\\d]+$`).test(text)
     || new RegExp(`^[^\\d]+\\/[^\\d]*\\s${escaped}$`).test(text);
-}
-
-function plan3PresentationOnlyInlineChildren(unit) {
-  const childRaw = new Map();
-  for (const fragment of unit.fragments) {
-    if (!nonEmptyString(normalizeExactHtmlLiteral(fragment.value))) continue;
-    if (fragment.parent === unit.element) return false;
-    let child = fragment.parent;
-    while (child?.parent?.type === "element" && child.parent !== unit.element) child = child.parent;
-    if (child?.parent !== unit.element) return false;
-    childRaw.set(child, `${childRaw.get(child) ?? ""}${fragment.value}`);
-  }
-  if (childRaw.size === 0) return false;
-  return [...childRaw.values()].every((raw) => {
-    const text = normalizeExactHtmlLiteral(raw);
-    const tokens = plan3NumericTokens(text);
-    return tokens.length > 0 && tokens.every((token) => plan3PresentationNumber(text, token));
-  });
 }
 
 function plan3DynamicOccurrences(text) {
@@ -8097,7 +8141,7 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
 
   for (const unit of units) {
     const factRanges = plan3FactDisplayRanges(unit, state, path, entry.lang);
-    const unownedNumbers = plan3PresentationOnlyInlineChildren(unit) ? [] : plan3NumericTokens(unit.text).filter((token) => !plan3PresentationNumber(unit.text, token)
+    const unownedNumbers = plan3UnitNumericTokens(unit).filter((token) => !plan3PresentationNumber(token.presentationText, token)
       && !plan3RangeOwns(factRanges, token.start, token.end));
     if (unownedNumbers.length > 0) {
       error(errors, "fact-visible-number", path, `${plan3ElementPath(unit.element)} has unowned numeric tokens: ${unownedNumbers.map(({ value }) => value).join(", ")}`);
@@ -8198,7 +8242,9 @@ async function verifyMetadata(factData, context) {
     const mains = structural.filter((element) => element.name === "main");
     const headings = structural.filter((element) => element.name === "h1");
     if (mains.length !== 1) error(context.errors, "metadata-main", entry.file, `expected exactly one structural main; found ${mains.length}`);
+    else if (!plan3ElementPublishesCopy(mains[0])) error(context.errors, "metadata-main", entry.file, "the sole structural main must be publicly visible");
     if (headings.length !== 1) error(context.errors, "metadata-h1", entry.file, `expected exactly one structural h1; found ${headings.length}`);
+    else if (!plan3ElementPublishesCopy(headings[0])) error(context.errors, "metadata-h1", entry.file, "the sole structural h1 must be publicly visible");
 
     const titles = plan3MetadataElements(parsed.root, "title");
     if (titles.length !== 1 || !nonEmptyString(normalizeExactHtmlLiteral(rawElementText(titles[0])))) {

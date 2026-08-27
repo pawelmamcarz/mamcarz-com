@@ -7724,6 +7724,151 @@ test("Plan 3 Task 1 fix round 1 rejects normalized secret keys and private relat
   });
 });
 
+test("Plan 3 Task 1 fix round 2 matches complete dynamic claim families with Unicode boundaries", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const inflections = [
+    "największy", "największa", "największe", "największego", "największej", "największemu", "największym", "największych", "największą", "najwięksi", "największymi",
+    "wiodący", "wiodąca", "wiodące", "wiodącego", "wiodącej", "wiodącemu", "wiodącym", "wiodących", "wiodącą", "wiodącymi",
+    "aktywny", "aktywna", "aktywne", "aktywnego", "aktywnej", "aktywnemu", "aktywnym", "aktywnych", "aktywną", "aktywni", "aktywnymi", "aktywnie",
+    "aktualny", "aktualna", "aktualne", "aktualnego", "aktualnej", "aktualnemu", "aktualnym", "aktualnych", "aktualną", "aktualni", "aktualnymi", "aktualnie",
+    "obecny", "obecna", "obecne", "obecnego", "obecnej", "obecnemu", "obecnym", "obecnych", "obecną", "obecni", "obecnymi", "obecnie"
+  ];
+  await t.test("Polish cases genders plurals and adverbs are all dynamic", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${inflections.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    for (const copy of inflections) {
+      assert.ok(findings.some((item) => item.endsWith(`: ${copy}`)), `${copy}\n${findings.join("\n")}`);
+    }
+  });
+  await t.test("English categories and dated status phrases stay dynamic", async () => {
+    const copies = ["#1", "largest", "leading", "active", "currently", "current status", "current-status", "As of 2026", "Stan na 2026", "Według stanu na 2026", "czerwiec 2026", "June 2026"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copies.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    for (const copy of copies) assert.ok(findings.some((item) => item.endsWith(`: ${copy}`)), `${copy}\n${findings.join("\n")}`);
+  });
+  await t.test("lexical prefixes outside the intended families remain safe", async () => {
+    const safe = ["największości", "przewiodący", "aktywność", "proaktywny", "nieaktywny", "aktualizacja", "aktualność", "nieaktualny", "obecność", "nieobecny"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${safe.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("the exact inflected reviewer display in a constant fact remains unauthorized", async () => {
+    const fact = plan3Fact({
+      id: "fixture.constant-current",
+      value: "Największa marka działalności lotniczej",
+      display_pl: "Największą marką działalności lotniczej",
+      display_en: "Largest aviation venture",
+      kind: "constant",
+      surfaces: [entry.file]
+    });
+    const body = '<p data-fact-id="fixture.constant-current">Największą marką działalności lotniczej</p>';
+    const root = await plan3Root({ facts: [fact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 2 assigns inline sibling copy to semantic owners", async (t) => {
+  const plEntry = plan3ExpectedPublicPages[0];
+  const enEntry = plan3ExpectedPublicPages[1];
+  const statusFact = plan3Fact({
+    id: "fixture.current-status",
+    value: "akrobacja.com is the current aviation venture",
+    display_pl: "Aktualna marka działalności lotniczej",
+    display_en: "Current aviation venture",
+    kind: "dated",
+    as_of: "2026-08-26",
+    source_type: "public_source",
+    source_label: "Owner status checked 2026-08-26",
+    source_url: "https://example.com/status",
+    surfaces: [plEntry.file, enEntry.file]
+  });
+  await t.test("PL and EN status siblings keep their own numeric and dynamic copy", async () => {
+    const root = await plan3Root({
+      facts: [statusFact],
+      files: {
+        [plEntry.file]: plan3Page(plEntry, { body: '<div class="aviation-status-line"><time data-fact-id="fixture.current-status">Aktualna marka działalności lotniczej</time><span>Stan na 2026-08-26</span></div>' }),
+        [enEntry.file]: plan3Page(enEntry, { body: '<div class="aviation-status-line"><time data-fact-id="fixture.current-status">Current aviation venture</time><span>As of 2026-08-26</span></div>' })
+      }
+    });
+    const result = await runVerification({ root, scope: "metadata" });
+    const dynamic = result.errors.filter((item) => item.startsWith("ERROR fact-dynamic-claim "));
+    assert.ok(dynamic.some((item) => item.endsWith(": Stan na 2026")), dynamic.join("\n"));
+    assert.ok(dynamic.some((item) => item.endsWith(": As of 2026")), dynamic.join("\n"));
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number "));
+    assert.equal(numeric.some((item) => /lotniczej2026|venture2026/.test(item)), false, numeric.join("\n"));
+  });
+  await t.test("independent navigation and scale siblings never form composite numeric tokens", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <div><span>01</span><strong>OPS</strong></div>
+      <nav><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></nav>
+      <div>${[1, 2, 3, 4, 5].map((value) => `<label><input type="radio" value="${value}">${value}</label>`).join("")}</div>`;
+    const root = await plan3Root({ files: { [plEntry.file]: plan3Page(plEntry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const numeric = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${plEntry.file}:`));
+    assert.equal(numeric.some((item) => /01OPS|0102030405|12345/.test(item)), false, numeric.join("\n"));
+    for (const value of [1, 2, 3, 4, 5]) assert.ok(numeric.some((item) => item.endsWith(`unowned numeric tokens: ${value}`)), numeric.join("\n"));
+  });
+  await t.test("direct parent text joins inline markup but sibling-only and spaced fragments do not", async () => {
+    const bodies = [
+      '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol<span>pharma</span></p>',
+      '<p data-fact-id="fixture.claim">Verified claim</p><p><span>Pol</span><span>pharma</span></p><p>Pol <span>pharma</span></p><p>Pol</p><p>pharma</p>'
+    ];
+    const roots = await Promise.all(bodies.map((body) => plan3Root({ files: { [plEntry.file]: plan3Page(plEntry, { body }) } })));
+    const [joined, separated] = await Promise.all(roots.map((root) => runVerification({ root, scope: "metadata" })));
+    assert.ok(errorIds(joined).includes("blocked-client.polpharma"), joined.errors.join("\n"));
+    assert.equal(errorIds(separated).includes("blocked-client.polpharma"), false, separated.errors.join("\n"));
+  });
+  await t.test("real SEO output contains no sibling-concatenation artifacts and restores status findings", async () => {
+    const result = await runVerification({ root: resolve("."), scope: "seo" });
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number "));
+    for (const artifact of ["01OPS", "01Doradztwo", "12345", "lotniczej2026", "venture2026"]) {
+      assert.equal(numeric.some((item) => item.includes(artifact)), false, `${artifact}\n${numeric.join("\n")}`);
+    }
+    const dynamic = result.errors.filter((item) => item.startsWith("ERROR fact-dynamic-claim "));
+    assert.ok(dynamic.some((item) => item.startsWith("ERROR fact-dynamic-claim lotnictwo/index.html:") && item.endsWith(": Stan na 2026")), dynamic.join("\n"));
+    assert.ok(dynamic.some((item) => item.startsWith("ERROR fact-dynamic-claim en/lotnictwo/index.html:") && item.endsWith(": As of 2026")), dynamic.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 2 requires the sole structural landmarks to be public", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const cases = [
+    ["hidden main", "<main>", "<main hidden>", "metadata-main"],
+    ["aria-hidden main", "<main>", '<main aria-hidden="true">', "metadata-main"],
+    ["hidden h1", "<h1>", "<h1 hidden>", "metadata-h1"],
+    ["aria-hidden h1", "<h1>", '<h1 aria-hidden="true">', "metadata-h1"],
+    ["main below hidden ancestor", "<body><main>", "<body><div hidden><main>", "metadata-main", "</main></body>", "</main></div></body>"],
+    ["h1 below aria-hidden ancestor", "<main><h1>", '<main><div aria-hidden="true"><h1>', "metadata-h1", "</h1>", "</h1></div>"]
+  ];
+  for (const [label, before, after, id, closeBefore, closeAfter] of cases) await t.test(label, async () => {
+    let html = plan3Page(entry).replace(before, after);
+    if (closeBefore) html = html.replace(closeBefore, closeAfter);
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(id), result.errors.join("\n"));
+  });
+  await t.test("one visible plus one hidden landmark still fails structural cardinality", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><main hidden><h1 hidden>Duplicate</h1></main>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("template landmark decoys remain inert", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><template><main><h1>Decoy</h1></main></template>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+});
+
 test("Plan 3 Task 1 package scripts expose exact deterministic validator commands", async () => {
   const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
   assert.equal(pkg.scripts["verify:metadata"], "node scripts/verify-site.mjs --scope=metadata");
