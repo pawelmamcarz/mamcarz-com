@@ -4242,6 +4242,29 @@ function verifyBrowserScript(js, errors) {
   const domMailLink = /document\.createElement\(\s*["']a["']\s*\)/.test(activeJs)
     && /\.href\s*=\s*["']mailto:pawel@mamcarz\.com["']\s*;/.test(activeJs);
   if (!safeMessage || !domMailLink) error(errors, "js-chat-dom", path, "chat messages and fallback email link require safe DOM construction");
+
+  const clientIdHelper = namedFunctionBody(activeJs, "getChatClientId");
+  const helperBody = clientIdHelper?.body ?? "";
+  const validClientIdHelper = clientIdHelper
+    && helperBody.includes("mamcarz-chat-client-v1")
+    && /localStorage\.getItem\(\s*key\s*\)/u.test(helperBody)
+    && /localStorage\.setItem\(\s*key\s*,\s*created\s*\)/u.test(helperBody)
+    && (helperBody.match(/crypto\.randomUUID\(\s*\)/gu) ?? []).length === 2
+    && /4\[0-9a-f\]\{3\}.*\[89ab\]\[0-9a-f\]\{3\}/iu.test(helperBody);
+  if (!validClientIdHelper) {
+    error(errors, "js-chat-client-id", path, "chat requires the reviewed localStorage UUID-v4 helper with an ephemeral fallback");
+  }
+
+  const chatBody = namedFunctionBody(activeJs, "initChat")?.body ?? "";
+  if (!/["']X-Chat-Client["']\s*:\s*getChatClientId\(\s*\)/u.test(chatBody)) {
+    error(errors, "js-chat-header", path, "chat requests must send the pseudonymous UUID in X-Chat-Client");
+  }
+  const fallbackCodes = [400, 413, 429, 500].every((status) => new RegExp(`(?:\\{|,)\\s*${status}\\s*:`).test(chatBody));
+  const consumesHttpStatus = /if\s*\(\s*!response\.ok\s*\)/u.test(chatBody)
+    && /\[\s*response\.status\s*\]/u.test(chatBody);
+  if (!fallbackCodes || !consumesHttpStatus || !domMailLink) {
+    error(errors, "js-chat-fallbacks", path, "chat requires localized 400, 413, 429 and 500 fallbacks that preserve direct email contact");
+  }
 }
 
 async function verifyFoundation(context) {

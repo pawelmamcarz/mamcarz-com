@@ -85,6 +85,19 @@ function initBackToTop() {
   });
 }
 
+function getChatClientId() {
+  const key = "mamcarz-chat-client-v1";
+  try {
+    const existing = localStorage.getItem(key);
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(existing ?? "")) return existing;
+    const created = crypto.randomUUID();
+    localStorage.setItem(key, created);
+    return created;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
 function initChat() {
   const chatMessages = document.getElementById("chat-messages");
   const chatInput = document.getElementById("chat-input");
@@ -98,20 +111,30 @@ function initChat() {
   const language = (document.documentElement.lang || "pl").toLowerCase().startsWith("en") ? "en" : "pl";
   const copy = {
     pl: {
-      thinking: "Zaglądam do notatek…",
-      apiErrorBefore: "Hmm, coś mi się zacięło. Spróbuj jeszcze raz albo napisz wprost do Pawła na",
-      apiErrorAfter: ".",
-      netErrorBefore: "Nie mogę się teraz połączyć z AI. Możesz napisać bezpośrednio do Pawła na",
+      thinking: "Sprawdzam…",
+      httpErrorBefore: {
+        400: "Nie mogę przetworzyć tej rozmowy. Skróć pytanie lub rozpocznij rozmowę od nowa. Możesz napisać do Pawła na",
+        413: "Wiadomość lub historia rozmowy jest zbyt długa. Skróć ją albo napisz do Pawła na",
+        429: "Limit zapytań został chwilowo wykorzystany. Spróbuj ponownie za minutę albo napisz do Pawła na",
+        500: "Czat jest chwilowo niedostępny. Możesz napisać bezpośrednio do Pawła na"
+      },
+      fallbackAfter: ".",
+      netErrorBefore: "Nie mogę połączyć się z czatem. Możesz napisać bezpośrednio do Pawła na",
       netErrorAfter: ".",
-      greeting: "Cześć! Jestem asystentem Pawła Mamcarza.\nZapytaj mnie o usługi Pawła, jego doświadczenie albo najprostszy sposób kontaktu."
+      greeting: "Cześć! Pomogę Ci znaleźć właściwą część serwisu.\nZapytaj o doradztwo, aplikacje operacyjne, lotnictwo albo kontakt."
     },
     en: {
-      thinking: "Checking my notes…",
-      apiErrorBefore: "Hmm, something got stuck. Try again, or drop Paweł a line at",
-      apiErrorAfter: ".",
-      netErrorBefore: "Can't reach the AI right now. You can email Paweł directly at",
+      thinking: "Checking…",
+      httpErrorBefore: {
+        400: "I cannot process this conversation. Shorten the question or start again. You can email Paweł at",
+        413: "The message or conversation history is too long. Shorten it or email Paweł at",
+        429: "The request limit has been reached for now. Try again in one minute or email Paweł at",
+        500: "The chat is temporarily unavailable. You can email Paweł directly at"
+      },
+      fallbackAfter: ".",
+      netErrorBefore: "I cannot connect to the chat. You can email Paweł directly at",
       netErrorAfter: ".",
-      greeting: "Hi! I'm Paweł Mamcarz's assistant.\nAsk me about Paweł's services, his experience, or the simplest way to get in touch."
+      greeting: "Hi! I can help you find the right part of the site.\nAsk about advisory, operational applications, aviation or contact."
     }
   }[language];
 
@@ -164,16 +187,24 @@ function initChat() {
     try {
       const response = await fetch(CHAT_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Chat-Client": getChatClientId()
+        },
         body: JSON.stringify({ messages: chatHistory })
       });
+      if (!response.ok) {
+        const before = copy.httpErrorBefore[response.status] ?? copy.httpErrorBefore[500];
+        showFallback(thinking, before, copy.fallbackAfter);
+        return;
+      }
       const data = await response.json();
 
       if (typeof data.reply === "string" && data.reply.trim()) {
         thinking.textContent = data.reply;
         chatHistory.push({ role: "assistant", content: data.reply });
       } else {
-        showFallback(thinking, copy.apiErrorBefore, copy.apiErrorAfter);
+        showFallback(thinking, copy.httpErrorBefore[500], copy.fallbackAfter);
       }
     } catch {
       showFallback(thinking, copy.netErrorBefore, copy.netErrorAfter);

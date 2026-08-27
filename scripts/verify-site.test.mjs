@@ -509,6 +509,18 @@ const legacyNavigationFixture = `
   </nav>`;
 
 const validBrowserScript = `
+function getChatClientId() {
+  const key = "mamcarz-chat-client-v1";
+  try {
+    const existing = localStorage.getItem(key);
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(existing ?? "")) return existing;
+    const created = crypto.randomUUID();
+    localStorage.setItem(key, created);
+    return created;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
 function initNavigation() {
   const toggle = document.getElementById("nav-toggle");
   const menu = document.getElementById("nav-menu");
@@ -529,6 +541,13 @@ function initChat() {
   const chatSendButton = document.getElementById("chat-send");
   if (!chatMessages || !chatInput || !chatSendButton) return;
   const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
+  const localizedFallbacks = { 400: "invalid", 413: "too large", 429: "rate limited", 500: "unavailable" };
+  const requestHeaders = { "Content-Type": "application/json", "X-Chat-Client": getChatClientId() };
+  async function sendMessage() {
+    const response = await fetch(CHAT_API, { headers: requestHeaders });
+    if (!response.ok) message.textContent = localizedFallbacks[response.status] ?? localizedFallbacks[500];
+  }
+  void sendMessage;
   function addChatMessage(text, role) {
     const message = document.createElement("div");
     message.className = \`chat-msg chat-msg--\${role}\`;
@@ -4126,6 +4145,29 @@ test("foundation requires the navigation guard before the only JS marker", async
   const root = await fixture({ css: foundationCss, js });
   const result = await runVerification({ root, scope: "foundation" });
   assert.ok(errorIds(result).includes("js-navigation-marker"));
+});
+
+test("Plan 3 Task 8 requires a pseudonymous chat ID, limiter header and localized fallbacks", async (t) => {
+  const validRoot = await fixture({ css: foundationCss, js: validBrowserScript });
+  const valid = await runVerification({ root: validRoot, scope: "foundation" });
+  assert.deepEqual(valid.errors.filter((entry) => entry.startsWith("ERROR js-chat-client")), []);
+  assert.equal(errorIds(valid).includes("js-chat-header"), false);
+  assert.equal(errorIds(valid).includes("js-chat-fallbacks"), false);
+
+  const cases = [
+    ["missing helper", "js-chat-client-id", (js) => js.replaceAll("getChatClientId", "removedChatClientId")],
+    ["missing random UUID", "js-chat-client-id", (js) => js.replaceAll("crypto.randomUUID", "crypto.removedUUID")],
+    ["missing local storage write", "js-chat-client-id", (js) => js.replace("localStorage.setItem", "localStorage.removedSetItem")],
+    ["missing limiter header", "js-chat-header", (js) => js.replace("X-Chat-Client", "X-Removed-Client")],
+    ["missing 413 fallback", "js-chat-fallbacks", (js) => js.replace("413:", "412:")],
+    ["missing 429 fallback", "js-chat-fallbacks", (js) => js.replace("429:", "428:")],
+    ["missing 500 fallback", "js-chat-fallbacks", (js) => js.replace("500:", "501:")]
+  ];
+  for (const [label, expected, mutate] of cases) await t.test(label, async () => {
+    const root = await fixture({ css: foundationCss, js: mutate(validBrowserScript) });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+  });
 });
 
 function notFoundContractFixture() {
