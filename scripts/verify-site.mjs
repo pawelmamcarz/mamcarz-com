@@ -3333,7 +3333,10 @@ function escapeRegExp(value) {
 }
 
 function normalizeClaimLine(line) {
-  return normalize(line).replace(/^(?:(?:>\s*)+|[-*+]\s+)/, "").trim();
+  return normalize(line)
+    .replace(/^(?:(?:>\s*)+|[-*+]\s+)/, "")
+    .replace(/^\[[a-z0-9._-]+\]\s+/, "")
+    .trim();
 }
 
 function publicSurfaceSearchData(surface, text, errors) {
@@ -4031,6 +4034,98 @@ function verifyLegacyNavigation(html, path, errors) {
   }
 }
 
+function verifyNotFound(html, errors) {
+  const path = "404.html";
+  const parsed = parseStaticHtml(html);
+  const elements = elementDescendants(parsed.root).filter((element) => !plan3InsideTemplate(element));
+  const byName = (name) => elements.filter((element) => element.name === name);
+  const htmlElements = byName("html");
+  const heads = byName("head");
+  const bodies = byName("body");
+  const mains = byName("main");
+  const headings = byName("h1");
+
+  if (parsed.errors.length > 0 || htmlElements.length !== 1 || heads.length !== 1 || bodies.length !== 1) {
+    error(errors, "not-found-metadata", path, "expected one valid HTML document with one head and one body");
+  }
+  if (mains.length !== 1) error(errors, "not-found-main", path, "expected exactly one main landmark");
+  if (headings.length !== 1) error(errors, "not-found-h1", path, "expected exactly one h1");
+
+  const robots = byName("meta").filter((element) => normalize(elementAttribute(element, "name") ?? "") === "robots");
+  const robotsTokens = robots.length === 1
+    ? new Set((elementAttribute(robots[0], "content") ?? "").toLowerCase().split(/[\s,]+/).filter(Boolean))
+    : new Set();
+  if (robots.length !== 1 || !robotsTokens.has("noindex")) {
+    error(errors, "not-found-robots", path, "404 must have one robots meta containing noindex");
+  }
+
+  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
+  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
+  const stylesheets = byName("link").filter((element) => elementIsActiveResource(element)
+    && elementAttributeTokens(element, "rel").includes("stylesheet"));
+  const externalScripts = byName("script").filter((element) => elementIsActiveResource(element)
+    && nonEmptyString(elementAttribute(element, "src")));
+  const inlineScripts = byName("script").filter((element) => elementIsActiveResource(element)
+    && !nonEmptyString(elementAttribute(element, "src")));
+  if (stylesheets.length !== 1 || elementAttribute(stylesheets[0] ?? { attributes: new Map() }, "href") !== expectedCss
+    || externalScripts.length !== 1 || elementAttribute(externalScripts[0] ?? { attributes: new Map() }, "src") !== expectedJs
+    || !externalScripts[0]?.attributes.has("defer")) {
+    error(errors, "not-found-assets", path, "404 must use the current shared stylesheet and deferred browser script exactly once");
+  }
+
+  const canonical = byName("link").filter((element) => elementAttributeTokens(element, "rel").includes("canonical"));
+  if (canonical.length !== 0) error(errors, "not-found-metadata", path, "404 must not publish a canonical URL");
+
+  const anchors = byName("a").filter((element) => elementIsActiveResource(element));
+  const requiredHrefs = ["/", "/#contact", "/en/", "/en/#contact"];
+  if (requiredHrefs.some((href) => anchors.filter((anchor) => elementAttribute(anchor, "href") === href).length === 0)
+    || anchors.some((anchor) => elementAttribute(anchor, "href") === "#")) {
+    error(errors, "not-found-links", path, "404 requires one direct PL and EN home and contact link");
+  }
+
+  const ids = elements.map((element) => elementAttribute(element, "id")).filter(nonEmptyString);
+  if (new Set(ids).size !== ids.length) error(errors, "not-found-ids", path, "element IDs must be unique");
+
+  const languageHeadings = headings.length === 1
+    ? elementDescendants(headings[0]).filter((element) => element.attributes.has("data-lang"))
+    : [];
+  const headingCopy = new Map(languageHeadings.map((element) => [
+    normalize(elementAttribute(element, "data-lang") ?? ""),
+    publishedStaticText(element)
+  ]));
+  const inlineStyles = byName("style").map(rawElementText).join("\n");
+  const hasNoJsLanguageCss = /\[data-lang=["']en["']\]\s*\{[^}]*display\s*:\s*none/iu.test(inlineStyles)
+    && /html\[lang=["']en["']\]\s+\[data-lang=["']en["']\]\s*\{[^}]*display\s*:\s*revert/iu.test(inlineStyles);
+  if (htmlElements.length !== 1 || normalize(elementAttribute(htmlElements[0], "lang") ?? "") !== "pl"
+    || languageHeadings.length !== 2 || headingCopy.get("pl") !== "Tej strony nie ma"
+    || headingCopy.get("en") !== "This page does not exist" || !hasNoJsLanguageCss) {
+    error(errors, "not-found-default", path, "404 must render the Polish version by default without JavaScript and carry the exact localized h1 copy");
+  }
+
+  const localeScript = inlineScripts.length === 1 ? rawElementText(inlineScripts[0]) : "";
+  const localeScriptInHead = inlineScripts.length === 1 && inlineScripts[0].parent === heads[0];
+  const localeOnlyChangesExistingMetadata = localeScriptInHead
+    && /location\.pathname/u.test(localeScript)
+    && /document\.documentElement\.lang\s*=/u.test(localeScript)
+    && /document\.title\s*=/u.test(localeScript)
+    && /meta\[name=["']description["']\]/u.test(localeScript)
+    && !/(?:createElement|appendChild|replaceChildren|insertAdjacentHTML|innerHTML|outerHTML|document\.write|\.remove\s*\()/u.test(localeScript);
+  if (inlineScripts.length !== 1 || !localeOnlyChangesExistingMetadata) {
+    error(errors, "not-found-script", path, "the single early locale script may only update lang, title and the existing description");
+  }
+
+  const navs = byName("nav").filter((element) => elementHasClass(element, "site-nav"));
+  const footers = byName("footer").filter((element) => elementHasClass(element, "site-footer"));
+  if (navs.length !== 1 || footers.length !== 1) {
+    error(errors, "not-found-main", path, "expected one shared site navigation and footer around the main landmark");
+  }
+
+  const auditedCopy = stripHtmlComments(html).replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/giu, " ");
+  if (/\b(?:radar\p{L}*|baz\p{L}*|base|rescue|ratun\p{L}*|chętnie|najlepszy|best)\b|flight\s+plan|plan\s+lotu/iu.test(auditedCopy)) {
+    error(errors, "not-found-copy", path, "404 copy must stay literal and avoid invented aviation, rescue or promotional framing");
+  }
+}
+
 function verifyBrowserScript(js, errors) {
   const path = "assets/js/main.js";
   const activeJs = stripJsComments(js);
@@ -4081,7 +4176,7 @@ async function verifyFoundation(context) {
   ]);
   if (plHome !== null) verifyHomepageNavigation(plHome, { path: "index.html", lang: "pl" }, context.errors);
   if (enHome !== null) verifyHomepageNavigation(enHome, { path: "en/index.html", lang: "en" }, context.errors);
-  if (notFound !== null) verifyLegacyNavigation(notFound, "404.html", context.errors);
+  if (notFound !== null) verifyNotFound(notFound, context.errors);
   if (css !== null && css.length === 0) error(context.errors, "foundation-css", "assets/css/style.css", "stylesheet is empty");
   if (css !== null && gzipSync(Buffer.from(css, "utf8")).byteLength > 75_000) {
     error(context.errors, "budget-css-gzip", "assets/css/style.css", "compressed stylesheet exceeds 75000 bytes");

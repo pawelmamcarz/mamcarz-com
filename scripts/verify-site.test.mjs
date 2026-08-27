@@ -3845,6 +3845,28 @@ test("Plan 1 broad review accepts an exact approved surface claim without drift"
   assert.ok(!errorIds(result).some((id) => id.startsWith("fact-surface-")), result.errors.join("\n"));
 });
 
+test("fact surface line matching ignores the controlled discovery fact-id prefix", async () => {
+  const surface = "llms.txt";
+  const approved = "20+ SAP Ariba implementations.";
+  const controlled = fact({
+    id: "hero.implementations",
+    value: approved,
+    display_pl: approved,
+    display_en: approved,
+    surfaces: [surface],
+    surface_rules: {
+      [surface]: {
+        approved_any: [approved],
+        match_mode: "line",
+        controlled_any: ["20+ SAP Ariba implementations"]
+      }
+    }
+  });
+  const root = await fixture({ facts: [fact(), controlled], llms: `- [hero.implementations] ${approved}` });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(!errorIds(result).some((id) => id.startsWith("fact-surface-")), result.errors.join("\n"));
+});
+
 const productionRegistryBoundaryBypasses = [
   {
     label: "an Ariba count extended to Fieldglass and S/4HANA",
@@ -4107,14 +4129,49 @@ test("foundation requires the navigation guard before the only JS marker", async
   assert.ok(errorIds(result).includes("js-navigation-marker"));
 });
 
-for (const [option, path] of [["notFoundHtml", "404.html"]]) {
-  test(`foundation requires legacy in-flow navigation markup on ${path}`, async () => {
-    const html = legacyNavigationFixture.replace('class="nav-links"', 'class="removed-nav-links"');
-    const root = await fixture({ [option]: html, css: foundationCss });
-    const result = await runVerification({ root, scope: "foundation" });
-    assert.ok(result.errors.some((entry) => entry.startsWith(`ERROR legacy-nav ${path}:`)));
-  });
+function notFoundContractFixture() {
+  return `<!doctype html><html lang="pl"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 · Strona nie istnieje | mamcarz.com</title>
+    <meta name="description" content="Pod tym adresem nie ma strony.">
+    <meta name="robots" content="noindex, follow">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <style>[data-lang="en"]{display:none}html[lang="en"] [data-lang="pl"]{display:none}html[lang="en"] [data-lang="en"]{display:revert}</style>
+    <script>(function(){var english=location.pathname.indexOf("/en/")===0;if(!english)return;document.documentElement.lang="en";document.title="404 · Page not found | mamcarz.com";var meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute("content","There is no page at this address.");})();</script>
+  </head><body>
+    <nav class="site-nav" aria-label="Nawigacja / Navigation"><a href="/" class="nav-logo">PM · Mamcarz.com</a></nav>
+    <main id="main"><h1><span data-lang="pl">Tej strony nie ma</span><span data-lang="en">This page does not exist</span></h1>
+      <p data-lang="pl">Pod tym adresem nie ma strony.</p><p data-lang="en">There is no page at this address.</p>
+      <a href="/" data-lang="pl">Strona główna</a><a href="/#contact" data-lang="pl">Kontakt</a>
+      <a href="/en/" data-lang="en">Home</a><a href="/en/#contact" data-lang="en">Contact</a>
+    </main><footer class="site-footer">mamcarz.com</footer>
+    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+  </body></html>`;
 }
+
+test("Plan 3 Task 5 requires one no-JS-safe bilingual 404 document", async (t) => {
+  const validRoot = await fixture({ notFoundHtml: notFoundContractFixture(), css: foundationCss });
+  const valid = await runVerification({ root: validRoot, scope: "foundation" });
+  assert.deepEqual(valid.errors.filter((entry) => entry.startsWith("ERROR not-found-")), []);
+
+  const cases = [
+    ["second h1", "not-found-h1", (html) => html.replace("</main>", "<h1>Duplicate</h1></main>")],
+    ["second main", "not-found-main", (html) => html.replace("</footer>", "<main></main></footer>")],
+    ["indexable error", "not-found-robots", (html) => html.replace("noindex, follow", "index, follow")],
+    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260825-flightplan-3", "stale")],
+    ["missing English contact", "not-found-links", (html) => html.replace('href="/en/#contact"', 'href="/en/"')],
+    ["duplicate id", "not-found-ids", (html) => html.replace("</main>", '<span id="main"></span></main>')],
+    ["English default", "not-found-default", (html) => html.replace('<html lang="pl">', '<html lang="en">')],
+    ["DOM creation in locale script", "not-found-script", (html) => html.replace("})();</script>", 'document.createElement("p");})();</script>')],
+    ["invented radar copy", "not-found-copy", (html) => html.replace("Pod tym adresem nie ma strony.", "Poza zasięgiem radaru.")],
+    ["canonical error URL", "not-found-metadata", (html) => html.replace("</head>", '<link rel="canonical" href="https://mamcarz.com/404"></head>')]
+  ];
+  for (const [label, expected, mutate] of cases) await t.test(label, async () => {
+    const root = await fixture({ notFoundHtml: mutate(notFoundContractFixture()), css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+  });
+});
 
 test("foundation protects every existing mobile legacy navigation fallback branch", async () => {
   const visibleLinks = foundationCss.replace(
