@@ -6957,3 +6957,150 @@ ${foundationCss}
   assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
   assert.equal(errorIds(result).includes("css-current-route"), false, result.errors.join("\n"));
 });
+
+test("Plan 2 Task 10 fix round 2 rejects the reviewer's negated horizontal-footer media override", async () => {
+  const css = `${foundationCss}\n@media not (max-width: 759px) {
+  footer.site-footer { padding-inline-end: var(--page-gutter); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 accepts a correct horizontal rule under negated media", async () => {
+  const css = `${foundationCss}\n@media not (max-width: 759px) {
+  footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 fails closed on an unsupported media disjunction", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) or (min-width: 760px) {
+  footer.site-footer { padding-inline-end: var(--page-gutter); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 permits unrelated declarations in unsupported media", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) or (min-width: 760px) {
+  .unrelated-card { padding-inline-end: 0; }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 rejects a current-route override confined to 760 through 1279 pixels", async () => {
+  const css = `${foundationCss}\n@media (min-width: 760px) and (max-width: 1279px) {
+  .nav-logo[aria-current="page"],
+  .nav-list a[aria-current="page"],
+  .nav-links a[aria-current="page"],
+  .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary {
+    color: var(--panel);
+  }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 models the real main-adjacent footer topology", async () => {
+  const css = `${foundationCss}\n@media (min-width: 760px) {
+  body > main + footer.site-footer { padding-inline-end: var(--page-gutter); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 permits a footer first-child rule that cannot match the real shell", async () => {
+  const css = `${foundationCss}\n@media (min-width: 760px) {
+  footer.site-footer:first-child { padding-inline-end: var(--page-gutter); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 fails closed on an unsupported negated footer pseudo", async () => {
+  const css = `${foundationCss}\n@media (min-width: 760px) {
+  footer.site-footer:not(:nth-child(3)) { padding-inline-end: var(--page-gutter); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 permits an unsupported pseudo on an unrelated selector", async () => {
+  const css = `${foundationCss}\n@media (min-width: 760px) {
+  .unrelated-card:not(:nth-child(3)) { padding-inline-end: 0; }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 rejects an inherited navigation signal-token override", async () => {
+  const result = await verifyFixtureCss(`${foundationCss}\n.site-nav { --signal-dark: var(--panel); }`);
+  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 rejects an inherited navigation panel-token override", async () => {
+  const result = await verifyFixtureCss(`${foundationCss}\n.nav-group { --panel: var(--signal-dark); }`);
+  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 rejects a horizontal footer gutter-token override", async () => {
+  const css = `${foundationCss}\n@media (min-width: 760px) {
+  footer.site-footer { --page-gutter: 0px; }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 permits unrelated protected-token spellings and harmless local variables", async () => {
+  const css = `${foundationCss}\n.unrelated-card {
+  --signal-dark: var(--panel);
+  --panel: #000;
+  --page-gutter: 0px;
+}
+.site-nav { --task10-local-accent: var(--panel); }`;
+  const result = await verifyFixtureCss(css);
+  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
+  assert.equal(errorIds(result).includes("css-current-route"), false, result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 rejects a protected footer override inside a layer", async () => {
+  const css = `${foundationCss}\n@layer task10-review {
+  @media (min-width: 760px) {
+    footer.site-footer { padding-inline-end: var(--page-gutter) !important; }
+  }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 retains protected inspection inside supports", async () => {
+  const css = `${foundationCss}\n@supports (selector(:has(*))) {
+  @media (min-width: 760px) {
+    footer.site-footer { padding-inline-end: var(--page-gutter); }
+  }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 rejects a protected footer override inside a container", async () => {
+  const css = `${foundationCss}\n@container shell (min-width: 760px) {
+  footer.site-footer { padding-inline-end: var(--page-gutter); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 10 fix round 2 permits unrelated layer and container content", async () => {
+  const css = `${foundationCss}\n@layer task10-unrelated {
+  .unrelated-card { padding-inline-end: 0; --page-gutter: 0px; }
+}
+@container shell (min-width: 1px) {
+  .unrelated-card { color: var(--panel); --signal-dark: var(--panel); }
+}`;
+  const result = await verifyFixtureCss(css);
+  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
+  assert.equal(errorIds(result).includes("css-current-route"), false, result.errors.join("\n"));
+});
