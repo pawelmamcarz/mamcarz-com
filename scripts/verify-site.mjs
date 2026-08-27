@@ -16,6 +16,10 @@ const unsupportedLlmsFullClauses = Object.freeze([
   "spend analytics, category strategies, TOM, IT platform selection",
   "currently Cloudflare, React, and custom web projects"
 ]);
+// These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
+// Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
+// renewed visual/cascade review followed by an explicit digest baseline refresh.
+const TASK10_REVIEWED_CSS_SHA256 = "139ad09341eb2c4160622391a79eab7ca6c6896d141eef4022396d17b450055d";
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
 
@@ -1974,20 +1978,16 @@ function splitCssTopLevel(source, delimiterCharacter) {
   return parts;
 }
 
-function parseDeclarationEntries(body) {
-  const entries = [];
+function parseDeclarations(body) {
+  const declarations = new Map();
   for (const candidate of splitCssTopLevel(body, ";")) {
     const colon = cssDelimiterIndex(candidate, ":");
     if (colon === -1) continue;
     const property = candidate.slice(0, colon).trim().toLowerCase();
     const value = candidate.slice(colon + 1).trim().replace(/\s+/g, " ");
-    if (property) entries.push([property, value]);
+    if (property) declarations.set(property, value);
   }
-  return entries;
-}
-
-function parseDeclarations(body) {
-  return new Map(parseDeclarationEntries(body));
+  return declarations;
 }
 
 function cssStructureIsBalanced(source) {
@@ -2094,10 +2094,6 @@ function textOutsideCssStrings(source) {
   return outside;
 }
 
-const CSS_DECLARATION_AT_RULES = new Set([
-  "counter-style", "font-face", "font-feature-values", "font-palette-values", "page", "property"
-]);
-
 export function parseCssRules(source, media = [], rules = []) {
   let cursor = 0;
   while (cursor < source.length) {
@@ -2115,12 +2111,9 @@ export function parseCssRules(source, media = [], rules = []) {
       parseCssRules(body, [...media, mediaPrelude], rules);
     } else if (atRuleName === "supports") {
       parseCssRules(body, media, rules);
-    } else if (atRuleName !== undefined && !CSS_DECLARATION_AT_RULES.has(atRuleName)) {
-      parseCssRules(body, media, rules);
     } else {
       const selectors = prelude.startsWith("@") ? [] : splitCssTopLevel(prelude, ",").map((selector) => selector.trim().replace(/\s+/g, " ")).filter(Boolean);
-      const declarationEntries = parseDeclarationEntries(body);
-      rules.push({ prelude: normalizedPrelude, selectors, declarations: new Map(declarationEntries), declarationEntries, media });
+      rules.push({ prelude: normalizedPrelude, selectors, declarations: parseDeclarations(body), media });
     }
     cursor = closing + 1;
   }
@@ -2341,585 +2334,6 @@ function propertyValue(rules, selector, property, media = []) {
   return value;
 }
 
-function task10SpecificityAdd(left, right) {
-  return left.map((value, index) => value + right[index]);
-}
-
-function task10SpecificityCompare(left, right) {
-  for (let index = 0; index < left.length; index += 1) {
-    if (left[index] !== right[index]) return left[index] - right[index];
-  }
-  return 0;
-}
-
-function task10SelectorSpecificity(selector) {
-  const source = decodeCssEscapes(selector);
-  let specificity = [0, 0, 0];
-  let cursor = 0;
-  let expectsType = true;
-  const identifier = /^[a-z_-][a-z0-9_-]*/i;
-  while (cursor < source.length) {
-    const character = source[cursor];
-    if (/\s/.test(character) || character === ">" || character === "+" || character === "~") {
-      expectsType = true;
-      cursor += 1;
-      continue;
-    }
-    if (character === "*") {
-      expectsType = false;
-      cursor += 1;
-      continue;
-    }
-    if (character === "#" || character === ".") {
-      specificity[character === "#" ? 0 : 1] += 1;
-      cursor += 1 + (identifier.exec(source.slice(cursor + 1))?.[0].length ?? 0);
-      expectsType = false;
-      continue;
-    }
-    if (character === "[") {
-      specificity[1] += 1;
-      let quote = null;
-      let escaped = false;
-      cursor += 1;
-      while (cursor < source.length) {
-        const current = source[cursor];
-        if (quote !== null) {
-          if (escaped) escaped = false;
-          else if (current === "\\") escaped = true;
-          else if (current === quote) quote = null;
-        } else if (current === "'" || current === '"') quote = current;
-        else if (current === "]") break;
-        cursor += 1;
-      }
-      cursor += 1;
-      expectsType = false;
-      continue;
-    }
-    if (character === ":") {
-      const pseudoElement = source[cursor + 1] === ":";
-      cursor += pseudoElement ? 2 : 1;
-      const name = identifier.exec(source.slice(cursor))?.[0] ?? "";
-      cursor += name.length;
-      const lowerName = name.toLowerCase();
-      if (pseudoElement || ["before", "after", "first-line", "first-letter"].includes(lowerName)) specificity[2] += 1;
-      else if (source[cursor] !== "(") specificity[1] += 1;
-      if (source[cursor] === "(") {
-        const closing = matchingParenthesis(source, cursor);
-        const argument = closing === -1 ? "" : source.slice(cursor + 1, closing);
-        if (["is", "not", "has"].includes(lowerName)) {
-          const argumentSpecificities = splitCssTopLevel(argument, ",")
-            .map((candidate) => task10SelectorSpecificity(candidate.trim()));
-          const maximum = argumentSpecificities.reduce((current, candidate) => task10SpecificityCompare(candidate, current) > 0 ? candidate : current, [0, 0, 0]);
-          specificity = task10SpecificityAdd(specificity, maximum);
-        } else if (lowerName !== "where") {
-          specificity[1] += 1;
-        }
-        cursor = closing === -1 ? source.length : closing + 1;
-      }
-      expectsType = false;
-      continue;
-    }
-    const type = identifier.exec(source.slice(cursor))?.[0];
-    if (type) {
-      if (expectsType) specificity[2] += 1;
-      cursor += type.length;
-      expectsType = false;
-      continue;
-    }
-    cursor += 1;
-  }
-  return specificity;
-}
-
-function task10SelectorTokens(selector) {
-  const tokens = [];
-  let compound = "";
-  let quote = null;
-  let escaped = false;
-  let parentheses = 0;
-  let brackets = 0;
-  let pendingDescendant = false;
-  const combinators = new Set([" ", ">", "+", "~"]);
-  const flushCompound = () => {
-    const value = compound.trim();
-    if (value.length > 0) tokens.push(value);
-    compound = "";
-  };
-  for (const character of selector.trim()) {
-    if (quote !== null) {
-      compound += character;
-      if (escaped) escaped = false;
-      else if (character === "\\") escaped = true;
-      else if (character === quote) quote = null;
-      continue;
-    }
-    if (character === "'" || character === '"') {
-      quote = character;
-      compound += character;
-      continue;
-    }
-    if (character === "(") parentheses += 1;
-    else if (character === ")" && parentheses > 0) parentheses -= 1;
-    else if (character === "[") brackets += 1;
-    else if (character === "]" && brackets > 0) brackets -= 1;
-    if (parentheses === 0 && brackets === 0 && /\s/.test(character)) {
-      flushCompound();
-      if (tokens.length > 0 && !combinators.has(tokens.at(-1))) pendingDescendant = true;
-      continue;
-    }
-    if (parentheses === 0 && brackets === 0 && [">", "+", "~"].includes(character)) {
-      flushCompound();
-      pendingDescendant = false;
-      if (tokens.at(-1) === " ") tokens.pop();
-      tokens.push(character);
-      continue;
-    }
-    if (pendingDescendant) {
-      if (tokens.length > 0 && !combinators.has(tokens.at(-1))) tokens.push(" ");
-      pendingDescendant = false;
-    }
-    compound += character;
-  }
-  flushCompound();
-  return tokens;
-}
-
-function task10Element(name, { classes = [], attributes = {}, parent = null } = {}) {
-  const element = { name, classes: new Set(classes), attributes: new Map(Object.entries(attributes)), parent, children: [] };
-  if (parent) parent.children.push(element);
-  return element;
-}
-
-function task10AttributeValue(element, name) {
-  if (name === "class") return [...element.classes].join(" ");
-  return element.attributes.has(name) ? element.attributes.get(name) : null;
-}
-
-function task10AttributeMatches(element, source) {
-  const match = /^([^\s~|^$*!=]+)\s*(?:(~=|\|=|\^=|\$=|\*=|=)\s*(?:"([^"]*)"|'([^']*)'|([^\s]+))(?:\s+[is])?)?$/i.exec(source.trim());
-  if (!match) return false;
-  const [, name, operator, doubleQuoted, singleQuoted, unquoted] = match;
-  const actual = task10AttributeValue(element, name.toLowerCase());
-  if (actual === null) return false;
-  if (!operator) return true;
-  const expected = doubleQuoted ?? singleQuoted ?? unquoted ?? "";
-  if (operator === "=") return actual === expected;
-  if (operator === "~=") return actual.split(/\s+/).includes(expected);
-  if (operator === "|=") return actual === expected || actual.startsWith(`${expected}-`);
-  if (operator === "^=") return actual.startsWith(expected);
-  if (operator === "$=") return actual.endsWith(expected);
-  if (operator === "*=") return actual.includes(expected);
-  return false;
-}
-
-function task10ElementDescendants(element) {
-  return element.children.flatMap((child) => [child, ...task10ElementDescendants(child)]);
-}
-
-function task10MatchesHas(element, argument) {
-  return splitCssTopLevel(argument, ",").some((candidate) => {
-    const relative = candidate.trim();
-    if (relative.startsWith(">")) {
-      const selector = relative.slice(1).trim();
-      return element.children.some((child) => task10MatchesComplexSelector(child, selector, element));
-    }
-    if (relative.startsWith("+")) {
-      const siblings = element.parent?.children ?? [];
-      const index = siblings.indexOf(element);
-      return index !== -1 && task10MatchesComplexSelector(siblings[index + 1], relative.slice(1).trim(), element.parent);
-    }
-    if (relative.startsWith("~")) {
-      const siblings = element.parent?.children ?? [];
-      const index = siblings.indexOf(element);
-      return index !== -1 && siblings.slice(index + 1).some((sibling) => task10MatchesComplexSelector(sibling, relative.slice(1).trim(), element.parent));
-    }
-    return task10ElementDescendants(element).some((descendant) => task10MatchesComplexSelector(descendant, relative, element));
-  });
-}
-
-function task10MatchesCompound(element, rawCompound) {
-  if (!element) return false;
-  const compound = decodeCssEscapes(rawCompound);
-  let cursor = 0;
-  const identifier = /^[a-z_-][a-z0-9_-]*/i;
-  const initialType = identifier.exec(compound)?.[0];
-  if (initialType) {
-    if (element.name !== initialType.toLowerCase()) return false;
-    cursor = initialType.length;
-  } else if (compound[cursor] === "*") cursor += 1;
-  while (cursor < compound.length) {
-    const character = compound[cursor];
-    if (character === "." || character === "#") {
-      const value = identifier.exec(compound.slice(cursor + 1))?.[0];
-      if (!value) return false;
-      if (character === "." && !element.classes.has(value)) return false;
-      if (character === "#" && task10AttributeValue(element, "id") !== value) return false;
-      cursor += value.length + 1;
-      continue;
-    }
-    if (character === "[") {
-      let closing = cursor + 1;
-      let quote = null;
-      let escaped = false;
-      for (; closing < compound.length; closing += 1) {
-        const current = compound[closing];
-        if (quote !== null) {
-          if (escaped) escaped = false;
-          else if (current === "\\") escaped = true;
-          else if (current === quote) quote = null;
-        } else if (current === "'" || current === '"') quote = current;
-        else if (current === "]") break;
-      }
-      if (closing >= compound.length || !task10AttributeMatches(element, compound.slice(cursor + 1, closing))) return false;
-      cursor = closing + 1;
-      continue;
-    }
-    if (character === ":") {
-      if (compound[cursor + 1] === ":") return false;
-      const name = identifier.exec(compound.slice(cursor + 1))?.[0];
-      if (!name) return false;
-      cursor += name.length + 1;
-      const lowerName = name.toLowerCase();
-      let argument = null;
-      if (compound[cursor] === "(") {
-        const closing = matchingParenthesis(compound, cursor);
-        if (closing === -1) return false;
-        argument = compound.slice(cursor + 1, closing);
-        cursor = closing + 1;
-      }
-      if (lowerName === "not") {
-        if (splitCssTopLevel(argument ?? "", ",").some((selector) => task10MatchesComplexSelector(element, selector.trim()))) return false;
-      } else if (lowerName === "is" || lowerName === "where") {
-        if (!splitCssTopLevel(argument ?? "", ",").some((selector) => task10MatchesComplexSelector(element, selector.trim()))) return false;
-      } else if (lowerName === "has") {
-        if (!task10MatchesHas(element, argument ?? "")) return false;
-      } else if (lowerName === "root") {
-        if (element.name !== "html") return false;
-      } else if (lowerName === "first-child") {
-        if (element.parent?.children[0] !== element) return false;
-      } else if (lowerName === "last-child") {
-        if (element.parent?.children.at(-1) !== element) return false;
-      } else if (lowerName === "only-child") {
-        if (element.parent?.children.length !== 1) return false;
-      } else if (["hover", "focus", "focus-visible", "focus-within", "active", "visited", "target"].includes(lowerName)) {
-        return false;
-      }
-      continue;
-    }
-    return false;
-  }
-  return true;
-}
-
-function task10MatchesComplexSelector(element, selector, boundary = null) {
-  if (!element || !selector) return false;
-  const tokens = task10SelectorTokens(selector);
-  if (tokens.length === 0 || tokens.length % 2 === 0) return false;
-  const matchAt = (candidate, index) => {
-    if (!candidate || !task10MatchesCompound(candidate, tokens[index])) return false;
-    if (index === 0) return true;
-    const combinator = tokens[index - 1];
-    const previous = index - 2;
-    if (combinator === ">") return matchAt(candidate.parent, previous);
-    if (combinator === " ") {
-      for (let ancestor = candidate.parent; ancestor; ancestor = ancestor.parent) {
-        if (matchAt(ancestor, previous)) return true;
-        if (ancestor === boundary) break;
-      }
-      return false;
-    }
-    const siblings = candidate.parent?.children ?? [];
-    const candidateIndex = siblings.indexOf(candidate);
-    if (combinator === "+") return candidateIndex > 0 && matchAt(siblings[candidateIndex - 1], previous);
-    if (combinator === "~") return siblings.slice(0, Math.max(0, candidateIndex)).some((sibling) => matchAt(sibling, previous));
-    return false;
-  };
-  return matchAt(element, tokens.length - 1);
-}
-
-function task10MediaMatchesWidth(media, width) {
-  return media.every((prelude) => splitCssTopLevel(prelude.replace(/^@media\s*/i, ""), ",").some((branch) => {
-    const query = branch.trim();
-    const negatedWidth = /^not\s*\(\s*(min|max)-width\s*:\s*([0-9]+(?:\.[0-9]+)?)px\s*\)$/i.exec(query);
-    if (negatedWidth !== null) {
-      const boundary = Number.parseFloat(negatedWidth[2]);
-      const matches = negatedWidth[1].toLowerCase() === "min" ? width >= boundary : width <= boundary;
-      return !matches;
-    }
-    if (/^not\b/i.test(query)) return true;
-    if (/^(?:only\s+)?print(?:\s+and\b[\s\S]*)?$/i.test(query)) return false;
-    const screenQuery = query.replace(/^(?:(?:only\s+)?(?:all|screen)\s+and\s+|(?:only\s+)?(?:all|screen)\s*$)/i, "");
-    const widthFeature = "\\(\\s*(?:min|max)-width\\s*:\\s*[0-9]+(?:\\.[0-9]+)?px\\s*\\)";
-    if (screenQuery !== "" && !new RegExp(`^${widthFeature}(?:\\s+and\\s+${widthFeature})*$`, "i").test(screenQuery)) return true;
-    for (const match of screenQuery.matchAll(/\b(min|max)-width\s*:\s*([0-9]+(?:\.[0-9]+)?)px/gi)) {
-      const boundary = Number.parseFloat(match[2]);
-      if (match[1].toLowerCase() === "min" && width < boundary) return false;
-      if (match[1].toLowerCase() === "max" && width > boundary) return false;
-    }
-    return true;
-  }));
-}
-
-function task10SplitValueTokens(value) {
-  const tokens = [];
-  let token = "";
-  let quote = null;
-  let escaped = false;
-  let parentheses = 0;
-  for (const character of value.trim()) {
-    if (quote !== null) {
-      token += character;
-      if (escaped) escaped = false;
-      else if (character === "\\") escaped = true;
-      else if (character === quote) quote = null;
-      continue;
-    }
-    if (character === "'" || character === '"') quote = character;
-    else if (character === "(") parentheses += 1;
-    else if (character === ")" && parentheses > 0) parentheses -= 1;
-    if (parentheses === 0 && /\s/.test(character)) {
-      if (token) tokens.push(token);
-      token = "";
-    } else token += character;
-  }
-  if (token) tokens.push(token);
-  return tokens;
-}
-
-function task10CascadeDeclarationValues(rule, property) {
-  const values = [];
-  let declarationIndex = 0;
-  for (const [name, rawValue] of rule.declarationEntries ?? rule.declarations) {
-    let value = null;
-    if (name === property) value = rawValue;
-    else if (property === "padding-inline-end" && name === "padding-right") value = rawValue;
-    else if (property === "padding-inline-end" && name === "padding-inline") {
-      const tokens = task10SplitValueTokens(rawValue.replace(/\s*!\s*important\s*$/i, ""));
-      value = `${tokens[1] ?? tokens[0] ?? ""}${/!\s*important\s*$/i.test(rawValue) ? " !important" : ""}`.trim();
-    } else if (property === "padding-inline-end" && name === "padding") {
-      const important = /!\s*important\s*$/i.test(rawValue);
-      const tokens = task10SplitValueTokens(rawValue.replace(/\s*!\s*important\s*$/i, ""));
-      const end = tokens.length === 1 ? tokens[0] : tokens[1];
-      value = `${end ?? ""}${important ? " !important" : ""}`.trim();
-    } else if (name === "all" && !property.startsWith("--")) value = rawValue;
-    if (value !== null) values.push({ value, declarationIndex });
-    declarationIndex += 1;
-  }
-  return values;
-}
-
-const TASK10_SUPPORTED_PSEUDOS = new Set([
-  "active", "first-child", "focus", "focus-visible", "focus-within", "has", "hover", "is",
-  "last-child", "not", "only-child", "root", "target", "visited", "where"
-]);
-
-function task10SelectorHasUnsupportedPseudo(rawSelector) {
-  const selector = decodeCssEscapes(rawSelector);
-  let quote = null;
-  let escaped = false;
-  let brackets = 0;
-  for (let cursor = 0; cursor < selector.length; cursor += 1) {
-    const character = selector[cursor];
-    if (quote !== null) {
-      if (escaped) escaped = false;
-      else if (character === "\\") escaped = true;
-      else if (character === quote) quote = null;
-      continue;
-    }
-    if (character === "'" || character === '"') {
-      quote = character;
-      continue;
-    }
-    if (character === "[") {
-      brackets += 1;
-      continue;
-    }
-    if (character === "]" && brackets > 0) {
-      brackets -= 1;
-      continue;
-    }
-    if (character !== ":" || brackets > 0) continue;
-    if (selector[cursor + 1] === ":") return false;
-    const name = /^[a-z_-][a-z0-9_-]*/i.exec(selector.slice(cursor + 1))?.[0];
-    if (!name || !TASK10_SUPPORTED_PSEUDOS.has(name.toLowerCase())) return true;
-    cursor += name.length;
-  }
-  return false;
-}
-
-function task10CompoundWithoutPseudos(rawCompound) {
-  const compound = decodeCssEscapes(rawCompound);
-  let result = "";
-  let cursor = 0;
-  while (cursor < compound.length) {
-    if (compound[cursor] === "[") {
-      let closing = cursor + 1;
-      let quote = null;
-      let escaped = false;
-      for (; closing < compound.length; closing += 1) {
-        const character = compound[closing];
-        if (quote !== null) {
-          if (escaped) escaped = false;
-          else if (character === "\\") escaped = true;
-          else if (character === quote) quote = null;
-        } else if (character === "'" || character === '"') quote = character;
-        else if (character === "]") break;
-      }
-      if (closing >= compound.length) return "*";
-      result += compound.slice(cursor, closing + 1);
-      cursor = closing + 1;
-      continue;
-    }
-    if (compound[cursor] !== ":") {
-      result += compound[cursor];
-      cursor += 1;
-      continue;
-    }
-    cursor += compound[cursor + 1] === ":" ? 2 : 1;
-    const name = /^[a-z_-][a-z0-9_-]*/i.exec(compound.slice(cursor))?.[0];
-    if (!name) return "*";
-    cursor += name.length;
-    if (compound[cursor] === "(") {
-      const closing = matchingParenthesis(compound, cursor);
-      if (closing === -1) return "*";
-      cursor = closing + 1;
-    }
-  }
-  return result || "*";
-}
-
-function task10SelectorCouldTargetElement(element, selector) {
-  const tokens = task10SelectorTokens(selector);
-  if (tokens.length === 0) return true;
-  return task10MatchesCompound(element, task10CompoundWithoutPseudos(tokens.at(-1)));
-}
-
-function task10EffectiveCascadeValue(rules, { element, property, width }) {
-  let winner = null;
-  let unsupportedSelector = false;
-  rules.forEach((rule, ruleIndex) => {
-    if (!task10MediaMatchesWidth(rule.media, width)) return;
-    const declarations = task10CascadeDeclarationValues(rule, property);
-    if (declarations.length === 0) return;
-    for (const selector of rule.selectors) {
-      if (task10SelectorHasUnsupportedPseudo(selector) && task10SelectorCouldTargetElement(element, selector)) {
-        unsupportedSelector = true;
-        continue;
-      }
-      if (!task10MatchesComplexSelector(element, selector)) continue;
-      const specificity = task10SelectorSpecificity(selector);
-      for (const declaration of declarations) {
-        const important = /!\s*important\s*$/i.test(declaration.value);
-        const value = declaration.value.replace(/\s*!\s*important\s*$/i, "").trim();
-        const candidate = { value, important, specificity, ruleIndex, declarationIndex: declaration.declarationIndex };
-        const candidateWins = winner === null
-          || Number(candidate.important) > Number(winner.important)
-          || (candidate.important === winner.important && task10SpecificityCompare(candidate.specificity, winner.specificity) > 0)
-          || (candidate.important === winner.important
-            && task10SpecificityCompare(candidate.specificity, winner.specificity) === 0
-            && (candidate.ruleIndex > winner.ruleIndex
-              || (candidate.ruleIndex === winner.ruleIndex && candidate.declarationIndex > winner.declarationIndex)));
-        if (candidateWins) winner = candidate;
-      }
-    }
-  });
-  if (unsupportedSelector) return "unsupported selector";
-  return winner?.value;
-}
-
-function task10RulesDeclaring(rules, properties) {
-  return rules.filter((rule) => [...(rule.declarationEntries ?? rule.declarations)]
-    .some(([name]) => properties.has(name)));
-}
-
-function task10InheritedCascadeValue(rules, { element, property, width }) {
-  for (let candidate = element; candidate; candidate = candidate.parent) {
-    const value = task10EffectiveCascadeValue(rules, { element: candidate, property, width });
-    if (value !== undefined) return value;
-  }
-  return undefined;
-}
-
-function task10FooterElement() {
-  const html = task10Element("html");
-  const body = task10Element("body", { parent: html });
-  task10Element("main", { attributes: { id: "main" }, parent: body });
-  const footer = task10Element("footer", { classes: ["site-footer"], parent: body });
-  task10Element("script", { parent: body });
-  return footer;
-}
-
-function task10NavigationElements({ current, open = false }) {
-  const html = task10Element("html");
-  const body = task10Element("body", { parent: html });
-  const nav = task10Element("nav", { classes: ["site-nav"], parent: body });
-  const logo = task10Element("a", {
-    classes: ["nav-logo"],
-    attributes: { href: "/", ...(current === "logo" ? { "aria-current": "page" } : {}) },
-    parent: nav
-  });
-  const list = task10Element("ul", { classes: ["nav-list"], parent: nav });
-  const groupItem = task10Element("li", { parent: list });
-  const details = task10Element("details", { classes: ["nav-group"], attributes: open ? { open: "" } : {}, parent: groupItem });
-  const summary = task10Element("summary", { parent: details });
-  const submenu = task10Element("ul", { classes: ["nav-submenu"], parent: details });
-  const submenuItem = task10Element("li", { parent: submenu });
-  const service = task10Element("a", {
-    attributes: { href: "/service/", ...(current === "service" ? { "aria-current": "page" } : {}) },
-    parent: submenuItem
-  });
-  const directItem = task10Element("li", { parent: list });
-  const direct = task10Element("a", {
-    attributes: { href: "/direct/", ...(current === "direct" ? { "aria-current": "page" } : {}) },
-    parent: directItem
-  });
-  const legacyList = task10Element("ul", { classes: ["nav-links"], parent: nav });
-  const legacyItem = task10Element("li", { parent: legacyList });
-  const legacy = task10Element("a", {
-    attributes: { href: "/legacy/", ...(current === "legacy" ? { "aria-current": "page" } : {}) },
-    parent: legacyItem
-  });
-  return { logo, direct, legacy, summary, service };
-}
-
-function task10FooterCascadeFailures(rules) {
-  const element = task10FooterElement();
-  const variableRules = task10RulesDeclaring(rules, new Set(["--page-gutter"]));
-  const widths = [390, 759, 760, 800, 900, 1024, 1179, 1180, 1280, 1440, 1600];
-  return widths.flatMap((width) => {
-    const expected = width <= 759 ? "var(--page-gutter)" : "calc(var(--page-gutter) + 64px)";
-    const actual = task10EffectiveCascadeValue(rules, { element, property: "padding-inline-end", width });
-    const gutter = task10InheritedCascadeValue(variableRules, { element, property: "--page-gutter", width });
-    return [
-      ...(actual === expected ? [] : [`${width}px resolves to ${actual ?? "no value"}; expected ${expected}`]),
-      ...(gutter === "clamp(20px, 4vw, 56px)" ? [] : [`${width}px inherits --page-gutter: ${gutter ?? "no value"}`])
-    ];
-  });
-}
-
-function task10CurrentRouteCascadeFailures(rules) {
-  const widths = [390, 759, 760, 800, 1024, 1179, 1279, 1280];
-  const variableRules = task10RulesDeclaring(rules, new Set(["--signal-dark", "--panel"]));
-  const scenarios = [
-    ["current logo", task10NavigationElements({ current: "logo" }).logo, "var(--signal-dark)"],
-    ["current direct route", task10NavigationElements({ current: "direct" }).direct, "var(--signal-dark)"],
-    ["current legacy route", task10NavigationElements({ current: "legacy" }).legacy, "var(--signal-dark)"],
-    ["closed service summary", task10NavigationElements({ current: "service" }).summary, "var(--signal-dark)"],
-    ["open service leaf", task10NavigationElements({ current: "service", open: true }).service, "var(--signal-dark)"],
-    ["open service summary", task10NavigationElements({ current: "service", open: true }).summary, "var(--panel)"]
-  ];
-  return widths.flatMap((width) => scenarios.flatMap(([label, element, expected]) => {
-    const actual = task10EffectiveCascadeValue(rules, { element, property: "color", width });
-    const signal = task10InheritedCascadeValue(variableRules, { element, property: "--signal-dark", width });
-    const panel = task10InheritedCascadeValue(variableRules, { element, property: "--panel", width });
-    return [
-      ...(actual === expected ? [] : [`${label} at ${width}px resolves to ${actual ?? "no value"}; expected ${expected}`]),
-      ...(signal === "#A9361D" ? [] : [`${label} at ${width}px inherits --signal-dark: ${signal ?? "no value"}`]),
-      ...(panel === "#193D49" ? [] : [`${label} at ${width}px inherits --panel: ${panel ?? "no value"}`])
-    ];
-  }));
-}
-
 function hexRgb(value) {
   const match = /^#([0-9a-f]{6})$/i.exec(value ?? "");
   if (!match) return null;
@@ -3088,6 +2502,15 @@ async function verifyFoundation(context) {
     error(context.errors, "budget-css-gzip", "assets/css/style.css", "compressed stylesheet exceeds 75000 bytes");
   }
   if (css !== null) {
+    const cssDigest = createHash("sha256").update(css).digest("hex");
+    if (cssDigest !== TASK10_REVIEWED_CSS_SHA256) {
+      error(
+        context.errors,
+        "task10-css-reviewed-artifact",
+        "assets/css/style.css",
+        `SHA-256 ${cssDigest} differs from reviewed ${TASK10_REVIEWED_CSS_SHA256}; any CSS byte change requires renewed visual/cascade review and an explicit baseline refresh`
+      );
+    }
     const commentScan = stripCssComments(css);
     const activeCss = commentScan.css;
     if (commentScan.unterminatedCommentAt !== -1) {
@@ -3272,11 +2695,6 @@ async function verifyFoundation(context) {
         error(context.errors, "css-footer-clearance", "assets/css/style.css", `${selector} must use ${property}: ${value} in ${media[0] ?? "base scope"}`);
       }
     }
-    const footerCascadeFailures = task10FooterCascadeFailures(rules);
-    if (footerCascadeFailures.length > 0) {
-      error(context.errors, "css-footer-clearance", "assets/css/style.css", `effective footer clearance cascade is unsafe: ${footerCascadeFailures.join("; ")}`);
-    }
-
     const semanticCurrentRouteContracts = [
       [".nav-logo[aria-current=\"page\"]", "color", "var(--signal-dark)"],
       [".nav-list a[aria-current=\"page\"]", "color", "var(--signal-dark)"],
@@ -3288,11 +2706,6 @@ async function verifyFoundation(context) {
         error(context.errors, "css-current-route", "assets/css/style.css", `${selector} must use ${property}: ${value} in base scope`);
       }
     }
-    const currentRouteCascadeFailures = task10CurrentRouteCascadeFailures(rules);
-    if (currentRouteCascadeFailures.length > 0) {
-      error(context.errors, "css-current-route", "assets/css/style.css", `effective semantic current-route cascade is unsafe: ${currentRouteCascadeFailures.join("; ")}`);
-    }
-
     const componentContrastContracts = [
       ["::selection", "background", "var(--signal-dark)"],
       [".btn-primary", "background", "var(--signal-dark)"], [".home-cta", "background", "var(--signal-dark)"],

@@ -4622,7 +4622,7 @@ test("foundation does not accept responsive declarations hidden in a nested medi
 test("foundation parser ignores structural characters inside quoted strings", async () => {
   const css = `${foundationCss}\n.string-probe::before { content: "{;:}"; }`;
   const result = await verifyFixtureCss(css);
-  assert.deepEqual(result.errors, []);
+  assert.deepEqual(errorIds(result), ["task10-css-reviewed-artifact"]);
 });
 
 test("foundation validates every display font face as a complete tuple", async () => {
@@ -4753,7 +4753,7 @@ test("foundation rejects important italic values regardless of case and spacing"
 test("foundation preserves quoted comment markers as valid declaration content", async () => {
   const css = `${foundationCss}\n.comment-content::before { --open-marker: "/*"; content: "prefix \\\" /* literal */ suffix"; color: red; }`;
   const result = await verifyFixtureCss(css);
-  assert.deepEqual(result.errors, []);
+  assert.deepEqual(errorIds(result), ["task10-css-reviewed-artifact"]);
 });
 
 test("foundation reports an unterminated real CSS comment", async () => {
@@ -6797,70 +6797,6 @@ test("Plan 2 Task 9 requires the repository's current 19 pages to use the exact 
   assert.deepEqual(shellErrors, [], shellErrors.join("\n"));
 });
 
-test("Plan 2 Task 10 reserves horizontal footer clearance and restores the mobile end padding", async () => {
-  const result = await verifyFixtureCss(foundationCss);
-  assert.equal(
-    errorIds(result).includes("css-footer-clearance"),
-    false,
-    result.errors.filter((entry) => entry.includes("css-footer-clearance")).join("\n")
-  );
-
-  const mutations = [
-    ["insufficient horizontal reservation", (css) => css.replace(
-      "padding-inline-end: calc(var(--page-gutter) + 64px);",
-      "padding-inline-end: calc(var(--page-gutter) + 48px);"
-    )],
-    ["missing mobile reset", (css) => css.replace(
-      "padding-inline-end: var(--page-gutter);",
-      "padding-inline-end: calc(var(--page-gutter) + 64px);"
-    )],
-    ["uncoordinated fixed-control width", (css) => css.replace(
-      /(\.back-to-top \{[\s\S]*?)width: 48px;/,
-      "$1width: 56px;"
-    )]
-  ];
-  for (const [label, mutate] of mutations) {
-    const css = mutate(foundationCss);
-    assert.notEqual(css, foundationCss, `${label}: mutation must apply`);
-    const mutationResult = await verifyFixtureCss(css);
-    assert.ok(errorIds(mutationResult).includes("css-footer-clearance"), `${label}: ${mutationResult.errors.join("\n")}`);
-  }
-});
-
-test("Plan 2 Task 10 makes semantic current routes visible and limits the service summary signal to closed disclosures", async () => {
-  const result = await verifyFixtureCss(foundationCss);
-  assert.equal(
-    errorIds(result).includes("css-current-route"),
-    false,
-    result.errors.filter((entry) => entry.includes("css-current-route")).join("\n")
-  );
-
-  const mutations = [
-    ["logo falls back to runtime class", (css) => css.replace(
-      '.nav-logo[aria-current="page"]',
-      ".nav-logo.active"
-    )],
-    ["direct route falls back to runtime class", (css) => css.replace(
-      '.nav-list a[aria-current="page"]',
-      ".nav-list a.active"
-    )],
-    ["legacy direct route loses semantic styling", (css) => css.replace(
-      '.nav-links a[aria-current="page"]',
-      ".nav-links a.active"
-    )],
-    ["open service disclosure keeps a competing summary signal", (css) => css.replace(
-      '.nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary',
-      '.nav-group:has(.nav-submenu a[aria-current="page"]) > summary'
-    )]
-  ];
-  for (const [label, mutate] of mutations) {
-    const css = mutate(foundationCss);
-    assert.notEqual(css, foundationCss, `${label}: mutation must apply`);
-    const mutationResult = await verifyFixtureCss(css);
-    assert.ok(errorIds(mutationResult).includes("css-current-route"), `${label}: ${mutationResult.errors.join("\n")}`);
-  }
-});
-
 test("Plan 2 Task 10 rejects the unsupported legacy llms-full clauses independently of the mutable registry", async () => {
   const current = await runVerification({ scope: "facts" });
   assert.equal(
@@ -6899,208 +6835,127 @@ test("Plan 2 Task 10 freezes the exact conservative llms-full correction", async
   );
 });
 
-test("Plan 2 Task 10 fix round 1 rejects the reviewer's later horizontal-footer media override", async () => {
-  const css = `${foundationCss}\n@media (min-width: 760px) {
-  footer.site-footer { padding-inline-end: var(--page-gutter); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
+  assert.equal(
+    createHash("sha256").update(foundationCss).digest("hex"),
+    "139ad09341eb2c4160622391a79eab7ca6c6896d141eef4022396d17b450055d",
+    "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
+  );
 });
 
-test("Plan 2 Task 10 fix round 1 rejects the reviewer's higher-specificity current-route override", async () => {
-  const css = `${foundationCss}\nnav .nav-logo[aria-current="page"],
+test("Plan 2 Task 10 fix round 3 accepts the untouched reviewed CSS artifact", async () => {
+  const result = await verifyFixtureCss(foundationCss);
+  assert.equal(
+    errorIds(result).includes("task10-css-reviewed-artifact"),
+    false,
+    result.errors.filter((entry) => entry.includes("task10-css-reviewed-artifact")).join("\n")
+  );
+});
+
+test("Plan 2 Task 10 fix round 3 rejects every reviewed unsafe CSS mutant by artifact digest", async (t) => {
+  const append = (suffix) => (css) => `${css}\n${suffix}`;
+  const mutations = [
+    ["original footer reservation", (css) => css.replace(
+      "padding-inline-end: calc(var(--page-gutter) + 64px);",
+      "padding-inline-end: calc(var(--page-gutter) + 48px);"
+    )],
+    ["original missing mobile reset", (css) => css.replace(
+      "padding-inline-end: var(--page-gutter);",
+      "padding-inline-end: calc(var(--page-gutter) + 64px);"
+    )],
+    ["original fixed-control width", (css) => css.replace(
+      /(\.back-to-top \{[\s\S]*?)width: 48px;/,
+      "$1width: 56px;"
+    )],
+    ["original logo semantic selector", (css) => css.replace('.nav-logo[aria-current="page"]', ".nav-logo.active")],
+    ["original direct-route semantic selector", (css) => css.replace('.nav-list a[aria-current="page"]', ".nav-list a.active")],
+    ["original legacy-route semantic selector", (css) => css.replace('.nav-links a[aria-current="page"]', ".nav-links a.active")],
+    ["original open-service competing summary", (css) => css.replace(
+      '.nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary',
+      '.nav-group:has(.nav-submenu a[aria-current="page"]) > summary'
+    )],
+    ["round 1 later horizontal media override", append('@media (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 higher-specificity current-route override", append(`nav .nav-logo[aria-current="page"],
 nav .nav-list a[aria-current="page"],
 nav .nav-links a[aria-current="page"],
-nav .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary {
-  color: var(--panel);
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 1 rejects adjacent footer cascade bypasses", async (t) => {
-  const cases = [
-    ["later equal-specificity horizontal override", `${foundationCss}\n@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter); } }`],
-    ["later overlapping max-width override", `${foundationCss}\n@media (max-width: 1000px) { .site-footer { padding-inline-end: var(--page-gutter); } }`],
-    ["later selector-list member override", `${foundationCss}\n@media (min-width: 760px) { .unrelated, footer.site-footer { padding-inline-end: var(--page-gutter); } }`],
-    ["lower-specificity important override", `${foundationCss}\n@media (min-width: 760px) { footer { padding-inline-end: var(--page-gutter) !important; } }`],
-    ["same-block earlier important override", `${foundationCss}\n@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter) !important; padding-inline-end: calc(var(--page-gutter) + 64px); } }`],
-    ["mobile reset override", `${foundationCss}\n@media (max-width: 759px) { footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); } }`]
+nav .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary { color: var(--panel); }`)],
+    ["round 1 equal-specificity footer override", append('@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 overlapping max-width footer override", append('@media (max-width: 1000px) { .site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 selector-list footer override", append('@media (min-width: 760px) { .unrelated, footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 important footer override", append('@media (min-width: 760px) { footer { padding-inline-end: var(--page-gutter) !important; } }')],
+    ["round 1 duplicate-block important footer override", append('@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter) !important; padding-inline-end: calc(var(--page-gutter) + 64px); } }')],
+    ["round 1 mobile footer override", append('@media (max-width: 759px) { footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); } }')],
+    ["round 1 equal-specificity logo override", append('[class~="nav-logo"][aria-current="page"] { color: var(--panel); }')],
+    ["round 1 selector-list current-route override", append('.unrelated, nav .nav-list a[aria-current="page"] { color: var(--panel); }')],
+    ["round 1 important current-route override", append('a[aria-current="page"] { color: var(--panel) !important; }')],
+    ["round 1 duplicate-block important current-route override", append('.nav-logo[aria-current="page"] { color: var(--panel) !important; color: var(--signal-dark); }')],
+    ["round 1 earlier higher-specificity current-route override", (css) => `nav .nav-logo[aria-current="page"] { color: var(--panel); }\n${css}`],
+    ["round 2 negated horizontal media override", append('@media not (max-width: 759px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 unsupported media disjunction", append('@media (max-width: 759px) or (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 current-route interval override", append(`@media (min-width: 760px) and (max-width: 1279px) {
+  .nav-logo[aria-current="page"], .nav-list a[aria-current="page"], .nav-links a[aria-current="page"],
+  .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary { color: var(--panel); }
+}`)],
+    ["round 2 real main-adjacent footer topology", append('@media (min-width: 760px) { body > main + footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 unsupported negated footer pseudo", append('@media (min-width: 760px) { footer.site-footer:not(:nth-child(3)) { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 inherited navigation signal token", append('.site-nav { --signal-dark: var(--panel); }')],
+    ["round 2 inherited navigation panel token", append('.nav-group { --panel: var(--signal-dark); }')],
+    ["round 2 inherited footer gutter token", append('@media (min-width: 760px) { footer.site-footer { --page-gutter: 0px; } }')],
+    ["round 2 layered footer override", append('@layer task10-review { @media (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter) !important; } } }')],
+    ["round 2 supports footer override", append('@supports (selector(:has(*))) { @media (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } } }')],
+    ["round 2 container footer override", append('@container shell (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 3 exact 1279px gap", append('@media (width: 1279px) { footer.site-footer { padding-inline-end: var(--page-gutter) !important; } }')],
+    ["round 3 exact 1600px gap", append('@media (width: 1600px) { .nav-logo[aria-current="page"] { color: var(--panel) !important; } }')],
+    ["round 3 media-feature state", append('@media (hover: hover) and (pointer: fine) { .nav-logo[aria-current="page"]:hover { color: var(--panel) !important; } }')],
+    ["round 3 scoped service-page topology", append('@scope (.service-page) { .nav-submenu a[aria-current="page"] { color: var(--panel) !important; } }')],
+    ["round 3 registered inherited gutter", append('@property --page-gutter { syntax: "<length>"; inherits: false; initial-value: 0px; }')],
+    ["round 3 real service-page ancestor", append('.service-page .nav-submenu a[aria-current="page"] { color: var(--panel) !important; }')],
+    ["round 3 focus interaction state", append('.nav-logo[aria-current="page"]:focus-visible { color: var(--panel) !important; }')]
   ];
-  for (const [label, css] of cases) await t.test(label, async () => {
+  for (const [label, mutate] of mutations) await t.test(label, async () => {
+    const css = mutate(foundationCss);
+    assert.notEqual(css, foundationCss, `${label}: mutation must change the reviewed CSS bytes`);
     const result = await verifyFixtureCss(css);
-    assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
+    assert.ok(
+      errorIds(result).includes("task10-css-reviewed-artifact"),
+      `${label}: expected the reviewed-artifact diagnostic, got\n${result.errors.join("\n")}`
+    );
   });
 });
 
-test("Plan 2 Task 10 fix round 1 rejects adjacent semantic-current cascade bypasses", async (t) => {
+test("Plan 2 Task 10 fix round 3 conservatively rejects formerly safe CSS additions", async (t) => {
   const cases = [
-    ["later equal-specificity logo override", `${foundationCss}\n[class~="nav-logo"][aria-current="page"] { color: var(--panel); }`],
-    ["later selector-list member override", `${foundationCss}\n.unrelated, nav .nav-list a[aria-current="page"] { color: var(--panel); }`],
-    ["lower-specificity important override", `${foundationCss}\na[aria-current="page"] { color: var(--panel) !important; }`],
-    ["same-block earlier important override", `${foundationCss}\n.nav-logo[aria-current="page"] { color: var(--panel) !important; color: var(--signal-dark); }`],
-    ["earlier higher-specificity override", `nav .nav-logo[aria-current="page"] { color: var(--panel); }\n${foundationCss}`],
-    ["open service summary competes with its current leaf", `${foundationCss}\nnav .nav-group:has(.nav-submenu a[aria-current="page"]) > summary { color: var(--signal-dark); }`]
+    ["round 1 unrelated selectors", `${foundationCss}\n@media (min-width: 760px) { .other-footer { padding-inline-end: 0; } }\n.utility-nav a[aria-current="page"] { color: var(--panel); }`],
+    ["round 2 correct declaration under negated media", `${foundationCss}\n@media not (max-width: 759px) { footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); } }`],
+    ["round 2 unrelated unsupported media", `${foundationCss}\n@media (max-width: 759px) or (min-width: 760px) { .unrelated-card { padding-inline-end: 0; } }`],
+    ["round 2 impossible first-child footer", `${foundationCss}\n@media (min-width: 760px) { footer.site-footer:first-child { padding-inline-end: var(--page-gutter); } }`],
+    ["round 2 unrelated unsupported pseudo", `${foundationCss}\n.unrelated-card:not(:nth-child(3)) { padding-inline-end: 0; }`],
+    ["round 2 unrelated protected-token spellings", `${foundationCss}\n.unrelated-card { --signal-dark: var(--panel); --panel: #000; --page-gutter: 0px; }`],
+    ["round 2 unrelated grouping content", `${foundationCss}\n@layer task10-unrelated { .unrelated-card { padding-inline-end: 0; } }`],
+    ["round 3 mutually exclusive supports", `${foundationCss}\n@supports (display: grid) { @supports not (display: grid) { footer.site-footer { padding-inline-end: 0; } } }`],
+    ["round 3 mutually exclusive media", `${foundationCss}\n@media (hover: hover) and (hover: none) { footer.site-footer { padding-inline-end: 0; } }`],
+    ["round 3 harmless reviewed-CSS comment", `${foundationCss}\n/* requires renewed Task 10 visual review */`]
   ];
   for (const [label, css] of cases) await t.test(label, async () => {
+    assert.notEqual(css, foundationCss, `${label}: addition must change the reviewed CSS bytes`);
     const result = await verifyFixtureCss(css);
-    assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
+    assert.ok(
+      errorIds(result).includes("task10-css-reviewed-artifact"),
+      `${label}: every CSS byte change must require explicit baseline refresh\n${result.errors.join("\n")}`
+    );
   });
 });
 
-test("Plan 2 Task 10 fix round 1 permits unrelated cascade declarations and an earlier equal-specificity rule", async () => {
-  const css = `.nav-logo[aria-current="page"] { color: var(--panel); }
-${foundationCss}
-@media (min-width: 760px) { .other-footer { padding-inline-end: 0; } }
-.utility-nav a[aria-current="page"] { color: var(--panel); }`;
-  const result = await verifyFixtureCss(css);
-  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
-  assert.equal(errorIds(result).includes("css-current-route"), false, result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 rejects the reviewer's negated horizontal-footer media override", async () => {
-  const css = `${foundationCss}\n@media not (max-width: 759px) {
-  footer.site-footer { padding-inline-end: var(--page-gutter); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 accepts a correct horizontal rule under negated media", async () => {
-  const css = `${foundationCss}\n@media not (max-width: 759px) {
-  footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 fails closed on an unsupported media disjunction", async () => {
-  const css = `${foundationCss}\n@media (max-width: 759px) or (min-width: 760px) {
-  footer.site-footer { padding-inline-end: var(--page-gutter); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 permits unrelated declarations in unsupported media", async () => {
-  const css = `${foundationCss}\n@media (max-width: 759px) or (min-width: 760px) {
-  .unrelated-card { padding-inline-end: 0; }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 rejects a current-route override confined to 760 through 1279 pixels", async () => {
-  const css = `${foundationCss}\n@media (min-width: 760px) and (max-width: 1279px) {
-  .nav-logo[aria-current="page"],
-  .nav-list a[aria-current="page"],
-  .nav-links a[aria-current="page"],
-  .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary {
-    color: var(--panel);
-  }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 models the real main-adjacent footer topology", async () => {
-  const css = `${foundationCss}\n@media (min-width: 760px) {
-  body > main + footer.site-footer { padding-inline-end: var(--page-gutter); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 permits a footer first-child rule that cannot match the real shell", async () => {
-  const css = `${foundationCss}\n@media (min-width: 760px) {
-  footer.site-footer:first-child { padding-inline-end: var(--page-gutter); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 fails closed on an unsupported negated footer pseudo", async () => {
-  const css = `${foundationCss}\n@media (min-width: 760px) {
-  footer.site-footer:not(:nth-child(3)) { padding-inline-end: var(--page-gutter); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 permits an unsupported pseudo on an unrelated selector", async () => {
-  const css = `${foundationCss}\n@media (min-width: 760px) {
-  .unrelated-card:not(:nth-child(3)) { padding-inline-end: 0; }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 rejects an inherited navigation signal-token override", async () => {
-  const result = await verifyFixtureCss(`${foundationCss}\n.site-nav { --signal-dark: var(--panel); }`);
-  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 rejects an inherited navigation panel-token override", async () => {
-  const result = await verifyFixtureCss(`${foundationCss}\n.nav-group { --panel: var(--signal-dark); }`);
-  assert.ok(errorIds(result).includes("css-current-route"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 rejects a horizontal footer gutter-token override", async () => {
-  const css = `${foundationCss}\n@media (min-width: 760px) {
-  footer.site-footer { --page-gutter: 0px; }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 permits unrelated protected-token spellings and harmless local variables", async () => {
-  const css = `${foundationCss}\n.unrelated-card {
-  --signal-dark: var(--panel);
-  --panel: #000;
-  --page-gutter: 0px;
-}
-.site-nav { --task10-local-accent: var(--panel); }`;
-  const result = await verifyFixtureCss(css);
-  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
-  assert.equal(errorIds(result).includes("css-current-route"), false, result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 rejects a protected footer override inside a layer", async () => {
-  const css = `${foundationCss}\n@layer task10-review {
-  @media (min-width: 760px) {
-    footer.site-footer { padding-inline-end: var(--page-gutter) !important; }
-  }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 retains protected inspection inside supports", async () => {
-  const css = `${foundationCss}\n@supports (selector(:has(*))) {
-  @media (min-width: 760px) {
-    footer.site-footer { padding-inline-end: var(--page-gutter); }
-  }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 rejects a protected footer override inside a container", async () => {
-  const css = `${foundationCss}\n@container shell (min-width: 760px) {
-  footer.site-footer { padding-inline-end: var(--page-gutter); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.ok(errorIds(result).includes("css-footer-clearance"), result.errors.join("\n"));
-});
-
-test("Plan 2 Task 10 fix round 2 permits unrelated layer and container content", async () => {
-  const css = `${foundationCss}\n@layer task10-unrelated {
-  .unrelated-card { padding-inline-end: 0; --page-gutter: 0px; }
-}
-@container shell (min-width: 1px) {
-  .unrelated-card { color: var(--panel); --signal-dark: var(--panel); }
-}`;
-  const result = await verifyFixtureCss(css);
-  assert.equal(errorIds(result).includes("css-footer-clearance"), false, result.errors.join("\n"));
-  assert.equal(errorIds(result).includes("css-current-route"), false, result.errors.join("\n"));
+test("Plan 2 Task 10 fix round 3 keeps CSS approval independent from llms-full corrections", async () => {
+  const llmsFull = await readFile(resolve("llms-full.txt"), "utf8");
+  const root = await productionRegistryFixture({
+    css: foundationCss,
+    llmsFull: `${llmsFull}\nCEE's largest insurer`
+  });
+  const [foundationResult, factsResult] = await Promise.all([
+    runVerification({ root, scope: "foundation" }),
+    runVerification({ root, scope: "facts" })
+  ]);
+  assert.equal(errorIds(foundationResult).includes("task10-css-reviewed-artifact"), false, foundationResult.errors.join("\n"));
+  assert.ok(errorIds(factsResult).includes("fact-llms-full-unsupported"), factsResult.errors.join("\n"));
 });
