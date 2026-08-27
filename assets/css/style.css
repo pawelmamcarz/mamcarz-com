@@ -527,6 +527,11 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 .nav-links a.active,
 .nav-group > summary:hover { color: var(--signal-dark); }
 
+.nav-logo[aria-current="page"],
+.nav-list a[aria-current="page"],
+.nav-links a[aria-current="page"],
+.nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary { color: var(--signal-dark); }
+
 .nav-group { position: relative; }
 
 .nav-group > summary {
@@ -2065,6 +2070,7 @@ footer {
   justify-content: space-between;
   gap: 1.5rem;
   padding: 1.75rem var(--page-gutter);
+  padding-inline-end: calc(var(--page-gutter) + 64px);
   border-top: 1px solid color-mix(in srgb, var(--white) 28%, transparent);
   background: var(--panel-deep);
   color: var(--white);
@@ -2613,6 +2619,7 @@ footer :focus-visible,
   footer {
     align-items: flex-start;
     flex-direction: column;
+    padding-inline-end: var(--page-gutter);
   }
 
   button,

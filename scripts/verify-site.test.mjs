@@ -6796,3 +6796,105 @@ test("Plan 2 Task 9 requires the repository's current 19 pages to use the exact 
   const shellErrors = result.errors.filter((entry) => entry.startsWith("ERROR site-shell-"));
   assert.deepEqual(shellErrors, [], shellErrors.join("\n"));
 });
+
+test("Plan 2 Task 10 reserves horizontal footer clearance and restores the mobile end padding", async () => {
+  const result = await verifyFixtureCss(foundationCss);
+  assert.equal(
+    errorIds(result).includes("css-footer-clearance"),
+    false,
+    result.errors.filter((entry) => entry.includes("css-footer-clearance")).join("\n")
+  );
+
+  const mutations = [
+    ["insufficient horizontal reservation", (css) => css.replace(
+      "padding-inline-end: calc(var(--page-gutter) + 64px);",
+      "padding-inline-end: calc(var(--page-gutter) + 48px);"
+    )],
+    ["missing mobile reset", (css) => css.replace(
+      "padding-inline-end: var(--page-gutter);",
+      "padding-inline-end: calc(var(--page-gutter) + 64px);"
+    )],
+    ["uncoordinated fixed-control width", (css) => css.replace(
+      /(\.back-to-top \{[\s\S]*?)width: 48px;/,
+      "$1width: 56px;"
+    )]
+  ];
+  for (const [label, mutate] of mutations) {
+    const css = mutate(foundationCss);
+    assert.notEqual(css, foundationCss, `${label}: mutation must apply`);
+    const mutationResult = await verifyFixtureCss(css);
+    assert.ok(errorIds(mutationResult).includes("css-footer-clearance"), `${label}: ${mutationResult.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 10 makes semantic current routes visible and limits the service summary signal to closed disclosures", async () => {
+  const result = await verifyFixtureCss(foundationCss);
+  assert.equal(
+    errorIds(result).includes("css-current-route"),
+    false,
+    result.errors.filter((entry) => entry.includes("css-current-route")).join("\n")
+  );
+
+  const mutations = [
+    ["logo falls back to runtime class", (css) => css.replace(
+      '.nav-logo[aria-current="page"]',
+      ".nav-logo.active"
+    )],
+    ["direct route falls back to runtime class", (css) => css.replace(
+      '.nav-list a[aria-current="page"]',
+      ".nav-list a.active"
+    )],
+    ["legacy direct route loses semantic styling", (css) => css.replace(
+      '.nav-links a[aria-current="page"]',
+      ".nav-links a.active"
+    )],
+    ["open service disclosure keeps a competing summary signal", (css) => css.replace(
+      '.nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary',
+      '.nav-group:has(.nav-submenu a[aria-current="page"]) > summary'
+    )]
+  ];
+  for (const [label, mutate] of mutations) {
+    const css = mutate(foundationCss);
+    assert.notEqual(css, foundationCss, `${label}: mutation must apply`);
+    const mutationResult = await verifyFixtureCss(css);
+    assert.ok(errorIds(mutationResult).includes("css-current-route"), `${label}: ${mutationResult.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 10 rejects the unsupported legacy llms-full clauses independently of the mutable registry", async () => {
+  const current = await runVerification({ scope: "facts" });
+  assert.equal(
+    errorIds(current).includes("fact-llms-full-unsupported"),
+    false,
+    current.errors.filter((entry) => entry.includes("fact-llms-full-unsupported")).join("\n")
+  );
+
+  const clauses = [
+    "CEE's largest insurer",
+    "spend analytics, category strategies, TOM, IT platform selection",
+    "currently Cloudflare, React, and custom web projects"
+  ];
+  for (const clause of clauses) {
+    const root = await productionRegistryFixture({
+      llmsFull: `${productionFactSurfaceControls.llmsFull}\n${clause}`
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(errorIds(result).includes("fact-llms-full-unsupported"), `${clause}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 10 freezes the exact conservative llms-full correction", async () => {
+  const text = await readFile(resolve("llms-full.txt"), "utf8");
+  const requiredLines = [
+    "- **2016–2017**: Strategic Project Director, PZU S.A., procurement transformation from spend analysis to the target operating model",
+    "Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX."
+  ];
+  for (const line of requiredLines) {
+    assert.equal(text.split(/\r?\n/).filter((candidate) => candidate === line).length, 1, line);
+  }
+  assert.equal(
+    createHash("sha256").update(text).digest("hex"),
+    "1df89520de10da809d01c77f3016c407c673f80d61172ce4f57a51b6ed360e97",
+    "llms-full.txt must differ from the Task 9 base only by the two approved conservative corrections"
+  );
+});

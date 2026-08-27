@@ -11,6 +11,11 @@ const sourceTypes = new Set(["owner_verified", "public_source", "internal_eviden
 const statuses = new Set(["approved", "review", "retired"]);
 const blockedKeys = ["id", "pattern", "forbidden_contexts", "reason"];
 const requiredPublicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"];
+const unsupportedLlmsFullClauses = Object.freeze([
+  "CEE's largest insurer",
+  "spend analytics, category strategies, TOM, IT platform selection",
+  "currently Cloudflare, React, and custom web projects"
+]);
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
 
@@ -1784,6 +1789,13 @@ async function verifyPublicFactSurfaces(factData, publicSurfaces, context) {
     const text = await read(context, surface);
     if (text === null) continue;
     const searchData = publicSurfaceSearchData(surface, text, context.errors);
+    if (surface === "llms-full.txt") {
+      for (const clause of unsupportedLlmsFullClauses) {
+        if (surfaceContains(searchData.texts, clause)) {
+          error(context.errors, "fact-llms-full-unsupported", surface, `unsupported legacy clause remains: ${clause}`);
+        }
+      }
+    }
     for (const fact of records) {
       if (fact.status === "review" || fact.status === "retired") {
         const published = factStatusCandidates(fact, surface).find((candidate) => surfaceContains(searchData.texts, candidate));
@@ -2656,6 +2668,30 @@ async function verifyFoundation(context) {
     for (const selector of targetSelectors) {
       if (propertyValue(rules, selector, "min-width") !== "44px" || propertyValue(rules, selector, "min-height") !== "44px") {
         error(context.errors, "css-target", "assets/css/style.css", `${selector} must be at least 44px by 44px in base scope`);
+      }
+    }
+
+    const footerClearanceContracts = [
+      [[], ".site-footer", "padding-inline-end", "calc(var(--page-gutter) + 64px)"],
+      [[], ".back-to-top", "right", "max(16px, var(--page-gutter))"],
+      [[], ".back-to-top", "width", "48px"],
+      [media759, ".site-footer", "padding-inline-end", "var(--page-gutter)"]
+    ];
+    for (const [media, selector, property, value] of footerClearanceContracts) {
+      if (propertyValue(rules, selector, property, media) !== value) {
+        error(context.errors, "css-footer-clearance", "assets/css/style.css", `${selector} must use ${property}: ${value} in ${media[0] ?? "base scope"}`);
+      }
+    }
+
+    const semanticCurrentRouteContracts = [
+      [".nav-logo[aria-current=\"page\"]", "color", "var(--signal-dark)"],
+      [".nav-list a[aria-current=\"page\"]", "color", "var(--signal-dark)"],
+      [".nav-links a[aria-current=\"page\"]", "color", "var(--signal-dark)"],
+      [".nav-group:not([open]):has(.nav-submenu a[aria-current=\"page\"]) > summary", "color", "var(--signal-dark)"]
+    ];
+    for (const [selector, property, value] of semanticCurrentRouteContracts) {
+      if (propertyValue(rules, selector, property) !== value) {
+        error(context.errors, "css-current-route", "assets/css/style.css", `${selector} must use ${property}: ${value} in base scope`);
       }
     }
 
