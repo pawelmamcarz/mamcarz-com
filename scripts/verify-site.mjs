@@ -8301,6 +8301,164 @@ function plan3FirstDirectElement(parent, element) {
   return directElementChildren(parent)[0] === element;
 }
 
+function plan3DirectElementPosition(parent, element, predicate = () => true) {
+  return directElementChildren(parent).filter(predicate).indexOf(element) + 1;
+}
+
+function plan3DirectMainChild(element) {
+  return element.parent?.type === "element" && element.parent.name === "main";
+}
+
+function plan3LeadingSectionLabelRelation(element) {
+  if (element.name !== "p" || !elementHasClass(element, "section-label")) return false;
+  let current = element;
+  while (current.parent?.type === "element" && current.parent.name !== "section") {
+    if (!plan3FirstDirectElement(current.parent, current)) return false;
+    current = current.parent;
+  }
+  const section = current.parent;
+  if (section?.type !== "element"
+    || section.name !== "section"
+    || !section.attributes.has("data-section")
+    || !plan3FirstDirectElement(section, current)) return false;
+  return ["service-section", "applications-section", "projects-group", "speaking-group"]
+    .some((className) => elementHasClass(section, className));
+}
+
+function plan3RouteSectionIndexRelation(element, token) {
+  if (element.name !== "p" || !elementHasClass(element, "section-index")) return false;
+  const article = element.parent;
+  const sequence = article?.parent;
+  if (article?.type !== "element"
+    || article.name !== "article"
+    || !elementHasClass(article, "route-sequence__step")
+    || sequence?.type !== "element"
+    || !elementHasClass(sequence, "route-sequence")
+    || !plan3FirstDirectElement(article, element)) return false;
+  const position = plan3DirectElementPosition(sequence, article, (candidate) => candidate.name === "article"
+    && elementHasClass(candidate, "route-sequence__step"));
+  if (position !== Number(token.value)) return false;
+  const shell = sequence.parent;
+  const section = shell?.parent;
+  if (shell?.type !== "element" || section?.type !== "element" || section.name !== "section") return false;
+  const homeProcess = elementHasClass(shell, "container") && elementAttribute(section, "id") === "process";
+  const applicationDelivery = elementHasClass(shell, "section-shell")
+    && elementHasClass(section, "applications-section")
+    && elementAttribute(section, "data-section") === "delivery";
+  return homeProcess || applicationDelivery;
+}
+
+function plan3HeroCodeRelation(element, heroClass) {
+  const content = element.parent;
+  const header = content?.parent;
+  return content?.type === "element"
+    && content.name === "div"
+    && elementHasClass(content, "page-hero-content")
+    && header?.type === "element"
+    && header.name === "header"
+    && elementHasClass(header, "page-hero")
+    && elementHasClass(header, heroClass)
+    && plan3DirectMainChild(header);
+}
+
+function plan3ApplicationEvidenceRelation(element, token) {
+  const row = element.parent;
+  const list = row?.parent;
+  const shell = list?.parent;
+  const section = shell?.parent;
+  if (element.name !== "p"
+    || row?.type !== "element"
+    || row.name !== "article"
+    || !elementHasClass(row, "evidence-row")
+    || list?.type !== "element"
+    || !elementHasClass(list, "applications-evidence-list")
+    || shell?.type !== "element"
+    || !elementHasClass(shell, "section-shell")
+    || section?.type !== "element"
+    || section.name !== "section"
+    || !elementHasClass(section, "applications-section")
+    || !elementHasClass(section, "application-evidence")
+    || elementAttribute(section, "data-section") !== "evidence"
+    || !plan3FirstDirectElement(row, element)) return false;
+  return plan3DirectElementPosition(list, row, (candidate) => candidate.name === "article"
+    && elementHasClass(candidate, "evidence-row")) === Number(token.value);
+}
+
+function plan3AviationSectorIndexRelation(element, token) {
+  const index = element.parent;
+  if (index?.type !== "element" || !elementHasClass(index, "aviation-sector__index")) return false;
+  let current = index;
+  while (current.parent?.type === "element" && current.parent.name !== "section") {
+    if (!plan3FirstDirectElement(current.parent, current)) return false;
+    current = current.parent;
+  }
+  const section = current.parent;
+  if (section?.type !== "element"
+    || section.name !== "section"
+    || !elementHasClass(section, "aviation-sector")
+    || !section.attributes.has("data-section")
+    || !plan3FirstDirectElement(section, current)
+    || !plan3DirectMainChild(section)) return false;
+  return plan3DirectElementPosition(section.parent, section, (candidate) => candidate.name === "section"
+    && elementHasClass(candidate, "aviation-sector")
+    && candidate.attributes.has("data-section")) === Number(token.value);
+}
+
+function plan3ServiceMethodIndexRelation(element, token) {
+  const article = element.parent;
+  const method = article?.parent;
+  const shell = method?.parent;
+  const section = shell?.parent;
+  return article?.type === "element"
+    && article.name === "article"
+    && plan3PresentationRelationValue(article, "data-method-step", token)
+    && method?.type === "element"
+    && elementHasClass(method, "service-method")
+    && shell?.type === "element"
+    && elementHasClass(shell, "section-shell")
+    && section?.type === "element"
+    && section.name === "section"
+    && elementHasClass(section, "service-section")
+    && elementAttribute(section, "data-section") === "method"
+    && plan3FirstDirectElement(article, element);
+}
+
+function plan3SpeakingTopicIndexRelation(element, token) {
+  const article = element.parent;
+  const agenda = article?.parent;
+  const section = agenda?.parent;
+  if (article?.type !== "element"
+    || article.name !== "article"
+    || !article.attributes.has("data-topic")
+    || agenda?.type !== "element"
+    || !elementHasClass(agenda, "speaking-agenda")
+    || section?.type !== "element"
+    || section.name !== "section"
+    || !elementHasClass(section, "speaking-group")
+    || !elementHasClass(section, "speaking-topics")
+    || elementAttribute(section, "data-section") !== "topics"
+    || !plan3FirstDirectElement(article, element)) return false;
+  return plan3DirectElementPosition(agenda, article, (candidate) => candidate.name === "article"
+    && candidate.attributes.has("data-topic")) === Number(token.value);
+}
+
+function plan3ProcurementArtifactIndexRelation(element, token) {
+  const header = element.parent;
+  const article = header?.parent;
+  const section = article?.parent;
+  return header?.type === "element"
+    && header.name === "header"
+    && article?.type === "element"
+    && article.name === "article"
+    && elementHasClass(article, "procurement-artifact")
+    && plan3PresentationRelationValue(article, "data-artifact", token)
+    && section?.type === "element"
+    && section.name === "section"
+    && elementHasClass(section, "procurement-artifacts")
+    && plan3FirstDirectElement(article, header)
+    && plan3FirstDirectElement(header, element);
+}
+
 function plan3ExactPresentationIndex(unit, element, token) {
   const representation = plan3VisibleSubtreeRepresentation(element);
   const occurrence = plan3MapRepresentationRange(unit, token.start, token.end, representation);
@@ -8308,17 +8466,20 @@ function plan3ExactPresentationIndex(unit, element, token) {
   const text = representation.text;
   if (normalize(elementAttribute(element, "aria-hidden") ?? "") === "true"
     && plan3StandalonePresentationToken(representation, occurrence, token)) return true;
-  if (elementHasClass(element, "knowledge-entry__number")
-    && element.name === "span"
-    && plan3StandalonePresentationToken(representation, occurrence, token)) return true;
-  if ((elementHasClass(element, "section-label") || elementHasClass(element, "section-index"))
+  if (plan3LeadingSectionLabelRelation(element)
+    && occurrence.start === 0
+    && new RegExp(`^${token.value}\\s*/\\s*\\S`, "u").test(text)) return true;
+  if (plan3RouteSectionIndexRelation(element, token)
     && occurrence.start === 0
     && new RegExp(`^${token.value}\\s*/\\s*\\S`, "u").test(text)) return true;
   if (elementHasClass(element, "service-dossier-code")
+    && plan3HeroCodeRelation(element, "service-hero")
     && new RegExp(`^DOSSIER\\s*/\\s*ADVISORY\\s+${token.value}$`, "u").test(text)) return true;
   if (elementHasClass(element, "evidence-row__context")
+    && plan3ApplicationEvidenceRelation(element, token)
     && new RegExp(`^(?:Produkt|Product)\\s*/\\s*${token.value}$`, "u").test(text)) return true;
   if (elementHasClass(element, "aviation-call-sign")
+    && plan3HeroCodeRelation(element, "aviation-hero")
     && new RegExp(`^FLIGHT PLAN\\s*/\\s*CORE ROUTE\\s+${token.value}$`, "u").test(text)) return true;
   if (element.name !== "span" || !plan3StandalonePresentationToken(representation, occurrence, token)) return false;
 
@@ -8328,30 +8489,14 @@ function plan3ExactPresentationIndex(unit, element, token) {
     && parent.parent?.type === "element"
     && parent.parent.name === "nav"
     && elementHasClass(parent.parent, "projects-index")
-    && plan3FirstDirectElement(parent, element)) return true;
-  if (elementHasClass(parent, "aviation-sector__index")
-    && plan3FirstDirectElement(parent, element)) return true;
-  if (parent.name === "article"
-    && plan3PresentationRelationValue(parent, "data-method-step", token)
-    && parent.parent?.type === "element"
-    && elementHasClass(parent.parent, "service-method")
-    && plan3FirstDirectElement(parent, element)) return true;
-  if (parent.name === "article"
-    && parent.attributes.has("data-topic")
-    && parent.parent?.type === "element"
-    && elementHasClass(parent.parent, "speaking-agenda")
-    && plan3FirstDirectElement(parent, element)) {
-    const topics = directElementChildren(parent.parent, "article")
-      .filter((candidate) => candidate.attributes.has("data-topic"));
-    if (topics.indexOf(parent) + 1 === Number(token.value)) return true;
-  }
-  if (parent.name === "header"
-    && parent.parent?.type === "element"
-    && parent.parent.name === "article"
-    && elementHasClass(parent.parent, "procurement-artifact")
-    && plan3PresentationRelationValue(parent.parent, "data-artifact", token)
-    && plan3FirstDirectElement(parent.parent, parent)
-    && plan3FirstDirectElement(parent, element)) return true;
+    && plan3DirectMainChild(parent.parent)
+    && parent.attributes.has("href")
+    && plan3FirstDirectElement(parent, element)
+    && plan3DirectElementPosition(parent.parent, parent, (candidate) => candidate.name === "a") === Number(token.value)) return true;
+  if (plan3AviationSectorIndexRelation(element, token)) return true;
+  if (plan3ServiceMethodIndexRelation(element, token)) return true;
+  if (plan3SpeakingTopicIndexRelation(element, token)) return true;
+  if (plan3ProcurementArtifactIndexRelation(element, token)) return true;
   return false;
 }
 
@@ -8509,7 +8654,10 @@ function plan3ElementInActualPublicBody(element, parsedRoot) {
   if (bodies.length !== 1 || !plan3NodeWithin(element, bodies[0])) return false;
   for (let current = element; current?.type === "element"; current = current.parent) {
     if (current.name === "template" || current.name === "noscript" || current.name === "head") return false;
-    if (current.attributes.has("inert") || elementHasHiddenState(current) || elementHasHiddenInlineStyle(current)) return false;
+    if (current.attributes.has("inert")
+      || current.attributes.has("popover")
+      || elementHasHiddenState(current)
+      || elementHasHiddenInlineStyle(current)) return false;
     if (current.name === "details" && !current.attributes.has("open")) return false;
     if (current.name === "dialog" && !current.attributes.has("open")) return false;
     if (current === bodies[0]) return true;

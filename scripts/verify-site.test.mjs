@@ -7051,6 +7051,22 @@ ${shellAssets}
 </head><body><main><h1>Fixture page</h1>${content}</main></body></html>`;
 }
 
+function plan3RealPresentationBody() {
+  return `<p data-fact-id="fixture.claim">Verified claim</p>
+    <section class="service-section" data-section="problem"><div class="section-shell"><p class="section-label">01 / Problem</p><h2>Problem</h2></div></section>
+    <section class="applications-section" data-section="delivery"><div class="section-shell"><div class="route-sequence"><article class="route-sequence__step" data-step="discovery"><p class="section-index">01 / Discovery</p><h3>Discovery</h3></article></div></div></section>
+    <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">DOSSIER / ADVISORY 01</p><h2>Service</h2></div></header>
+    <section class="applications-section application-evidence" data-section="evidence"><div class="section-shell"><div class="applications-evidence-list"><article class="evidence-row"><p class="evidence-row__context">Product / 01</p><h3>Product</h3></article></div></div></section>
+    <header class="page-hero aviation-hero"><div class="page-hero-content"><p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 01</p><h2>Aviation</h2></div></header>
+    <section class="knowledge-index" data-section="resources"><article class="knowledge-entry" data-resource><span class="knowledge-entry__number" aria-hidden="true">01</span><h2>Resource</h2></article></section>
+    <nav class="projects-index"><a href="#project"><span>01</span>Advisory</a></nav>
+    <section class="aviation-sector" data-section="operations"><div class="section-shell"><div class="aviation-sector__index"><span>01</span><strong>OPS</strong></div></div></section>
+    <section class="service-section" data-section="method"><div class="section-shell"><div class="service-method"><article data-method-step="1"><span>01</span><h3>Method</h3></article></div></div></section>
+    <section class="speaking-group speaking-topics" data-section="topics"><div class="speaking-agenda"><article data-topic="one"><span>01</span><h3>Topic</h3></article></div></section>
+    <section class="procurement-artifacts"><article class="procurement-artifact" data-artifact="1"><header><span>01</span><h2>Artifact</h2></header></article></section>
+    <span aria-hidden="true">11</span><p>404</p>`;
+}
+
 function plan3Sitemap() {
   const blocks = plan3ExpectedPublicPages.map((entry) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
@@ -7216,7 +7232,10 @@ test("Plan 3 Task 1 binds singular and plural fact attributes to approved exact 
 test("Plan 3 Task 1 requires approved enclosing fact IDs for visible numbers with only exact presentation exemptions", async (t) => {
   const entry = plan3ExpectedPublicPages[0];
   await t.test("legal section indices and 404", async () => {
-    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="section-index">01 / Diagnosis</p><span class="knowledge-entry__number">11</span><p class="section-label">02 / Strategy</p><span>404</span>';
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Diagnosis</p></article></div></div></section>
+      <section class="service-section" data-section="strategy"><div class="section-shell"><p class="section-label">02 / Strategy</p></div></section>
+      <span class="knowledge-entry__number" aria-hidden="true">11</span><span>404</span>`;
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -7665,7 +7684,11 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
     ]);
   });
   await t.test("presentation indexes and literal 404 remain exempt", async () => {
-    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="service-dossier-code">DOSSIER / ADVISORY 01</p><p class="section-label">01 / Diagnosis</p><p class="section-index">02 / Stage</p><span class="knowledge-entry__number">11</span><p>404</p>';
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">DOSSIER / ADVISORY 01</p></div></header>
+      <section class="service-section" data-section="diagnosis"><div class="section-shell"><p class="section-label">01 / Diagnosis</p></div></section>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Stage</p></article></div></div></section>
+      <span class="knowledge-entry__number" aria-hidden="true">11</span><p>404</p>`;
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -8192,17 +8215,7 @@ test("Plan 3 Task 1 fix round 4 requires semantic evidence for presentation inde
     assert.ok(errorIds(result).includes("fact-visible-number"), result.errors.join("\n"));
   });
   await t.test("approved real presentation structures and literal 404 stay exempt", async () => {
-    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
-      <p class="section-label">01 / Problem</p><p class="section-index">02 / Stage</p>
-      <nav class="projects-index"><a><span>03</span>Advisory</a></nav>
-      <div class="aviation-sector__index"><span>04</span><strong>OPS</strong></div>
-      <div class="service-method"><article data-method-step="5"><span>05</span></article></div>
-      <div class="speaking-agenda"><article data-topic="scope"><span>01</span></article></div>
-      <article class="procurement-artifact" data-artifact="7"><header><span>07</span></header></article>
-      <p class="service-dossier-code">DOSSIER / ADVISORY 08</p>
-      <p class="evidence-row__context">Product / 09</p>
-      <p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 03</p>
-      <span class="knowledge-entry__number">10</span><span aria-hidden="true">11</span><p>404</p>`;
+    const body = plan3RealPresentationBody();
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -8333,28 +8346,17 @@ test("Plan 3 Task 1 fix round 5 binds presentation exemptions to exact numeric o
     ]);
   });
   await t.test("a section prefix exempts only its own numeric occurrence", async () => {
-    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="section-index">01 / Model quantity 01</p>';
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Model quantity 01</p></article></div></div></section>`;
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
     assert.deepEqual(findings, [
-      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 01`
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>article[1]>p[1] has unowned numeric tokens: 01`
     ]);
   });
-  await t.test("actual standalone and structurally related presentation indexes stay exempt", async () => {
-    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
-      <p class="section-label">01 / Problem</p>
-      <p class="section-index">02 / Stage</p>
-      <p class="service-dossier-code">DOSSIER / ADVISORY 03</p>
-      <p class="evidence-row__context">Product / 04</p>
-      <p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 05</p>
-      <span class="knowledge-entry__number">06</span>
-      <nav class="projects-index"><a><span>07</span>Advisory</a></nav>
-      <div class="aviation-sector__index"><span>08</span><strong>OPS</strong></div>
-      <div class="service-method"><article data-method-step="9"><span>09</span><h3>Method</h3></article></div>
-      <div class="speaking-agenda"><article data-topic="one"><span>01</span><h3>Topic one</h3></article><article data-topic="two"><span>02</span><h3>Topic two</h3></article></div>
-      <article class="procurement-artifact" data-artifact="10"><header><span>10</span><h2>Artifact</h2></header></article>
-      <span aria-hidden="true">11</span><p>404</p>`;
+  await t.test("actual accessibility and structurally related presentation indexes stay exempt", async () => {
+    const body = plan3RealPresentationBody();
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -8394,6 +8396,85 @@ test("Plan 3 Task 1 fix round 5 rejects inert landmarks without changing structu
     const result = await runVerification({ root, scope: "metadata" });
     assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
     assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 6 closes presentation-index class spoofing", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+
+  await t.test("visible knowledge and standalone section classes do not authorize numbers", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p><span class="knowledge-entry__number">02</span> units sold</p>
+      <p class="section-index">01 / Model</p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 02`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[3] has unowned numeric tokens: 01`
+    ]);
+  });
+
+  const presentationSpoofs = [
+    ["section label", '<p class="section-label">01 / Model</p>'],
+    ["service dossier", '<p class="service-dossier-code">DOSSIER / ADVISORY 01</p>'],
+    ["application evidence", '<p class="evidence-row__context">Product / 01</p>'],
+    ["aviation call sign", '<p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 01</p>'],
+    ["projects index", '<div class="projects-index"><a><span>01</span>Advisory</a></div>'],
+    ["aviation sector", '<div class="aviation-sector__index"><span>01</span><strong>OPS</strong></div>'],
+    ["service method", '<div class="service-method"><article data-method-step="1"><span>01</span><h3>Method</h3></article></div>'],
+    ["speaking topic", '<div class="speaking-agenda"><article data-topic="one"><span>01</span><h3>Topic</h3></article></div>'],
+    ["procurement artifact", '<article class="procurement-artifact" data-artifact="1"><header><span>01</span><h2>Artifact</h2></header></article>']
+  ];
+  for (const [label, markup] of presentationSpoofs) {
+    await t.test(`${label} needs its complete real DOM relation`, async () => {
+      const body = `<p data-fact-id="fixture.claim">Verified claim</p>${markup}`;
+      const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+      const result = await runVerification({ root, scope: "metadata" });
+      const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+      assert.equal(findings.length, 1, result.errors.join("\n"));
+      assert.match(findings[0], /has unowned numeric tokens: 01$/);
+    });
+  }
+
+  await t.test("all real presentation relations and literal 404 remain exempt", async () => {
+    const body = plan3RealPresentationBody();
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 6 treats static popovers as non-rendered landmarks", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const wrapped = (attributes) => plan3Page(entry)
+    .replace("<body><main>", `<body><div ${attributes}><main>`)
+    .replace("</main></body>", "</main></div></body>");
+
+  for (const [label, html] of [
+    ["empty popover ancestor", wrapped("popover")],
+    ["manual popover ancestor", wrapped('popover="manual"')],
+    ["nested popover ancestor", plan3Page(entry)
+      .replace("<body><main>", '<body><section><div popover="manual"><main>')
+      .replace("</main></body>", "</main></div></section></body>")],
+    ["popover on each landmark", plan3Page(entry)
+      .replace("<body><main>", "<body><main popover>")
+      .replace("<h1>Fixture page</h1>", '<h1 popover="manual">Fixture page</h1>')]
+  ]) {
+    await t.test(`${label} cannot satisfy rendered main or h1`, async () => {
+      const root = await plan3Root({ files: { [entry.file]: html } });
+      const result = await runVerification({ root, scope: "metadata" });
+      assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+      assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+    });
+  }
+
+  await t.test("a popover sibling does not hide visible body landmarks", async () => {
+    const html = plan3Page(entry).replace("<body><main>", "<body><aside popover><p>Closed</p></aside><main>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
   });
 });
 
