@@ -22,6 +22,47 @@ const unsupportedLlmsFullClauses = Object.freeze([
 const TASK10_REVIEWED_CSS_SHA256 = "139ad09341eb2c4160622391a79eab7ca6c6896d141eef4022396d17b450055d";
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
+const PLAN3_VALIDATION_DATE = "2026-08-27";
+
+export const PUBLIC_PAGES = Object.freeze([
+  Object.freeze({ file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: Object.freeze(["Person", "WebSite"]) }),
+  Object.freeze({ file: "en/index.html", route: "/en/", lang: "en", pair: "/", schema: Object.freeze(["Person", "WebSite"]) }),
+  Object.freeze({ file: "uslugi/transformacja-zakupow/index.html", route: "/uslugi/transformacja-zakupow/", lang: "pl", pair: "/en/uslugi/transformacja-zakupow/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "en/uslugi/transformacja-zakupow/index.html", route: "/en/uslugi/transformacja-zakupow/", lang: "en", pair: "/uslugi/transformacja-zakupow/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "uslugi/wdrozenie-sap-ariba/index.html", route: "/uslugi/wdrozenie-sap-ariba/", lang: "pl", pair: "/en/uslugi/wdrozenie-sap-ariba/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "en/uslugi/wdrozenie-sap-ariba/index.html", route: "/en/uslugi/wdrozenie-sap-ariba/", lang: "en", pair: "/uslugi/wdrozenie-sap-ariba/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "uslugi/doradztwo-zamowienia-publiczne/index.html", route: "/uslugi/doradztwo-zamowienia-publiczne/", lang: "pl", pair: "/en/uslugi/doradztwo-zamowienia-publiczne/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "en/uslugi/doradztwo-zamowienia-publiczne/index.html", route: "/en/uslugi/doradztwo-zamowienia-publiczne/", lang: "en", pair: "/uslugi/doradztwo-zamowienia-publiczne/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "aplikacje-operacyjne/index.html", route: "/aplikacje-operacyjne/", lang: "pl", pair: "/en/aplikacje-operacyjne/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "en/aplikacje-operacyjne/index.html", route: "/en/aplikacje-operacyjne/", lang: "en", pair: "/aplikacje-operacyjne/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "lotnictwo/index.html", route: "/lotnictwo/", lang: "pl", pair: "/en/lotnictwo/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "en/lotnictwo/index.html", route: "/en/lotnictwo/", lang: "en", pair: "/lotnictwo/", schema: Object.freeze(["Service"]) }),
+  Object.freeze({ file: "case-studies/index.html", route: "/case-studies/", lang: "pl", pair: "/en/case-studies/", schema: Object.freeze(["CollectionPage", "ItemList"]) }),
+  Object.freeze({ file: "en/case-studies/index.html", route: "/en/case-studies/", lang: "en", pair: "/case-studies/", schema: Object.freeze(["CollectionPage", "ItemList"]) }),
+  Object.freeze({ file: "wiedza/index.html", route: "/wiedza/", lang: "pl", pair: "/en/wiedza/", schema: Object.freeze(["CollectionPage"]) }),
+  Object.freeze({ file: "en/wiedza/index.html", route: "/en/wiedza/", lang: "en", pair: "/wiedza/", schema: Object.freeze(["CollectionPage"]) }),
+  Object.freeze({ file: "wystapienia/index.html", route: "/wystapienia/", lang: "pl", pair: "/en/wystapienia/", schema: Object.freeze(["CollectionPage"]) }),
+  Object.freeze({ file: "en/wystapienia/index.html", route: "/en/wystapienia/", lang: "en", pair: "/wystapienia/", schema: Object.freeze(["CollectionPage"]) }),
+  Object.freeze({ file: "procurement-2026/index.html", route: "/procurement-2026/", lang: "pl", pair: null, schema: Object.freeze(["Article"]) }),
+  Object.freeze({ file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
+  Object.freeze({ file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
+  Object.freeze({ file: "diagrams/diagram3_maturity.html", route: "/diagrams/diagram3_maturity.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
+  Object.freeze({ file: "diagrams/infographic.html", route: "/diagrams/infographic.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
+  Object.freeze({ file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) })
+]);
+
+const PLAN3_ARTIFACT_FILES = new Set(PUBLIC_PAGES.slice(19).map(({ file }) => file));
+const PLAN3_VALID_SCOPES = new Set(["all", "facts", "foundation", "home", "pages", "metadata", "discovery", "seo"]);
+const PLAN3_REJECTED_COPY = Object.freeze([
+  /\u2014/u,
+  /\bnie tylko\b/iu,
+  /\bnot just\b/iu,
+  /\bkompleksow(?:y|a|e|o|ych)?\b/iu,
+  /\bcomprehensive\b/iu,
+  /\binnowacyjn(?:y|a|e|ie|ych)?\b/iu,
+  /\binnovative\b/iu
+]);
+const PLAN3_DYNAMIC_COPY = /#\s*1\b|\bnajwiększ(?:y|a|e|ym|ych)?\b|\blargest\b|\bwiodąc(?:y|a|e|ym|ych)?\b|\bleading\b|\baktywn(?:y|a|e|ie|ych)?\b|\bactive\b|\bcurrently\b|\b(?:as of|stan na|według stanu na|czerwiec|june)\b[^.!?\n]{0,80}\b\d{4}\b/iu;
 
 const ROUTE_PAIRS = [
   ["index.html", "en/index.html", "/", "/en/", "home"],
@@ -7688,12 +7729,529 @@ async function verifyHome(factData, context) {
   }
 }
 
+function plan3DirectHttpsUrl(value) {
+  if (!nonEmptyString(value)) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && nonEmptyString(url.hostname) && url.username === "" && url.password === "";
+  } catch {
+    return false;
+  }
+}
+
+function plan3RegistryMaterialFailures(value, errors, path = "content/site-facts.json", cursor = "registry") {
+  const secretKey = /(?:^|[_-])(?:secret|token|password|passwd|api[_-]?key|private[_-]?key|authorization|cookie)(?:$|[_-])/i;
+  const privateMaterial = /(?:\/Users\/[^\s"']+|\/home\/[^/\s"']+\/|[A-Za-z]:\\Users\\|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|rk)-[A-Za-z0-9_-]{12,}|\bBearer\s+[A-Za-z0-9._~-]{8,})/i;
+  if (typeof value === "string") {
+    if (privateMaterial.test(value)) error(errors, "fact-private-material", path, `${cursor} contains private-path or secret-like material`);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => plan3RegistryMaterialFailures(item, errors, path, `${cursor}[${index}]`));
+    return;
+  }
+  if (!isPlainObject(value)) return;
+  for (const [key, nested] of Object.entries(value)) {
+    if (secretKey.test(key)) error(errors, "fact-secret-key", path, `${cursor}.${key} is a secret-like field name`);
+    plan3RegistryMaterialFailures(nested, errors, path, `${cursor}.${key}`);
+  }
+}
+
+function plan3FactState(factData, context) {
+  if (context.plan3FactState) return context.plan3FactState;
+  const path = "content/site-facts.json";
+  const requiredTopLevel = ["version", "public_claim_surfaces", "facts", "blocked_claims"];
+  if (!isPlainObject(factData)) error(context.errors, "fact-top-level", path, "registry must be an object");
+  for (const key of requiredTopLevel) {
+    if (!Object.hasOwn(factData, key)) error(context.errors, "fact-top-level", path, `missing required top-level key ${key}`);
+  }
+  if (factData.version !== 1) error(context.errors, "facts-version", path, "expected version 1");
+
+  const publicSurfaces = Array.isArray(factData.public_claim_surfaces) ? factData.public_claim_surfaces : [];
+  if (!Array.isArray(factData.public_claim_surfaces) || !publicSurfaces.every(nonEmptyString)) {
+    error(context.errors, "public-surface-inventory", path, "public_claim_surfaces must be an array of non-empty strings");
+  }
+  if (new Set(publicSurfaces).size !== publicSurfaces.length) {
+    error(context.errors, "public-surface-duplicate", path, "public_claim_surfaces must not contain duplicates");
+  }
+
+  const records = Array.isArray(factData.facts) ? factData.facts : [];
+  if (!Array.isArray(factData.facts)) error(context.errors, "facts-array", path, "facts must be an array");
+  const byId = new Map();
+  for (const [index, fact] of records.entries()) {
+    if (!isPlainObject(fact)) {
+      error(context.errors, "fact-record", path, `facts[${index}] must be an object`);
+      continue;
+    }
+    for (const key of factKeys) {
+      if (!Object.hasOwn(fact, key)) error(context.errors, "fact-key", path, `facts[${index}] missing ${key}`);
+    }
+    if (!nonEmptyString(fact.id)) error(context.errors, "fact-id", path, `facts[${index}] id must be a non-empty string`);
+    else if (byId.has(fact.id)) error(context.errors, "fact-duplicate-id", path, `duplicate fact id ${fact.id}`);
+    else byId.set(fact.id, fact);
+    if (!validFactValue(fact.value)) error(context.errors, "fact-value", path, `facts[${index}] value must be a non-empty string or finite number`);
+    if (!nonEmptyString(fact.display_pl)) error(context.errors, "fact-display-pl", path, `facts[${index}] display_pl must be a non-empty string`);
+    if (!nonEmptyString(fact.display_en)) error(context.errors, "fact-display-en", path, `facts[${index}] display_en must be a non-empty string`);
+    if (!kinds.has(fact.kind)) error(context.errors, "fact-kind", path, `facts[${index}] kind must be constant or dated`);
+    if (fact.kind === "constant" && fact.as_of !== null) {
+      error(context.errors, "fact-as-of", path, `facts[${index}] constant facts require as_of null`);
+    }
+    if (fact.kind === "dated") {
+      if (!nonEmptyString(fact.as_of) || !isIsoDate(fact.as_of)) {
+        error(context.errors, "fact-as-of", path, `facts[${index}] dated facts require a valid YYYY-MM-DD as_of`);
+      } else if (fact.as_of > PLAN3_VALIDATION_DATE) {
+        error(context.errors, "fact-as-of-future", path, `facts[${index}] as_of ${fact.as_of} is later than ${PLAN3_VALIDATION_DATE}`);
+      }
+    }
+    if (!sourceTypes.has(fact.source_type)) error(context.errors, "fact-source-type", path, `facts[${index}] source_type is invalid`);
+    if (!nonEmptyString(fact.source_label)) error(context.errors, "fact-source-label", path, `facts[${index}] source_label must be public-safe and non-empty`);
+    if (fact.source_type === "public_source") {
+      if (!plan3DirectHttpsUrl(fact.source_url)) error(context.errors, "fact-source-url", path, `facts[${index}] public_source requires a direct HTTPS source_url`);
+    } else if (fact.source_url !== null && !plan3DirectHttpsUrl(fact.source_url)) {
+      error(context.errors, "fact-source-url", path, `facts[${index}] source_url must be null or a direct HTTPS URL`);
+    }
+    if (!Array.isArray(fact.surfaces) || fact.surfaces.length === 0 || !fact.surfaces.every(nonEmptyString)) {
+      error(context.errors, "fact-surfaces", path, `facts[${index}] surfaces must be a non-empty string array`);
+    } else {
+      if (new Set(fact.surfaces).size !== fact.surfaces.length) {
+        error(context.errors, "fact-duplicate-surface", path, `facts[${index}] surfaces must not contain duplicates`);
+      }
+      for (const surface of fact.surfaces) {
+        if (!publicSurfaces.includes(surface)) error(context.errors, "fact-surfaces", path, `facts[${index}] undeclared public surface ${surface}`);
+      }
+    }
+    if (!statuses.has(fact.status)) error(context.errors, "fact-status", path, `facts[${index}] status is invalid`);
+    verifyAliases(fact, index, context.errors);
+    verifySurfaceRules(fact, index, publicSurfaces, context.errors);
+    verifyPinnedFactContract(fact, context.errors);
+  }
+  const ids = new Set(byId.keys());
+  verifyBlockedSchema(factData, ids, context.errors);
+  plan3RegistryMaterialFailures(factData, context.errors);
+  const blockedClaims = Array.isArray(factData.blocked_claims) ? factData.blocked_claims.filter(isPlainObject) : [];
+  context.plan3FactState = { records: records.filter(isPlainObject), byId, publicSurfaces, blockedClaims };
+  return context.plan3FactState;
+}
+
+function plan3ElementFactIds(element, path, errors) {
+  const ids = [];
+  if (element.attributes.has("data-fact-id")) {
+    const value = elementAttribute(element, "data-fact-id");
+    if (!nonEmptyString(value) || value.trim().split(/\s+/).length !== 1) {
+      error(errors, "fact-attribute-shape", path, "data-fact-id must contain exactly one fact ID");
+    } else ids.push(value.trim());
+  }
+  if (element.attributes.has("data-fact-ids")) {
+    const value = elementAttribute(element, "data-fact-ids");
+    const tokens = nonEmptyString(value) ? value.trim().split(/\s+/).filter(Boolean) : [];
+    if (tokens.length === 0 || new Set(tokens).size !== tokens.length) {
+      error(errors, "fact-attribute-shape", path, "data-fact-ids must contain unique whitespace-delimited fact IDs");
+    }
+    ids.push(...tokens);
+  }
+  return ids;
+}
+
+function plan3FactCandidates(fact) {
+  const aliases = isPlainObject(fact.aliases)
+    ? [fact.aliases.pl, fact.aliases.en].flatMap((items) => Array.isArray(items) ? items : [])
+    : [];
+  const forbidden = Array.isArray(fact.forbidden_variants) ? fact.forbidden_variants : [];
+  return [...new Set([fact.value, fact.display_pl, fact.display_en, ...aliases, ...forbidden].filter(nonEmptyString))];
+}
+
+function plan3EnclosingApprovedFacts(element, state, path) {
+  const facts = [];
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (["section", "main", "body", "html"].includes(current.name)) break;
+    for (const id of plan3ElementFactIds(current, path, [])) {
+      const fact = state.byId.get(id);
+      if (fact?.status === "approved" && Array.isArray(fact.surfaces) && fact.surfaces.includes(path)) facts.push(fact);
+    }
+  }
+  return facts;
+}
+
+function plan3VisibleTextNodes(root) {
+  const nodes = [];
+  const visit = (node, hidden = false) => {
+    const currentHidden = hidden || (node.type === "element" && !elementIsStaticallyVisible(node));
+    if (node.type === "text") {
+      if (!currentHidden && node.parent?.type === "element") nodes.push(node);
+      return;
+    }
+    for (const child of node.children ?? []) visit(child, currentHidden);
+  };
+  visit(root);
+  return nodes;
+}
+
+function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
+  const path = entry.file;
+  const elements = elementDescendants(parsedRoot);
+  for (const element of elements) {
+    for (const id of plan3ElementFactIds(element, path, errors)) {
+      const fact = state.byId.get(id);
+      if (!fact) error(errors, "fact-attribute-unknown", path, `unknown fact attribute ${id}`);
+      else if (fact.status !== "approved") error(errors, "fact-attribute-status", path, `${id} has non-publishable status ${fact.status}`);
+      else if (!Array.isArray(fact.surfaces) || !fact.surfaces.includes(path)) error(errors, "fact-attribute-surface", path, `${id} does not list this exact surface`);
+    }
+  }
+
+  const rawPublic = normalize(decodeHtmlEntities(stripHtmlComments(html)));
+  for (const fact of state.records) {
+    if (fact.status === "approved" && Array.isArray(fact.surfaces) && fact.surfaces.includes(path)) {
+      const display = entry.lang === "pl" ? fact.display_pl : fact.display_en;
+      if (nonEmptyString(display) && !rawPublic.includes(normalize(display))) {
+        error(errors, "fact-display-missing", path, `${fact.id} is missing its approved ${entry.lang} display`);
+      }
+    }
+    if (fact.status === "review" || fact.status === "retired") {
+      const published = plan3FactCandidates(fact).find((candidate) => rawPublic.includes(normalize(candidate)));
+      if (published) error(errors, "fact-known-nonapproved", path, `${fact.id} publishes non-approved known display ${published}`);
+    }
+  }
+  for (const claim of Array.isArray(state.blockedClaims) ? state.blockedClaims : []) {
+    if (nonEmptyString(claim.pattern) && rawPublic.includes(normalize(claim.pattern))) {
+      error(errors, `blocked-${claim.id}`, path, `blocked claim ${claim.pattern} is public`);
+    }
+  }
+
+  const body = htmlBodyRoot(parsedRoot);
+  const visibleCopy = staticVisibleText(body);
+  for (const pattern of PLAN3_REJECTED_COPY) {
+    pattern.lastIndex = 0;
+    if (pattern.test(visibleCopy)) error(errors, "copy-rejected", path, `visible copy matches ${pattern}`);
+  }
+
+  for (const textNode of plan3VisibleTextNodes(body)) {
+    const literal = normalizeExactHtmlLiteral(textNode.value);
+    if (!nonEmptyString(literal)) continue;
+    const enclosing = plan3EnclosingApprovedFacts(textNode.parent, state, path);
+    const presentationNumber = /^(?:(?:0[1-9]|1[01])(?:\s*\/\s*[^\d]+)?|404)$/.test(literal);
+    if (/\d/u.test(literal) && !presentationNumber && enclosing.length === 0) {
+      error(errors, "fact-visible-number", path, `visible numeric claim lacks an enclosing approved fact ID: ${literal}`);
+    }
+    PLAN3_DYNAMIC_COPY.lastIndex = 0;
+    if (PLAN3_DYNAMIC_COPY.test(literal)) {
+      const validDynamic = enclosing.some((fact) => fact.kind === "dated"
+        && nonEmptyString(fact.as_of)
+        && isIsoDate(fact.as_of)
+        && fact.as_of <= PLAN3_VALIDATION_DATE
+        && plan3DirectHttpsUrl(fact.source_url));
+      if (!validDynamic) error(errors, "fact-dynamic-claim", path, `dynamic claim lacks an enclosing approved dated fact with a direct source URL: ${literal}`);
+    }
+  }
+}
+
+function plan3HeadElement(element) {
+  for (let current = element.parent; current?.type === "element"; current = current.parent) {
+    if (current.name === "head") return true;
+    if (current.name === "body") return false;
+  }
+  return false;
+}
+
+function plan3MetadataElements(parsedRoot, name) {
+  return elementDescendants(parsedRoot, name).filter((element) => elementIsActiveResource(element) && plan3HeadElement(element));
+}
+
+function plan3MetaValue(parsedRoot, attribute, key) {
+  const candidates = plan3MetadataElements(parsedRoot, "meta").filter((element) => normalize(elementAttribute(element, attribute) ?? "") === normalize(key));
+  return { candidates, value: candidates.length === 1 ? elementAttribute(candidates[0], "content") : null };
+}
+
+function parseJsonLd(path, html, errors) {
+  const blocks = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  return blocks.flatMap((match, index) => {
+    try {
+      const value = JSON.parse(match[1]);
+      return Array.isArray(value) ? value : [value];
+    } catch (cause) {
+      error(errors, "jsonld-parse", path, `block ${index + 1}: ${cause.message}`);
+      return [];
+    }
+  });
+}
+
+function plan3SchemaTypes(value, types = new Set()) {
+  if (Array.isArray(value)) {
+    for (const item of value) plan3SchemaTypes(item, types);
+    return types;
+  }
+  if (!isPlainObject(value)) return types;
+  const type = value["@type"];
+  if (nonEmptyString(type)) types.add(type);
+  else if (Array.isArray(type)) type.filter(nonEmptyString).forEach((item) => types.add(item));
+  for (const nested of Object.values(value)) plan3SchemaTypes(nested, types);
+  return types;
+}
+
+function plan3ExpectedHreflang(entry) {
+  if (entry.pair === null) return new Map([[entry.lang, `https://mamcarz.com${entry.route}`], ["x-default", `https://mamcarz.com${entry.route}`]]);
+  const plRoute = entry.lang === "pl" ? entry.route : entry.pair;
+  const enRoute = entry.lang === "en" ? entry.route : entry.pair;
+  return new Map([
+    ["pl", `https://mamcarz.com${plRoute}`],
+    ["en", `https://mamcarz.com${enRoute}`],
+    ["x-default", `https://mamcarz.com${plRoute}`]
+  ]);
+}
+
+async function verifyMetadata(factData, context) {
+  const state = plan3FactState(factData, context);
+  for (const entry of PUBLIC_PAGES) {
+    const html = await readRequired(context, entry.file, "metadata-file");
+    const parsed = parseStaticHtml(html);
+    for (const syntaxError of parsed.errors) error(context.errors, "metadata-html", entry.file, syntaxError);
+    const all = elementDescendants(parsed.root);
+    const active = all.filter(elementIsStaticallyVisible);
+    const htmlElements = all.filter((element) => element.name === "html" && elementIsActiveResource(element));
+    const htmlStart = /<html\b[^>]*>/i.exec(html)?.[0] ?? "";
+    const langAttributes = htmlStart.match(/\blang\s*=/gi) ?? [];
+    if (htmlElements.length !== 1 || elementAttribute(htmlElements[0], "lang") !== entry.lang || langAttributes.length !== 1) {
+      error(context.errors, "metadata-lang", entry.file, `requires exactly one html lang=${entry.lang}`);
+    }
+    const mains = active.filter((element) => element.name === "main");
+    const headings = active.filter((element) => element.name === "h1");
+    if (mains.length !== 1) error(context.errors, "metadata-main", entry.file, `expected exactly one visible main; found ${mains.length}`);
+    if (headings.length !== 1) error(context.errors, "metadata-h1", entry.file, `expected exactly one visible h1; found ${headings.length}`);
+
+    const titles = plan3MetadataElements(parsed.root, "title");
+    if (titles.length !== 1 || !nonEmptyString(normalizeExactHtmlLiteral(rawElementText(titles[0])))) {
+      error(context.errors, "metadata-title", entry.file, "requires exactly one non-empty title");
+    }
+    const expectedCanonical = `https://mamcarz.com${entry.route}`;
+    const canonical = plan3MetadataElements(parsed.root, "link").filter((element) => elementAttributeTokens(element, "rel").includes("canonical"));
+    if (canonical.length !== 1 || elementAttributeTokens(canonical[0], "rel").length !== 1 || elementAttribute(canonical[0], "href") !== expectedCanonical) {
+      error(context.errors, "metadata-canonical", entry.file, `requires exactly one canonical ${expectedCanonical}`);
+    }
+    const expectedHreflang = plan3ExpectedHreflang(entry);
+    const alternate = plan3MetadataElements(parsed.root, "link").filter((element) => element.attributes.has("hreflang") || elementAttributeTokens(element, "rel").includes("alternate"));
+    const actualHreflang = new Map();
+    let hreflangValid = alternate.length === expectedHreflang.size;
+    for (const link of alternate) {
+      const language = normalize(elementAttribute(link, "hreflang") ?? "");
+      const href = elementAttribute(link, "href");
+      if (actualHreflang.has(language)
+        || elementAttributeTokens(link, "rel").length !== 1
+        || elementAttributeTokens(link, "rel")[0] !== "alternate"
+        || expectedHreflang.get(language) !== href) hreflangValid = false;
+      actualHreflang.set(language, href);
+    }
+    if (!hreflangValid || [...expectedHreflang].some(([language, href]) => actualHreflang.get(language) !== href)) {
+      error(context.errors, "metadata-hreflang", entry.file, "hreflang entries must exactly match the true route topology");
+    }
+
+    const description = plan3MetaValue(parsed.root, "name", "description");
+    if (description.candidates.length !== 1 || !nonEmptyString(description.value)) error(context.errors, "metadata-description", entry.file, "requires exactly one non-empty description");
+    const ogValues = new Map();
+    for (const field of ["og:title", "og:description", "og:type", "og:url", "og:image", "og:locale"]) {
+      const result = plan3MetaValue(parsed.root, "property", field);
+      ogValues.set(field, result.value);
+      if (result.candidates.length !== 1 || !nonEmptyString(result.value)) error(context.errors, "metadata-og", entry.file, `requires exactly one non-empty ${field}`);
+    }
+    if (ogValues.get("og:url") !== expectedCanonical) error(context.errors, "metadata-og-url", entry.file, `og:url must equal ${expectedCanonical}`);
+    if (!plan3DirectHttpsUrl(ogValues.get("og:image")) || new URL(ogValues.get("og:image"), "https://invalid.example").hostname !== "mamcarz.com") {
+      error(context.errors, "metadata-og-image", entry.file, "og:image must be an absolute local HTTPS URL");
+    }
+    const expectedLocale = entry.lang === "pl" ? "pl_PL" : "en_US";
+    if (ogValues.get("og:locale") !== expectedLocale) error(context.errors, "metadata-og-locale", entry.file, `og:locale must equal ${expectedLocale}`);
+    const alternateLocale = plan3MetaValue(parsed.root, "property", "og:locale:alternate");
+    const wantedAlternate = entry.lang === "pl" ? "en_US" : "pl_PL";
+    if (entry.pair === null) {
+      if (alternateLocale.candidates.length !== 0) error(context.errors, "metadata-og-locale", entry.file, "unpaired pages must not declare an alternate OG locale");
+    } else if (alternateLocale.candidates.length !== 1 || alternateLocale.value !== wantedAlternate) {
+      error(context.errors, "metadata-og-locale", entry.file, `paired page requires alternate OG locale ${wantedAlternate}`);
+    }
+
+    parseJsonLd(entry.file, html, context.errors);
+    const activeJsonLd = all
+      .filter((element) => element.name === "script"
+        && normalize(elementAttribute(element, "type") ?? "") === "application/ld+json"
+        && elementIsActiveResource(element))
+      .flatMap((element) => {
+        try {
+          const value = JSON.parse(rawElementText(element));
+          return Array.isArray(value) ? value : [value];
+        } catch {
+          return [];
+        }
+      });
+    const schemaTypes = plan3SchemaTypes(activeJsonLd);
+    for (const expected of entry.schema) {
+      if (!schemaTypes.has(expected)) error(context.errors, "metadata-schema", entry.file, `missing conservative Schema.org type ${expected}`);
+    }
+
+    if (!PLAN3_ARTIFACT_FILES.has(entry.file)) {
+      const stylesheets = all.filter((element) => element.name === "link" && (elementAttributeTokens(element, "rel").includes("stylesheet") || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")));
+      const scripts = all.filter((element) => element.name === "script" && ((elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js") || element.attributes.has("src")));
+      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === "/assets/css/style.css?v=20260825-flightplan-3");
+      const validScripts = scripts.filter((element) => elementIsActiveResource(element)
+        && elementAttribute(element, "src") === "/assets/js/main.js?v=20260825-flightplan-3"
+        && element.attributes.has("defer"));
+      if (stylesheets.length !== 1 || validStyles.length !== 1 || scripts.length !== 1 || validScripts.length !== 1) {
+        error(context.errors, "metadata-assets", entry.file, "site shell requires exact Flight Plan 3 CSS and deferred JS assets");
+      }
+    }
+    plan3VerifyHtmlFacts(entry, html, parsed.root, state, context.errors);
+  }
+}
+
+function plan3VerifyTextFactSurface(path, text, state, errors) {
+  const search = publicSurfaceSearchData(path, text, errors);
+  for (const fact of state.records) {
+    if (fact.status === "approved" && Array.isArray(fact.surfaces) && fact.surfaces.includes(path)) {
+      const rule = isPlainObject(fact.surface_rules?.[path]) ? fact.surface_rules[path] : null;
+      const approved = Array.isArray(rule?.approved_any)
+        ? rule.approved_any.some((candidate) => surfaceContains(search.texts, candidate))
+        : [fact.display_pl, fact.display_en].filter(nonEmptyString).some((candidate) => surfaceContains(search.texts, candidate));
+      if (!approved) error(errors, "fact-display-missing", path, `${fact.id} is missing its approved public display`);
+    }
+    if (fact.status === "review" || fact.status === "retired") {
+      const published = plan3FactCandidates(fact).find((candidate) => surfaceContains(search.texts, candidate));
+      if (published) error(errors, "fact-known-nonapproved", path, `${fact.id} publishes non-approved known display ${published}`);
+    }
+  }
+  for (const claim of state.blockedClaims) {
+    if (nonEmptyString(claim.pattern) && surfaceContains(search.texts, claim.pattern)) {
+      error(errors, `blocked-${claim.id}`, path, `blocked claim ${claim.pattern} is public`);
+    }
+  }
+  if (!path.endsWith(".js")) {
+    for (const pattern of PLAN3_REJECTED_COPY) {
+      pattern.lastIndex = 0;
+      if (pattern.test(text)) error(errors, "copy-rejected", path, `public text matches ${pattern}`);
+    }
+  }
+}
+
+function plan3SitemapAlternates(block) {
+  const actual = new Map();
+  let valid = true;
+  for (const match of block.matchAll(/<xhtml:link\b[^>]*>/gi)) {
+    const attributes = openingTagAttributes(match[0]);
+    const language = normalize(attributes.get("hreflang") ?? "");
+    const href = attributes.get("href");
+    const rel = normalize(attributes.get("rel") ?? "");
+    if (!nonEmptyString(language) || !nonEmptyString(href) || rel !== "alternate" || actual.has(language)) valid = false;
+    actual.set(language, href);
+  }
+  return { actual, valid };
+}
+
+async function verifyDiscovery(factData, context) {
+  const state = plan3FactState(factData, context);
+  const sitemap = stripHtmlComments(await readRequired(context, "sitemap.xml", "discovery-file"));
+  const expectedUrls = PUBLIC_PAGES.map(({ route }) => `https://mamcarz.com${route}`);
+  const urlBlocks = [...sitemap.matchAll(/<url\b[^>]*>([\s\S]*?)<\/url>/gi)].map((match) => match[1]);
+  const actualUrls = urlBlocks.map((block) => decodeHtmlEntities(/<loc\b[^>]*>\s*([^<]+?)\s*<\/loc>/i.exec(block)?.[1] ?? ""));
+  const exactRoutes = actualUrls.length === expectedUrls.length
+    && new Set(actualUrls).size === actualUrls.length
+    && expectedUrls.every((url) => actualUrls.includes(url));
+  if (!exactRoutes) error(context.errors, "discovery-sitemap-routes", "sitemap.xml", "canonical route coverage must exactly equal PUBLIC_PAGES");
+  for (const entry of PUBLIC_PAGES) {
+    const url = `https://mamcarz.com${entry.route}`;
+    const indexes = actualUrls.flatMap((candidate, index) => candidate === url ? [index] : []);
+    if (indexes.length !== 1) continue;
+    const alternates = plan3SitemapAlternates(urlBlocks[indexes[0]]);
+    const expected = plan3ExpectedHreflang(entry);
+    if (!alternates.valid
+      || alternates.actual.size !== expected.size
+      || [...expected].some(([lang, href]) => alternates.actual.get(lang) !== href)) {
+      error(context.errors, "discovery-sitemap-hreflang", "sitemap.xml", `${entry.route} must use its exact true-language alternates`);
+    }
+  }
+
+  const llms = await readRequired(context, "llms.txt", "discovery-file");
+  const sameDomainUrls = [...llms.matchAll(/https:\/\/mamcarz\.com(?:\/[^\s<>()\]"']*)?/g)].map((match) => match[0].replace(/[.,;:]+$/, ""));
+  const llmsValid = expectedUrls.every((url) => sameDomainUrls.includes(url))
+    && sameDomainUrls.every((url) => expectedUrls.includes(url))
+    && !llms.includes("/projekty/")
+    && !llms.includes("/en/procurement-2026/");
+  if (!llmsValid) error(context.errors, "discovery-llms-routes", "llms.txt", "canonical route list must cover only and all PUBLIC_PAGES routes");
+
+  const discoverySurfaces = state.publicSurfaces.filter((path) => !path.endsWith(".html"));
+  for (const path of discoverySurfaces) {
+    const text = await readRequired(context, path, "discovery-surface-file");
+    plan3VerifyTextFactSurface(path, text, state, context.errors);
+  }
+}
+
+function plan3HeaderBlocks(source) {
+  const blocks = new Map();
+  let current = null;
+  for (const line of source.split(/\r?\n/)) {
+    if (line.trim() === "" || line.trimStart().startsWith("#")) continue;
+    if (!/^\s/.test(line)) {
+      current = line.trim();
+      if (!blocks.has(current)) blocks.set(current, []);
+      continue;
+    }
+    const match = /^\s+([^:]+):\s*(.*?)\s*$/.exec(line);
+    if (current !== null && match) blocks.get(current).push([match[1].trim().toLowerCase(), match[2].trim().toLowerCase()]);
+  }
+  return blocks;
+}
+
+async function verifyInstructions(context) {
+  let agents = null;
+  let claude = null;
+  try { agents = await readFile(resolve(context.root, "AGENTS.md")); } catch (cause) { error(context.errors, "instructions-read", "AGENTS.md", cause.code ?? cause.message); }
+  try { claude = await readFile(resolve(context.root, "CLAUDE.md")); } catch (cause) { error(context.errors, "instructions-read", "CLAUDE.md", cause.code ?? cause.message); }
+  if (agents !== null && claude !== null && !agents.equals(claude)) {
+    error(context.errors, "instructions-sync", "AGENTS.md", "AGENTS.md and CLAUDE.md must be byte-identical");
+  }
+
+  const redirects = await readRequired(context, "_redirects", "infrastructure-file");
+  const redirectLines = redirects.split(/\r?\n/).map((line) => line.trim()).filter((line) => line !== "" && !line.startsWith("#"));
+  const wwwRules = redirectLines.filter((line) => line.startsWith("https://www.mamcarz.com/"));
+  const exactRedirect = "https://www.mamcarz.com/* https://mamcarz.com/:splat 301";
+  if (wwwRules.length !== 1 || wwwRules[0] !== exactRedirect) {
+    error(context.errors, "infrastructure-redirect", "_redirects", `requires exactly ${exactRedirect}`);
+  }
+
+  const headers = await readRequired(context, "_headers", "infrastructure-file");
+  const blocks = plan3HeaderBlocks(headers);
+  const rootHeaders = new Map(blocks.get("/*") ?? []);
+  const security = ["x-content-type-options", "x-frame-options", "referrer-policy", "permissions-policy"];
+  const expectedSecurity = new Map([
+    ["x-content-type-options", "nosniff"],
+    ["x-frame-options", "sameorigin"],
+    ["referrer-policy", "strict-origin-when-cross-origin"],
+    ["permissions-policy", "camera=(), microphone=(), geolocation=()"]
+  ]);
+  let valid = security.every((name) => {
+    const matches = (blocks.get("/*") ?? []).filter(([candidate]) => candidate === name);
+    return matches.length === 1 && matches[0][1] === expectedSecurity.get(name);
+  });
+  const exactCache = (path, expectedAge, requireImmutable) => {
+    const matches = (blocks.get(path) ?? []).filter(([name]) => name === "cache-control");
+    if (matches.length !== 1) return false;
+    const directives = matches[0][1].split(",").map((item) => item.trim());
+    return directives.includes("public")
+      && directives.includes(`max-age=${expectedAge}`)
+      && (requireImmutable ? directives.includes("immutable") : directives.includes("must-revalidate"));
+  };
+  const immutable = (path) => exactCache(path, "31536000", true);
+  const revalidated = (path) => exactCache(path, "0", false);
+  valid = valid
+    && immutable("/assets/fonts/*")
+    && ["/*.jpeg", "/*.jpg", "/*.png", "/*.webp"].every(immutable)
+    && revalidated("/assets/css/*")
+    && revalidated("/assets/js/*");
+  if (!valid) error(context.errors, "infrastructure-headers", "_headers", "requires security headers, immutable font/image caching and CSS/JS revalidation");
+}
+
 export async function runVerification({ root = defaultRoot, scope = "all", lang = "all", family = "all", familyOptionCount = 1 } = {}) {
   const errors = [];
   const deferred = [];
   const context = { root, scope, lang, family, errors, deferred };
   if (!["all", "pl", "en"].includes(lang)) error(errors, "cli-lang", "scripts/verify-site.mjs", `unsupported language ${lang}`);
-  if (!["all", "facts", "foundation", "home", "pages"].includes(scope)) error(errors, "cli-scope", "scripts/verify-site.mjs", `unsupported scope ${scope}`);
+  if (!PLAN3_VALID_SCOPES.has(scope)) {
+    error(errors, "cli-scope", "scripts/verify-site.mjs", `unsupported scope ${scope}`);
+    return { facts: { version: 0, public_claim_surfaces: [], facts: [], blocked_claims: [] }, errors, deferred };
+  }
   const repeatedFamilyOption = !Number.isInteger(familyOptionCount) || familyOptionCount < 0 || familyOptionCount > 1;
   const validFamily = !repeatedFamilyOption && typeof family === "string" && VALID_FAMILIES.has(family);
   if (repeatedFamilyOption) error(errors, "cli-family", "scripts/verify-site.mjs", `family option must be supplied at most once; found ${familyOptionCount}`);
@@ -7717,14 +8275,27 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   if (scope === "foundation" || scope === "all") await verifyFoundation(context);
   if (scope === "home" || scope === "all") await verifyHome(facts, context);
   if (scope === "pages" && validFamily) await verifyPages(facts, family, context);
+  if (scope === "metadata" || scope === "seo" || scope === "all") await verifyMetadata(facts, context);
+  if (scope === "discovery" || scope === "seo" || scope === "all") await verifyDiscovery(facts, context);
+  if (scope === "all") await verifyInstructions(context);
   return { facts, errors, deferred };
 }
 
 async function cli() {
-  const scope = process.argv.find((arg) => arg.startsWith("--scope="))?.split("=")[1] ?? "all";
-  const lang = process.argv.find((arg) => arg.startsWith("--lang="))?.split("=")[1] ?? "all";
+  const args = process.argv.slice(2);
+  const unsupportedArgs = args.filter((arg) => arg !== "--family"
+    && !arg.startsWith("--scope=")
+    && !arg.startsWith("--lang=")
+    && !arg.startsWith("--family="));
+  if (unsupportedArgs.length > 0) {
+    console.error(`ERROR cli-argument scripts/verify-site.mjs: unsupported argument syntax ${unsupportedArgs.join(", ")}`);
+    process.exitCode = 1;
+    return;
+  }
+  const scope = args.find((arg) => arg.startsWith("--scope="))?.split("=")[1] ?? "all";
+  const lang = args.find((arg) => arg.startsWith("--lang="))?.split("=")[1] ?? "all";
   const familyPrefix = "--family=";
-  const familyArgs = process.argv.filter((arg) => arg === "--family" || arg.startsWith(familyPrefix));
+  const familyArgs = args.filter((arg) => arg === "--family" || arg.startsWith(familyPrefix));
   const family = familyArgs.length === 0 ? "all" : familyArgs[0].startsWith(familyPrefix) ? familyArgs[0].slice(familyPrefix.length) : "";
   const result = await runVerification({ scope, lang, family, familyOptionCount: familyArgs.length });
   const deferredLabel = result.deferred.length > 0 ? `; deferred: ${result.deferred.join(", ")}` : "";

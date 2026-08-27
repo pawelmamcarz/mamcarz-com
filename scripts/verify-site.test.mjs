@@ -8,7 +8,7 @@ import { promisify } from "node:util";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
 
-import { parseCssRules, readFacts, runVerification } from "./verify-site.mjs";
+import { PUBLIC_PAGES, parseCssRules, readFacts, runVerification } from "./verify-site.mjs";
 
 const execFileAsync = promisify(execFile);
 const modulePath = resolve("scripts/verify-site.mjs");
@@ -6958,4 +6958,453 @@ test("Plan 2 Task 10 fix round 3 keeps CSS approval independent from llms-full c
   ]);
   assert.equal(errorIds(foundationResult).includes("task10-css-reviewed-artifact"), false, foundationResult.errors.join("\n"));
   assert.ok(errorIds(factsResult).includes("fact-llms-full-unsupported"), factsResult.errors.join("\n"));
+});
+
+const plan3ExpectedPublicPages = Object.freeze([
+  { file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: ["Person", "WebSite"] },
+  { file: "en/index.html", route: "/en/", lang: "en", pair: "/", schema: ["Person", "WebSite"] },
+  { file: "uslugi/transformacja-zakupow/index.html", route: "/uslugi/transformacja-zakupow/", lang: "pl", pair: "/en/uslugi/transformacja-zakupow/", schema: ["Service"] },
+  { file: "en/uslugi/transformacja-zakupow/index.html", route: "/en/uslugi/transformacja-zakupow/", lang: "en", pair: "/uslugi/transformacja-zakupow/", schema: ["Service"] },
+  { file: "uslugi/wdrozenie-sap-ariba/index.html", route: "/uslugi/wdrozenie-sap-ariba/", lang: "pl", pair: "/en/uslugi/wdrozenie-sap-ariba/", schema: ["Service"] },
+  { file: "en/uslugi/wdrozenie-sap-ariba/index.html", route: "/en/uslugi/wdrozenie-sap-ariba/", lang: "en", pair: "/uslugi/wdrozenie-sap-ariba/", schema: ["Service"] },
+  { file: "uslugi/doradztwo-zamowienia-publiczne/index.html", route: "/uslugi/doradztwo-zamowienia-publiczne/", lang: "pl", pair: "/en/uslugi/doradztwo-zamowienia-publiczne/", schema: ["Service"] },
+  { file: "en/uslugi/doradztwo-zamowienia-publiczne/index.html", route: "/en/uslugi/doradztwo-zamowienia-publiczne/", lang: "en", pair: "/uslugi/doradztwo-zamowienia-publiczne/", schema: ["Service"] },
+  { file: "aplikacje-operacyjne/index.html", route: "/aplikacje-operacyjne/", lang: "pl", pair: "/en/aplikacje-operacyjne/", schema: ["Service"] },
+  { file: "en/aplikacje-operacyjne/index.html", route: "/en/aplikacje-operacyjne/", lang: "en", pair: "/aplikacje-operacyjne/", schema: ["Service"] },
+  { file: "lotnictwo/index.html", route: "/lotnictwo/", lang: "pl", pair: "/en/lotnictwo/", schema: ["Service"] },
+  { file: "en/lotnictwo/index.html", route: "/en/lotnictwo/", lang: "en", pair: "/lotnictwo/", schema: ["Service"] },
+  { file: "case-studies/index.html", route: "/case-studies/", lang: "pl", pair: "/en/case-studies/", schema: ["CollectionPage", "ItemList"] },
+  { file: "en/case-studies/index.html", route: "/en/case-studies/", lang: "en", pair: "/case-studies/", schema: ["CollectionPage", "ItemList"] },
+  { file: "wiedza/index.html", route: "/wiedza/", lang: "pl", pair: "/en/wiedza/", schema: ["CollectionPage"] },
+  { file: "en/wiedza/index.html", route: "/en/wiedza/", lang: "en", pair: "/wiedza/", schema: ["CollectionPage"] },
+  { file: "wystapienia/index.html", route: "/wystapienia/", lang: "pl", pair: "/en/wystapienia/", schema: ["CollectionPage"] },
+  { file: "en/wystapienia/index.html", route: "/en/wystapienia/", lang: "en", pair: "/wystapienia/", schema: ["CollectionPage"] },
+  { file: "procurement-2026/index.html", route: "/procurement-2026/", lang: "pl", pair: null, schema: ["Article"] },
+  { file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/diagram3_maturity.html", route: "/diagrams/diagram3_maturity.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/infographic.html", route: "/diagrams/infographic.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: ["CreativeWork"] }
+]);
+
+const plan3ShellFiles = new Set(plan3ExpectedPublicPages.slice(0, 19).map(({ file }) => file));
+
+function plan3Fact(overrides = {}) {
+  return {
+    id: "fixture.claim",
+    value: "Verified claim",
+    display_pl: "Verified claim",
+    display_en: "Verified claim",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: "Owner decision, 2026-08-27",
+    source_url: null,
+    surfaces: ["index.html"],
+    status: "approved",
+    ...overrides
+  };
+}
+
+function plan3Hreflang(entry) {
+  if (entry.pair === null) {
+    return [entry.lang, "x-default"].map((lang) => `<link rel="alternate" hreflang="${lang}" href="https://mamcarz.com${entry.route}">`).join("\n");
+  }
+  const pl = entry.lang === "pl" ? entry.route : entry.pair;
+  const en = entry.lang === "en" ? entry.route : entry.pair;
+  return [
+    `<link rel="alternate" hreflang="pl" href="https://mamcarz.com${pl}">`,
+    `<link rel="alternate" hreflang="en" href="https://mamcarz.com${en}">`,
+    `<link rel="alternate" hreflang="x-default" href="https://mamcarz.com${pl}">`
+  ].join("\n");
+}
+
+function plan3Schema(entry, shape = "graph") {
+  const nodes = entry.schema.map((type) => ({ "@type": type }));
+  if (shape === "array") return JSON.stringify(nodes);
+  if (shape === "object" && nodes.length === 1) return JSON.stringify(nodes[0]);
+  return JSON.stringify({ "@context": "https://schema.org", "@graph": nodes });
+}
+
+function plan3Page(entry, { body, head = "", schema = plan3Schema(entry), hreflang = plan3Hreflang(entry), assets = null } = {}) {
+  const shellAssets = assets ?? (plan3ShellFiles.has(entry.file)
+    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">\n<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>'
+    : "");
+  const content = body ?? (entry.file === "index.html" ? '<p data-fact-id="fixture.claim">Verified claim</p>' : "Page copy");
+  const locale = entry.lang === "pl" ? "pl_PL" : "en_US";
+  const alternateLocale = entry.pair === null ? "" : `<meta property="og:locale:alternate" content="${entry.lang === "pl" ? "en_US" : "pl_PL"}">`;
+  return `<!doctype html><html lang="${entry.lang}"><head>
+<title>Fixture page</title>
+<meta name="description" content="Fixture description">
+<link rel="canonical" href="https://mamcarz.com${entry.route}">
+${hreflang}
+<meta property="og:title" content="Fixture page">
+<meta property="og:description" content="Fixture description">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mamcarz.com${entry.route}">
+<meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg">
+<meta property="og:locale" content="${locale}">
+${alternateLocale}
+<script type="application/ld+json">${schema}</script>
+${head}
+${shellAssets}
+</head><body><main><h1>Fixture page</h1>${content}</main></body></html>`;
+}
+
+function plan3Sitemap() {
+  const blocks = plan3ExpectedPublicPages.map((entry) => {
+    const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
+    return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}</url>`;
+  });
+  return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
+}
+
+async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"], factData = null, agents = "same instructions\n", claude = "same instructions\n", redirects = "https://www.mamcarz.com/* https://mamcarz.com/:splat 301\n", headers = null, sitemap = plan3Sitemap(), llms = null } = {}) {
+  const root = await mkdtemp(resolve(tmpdir(), "verify-site-plan3-"));
+  const pageFiles = Object.fromEntries(plan3ExpectedPublicPages.map((entry) => [entry.file, plan3Page(entry)]));
+  const completeHeaders = headers ?? `/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+/assets/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+`;
+  const llmsRoutes = llms ?? plan3ExpectedPublicPages.map(({ route }) => `https://mamcarz.com${route}`).join("\n");
+  const registry = factData ?? { version: 1, public_claim_surfaces: publicClaimSurfaces, facts, blocked_claims: [blockedClaim()] };
+  const allFiles = {
+    ...pageFiles,
+    "content/site-facts.json": JSON.stringify(registry),
+    "sitemap.xml": sitemap,
+    "llms.txt": llmsRoutes,
+    "llms-full.txt": "",
+    "worker/index.js": "",
+    "assets/js/main.js": validBrowserScript,
+    "assets/css/style.css": foundationCss,
+    "assets/img/IMG_3284-480.webp": Buffer.from("fixture"),
+    "404.html": "<!doctype html><html lang=pl><main><h1>404</h1></main></html>",
+    "AGENTS.md": agents,
+    "CLAUDE.md": claude,
+    "_redirects": redirects,
+    "_headers": completeHeaders,
+    ...files
+  };
+  await Promise.all(Object.entries(allFiles).map(async ([path, value]) => {
+    const target = resolve(root, path);
+    await mkdir(resolve(target, ".."), { recursive: true });
+    await writeFile(target, value);
+  }));
+  return root;
+}
+
+test("Plan 3 Task 1 accepts the exact independent 24-route metadata manifest", async () => {
+  assert.equal(plan3ExpectedPublicPages.length, 24);
+  assert.deepEqual(PUBLIC_PAGES, plan3ExpectedPublicPages);
+  const root = await plan3Root();
+  const result = await runVerification({ root, scope: "metadata" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 3 Task 1 fails closed on missing fake and duplicate route metadata", async (t) => {
+  await t.test("missing manifest file", async () => {
+    const root = await plan3Root();
+    await rm(resolve(root, "diagrams/diagram2_ariba.html"));
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-file"), result.errors.join("\n"));
+  });
+  await t.test("fake canonical", async () => {
+    const entry = plan3ExpectedPublicPages[0];
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry).replace("https://mamcarz.com/\"", "https://mamcarz.com/projekty/\"") } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-canonical"), result.errors.join("\n"));
+  });
+  await t.test("duplicate canonical", async () => {
+    const entry = plan3ExpectedPublicPages[0];
+    const duplicate = '<link rel="canonical" href="https://mamcarz.com/">';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry).replace("</head>", `${duplicate}</head>`) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-canonical"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 enforces paired PL-only and EN-only hreflang topologies", async (t) => {
+  const cases = [
+    ["paired page", plan3ExpectedPublicPages[0], (entry) => plan3Hreflang(entry).replace('hreflang="en"', 'hreflang="de"')],
+    ["PL-only page", plan3ExpectedPublicPages[18], (entry) => `${plan3Hreflang(entry)}<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/procurement-2026/">`],
+    ["EN-only page", plan3ExpectedPublicPages[19], (entry) => plan3Hreflang(entry).replace('hreflang="en"', 'hreflang="pl"')]
+  ];
+  for (const [label, entry, mutate] of cases) await t.test(label, async () => {
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { hreflang: mutate(entry) }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-hreflang"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 parses JSON-LD objects arrays graphs and reports malformed block indexes", async (t) => {
+  for (const shape of ["object", "array", "graph"]) await t.test(`legal ${shape}`, async () => {
+    const entry = plan3ExpectedPublicPages[2];
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { schema: plan3Schema(entry, shape) }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-schema"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("jsonld-parse"), false, result.errors.join("\n"));
+  });
+  await t.test("malformed second block", async () => {
+    const entry = plan3ExpectedPublicPages[2];
+    const head = '<script type="application/ld+json">{"@type":</script>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(result.errors.some((item) => item.includes(`jsonld-parse ${entry.file}: block 2:`)), result.errors.join("\n"));
+  });
+  await t.test("inactive template schema cannot satisfy the route", async () => {
+    const entry = plan3ExpectedPublicPages[2];
+    const inactive = plan3Page(entry)
+      .replace('<script type="application/ld+json">', '<template><script type="application/ld+json">')
+      .replace("</script>", "</script></template>");
+    const root = await plan3Root({ files: { [entry.file]: inactive } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-schema"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and secret material", async (t) => {
+  const cases = [
+    ["duplicate ids", [plan3Fact(), plan3Fact()], "fact-duplicate-id"],
+    ["duplicate surfaces", [plan3Fact({ surfaces: ["index.html", "index.html"] })], "fact-duplicate-surface"],
+    ["unsupported enum", [plan3Fact({ status: "published" })], "fact-status"],
+    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-08-28" })], "fact-as-of-future"],
+    ["malformed date", [plan3Fact({ kind: "dated", as_of: "2026-02-30" })], "fact-as-of"],
+    ["public source without HTTPS", [plan3Fact({ source_type: "public_source", source_url: "http://example.com/source" })], "fact-source-url"],
+    ["secret-like nested key", [plan3Fact({ evidence: { api_token: "do-not-publish" } })], "fact-secret-key"],
+    ["private path material", [plan3Fact({ source_label: "/Users/person/private/cv.pdf" })], "fact-private-material"]
+  ];
+  for (const [label, facts, expected] of cases) await t.test(label, async () => {
+    const root = await plan3Root({ facts });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 binds singular and plural fact attributes to approved exact surfaces and displays", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const cases = [
+    ["unknown singular", [plan3Fact()], '<p data-fact-id="missing.fact">Unknown</p>', "fact-attribute-unknown"],
+    ["unknown plural token", [plan3Fact()], '<p data-fact-ids="fixture.claim missing.fact">Verified claim</p>', "fact-attribute-unknown"],
+    ["not approved", [plan3Fact({ status: "review" })], '<p data-fact-id="fixture.claim">Verified claim</p>', "fact-attribute-status"],
+    ["wrong surface", [plan3Fact({ surfaces: ["en/index.html"] })], '<p data-fact-id="fixture.claim">Verified claim</p>', "fact-attribute-surface"],
+    ["missing approved display", [plan3Fact()], '<p data-fact-id="fixture.claim">Different copy</p>', "fact-display-missing"],
+    ["known review display without annotation", [plan3Fact(), plan3Fact({ id: "fixture.review", value: "Retired venture", display_pl: "Retired venture", display_en: "Retired venture", status: "review" })], '<p data-fact-id="fixture.claim">Verified claim</p><p>Retired venture</p>', "fact-known-nonapproved"]
+  ];
+  for (const [label, facts, body, expected] of cases) await t.test(label, async () => {
+    const root = await plan3Root({ facts, files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 requires approved enclosing fact IDs for visible numbers with only exact presentation exemptions", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("legal section indices and 404", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><span>01</span><span>11</span><span>01 / Diagnosis</span><span>404</span>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("unapproved date", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Established in 2001</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-visible-number"), result.errors.join("\n"));
+  });
+  await t.test("approved enclosed date", async () => {
+    const dateFact = plan3Fact({ id: "fixture.year", value: "2001", display_pl: "2001", display_en: "2001" });
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p data-fact-id="fixture.year">2001</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), dateFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 scans rejected copy only when browser-visible", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("hidden script style and comment", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><!-- innovative --><style>.x::after{content:"— comprehensive"}</style><script>const copy="not just"</script>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-rejected"), false, result.errors.join("\n"));
+  });
+  for (const copy of ["Decyzja — system", "nie tylko", "not just", "kompleksowy", "comprehensive", "innowacyjny", "innovative"]) {
+    await t.test(`visible ${copy}`, async () => {
+      const body = `<p data-fact-id="fixture.claim">Verified claim</p><p>${copy}</p>`;
+      const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+      const result = await runVerification({ root, scope: "metadata" });
+      assert.ok(errorIds(result).includes("copy-rejected"), result.errors.join("\n"));
+    });
+  }
+});
+
+test("Plan 3 Task 1 requires dated sourced enclosing facts for dynamic claims", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const dynamicFact = plan3Fact({
+    id: "fixture.dynamic",
+    value: "Currently active",
+    display_pl: "Currently active",
+    display_en: "Currently active",
+    kind: "dated",
+    as_of: "2026-08-27",
+    source_type: "public_source",
+    source_label: "Direct owner page checked 2026-08-27",
+    source_url: "https://example.com/current"
+  });
+  const body = '<p data-fact-id="fixture.claim">Verified claim</p><p data-fact-id="fixture.dynamic">Currently active</p>';
+  await t.test("approved dated source", async () => {
+    const root = await plan3Root({ facts: [plan3Fact(), dynamicFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("missing date", async () => {
+    const root = await plan3Root({ facts: [plan3Fact(), { ...dynamicFact, kind: "constant", as_of: null }], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("missing source URL", async () => {
+    const root = await plan3Root({ facts: [plan3Fact(), { ...dynamicFact, source_type: "owner_verified", source_url: null }], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("unrelated sibling fact does not satisfy", async () => {
+    const sibling = '<p data-fact-id="fixture.claim">Verified claim</p><p data-fact-id="fixture.dynamic">Different copy</p><p>Currently active</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), dynamicFact], files: { [entry.file]: plan3Page(entry, { body: sibling }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 derives discovery coverage from the independent canonical route set", async (t) => {
+  const root = await plan3Root();
+  const valid = await runVerification({ root, scope: "discovery" });
+  assert.deepEqual(valid.errors, []);
+  await t.test("missing LLM route and fake sitemap route", async () => {
+    const missing = "https://mamcarz.com/lotnictwo/";
+    const llms = plan3ExpectedPublicPages.map(({ route }) => `https://mamcarz.com${route}`).filter((url) => url !== missing).join("\n");
+    const sitemap = plan3Sitemap().replace("</urlset>", '<url><loc>https://mamcarz.com/projekty/</loc></url></urlset>');
+    const changedRoot = await plan3Root({ llms, sitemap });
+    const result = await runVerification({ root: changedRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-llms-routes"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("discovery-sitemap-routes"), result.errors.join("\n"));
+  });
+  await t.test("sitemap comments cannot replace a real route", async () => {
+    const original = plan3Sitemap();
+    const block = original.match(/<url><loc>https:\/\/mamcarz\.com\/infographic_procurement_2026_EN\.html<\/loc>[\s\S]*?<\/url>/)?.[0];
+    assert.ok(block);
+    const changedRoot = await plan3Root({ sitemap: original.replace(block, `<!--${block}-->`) });
+    const result = await runVerification({ root: changedRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-sitemap-routes"), result.errors.join("\n"));
+  });
+  await t.test("a JavaScript comment cannot satisfy a Worker fact surface", async () => {
+    const workerFact = plan3Fact({ id: "fixture.worker", value: "Worker truth", display_pl: "Worker truth", display_en: "Worker truth", surfaces: ["worker/index.js"] });
+    const indexEntry = plan3ExpectedPublicPages[0];
+    const commentRoot = await plan3Root({
+      facts: [workerFact],
+      files: { "worker/index.js": "// Worker truth", [indexEntry.file]: plan3Page(indexEntry, { body: "Page copy" }) }
+    });
+    const commentResult = await runVerification({ root: commentRoot, scope: "discovery" });
+    assert.ok(errorIds(commentResult).includes("fact-display-missing"), commentResult.errors.join("\n"));
+
+    const literalRoot = await plan3Root({
+      facts: [workerFact],
+      files: { "worker/index.js": 'const verified = "Worker truth";', [indexEntry.file]: plan3Page(indexEntry, { body: "Page copy" }) }
+    });
+    const literalResult = await runVerification({ root: literalRoot, scope: "discovery" });
+    assert.equal(errorIds(literalResult).includes("fact-display-missing"), false, literalResult.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 checks instruction bytes redirect and cache/security contracts only in all", async (t) => {
+  const cases = [
+    ["instruction mismatch", { claude: "different instructions\n" }, "instructions-sync"],
+    ["redirect drift", { redirects: "https://www.mamcarz.com/* https://mamcarz.com/:splat 302\n" }, "infrastructure-redirect"],
+    ["missing security header", { headers: "/*\n  X-Frame-Options: SAMEORIGIN\n" }, "infrastructure-headers"],
+    ["unsafe changed security value", { headers: `/*
+  X-Content-Type-Options: sniff
+  X-Frame-Options: ALLOWALL
+  Referrer-Policy: unsafe-url
+  Permissions-Policy: *
+/assets/fonts/*
+  Cache-Control: private, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: private, max-age=31536000, immutable
+/*.jpg
+  Cache-Control: private, max-age=31536000, immutable
+/*.png
+  Cache-Control: private, max-age=31536000, immutable
+/*.webp
+  Cache-Control: private, max-age=31536000, immutable
+/assets/css/*
+  Cache-Control: private, max-age=0, must-revalidate
+/assets/js/*
+  Cache-Control: private, max-age=0, must-revalidate
+` }, "infrastructure-headers"]
+  ];
+  for (const [label, options, expected] of cases) await t.test(label, async () => {
+    const root = await plan3Root(options);
+    const metadata = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(metadata).includes(expected), false, metadata.errors.join("\n"));
+    const all = await runVerification({ root, scope: "all" });
+    assert.ok(errorIds(all).includes(expected), all.errors.join("\n"));
+  });
+  await t.test("a safe duplicate cannot hide an unsafe security header", async () => {
+    const root = await plan3Root();
+    const path = resolve(root, "_headers");
+    const current = await readFile(path, "utf8");
+    await writeFile(path, current.replace("  X-Frame-Options: SAMEORIGIN", "  X-Frame-Options: ALLOWALL\n  X-Frame-Options: SAMEORIGIN"));
+    const result = await runVerification({ root, scope: "all" });
+    assert.ok(errorIds(result).includes("infrastructure-headers"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 rejects unsupported scopes without running unrelated validators", async () => {
+  const root = await plan3Root();
+  const result = await runVerification({ root, scope: "not-a-scope" });
+  assert.deepEqual(errorIds(result), ["cli-scope"]);
+});
+
+test("Plan 3 Task 1 CLI rejects unsupported and separated arguments before verification", async () => {
+  const cases = [
+    ["separated scope", ["--scope", "home"]],
+    ["separated language", ["--lang", "pl"]],
+    ["unknown option", ["--unexpected"]]
+  ];
+  for (const [label, args] of cases) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [modulePath, ...args]),
+      (cause) => {
+        assert.equal(cause.stdout, "", `${label} must not print success`);
+        const errors = cause.stderr.trim().split("\n").filter((line) => line.startsWith("ERROR "));
+        assert.equal(errors.length, 1, `${label} must stop before verification`);
+        assert.match(errors[0], /^ERROR cli-argument scripts\/verify-site\.mjs:/, label);
+        return true;
+      }
+    );
+  }
+});
+
+test("Plan 3 Task 1 package scripts expose exact deterministic validator commands", async () => {
+  const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
+  assert.equal(pkg.scripts["verify:metadata"], "node scripts/verify-site.mjs --scope=metadata");
+  assert.equal(pkg.scripts["verify:discovery"], "node scripts/verify-site.mjs --scope=discovery");
+  assert.equal(pkg.scripts["verify:seo"], "node scripts/verify-site.mjs --scope=seo");
+  assert.equal(pkg.scripts["verify:site"], "node scripts/verify-site.mjs --scope=all");
+  assert.equal(pkg.scripts["test:worker"], "node --test worker/index.test.mjs");
 });
