@@ -19,7 +19,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "198b7f6ca35fa734e5203f311b130d2bdc225f5892771a9b2b3038937f4834d8";
+const TASK10_REVIEWED_CSS_SHA256 = "8450b5b5dd7477afdf15f0ba08b5fdeda175843e31af27ad5df485eaca0d5c9f";
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
 const PLAN3_VALIDATION_DATE = "2026-08-27";
@@ -4474,6 +4474,15 @@ async function verifyFoundation(context) {
     for (const [media, selector, property, value] of footerClearanceContracts) {
       if (propertyValue(rules, selector, property, media) !== value) {
         error(context.errors, "css-footer-clearance", "assets/css/style.css", `${selector} must use ${property}: ${value} in ${media[0] ?? "base scope"}`);
+      }
+    }
+    const backToTopVisibilityContracts = [
+      [".back-to-top", "visibility", "hidden"],
+      [".back-to-top.visible", "visibility", "visible"]
+    ];
+    for (const [selector, property, value] of backToTopVisibilityContracts) {
+      if (propertyValue(rules, selector, property) !== value) {
+        error(context.errors, "css-back-to-top-visibility", "assets/css/style.css", `${selector} must use ${property}: ${value} in base scope`);
       }
     }
     const semanticCurrentRouteContracts = [
@@ -10927,10 +10936,9 @@ async function verifyInstructions(context) {
 
   const redirects = await readRequired(context, "_redirects", "infrastructure-file");
   const redirectLines = redirects.split(/\r?\n/).map((line) => line.trim()).filter((line) => line !== "" && !line.startsWith("#"));
-  const wwwRules = redirectLines.filter((line) => line.startsWith("https://www.mamcarz.com/"));
-  const exactRedirect = "https://www.mamcarz.com/* https://mamcarz.com/:splat 301";
-  if (wwwRules.length !== 1 || wwwRules[0] !== exactRedirect) {
-    error(context.errors, "infrastructure-redirect", "_redirects", `requires exactly ${exactRedirect}`);
+  const exactRedirects = "# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.\n# No path redirects are currently defined.\n";
+  if (redirects !== exactRedirects || redirectLines.length !== 0) {
+    error(context.errors, "infrastructure-redirect", "_redirects", "must contain only the reviewed comment-only Pages contract; www to apex belongs to a separately verified Cloudflare Bulk Redirect");
   }
 
   const headers = await readRequired(context, "_headers", "infrastructure-file");

@@ -13,6 +13,7 @@ import { PUBLIC_PAGES, parseCssRules, readFacts, runVerification } from "./verif
 const execFileAsync = promisify(execFile);
 const modulePath = resolve("scripts/verify-site.mjs");
 const foundationCss = await readFile(resolve("assets/css/style.css"), "utf8");
+const notFoundProductHtml = await readFile(resolve("404.html"), "utf8");
 const applicationProductHtml = {
   pl: await readFile(resolve("aplikacje-operacyjne/index.html"), "utf8"),
   en: await readFile(resolve("en/aplikacje-operacyjne/index.html"), "utf8")
@@ -690,7 +691,7 @@ function blockedClaim(overrides = {}) {
   };
 }
 
-async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], public_claim_surfaces = publicClaimSurfaceFixture, pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = legacyNavigationFixture, css = "body{}", js = validBrowserScript, llms = "", llmsFull = "", worker = "", heroImage = Buffer.from("fixture"), extraFiles = {} } = {}) {
+async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], public_claim_surfaces = publicClaimSurfaceFixture, pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = notFoundProductHtml, css = "body{}", js = validBrowserScript, llms = "", llmsFull = "", worker = "", heroImage = Buffer.from("fixture"), extraFiles = {} } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-test-"));
   const fixtureFacts = [...facts];
   for (const [id, displayPl, displayEn] of controlledAboutFacts) {
@@ -800,7 +801,7 @@ const productionFactSurfaceControls = {
     "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
     "Neutral context after the controlled claims."
   ].join("\n"),
-  worker: `const verifiedFacts = ${JSON.stringify([
+  worker: `import factRegistry from "../content/site-facts.json" with { type: "json" };\nconst verifiedFacts = ${JSON.stringify([
     "Neutral context before the controlled claims.",
     "25+ lat doświadczenia w zakupach",
     "20+ wdrożeń SAP Ariba",
@@ -5046,6 +5047,23 @@ test("foundation requires the back-to-top dual-contrast focus treatment", async 
   assert.ok(errorIds(result).includes("css-focus"));
 });
 
+test("foundation keeps the inactive back-to-top control out of keyboard focus order", async () => {
+  const result = await verifyFixtureCss(foundationCss);
+  assert.equal(
+    errorIds(result).includes("css-back-to-top-visibility"),
+    false,
+    result.errors.filter((entry) => entry.includes("css-back-to-top-visibility")).join("\n")
+  );
+});
+
+test("foundation rejects a focusable back-to-top visibility regression", async () => {
+  const css = foundationCss
+    .replace("visibility: hidden;", "visibility: visible;")
+    .replace(/(\.back-to-top\.visible \{[\s\S]*?)visibility: visible;/, "$1visibility: hidden;");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-back-to-top-visibility"));
+});
+
 test("foundation parser preserves quoted and functional semicolons before later properties", () => {
   const rules = parseCssRules('.probe { content: "alpha;{beta}:gamma"; --payload: fn(alpha; { beta }); color: red; min-height: 44px; }');
   assert.equal(rules.length, 1);
@@ -7087,7 +7105,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "198b7f6ca35fa734e5203f311b130d2bdc225f5892771a9b2b3038937f4834d8",
+    "8450b5b5dd7477afdf15f0ba08b5fdeda175843e31af27ad5df485eaca0d5c9f",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });
@@ -7362,7 +7380,7 @@ function plan3Sitemap() {
   return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
 }
 
-async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"], factData = null, agents = "same instructions\n", claude = "same instructions\n", redirects = "https://www.mamcarz.com/* https://mamcarz.com/:splat 301\n", headers = null, sitemap = plan3Sitemap(), llms = null } = {}) {
+async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"], factData = null, agents = "same instructions\n", claude = "same instructions\n", redirects = "# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.\n# No path redirects are currently defined.\n", headers = null, sitemap = plan3Sitemap(), llms = null } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-plan3-"));
   const pageFiles = Object.fromEntries(plan3ExpectedPublicPages.map((entry) => [entry.file, plan3Page(entry)]));
   const completeHeaders = headers ?? `/*
@@ -7835,9 +7853,14 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
 });
 
 test("Plan 3 Task 1 checks instruction bytes redirect and cache/security contracts only in all", async (t) => {
+  const validRoot = await plan3Root();
+  const valid = await runVerification({ root: validRoot, scope: "all" });
+  assert.equal(errorIds(valid).includes("infrastructure-redirect"), false, valid.errors.join("\n"));
+
   const cases = [
     ["instruction mismatch", { claude: "different instructions\n" }, "instructions-sync"],
-    ["redirect drift", { redirects: "https://www.mamcarz.com/* https://mamcarz.com/:splat 302\n" }, "infrastructure-redirect"],
+    ["unsupported domain-level redirect", { redirects: "https://www.mamcarz.com/* https://mamcarz.com/:splat 301\n" }, "infrastructure-redirect"],
+    ["unreviewed path redirect", { redirects: "/old-path /new-path 301\n" }, "infrastructure-redirect"],
     ["missing security header", { headers: "/*\n  X-Frame-Options: SAMEORIGIN\n" }, "infrastructure-headers"],
     ["unsafe changed security value", { headers: `/*
   X-Content-Type-Options: sniff

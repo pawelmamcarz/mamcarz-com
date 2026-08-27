@@ -40,8 +40,8 @@ ${approvedFactLines.join("\n")}
 
 Kontakt bezpośredni: mailto:pawel@mamcarz.com`;
 
-const HIGH_RISK_PL = /\b(klient|wynik|rezultat|licencj|uprawnien|certyfikat|nagrod|wyróżnien|ile|liczb|wartość|pracował|stanowisk|rola|aktywn|działa obecnie|aktualn)\w*/iu;
-const HIGH_RISK_EN = /\b(client|result|licen[cs]e|qualification|certificate|award|how many|number|value|worked|position|role|active|currently|current status)\w*/iu;
+const HIGH_RISK_PL = /\b(klient|wynik|rezultat|licencj|uprawnien|certyfikat|nagrod|wyróżnien|ile|liczb|wartość|wydajno|pojemno|sklep|rafineri|pracował|stanowisk|rola|aktywn|działa obecnie|aktualn)\w*/iu;
+const HIGH_RISK_EN = /\b(client|result|licen[cs]e|qualification|certificate|award|how many|number|value|capacity|throughput|stores?|refiner|worked|position|role|active|currently|current status)\w*/iu;
 const HIGH_RISK_ID_PREFIXES = [
   "client.", "career.", "project.", "education.", "aviation.credential.", "award.", "availability."
 ];

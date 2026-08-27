@@ -2200,6 +2200,7 @@ footer {
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
   transform: translateY(8px);
   transition: opacity 160ms ease, transform 160ms ease;
 }
@@ -2207,6 +2208,7 @@ footer {
 .back-to-top.visible {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
   transform: translateY(0);
 }
 

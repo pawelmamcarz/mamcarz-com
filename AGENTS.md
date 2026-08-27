@@ -20,7 +20,7 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 - Lokalny `./deploy.sh` najpierw wykonuje push, potem deploy; jest w `.gitignore` i może nie istnieć w świeżym klonie.
 - Worker czatu w `worker/` jest osobnym wdrożeniem: `cd worker && wrangler deploy`.
 - Push, merge, deploy Pages i deploy Workera są osobnymi bramkami. Nie wykonuj żadnej z nich bez odpowiedniego zatwierdzenia.
-- `_headers` definiuje nagłówki bezpieczeństwa i cache, a `_redirects` jedyny redirect `www` na apex. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
+- `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i obecnie nie zawiera aktywnych reguł. Redirect `www` na apex jest konfiguracją Cloudflare Bulk Redirect poza repozytorium; przed wydaniem trzeba osobno odczytać jego stan i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
 
 ## Struktura i manifest tras
 
