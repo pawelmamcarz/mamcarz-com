@@ -72,19 +72,24 @@ const PLAN3_REJECTED_COPY = Object.freeze([
 const PLAN3_PL_NAJWIEKSZY_ENDING = "(?:zymi|zych|zego|zemu|zej|zym|zą|zy|za|ze)";
 const PLAN3_PL_PARTICIPLE_ENDING = "(?:ymi|ych|ego|emu|ej|ym|ą|y|a|e)";
 const PLAN3_PL_CURRENT_ENDING = "(?:ymi|ych|ego|emu|ie|ej|ym|ą|i|y|a|e)";
+const PLAN3_TOKEN_CHARACTER = "\\p{L}\\p{M}\\p{N}\\p{Pc}";
+const PLAN3_TOKEN_START = `(?<![${PLAN3_TOKEN_CHARACTER}])`;
+const PLAN3_TOKEN_END = `(?![${PLAN3_TOKEN_CHARACTER}])`;
+const PLAN3_BLOCK_BOUNDARY = "\uFFFC";
 const PLAN3_DYNAMIC_COPY = new RegExp([
-  "#\\s*1(?![\\p{L}\\p{N}_])",
-  `(?<!\\p{L})(?:najwięks${PLAN3_PL_NAJWIEKSZY_ENDING}|najwięksi)(?!\\p{L})`,
-  "(?<!\\p{L})largest(?!\\p{L})",
-  `(?<!\\p{L})wiodąc${PLAN3_PL_PARTICIPLE_ENDING}(?!\\p{L})`,
-  "(?<!\\p{L})leading(?!\\p{L})",
-  `(?<!\\p{L})aktywn${PLAN3_PL_CURRENT_ENDING}(?!\\p{L})`,
-  `(?<!\\p{L})aktualn${PLAN3_PL_CURRENT_ENDING}(?!\\p{L})`,
-  `(?<!\\p{L})obecn${PLAN3_PL_CURRENT_ENDING}(?!\\p{L})`,
-  "(?<!\\p{L})active(?!\\p{L})",
-  "(?<!\\p{L})currently(?!\\p{L})",
-  "(?<!\\p{L})current(?:\\s+|-)status(?!\\p{L})",
-  "(?<!\\p{L})(?:as of|stan na|według stanu na|czerwiec|june)(?!\\p{L})[^.!?\\n]{0,80}(?<!\\p{N})\\d{4}(?!\\p{N})"
+  `${PLAN3_TOKEN_START}#\\s*1${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}(?:najwięks${PLAN3_PL_NAJWIEKSZY_ENDING}|najwięksi)${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}largest${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}wiodąc${PLAN3_PL_PARTICIPLE_ENDING}${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}leading${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}aktywn${PLAN3_PL_CURRENT_ENDING}${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}aktualn${PLAN3_PL_CURRENT_ENDING}${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}obecn${PLAN3_PL_CURRENT_ENDING}${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}active${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}current(?:\\s+|-)status${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}currently${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}current${PLAN3_TOKEN_END}`,
+  `${PLAN3_TOKEN_START}(?:as of|stan na|według stanu na|czerwiec|june)${PLAN3_TOKEN_END}[^\\uFFFC.!?\\n]{0,80}${PLAN3_TOKEN_START}\\d{4}${PLAN3_TOKEN_END}`
 ].join("|"), "iu");
 
 const VALID_FAMILIES = new Set([
@@ -176,6 +181,9 @@ const htmlNamedCharacterReferences = new Map([
   ["apos", "'"],
   ["mdash", "—"],
   ["nbsp", "\u00a0"],
+  ["shy", "\u00ad"], ["ZeroWidthSpace", "\u200b"],
+  ["zwnj", "\u200c"], ["zwj", "\u200d"],
+  ["lrm", "\u200e"], ["rlm", "\u200f"],
   ["sol", "/"], ["bsol", "\\"],
   ["Tab", "\t"], ["NewLine", "\n"],
   ["colon", ":"], ["comma", ","]
@@ -187,7 +195,9 @@ function decodeHtmlEntities(text) {
     const entity = match.slice(2).replace(/;$/, "");
     const hexadecimal = entity[0] === "x" || entity[0] === "X";
     const codePoint = Number.parseInt(hexadecimal ? entity.slice(1) : entity, hexadecimal ? 16 : 10);
-    return codePoint > 0 && codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : "�";
+    return codePoint > 0 && codePoint <= 0x10FFFF && !(codePoint >= 0xD800 && codePoint <= 0xDFFF)
+      ? String.fromCodePoint(codePoint)
+      : "�";
   });
 }
 
@@ -7933,17 +7943,54 @@ function plan3NodeWithin(node, element) {
   return false;
 }
 
+function plan3TextRepresentation(chunks) {
+  const raw = chunks.map(({ value }) => value).join("");
+  const text = normalizeExactHtmlLiteral(raw);
+  const rangesByNode = new Map();
+  let rawCursor = 0;
+  for (const chunk of chunks) {
+    const rawStart = rawCursor;
+    rawCursor += chunk.value.length;
+    if (chunk.node === null) continue;
+    const start = normalizeExactHtmlLiteral(raw.slice(0, rawStart)).length;
+    const end = normalizeExactHtmlLiteral(raw.slice(0, rawCursor)).length;
+    if (end <= start) continue;
+    const ranges = rangesByNode.get(chunk.node) ?? [];
+    ranges.push({ start, end });
+    rangesByNode.set(chunk.node, ranges);
+  }
+  return { raw, text, rangesByNode };
+}
+
+function plan3VisibleSubtreeRepresentation(element) {
+  const chunks = [];
+  const visit = (node, root = false) => {
+    if (node.type === "element" && !plan3ElementPublishesCopy(node)) return;
+    if (node.type === "text") {
+      chunks.push({ value: node.value, node });
+      return;
+    }
+    const boundary = !root && node.type === "element" && blockTextElements.has(node.name);
+    if (boundary) chunks.push({ value: PLAN3_BLOCK_BOUNDARY, node: null });
+    for (const child of node.children ?? []) visit(child);
+    if (boundary) chunks.push({ value: PLAN3_BLOCK_BOUNDARY, node: null });
+  };
+  visit(element, true);
+  return plan3TextRepresentation(chunks);
+}
+
 function plan3CopyUnits(body) {
   const units = [];
   const byElement = new Map();
   const append = (owner, value, fragment = null) => {
     let unit = byElement.get(owner);
     if (unit === undefined) {
-      unit = { element: owner, raw: "", fragments: [] };
+      unit = { element: owner, raw: "", fragments: [], chunks: [] };
       byElement.set(owner, unit);
       units.push(unit);
     }
     unit.raw += value;
+    unit.chunks.push({ value, node: fragment });
     if (fragment !== null) unit.fragments.push(fragment);
   };
   const visit = (node) => {
@@ -7964,59 +8011,107 @@ function plan3CopyUnits(body) {
   };
   visit(body);
   return units
-    .map((unit) => ({ ...unit, text: normalizeExactHtmlLiteral(unit.raw) }))
+    .map((unit) => ({ ...unit, ...plan3TextRepresentation(unit.chunks) }))
     .filter((unit) => nonEmptyString(unit.text));
-}
-
-function plan3UnitElementText(unit, element) {
-  if (element === unit.element) return unit.text;
-  const raw = unit.fragments.filter((node) => plan3NodeWithin(node, element)).map((node) => node.value).join("");
-  return normalizeExactHtmlLiteral(raw);
-}
-
-function plan3UnitFactMarkers(unit) {
-  const candidates = new Set([unit.element, ...elementDescendants(unit.element)]);
-  for (let current = unit.element.parent; current?.type === "element" && !blockTextElements.has(current.name); current = current.parent) {
-    candidates.add(current);
-  }
-  return [...candidates]
-    .filter((element) => plan3ElementPublishesCopy(element)
-      && (element.attributes.has("data-fact-id") || element.attributes.has("data-fact-ids")));
 }
 
 function plan3LocalizedFactDisplay(fact, lang) {
   return normalizeExactHtmlLiteral(lang === "pl" ? fact.display_pl : fact.display_en);
 }
 
-function plan3FactDisplayRanges(unit, state, path, lang, predicate = () => true) {
+function plan3MapRepresentationRange(source, start, end, target) {
+  const pieces = [];
+  for (const [node, sourceRanges] of source.rangesByNode) {
+    for (const sourceRange of sourceRanges) {
+      const overlapStart = Math.max(start, sourceRange.start);
+      const overlapEnd = Math.min(end, sourceRange.end);
+      if (overlapStart >= overlapEnd) continue;
+      const targetRanges = target.rangesByNode.get(node);
+      if (!Array.isArray(targetRanges) || targetRanges.length !== 1) return null;
+      const targetRange = targetRanges[0];
+      const mappedStart = targetRange.start + overlapStart - sourceRange.start;
+      const mappedEnd = targetRange.start + overlapEnd - sourceRange.start;
+      if (mappedStart < targetRange.start || mappedEnd > targetRange.end) return null;
+      pieces.push({ sourceStart: overlapStart, start: mappedStart, end: mappedEnd });
+    }
+  }
+  if (pieces.length === 0) return null;
+  pieces.sort((left, right) => left.sourceStart - right.sourceStart);
+  return { start: pieces[0].start, end: pieces[pieces.length - 1].end };
+}
+
+function plan3DisplayRanges(representation, marker, state, path, lang, predicate) {
   const ranges = [];
-  for (const marker of plan3UnitFactMarkers(unit)) {
-    const markerText = plan3UnitElementText(unit, marker);
-    if (!nonEmptyString(markerText)) continue;
-    const markerOffset = marker === unit.element ? 0 : unit.text.indexOf(markerText);
-    if (markerOffset === -1) continue;
-    for (const id of plan3ElementFactIds(marker, path, [])) {
-      const fact = state.byId.get(id);
-      if (fact?.status !== "approved"
-        || !Array.isArray(fact.surfaces)
-        || !fact.surfaces.includes(path)
-        || !predicate(fact)) continue;
-      const display = plan3LocalizedFactDisplay(fact, lang);
-      if (!nonEmptyString(display)) continue;
-      let cursor = 0;
-      while (cursor <= markerText.length - display.length) {
-        const index = markerText.indexOf(display, cursor);
-        if (index === -1) break;
-        ranges.push({ start: markerOffset + index, end: markerOffset + index + display.length, fact });
-        cursor = index + Math.max(display.length, 1);
-      }
+  for (const id of plan3ElementFactIds(marker, path, [])) {
+    const fact = state.byId.get(id);
+    if (fact?.status !== "approved"
+      || !Array.isArray(fact.surfaces)
+      || !fact.surfaces.includes(path)
+      || !predicate(fact)) continue;
+    const display = plan3LocalizedFactDisplay(fact, lang);
+    if (!nonEmptyString(display)) continue;
+    let cursor = 0;
+    while (cursor <= representation.text.length - display.length) {
+      const index = representation.text.indexOf(display, cursor);
+      if (index === -1) break;
+      ranges.push({ start: index, end: index + display.length, fact });
+      cursor = index + Math.max(display.length, 1);
     }
   }
   return ranges;
 }
 
-function plan3RangeOwns(ranges, start, end) {
-  return ranges.some((range) => start >= range.start && end <= range.end);
+function plan3FactOwnsOccurrence(source, occurrence, markers, markerRepresentations, state, path, lang, predicate = () => true) {
+  for (const marker of markers) {
+    let representation = markerRepresentations.get(marker);
+    if (representation === undefined) {
+      representation = plan3VisibleSubtreeRepresentation(marker);
+      markerRepresentations.set(marker, representation);
+    }
+    const mapped = plan3MapRepresentationRange(source, occurrence.start, occurrence.end, representation);
+    if (mapped === null) continue;
+    const ranges = plan3DisplayRanges(representation, marker, state, path, lang, predicate);
+    if (ranges.some((range) => mapped.start >= range.start && mapped.end <= range.end)) return true;
+  }
+  return false;
+}
+
+const PLAN3_PUBLIC_TEXT_ATTRIBUTES = new Set(["alt", "title", "aria-label", "content", "placeholder", "value"]);
+
+function plan3UnsupportedNamedReferences(value) {
+  const unsupported = [];
+  for (const match of value.matchAll(/&([A-Za-z][A-Za-z0-9]+);/g)) {
+    if (!htmlNamedCharacterReferences.has(match[1]) && !unsupported.includes(match[0])) unsupported.push(match[0]);
+  }
+  return unsupported;
+}
+
+function plan3ReportUnsupportedHtmlEntities(parsedRoot, body, path, errors) {
+  for (const node of documentNodeDescendants(body).filter((item) => item.type === "text")) {
+    if (node.parent?.type !== "element" || !plan3ElementPublishesCopy(node.parent)) continue;
+    const unsupported = plan3UnsupportedNamedReferences(node.value);
+    if (unsupported.length > 0) {
+      error(errors, "copy-entity-unsupported", path, `${plan3ElementPath(node.parent)} contains unsupported named entities: ${unsupported.join(", ")}`);
+    }
+  }
+  for (const element of plan3DocumentElements(parsedRoot)) {
+    const inHead = plan3HeadElement(element);
+    if (!inHead && !plan3ElementPublishesCopy(element)) continue;
+    const publicValues = [];
+    if (inHead && (element.name === "title"
+      || (element.name === "script" && normalize(elementAttribute(element, "type") ?? "") === "application/ld+json"))) {
+      publicValues.push(["text", rawElementText(element)]);
+    }
+    for (const [name, value] of element.attributes) {
+      if (PLAN3_PUBLIC_TEXT_ATTRIBUTES.has(name)) publicValues.push([`@${name}`, value]);
+    }
+    for (const [surface, value] of publicValues) {
+      const unsupported = plan3UnsupportedNamedReferences(value);
+      if (unsupported.length > 0) {
+        error(errors, "copy-entity-unsupported", path, `${plan3ElementPath(element)} ${surface} contains unsupported named entities: ${unsupported.join(", ")}`);
+      }
+    }
+  }
 }
 
 function plan3ElementPath(element) {
@@ -8078,12 +8173,16 @@ function plan3PresentationNumber(text, token) {
 function plan3DynamicOccurrences(text) {
   const flags = PLAN3_DYNAMIC_COPY.flags.includes("g") ? PLAN3_DYNAMIC_COPY.flags : `${PLAN3_DYNAMIC_COPY.flags}g`;
   return [...text.matchAll(new RegExp(PLAN3_DYNAMIC_COPY.source, flags))]
-    .map((match) => ({ value: match[0], start: match.index, end: match.index + match[0].length }));
+    .map((match) => ({ value: match[0], start: match.index, end: match.index + match[0].length }))
+    .filter((occurrence) => {
+      if (!/^(?:active|aktywn)/iu.test(occurrence.value)) return true;
+      const prefix = text.slice(0, occurrence.start);
+      return !new RegExp(`(?:^|[^${PLAN3_TOKEN_CHARACTER}])(?:not|nie)(?:\\s+|-)$`, "iu").test(prefix);
+    });
 }
 
-function plan3HtmlFactSearchTexts(parsedRoot, units) {
-  const values = units.map((unit) => unit.text);
-  const publicAttributes = new Set(["alt", "title", "aria-label", "content", "placeholder", "value"]);
+function plan3HtmlFactSearchTexts(parsedRoot, publicCopy) {
+  const values = [publicCopy.text];
   for (const element of plan3DocumentElements(parsedRoot)) {
     const inHead = plan3HeadElement(element);
     if (!inHead && !plan3ElementPublishesCopy(element)) continue;
@@ -8092,7 +8191,7 @@ function plan3HtmlFactSearchTexts(parsedRoot, units) {
       values.push(normalizeExactHtmlLiteral(rawElementText(element)));
     }
     for (const [name, value] of element.attributes) {
-      if (publicAttributes.has(name)) values.push(normalizeExactHtmlLiteral(value));
+      if (PLAN3_PUBLIC_TEXT_ATTRIBUTES.has(name)) values.push(normalizeExactHtmlLiteral(value));
     }
   }
   return values.filter(nonEmptyString).map(normalize);
@@ -8111,8 +8210,13 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
   }
 
   const body = htmlBodyRoot(parsedRoot);
+  const publicCopy = plan3VisibleSubtreeRepresentation(body);
   const units = plan3CopyUnits(body);
-  const publicSearchTexts = plan3HtmlFactSearchTexts(parsedRoot, units);
+  const markers = elements.filter((element) => plan3ElementPublishesCopy(element)
+    && (element.attributes.has("data-fact-id") || element.attributes.has("data-fact-ids")));
+  const markerRepresentations = new Map();
+  plan3ReportUnsupportedHtmlEntities(parsedRoot, body, path, errors);
+  const publicSearchTexts = plan3HtmlFactSearchTexts(parsedRoot, publicCopy);
   const publishes = (candidate) => publicSearchTexts.some((text) => text.includes(normalize(candidate)));
   for (const fact of state.records) {
     if (fact.status === "approved" && Array.isArray(fact.surfaces) && fact.surfaces.includes(path)) {
@@ -8133,26 +8237,26 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
   }
 
   for (const pattern of PLAN3_REJECTED_COPY) {
-    if (units.some((unit) => {
-      pattern.lastIndex = 0;
-      return pattern.test(unit.text);
-    })) error(errors, "copy-rejected", path, `visible copy matches ${pattern}`);
+    pattern.lastIndex = 0;
+    if (pattern.test(publicCopy.text)) error(errors, "copy-rejected", path, `visible copy matches ${pattern}`);
   }
 
   for (const unit of units) {
-    const factRanges = plan3FactDisplayRanges(unit, state, path, entry.lang);
     const unownedNumbers = plan3UnitNumericTokens(unit).filter((token) => !plan3PresentationNumber(token.presentationText, token)
-      && !plan3RangeOwns(factRanges, token.start, token.end));
+      && !plan3FactOwnsOccurrence(unit, token, markers, markerRepresentations, state, path, entry.lang));
     if (unownedNumbers.length > 0) {
       error(errors, "fact-visible-number", path, `${plan3ElementPath(unit.element)} has unowned numeric tokens: ${unownedNumbers.map(({ value }) => value).join(", ")}`);
     }
-    const dynamicRanges = plan3FactDisplayRanges(unit, state, path, entry.lang, (fact) => fact.kind === "dated"
+  }
+
+  const dynamicPredicate = (fact) => fact.kind === "dated"
       && nonEmptyString(fact.as_of)
       && isIsoDate(fact.as_of)
       && fact.as_of <= PLAN3_VALIDATION_DATE
-      && plan3DirectHttpsUrl(fact.source_url));
+      && plan3DirectHttpsUrl(fact.source_url);
+  for (const unit of units) {
     const unownedDynamic = plan3DynamicOccurrences(unit.text)
-      .filter((occurrence) => !plan3RangeOwns(dynamicRanges, occurrence.start, occurrence.end));
+      .filter((occurrence) => !plan3FactOwnsOccurrence(unit, occurrence, markers, markerRepresentations, state, path, entry.lang, dynamicPredicate));
     if (unownedDynamic.length > 0) {
       error(errors, "fact-dynamic-claim", path, `${plan3ElementPath(unit.element)} has dynamic copy outside an exact approved dated display: ${unownedDynamic.map(({ value }) => value).join(", ")}`);
     }
@@ -8176,6 +8280,13 @@ function plan3InsideTemplate(element) {
 
 function plan3DocumentElements(parsedRoot, name = null) {
   return elementDescendants(parsedRoot, name).filter((element) => !plan3InsideTemplate(element));
+}
+
+function plan3ElementInActualPublicBody(element, parsedRoot) {
+  const bodies = plan3DocumentElements(parsedRoot, "body");
+  return bodies.length === 1
+    && plan3NodeWithin(element, bodies[0])
+    && plan3ElementPublishesCopy(element);
 }
 
 function plan3MetadataElements(parsedRoot, name) {
@@ -8242,9 +8353,9 @@ async function verifyMetadata(factData, context) {
     const mains = structural.filter((element) => element.name === "main");
     const headings = structural.filter((element) => element.name === "h1");
     if (mains.length !== 1) error(context.errors, "metadata-main", entry.file, `expected exactly one structural main; found ${mains.length}`);
-    else if (!plan3ElementPublishesCopy(mains[0])) error(context.errors, "metadata-main", entry.file, "the sole structural main must be publicly visible");
+    else if (!plan3ElementInActualPublicBody(mains[0], parsed.root)) error(context.errors, "metadata-main", entry.file, "the sole structural main must be inside the public body tree");
     if (headings.length !== 1) error(context.errors, "metadata-h1", entry.file, `expected exactly one structural h1; found ${headings.length}`);
-    else if (!plan3ElementPublishesCopy(headings[0])) error(context.errors, "metadata-h1", entry.file, "the sole structural h1 must be publicly visible");
+    else if (!plan3ElementInActualPublicBody(headings[0], parsed.root)) error(context.errors, "metadata-h1", entry.file, "the sole structural h1 must be inside the public body tree");
 
     const titles = plan3MetadataElements(parsed.root, "title");
     if (titles.length !== 1 || !nonEmptyString(normalizeExactHtmlLiteral(rawElementText(titles[0])))) {

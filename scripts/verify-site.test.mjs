@@ -7572,11 +7572,12 @@ test("Plan 3 Task 1 fix round 1 binds dynamic claims to their exact localized fa
     source_url: "https://example.com/current",
     surfaces: ["index.html", "en/index.html"]
   });
-  await t.test("a broad component marker cannot authorize a descendant claim", async () => {
+  await t.test("a broad marker authorizes only its exact descendant display", async () => {
     const body = '<div data-fact-id="fixture.dynamic"><p>Obecnie aktywny</p></div>';
     const root = await plan3Root({ facts: [{ ...dynamic, surfaces: ["index.html"] }], files: { [plEntry.file]: plan3Page(plEntry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
-    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
   });
   await t.test("a second dynamic assertion cannot borrow the first exact display", async () => {
     const body = '<p data-fact-id="fixture.dynamic">Obecnie aktywny. Wiodący dostawca.</p>';
@@ -7814,14 +7815,16 @@ test("Plan 3 Task 1 fix round 2 assigns inline sibling copy to semantic owners",
     assert.equal(numeric.some((item) => /01OPS|0102030405|12345/.test(item)), false, numeric.join("\n"));
     for (const value of [1, 2, 3, 4, 5]) assert.ok(numeric.some((item) => item.endsWith(`unowned numeric tokens: ${value}`)), numeric.join("\n"));
   });
-  await t.test("direct parent text joins inline markup but sibling-only and spaced fragments do not", async () => {
+  await t.test("inline sibling concatenation follows actual whitespace and block boundaries", async () => {
     const bodies = [
       '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol<span>pharma</span></p>',
-      '<p data-fact-id="fixture.claim">Verified claim</p><p><span>Pol</span><span>pharma</span></p><p>Pol <span>pharma</span></p><p>Pol</p><p>pharma</p>'
+      '<p data-fact-id="fixture.claim">Verified claim</p><p><span>Pol</span><span>pharma</span></p>',
+      '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol <span>pharma</span></p><p>Pol</p><p>pharma</p>'
     ];
     const roots = await Promise.all(bodies.map((body) => plan3Root({ files: { [plEntry.file]: plan3Page(plEntry, { body }) } })));
-    const [joined, separated] = await Promise.all(roots.map((root) => runVerification({ root, scope: "metadata" })));
-    assert.ok(errorIds(joined).includes("blocked-client.polpharma"), joined.errors.join("\n"));
+    const [direct, adjacent, separated] = await Promise.all(roots.map((root) => runVerification({ root, scope: "metadata" })));
+    assert.ok(errorIds(direct).includes("blocked-client.polpharma"), direct.errors.join("\n"));
+    assert.ok(errorIds(adjacent).includes("blocked-client.polpharma"), adjacent.errors.join("\n"));
     assert.equal(errorIds(separated).includes("blocked-client.polpharma"), false, separated.errors.join("\n"));
   });
   await t.test("real SEO output contains no sibling-concatenation artifacts and restores status findings", async () => {
@@ -7866,6 +7869,227 @@ test("Plan 3 Task 1 fix round 2 requires the sole structural landmarks to be pub
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
     assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 separates public scan text from semantic claim owners", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const currentFact = plan3Fact({
+    id: "fixture.current-venture",
+    value: "akrobacja.com is the current aviation venture",
+    display_pl: "Aktualna marka działalności lotniczej",
+    display_en: "Current aviation venture",
+    kind: "dated",
+    as_of: "2026-08-26",
+    source_type: "public_source",
+    source_label: "Owner status checked 2026-08-26",
+    source_url: "https://example.com/status",
+    surfaces: [entry.file]
+  });
+  await t.test("adjacent inline siblings cannot hide a blocked entity", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>Pol</span><span>pharma</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma"), result.errors.join("\n"));
+  });
+  await t.test("adjacent inline siblings cannot hide rejected copy", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>not</span><span> just</span><span> software</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("copy-rejected"), result.errors.join("\n"));
+  });
+  await t.test("a wrapper-only inline fact exposes its complete localized display", async () => {
+    const body = '<p data-fact-id="fixture.current-venture"><span>Aktualna marka</span><span> działalności lotniczej</span></p>';
+    const root = await plan3Root({ facts: [currentFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("an exact display in a broad marker cannot authorize an unrelated sibling claim", async () => {
+    const body = `<div data-fact-id="fixture.current-venture">
+      <p><span>Aktualna marka</span><span> działalności lotniczej</span></p>
+      <p>Aktualna oferta doradcza</p>
+    </div>`;
+    const root = await plan3Root({ facts: [currentFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    const dynamic = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(dynamic.length, 1, dynamic.join("\n"));
+    assert.match(dynamic[0], /p\[2\].*: Aktualna$/);
+  });
+  await t.test("numeric navigation siblings remain separate semantic owners", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <nav><span>01</span><span>OPS</span></nav>
+      <div><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const numeric = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(numeric.some((item) => /01OPS|12345/.test(item)), false, numeric.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 fails closed on public-copy HTML entity smuggling", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  await t.test("decimal and hexadecimal numeric references rejoin prohibited names", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p>Pol&#173;pharma</p><p>Pol&#xADpharma</p><p>Pol&#x200B;pharma</p>
+      <p>Warsaw&#8203;FlightSafety</p><p>Warsaw&#8203FlightSafety</p>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("fact-known-nonapproved"), result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("supported default-ignorable named references rejoin prohibited names", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol&shy;pharma</p><p>Warsaw&ZeroWidthSpace;FlightSafety</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("fact-known-nonapproved"), result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("ordinary ampersand and nonbreaking-space references remain supported", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>R&amp;D&nbsp;team</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("an unresolved long named reference emits one actionable diagnostic", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Public&CounterClockwiseContourIntegral;copy</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR copy-entity-unsupported ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /html\[1\]>body\[1\]>main\[1\]>p\[2\].*&CounterClockwiseContourIntegral;/);
+  });
+  await t.test("decoded ignorable references do not cross true block boundaries", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p>Pol&shy;</p><p>pharma</p><p>Warsaw&ZeroWidthSpace;</p><p>FlightSafety</p>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("blocked-client.polpharma"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-known-nonapproved"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 applies complete English dynamics with Unicode token boundaries", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("active current and currently remain true dynamic claims", async () => {
+    const copies = ["active", "currently", "current", "Current aviation venture"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copies.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(findings.length, copies.length, findings.join("\n"));
+    for (const token of ["active", "currently", "current", "Current"]) {
+      assert.ok(findings.some((item) => item.endsWith(`: ${token}`)), `${token}\n${findings.join("\n")}`);
+    }
+  });
+  await t.test("letters marks numbers connectors and immediate negation prevent false matches", async () => {
+    const safe = ["Active24", "_active", "active_count", "Xactive", "activeX", "a\u0301active", "active\u0301", "not active", "not-active", "nieaktywny", "nie aktywny"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${safe.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("Current aviation venture requires a dated sourced fact", async () => {
+    const current = plan3Fact({
+      id: "fixture.current",
+      value: "Current aviation venture",
+      display_pl: "Current aviation venture",
+      display_en: "Current aviation venture",
+      surfaces: [entry.file]
+    });
+    const body = '<p data-fact-id="fixture.current">Current aviation venture</p>';
+    const root = await plan3Root({ facts: [current], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("a dated sourced Current aviation venture display is authorized", async () => {
+    const current = plan3Fact({
+      id: "fixture.current",
+      value: "Current aviation venture",
+      display_pl: "Current aviation venture",
+      display_en: "Current aviation venture",
+      kind: "dated",
+      as_of: "2026-08-26",
+      source_type: "public_source",
+      source_label: "Owner status checked 2026-08-26",
+      source_url: "https://example.com/status",
+      surfaces: [entry.file]
+    });
+    const body = '<p data-fact-id="fixture.current">Current aviation venture</p>';
+    const root = await plan3Root({ facts: [current], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 requires landmarks inside the actual public body tree", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("a sole main in head is rejected", async () => {
+    const html = plan3Page(entry)
+      .replace("</head><body><main>", "<main></main></head><body><div>")
+      .replace("</main></body>", "</div></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+  });
+  await t.test("a sole h1 in head is rejected", async () => {
+    const html = plan3Page(entry).replace(
+      "</head><body><main><h1>Fixture page</h1>",
+      "<h1>Fixture page</h1></head><body><main>"
+    );
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("landmarks outside body at the document root are rejected", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main><h1>Fixture page</h1>", "<body><div>")
+      .replace("</main></body></html>", "</div></body><main><h1>Fixture page</h1></main></html>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("the ordinary visible body landmarks remain accepted", async () => {
+    const root = await plan3Root();
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+  await t.test("head decoys plus body landmarks still fail exact cardinality", async () => {
+    const head = "<main><h1>Head decoy</h1></main>";
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("template landmark decoys stay outside structural counts", async () => {
+    const head = "<template><main><h1>Template decoy</h1></main></template>";
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+  await t.test("noscript landmarks cannot satisfy the public body contract", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main>", "<body><noscript><main>")
+      .replace("</main></body>", "</main></noscript></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
   });
 });
 
