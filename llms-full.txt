@@ -127,7 +127,7 @@ Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with 
 
 Improv performer at Resort Komedii: live improvised comedy shows at Resort Komedii in Warsaw (resortkomedii.pl).
 
-Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (transport app), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator).
+Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (fleet TCO calculator using the Bielik model), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator).
 
 Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX.
 

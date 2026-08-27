@@ -29,6 +29,11 @@ const speakingProductHtml = {
   pl: await readFile(resolve("wystapienia/index.html"), "utf8"),
   en: await readFile(resolve("en/wystapienia/index.html"), "utf8")
 };
+const speakingProductAssets = Object.freeze(Object.fromEntries(await Promise.all([
+  "assets/img/speaking/procurement-beyond-episode-8-960.webp",
+  "assets/img/speaking/procurement-beyond-episode-8-1510.webp",
+  "assets/img/speaking/procurement-beyond-episode-8-1510.jpg"
+].map(async (path) => [path, await readFile(resolve(path))]))));
 const procurementParentProductHtml = await readFile(resolve("procurement-2026/index.html"), "utf8");
 const artifactPaths = Object.freeze([
   "diagrams/diagram1_universal.html",
@@ -211,24 +216,24 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "3d45dca047f8cfa2044c9eb547cdb935f7220ebfa759fb70a91f77bf6dbb2b29",
-  "en/index.html": "b93b7164f474044a03aa2977591858309cbf393ed008c8ec329927ee1efbd895",
+  "index.html": "df6e87d59542bced3e25ddb49a13aa902a707a9be8d754ae1cb6792c0b249970",
+  "en/index.html": "dd4307af00a9d243be430666448c389603cdcf77ecbd2ec6af56d35c47afadbb",
   "uslugi/transformacja-zakupow/index.html": "2f28530bccea6ef33d3e3479f22cfd8959a4b844476abc55500d0bfab0c95868",
   "en/uslugi/transformacja-zakupow/index.html": "dd955cb8ef3901f502a40ce12e8f454e7cdb658df1e93aa5e57cd0bcbb898114",
   "uslugi/wdrozenie-sap-ariba/index.html": "2258552b1a7b26978aa62e086c64a1a62d3405258aa3feed73ac85ceb051b434",
   "en/uslugi/wdrozenie-sap-ariba/index.html": "ae08e5df6eb0d707062d2e6b9182974b33d68a9d4e869cea00563183064545a6",
   "uslugi/doradztwo-zamowienia-publiczne/index.html": "2b9acecf1cdff6e666f7c74a8aec57b355cb080bcc4578d289e6a1128e9c65df",
   "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "99afb166df0bb7f17140b74b54c496908571bc08501a0396480d66200a61d453",
-  "aplikacje-operacyjne/index.html": "da365d359e8013f619fff8dff4144c9c3af82ff2738a4fb44aa6137a6d9e3b67",
-  "en/aplikacje-operacyjne/index.html": "467f9d9b449d8637d02f46728cab86784aea00cd6fce16bed760054992acdaa6",
+  "aplikacje-operacyjne/index.html": "5c8e79f7ce7d1f6ef5cdbc4d7deab874fde35322d0cd2c5ee839a95ae47062c8",
+  "en/aplikacje-operacyjne/index.html": "e206c4be277218456ab59135583d8e6eacd17a0d3d2e483a466be0e5ce2cdb35",
   "lotnictwo/index.html": "26efb1d2f17eb76756cc2db9ba0eb9d9544237373e680fe8cf56bbdb6a9faec4",
   "en/lotnictwo/index.html": "05438ca8f1c2bdacd42f172216cf52f0251690b6aaf856fb5dddd2f1948cd80a",
-  "case-studies/index.html": "824a23c06bb944b896402a06918d1a7b612026735e18e7a370a19eefbe1a89ac",
-  "en/case-studies/index.html": "8308eac3923d441574c8dcb26013f73e44d409e8c0e16ef5d6a648f2d0f8a31b",
+  "case-studies/index.html": "e06149104bca4daf718718ef8a46e42cfe039b54007bb87e081310c59a3e30e5",
+  "en/case-studies/index.html": "c3b9e4f6e3be641d724f026fb368ef3de901752f2f605af33e668c927873cf0f",
   "wiedza/index.html": "b471c00ec348cc63c48490d1aee1a19120fd51e4534ee39c3004dbd15b2a4929",
   "en/wiedza/index.html": "7c66c2b275be381b58aec854b7ae4f27f11d24567f14c32479be27510126e485",
-  "wystapienia/index.html": "dff112cff3f32d1405e32eef618638f3e6a8d8ec8bdb369c46c1f78b7749f21d",
-  "en/wystapienia/index.html": "7b294afee9502bca10a6ef9e7ec3b309725cb6ff3be1e187386639cc4019129a",
+  "wystapienia/index.html": "ba9e3b46847b0d7d6651fc915f2106125c0f159745556f04360ef8e1f46e0a2e",
+  "en/wystapienia/index.html": "0a7a091bfc8a5813087a5b42fa43a3fe0288a5c07518bcfb3b989f81506bccf1",
   "procurement-2026/index.html": "36c3e5b4e287bd1d6c9b310d5a7e2be07167d756474ed2ac5440779c205970bc"
 });
 
@@ -487,6 +492,7 @@ async function pageArchitectureFixture({ files, facts, public_claim_surfaces, ex
       "assets/img/signature.png": "fixture-image",
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      ...speakingProductAssets,
       "procurement-2026/index.html": procurementParentProductHtml,
       ...artifactProductHtml,
       ...remaining
@@ -817,6 +823,7 @@ async function productionRegistryFixture(overrides = {}) {
       "en/wystapienia/index.html": speakingProductHtml.en,
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      ...speakingProductAssets,
       ...extraFiles
     }
   });
@@ -859,6 +866,7 @@ async function speakingPageMutation({ lang = "pl", mutate = (html) => html, muta
     facts: mutateFacts(structuredClone(factData.facts)),
     public_claim_surfaces: mutateSurfaces(structuredClone(factData.public_claim_surfaces)),
     extraFiles: {
+      ...speakingProductAssets,
       "procurement-2026/index.html": mutateProcurement(procurementParentProductHtml),
       "diagrams/infographic.html": "<!doctype html><title>Infographic</title>",
       "diagrams/diagram1_universal.html": "<!doctype html><title>Process</title>",
@@ -1091,7 +1099,7 @@ const applicationContract = {
 
 const applicationEvidenceFacts = [
   ["portfolio.czympojade_pl", "czympojade.pl", "czympojade.pl"],
-  ["portfolio.czympojade_pl.type", "Aplikacja transportowa do pracy z połączeniami i rozkładami.", "Transport application for working with connections and timetables."],
+  ["portfolio.czympojade_pl.type", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership."],
   ["portfolio.przypominamy_com", "Przypominamy.com", "Przypominamy.com"],
   ["portfolio.przypominamy_com.type", "Platforma powiadomień dla organizacji.", "Notification platform for organisations."],
   ["portfolio.procuracost", "ProcuraCost", "ProcuraCost"],
@@ -2028,12 +2036,12 @@ test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner
       'data-fact-ids="portfolio.czympojade_pl.type portfolio.czympojade_pl"'
     )],
     ["appended evidence meaning", {}, (html) => html.replace(
-      "Aplikacja transportowa do pracy z połączeniami i rozkładami.</dd>",
-      "Aplikacja transportowa do pracy z połączeniami i rozkładami. Dodatkowy wynik.</dd>"
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd>",
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania. Dodatkowy wynik.</dd>"
     )],
     ["appended evidence element", {}, (html) => html.replace(
-      "Aplikacja transportowa do pracy z połączeniami i rozkładami.</dd>",
-      "Aplikacja transportowa do pracy z połączeniami i rozkładami.</dd><p>Dodatkowy element.</p>"
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd>",
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd><p>Dodatkowy element.</p>"
     )],
     ["registry-coordinated display drift", { facts: [fact(), driftFact] }, (html) => html.replace(
       '<h3 class="evidence-row__title">czympojade.pl</h3>',
@@ -3309,6 +3317,146 @@ test("Plan 2 Task 7 rejects Speaking fact attachment and public-surface removal"
     mutateSurfaces: (surfaces) => surfaces.filter((surface) => !speakingSurfaceFixture.has(surface))
   });
   assert.ok(errorIds(removed).includes("speaking-registry-inventory"), removed.errors.join("\n"));
+});
+
+const procurementBeyondInterview = Object.freeze({
+  href: "https://www.youtube.com/watch?v=5KYUdTLlvvg",
+  title: "Procurement&Beyond, odcinek 8. Nawet najlepsze narzędzie nie uratuje złego wdrożenia.",
+  summaryPl: "W rozmowie mówię o profesjonalizacji zakupów, odejściu od sztywnych procedur i roli wewnętrznego lidera wdrożenia. Pokazuję też Czym pojadę, kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania. Rozmowę zamyka pytanie, jak łączyć warsztat kupca z automatyzacją i analizą danych.",
+  summaryEn: "In the conversation I discuss the professionalisation of procurement, moving beyond rigid procedures, and the role of an internal implementation leader. I also present Czym pojadę, a fleet TCO calculator using the Bielik model to analyse ownership costs. The final theme is how to combine procurement judgement with automation and data analysis."
+});
+
+test("Owner-approved Procurement&Beyond interview is an exact bilingual YouTube resource", async () => {
+  const factData = await readFacts();
+  const titleFact = factData.facts.find((fact) => fact.id === "speaking.procurement_beyond.title");
+  const summaryFact = factData.facts.find((fact) => fact.id === "speaking.procurement_beyond.summary");
+  assert.deepEqual(titleFact, {
+    id: "speaking.procurement_beyond.title",
+    value: procurementBeyondInterview.title,
+    display_pl: procurementBeyondInterview.title,
+    display_en: procurementBeyondInterview.title,
+    kind: "constant",
+    as_of: null,
+    source_type: "public_source",
+    source_label: "Official YouTube oEmbed metadata inspected 2026-08-27",
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["wystapienia/index.html", "en/wystapienia/index.html"],
+    status: "approved"
+  });
+  assert.deepEqual(summaryFact, {
+    id: "speaking.procurement_beyond.summary",
+    value: procurementBeyondInterview.summaryEn,
+    display_pl: procurementBeyondInterview.summaryPl,
+    display_en: procurementBeyondInterview.summaryEn,
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: "Owner-provided interview summary, 2026-08-27",
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["wystapienia/index.html", "en/wystapienia/index.html"],
+    status: "approved"
+  });
+
+  for (const [lang, html, summary, sectionLabel, cta] of [
+    ["pl", speakingProductHtml.pl, procurementBeyondInterview.summaryPl, "04 / Wywiad", "Obejrzyj na YouTube"],
+    ["en", speakingProductHtml.en, procurementBeyondInterview.summaryEn, "04 / Interview", "Watch on YouTube · Polish audio"]
+  ]) {
+    assert.equal((html.match(/data-section="interview"/g) ?? []).length, 1, `${lang}: one interview section`);
+    assert.equal((html.match(/https:\/\/www\.youtube\.com\/watch\?v=5KYUdTLlvvg/g) ?? []).length, 1, `${lang}: one canonical YouTube target`);
+    assert.ok(html.includes(`<p class="section-label">${sectionLabel}</p>`), `${lang}: exact section label`);
+    assert.ok(html.includes(`data-fact-id="speaking.procurement_beyond.title" lang="pl">${procurementBeyondInterview.title.replace("&", "&amp;<wbr>")}</h3>`), `${lang}: official title remains Polish, marked as such and has one mobile-safe break opportunity`);
+    assert.ok(html.includes(`data-fact-id="speaking.procurement_beyond.summary">${summary}</p>`), `${lang}: owner-supplied summary`);
+    assert.ok(html.includes(`target="_blank" rel="noopener noreferrer"`), `${lang}: safe external navigation`);
+    assert.ok(html.includes(`<span class="speaking-recording__cta">${cta}</span>`), `${lang}: localized CTA`);
+    assert.ok(html.includes(`<p class="section-label">05 / ${lang === "pl" ? "Kontakt" : "Contact"}</p>`), `${lang}: contact follows interview`);
+    assert.doesNotMatch(html, /<iframe\b|i\.ytimg\.com/i, `${lang}: no tracking embed or remote thumbnail`);
+    assert.ok(html.includes('srcset="/assets/img/speaking/procurement-beyond-episode-8-960.webp 960w, /assets/img/speaking/procurement-beyond-episode-8-1510.webp 1510w"'), `${lang}: exact local responsive visual`);
+    assert.ok(html.includes('src="/assets/img/speaking/procurement-beyond-episode-8-1510.jpg"'), `${lang}: local fallback visual`);
+    assert.ok(html.includes(lang === "pl"
+      ? "Infografika do odcinka. Skrót tematów rozmowy; pełny kontekst i założenia modelu znajdują się w nagraniu."
+      : "Episode infographic. It summarises the conversation topics; the recording provides the full context and model assumptions."), `${lang}: editorial boundary for the supplied infographic`);
+  }
+
+  const assetDigests = {
+    "assets/img/speaking/procurement-beyond-episode-8.png": "45c3ee0563eccb5e608676bd38c7f332306cab2a1d514f2d8378a4113876acb0",
+    "assets/img/speaking/procurement-beyond-episode-8-960.webp": "1e22ac63694c35c45e81cd6c08df94888be7305dd692712c60acd64722562c2d",
+    "assets/img/speaking/procurement-beyond-episode-8-1510.webp": "d8b9aab406022259457f4ddef4993fa4ac71a649d2cf17dd96ad13778e83516d",
+    "assets/img/speaking/procurement-beyond-episode-8-1510.jpg": "5fdb16001b801c537c30015a248b3efc5a5fc525dbf49db1941d6ead3e91676c"
+  };
+  for (const [path, digest] of Object.entries(assetDigests)) {
+    assert.equal(createHash("sha256").update(await readFile(resolve(path))).digest("hex"), digest, `${path}: approved supplied asset or optimized derivative`);
+  }
+});
+
+test("Speaking verifier rejects Procurement&Beyond interview identity, link, structure and registry drift", async () => {
+  const cases = [
+    ["changed URL", "pl", "speaking-interview", (html) => html.replace(procurementBeyondInterview.href, "https://www.youtube.com/watch?v=other")],
+    ["changed title", "en", "speaking-interview", (html) => html.replace("Nawet najlepsze narzędzie nie uratuje złego wdrożenia.", "A translated marketing title")],
+    ["changed summary", "pl", "speaking-interview", (html) => html.replace(procurementBeyondInterview.summaryPl, `${procurementBeyondInterview.summaryPl} Gwarantowane rezultaty.`)],
+    ["missing noopener", "en", "speaking-interview", (html) => html.replace('rel="noopener noreferrer"', 'rel="noreferrer"')],
+    ["hidden section", "pl", "speaking-interview", (html) => html.replace('class="speaking-group speaking-recording"', 'hidden class="speaking-group speaking-recording"')],
+    ["duplicate interview", "en", "speaking-groups", (html) => html.replace('</main>', '<section data-section="interview"></section></main>')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await speakingPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const factData = await readFacts();
+  const changedRegistry = await speakingPageMutation({
+    mutateFacts: (facts) => facts.map((fact) => fact.id === "speaking.procurement_beyond.summary"
+      ? { ...fact, source_label: "Unverified summary" }
+      : fact)
+  });
+  assert.ok(factData.facts.some((fact) => fact.id === "speaking.procurement_beyond.summary"));
+  assert.ok(errorIds(changedRegistry).includes("speaking-registry-inventory"), changedRegistry.errors.join("\n"));
+});
+
+test("Owner correction updates Czym pojadę from timetable wording to the fleet TCO product", async () => {
+  const factData = await readFacts();
+  const name = factData.facts.find((fact) => fact.id === "portfolio.czympojade_pl");
+  const type = factData.facts.find((fact) => fact.id === "portfolio.czympojade_pl.type");
+  const sourceLabel = "Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27";
+  assert.deepEqual(name, {
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl fleet TCO calculator",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: sourceLabel,
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt", "worker/index.js"],
+    status: "approved"
+  });
+  assert.deepEqual(type, {
+    id: "portfolio.czympojade_pl.type",
+    value: "fleet TCO calculator using the Bielik model for ownership-cost analysis",
+    display_pl: "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
+    display_en: "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: sourceLabel,
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
+    status: "approved"
+  });
+
+  const surfaces = await Promise.all([
+    "index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html",
+    "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"
+  ].map(async (path) => [path, await readFile(resolve(path), "utf8")]));
+  const joined = surfaces.map(([, content]) => content).join("\n");
+  assert.doesNotMatch(joined, /połączeniami i rozkładami|connections and timetables|transport app/i);
+  for (const [path, content] of surfaces.filter(([path]) => path.endsWith(".html"))) {
+    const expected = path.startsWith("en/")
+      ? "Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
+      : "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.";
+    assert.ok(content.includes(expected), `${path}: corrected product meaning`);
+  }
+  assert.ok(surfaces.find(([path]) => path === "llms-full.txt")[1].includes("czympojade.pl (fleet TCO calculator using the Bielik model)"));
 });
 
 test("Plan 2 Task 7 rejects Procurement route, hreflang and iframe inventory drift", async () => {
@@ -6823,22 +6971,23 @@ test("Plan 2 Task 10 freezes the exact conservative llms-full correction", async
   const text = await readFile(resolve("llms-full.txt"), "utf8");
   const requiredLines = [
     "- **2016–2017**: Strategic Project Director, PZU S.A., procurement transformation from spend analysis to the target operating model",
-    "Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX."
+    "Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX.",
+    "Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (fleet TCO calculator using the Bielik model), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator)."
   ];
   for (const line of requiredLines) {
     assert.equal(text.split(/\r?\n/).filter((candidate) => candidate === line).length, 1, line);
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "1df89520de10da809d01c77f3016c407c673f80d61172ce4f57a51b6ed360e97",
-    "llms-full.txt must differ from the Task 9 base only by the two approved conservative corrections"
+    "2c38b4dda14d634fe105f34805fefb09bd344193d1f11a7bae9f6cd6e7c8bb0a",
+    "llms-full.txt must retain the approved conservative corrections and owner-corrected Czym pojadę meaning"
   );
 });
 
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "139ad09341eb2c4160622391a79eab7ca6c6896d141eef4022396d17b450055d",
+    "198b7f6ca35fa734e5203f311b130d2bdc225f5892771a9b2b3038937f4834d8",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });
@@ -6987,6 +7136,18 @@ const plan3ExpectedPublicPages = Object.freeze([
   { file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: ["CreativeWork"] }
 ]);
 
+const plan3ProductPageHtml = Object.freeze(Object.fromEntries(await Promise.all(
+  plan3ExpectedPublicPages.map(async ({ file }) => [file, await readFile(resolve(file), "utf8")])
+)));
+const plan3ProductFactData = JSON.parse(await readFile(resolve("content/site-facts.json"), "utf8"));
+
+async function plan3ProductMetadataRoot(files = {}) {
+  return plan3Root({
+    factData: plan3ProductFactData,
+    files: { ...plan3ProductPageHtml, ...files }
+  });
+}
+
 const plan3ShellFiles = new Set(plan3ExpectedPublicPages.slice(0, 19).map(({ file }) => file));
 
 function plan3Fact(overrides = {}) {
@@ -7130,7 +7291,9 @@ test("Plan 3 Task 1 accepts the exact independent 24-route metadata manifest", a
   assert.deepEqual(PUBLIC_PAGES, plan3ExpectedPublicPages);
   const root = await plan3Root();
   const result = await runVerification({ root, scope: "metadata" });
-  assert.deepEqual(result.errors, []);
+  const presentation = result.errors.filter((item) => item.startsWith("ERROR presentation-index-manifest "));
+  assert.equal(presentation.length, 19, "synthetic route fixtures must not impersonate the 19 reviewed presentation-index files");
+  assert.deepEqual(result.errors.filter((item) => !item.startsWith("ERROR presentation-index-manifest ")), []);
 });
 
 test("Plan 3 Task 1 fails closed on missing fake and duplicate route metadata", async (t) => {
@@ -7231,14 +7394,18 @@ test("Plan 3 Task 1 binds singular and plural fact attributes to approved exact 
 
 test("Plan 3 Task 1 requires approved enclosing fact IDs for visible numbers with only exact presentation exemptions", async (t) => {
   const entry = plan3ExpectedPublicPages[0];
-  await t.test("legal section indices and 404", async () => {
+  await t.test("unreviewed section shapes remain factual while literal 404 stays exempt", async () => {
     const body = `<p data-fact-id="fixture.claim">Verified claim</p>
       <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Diagnosis</p></article></div></div></section>
       <section class="service-section" data-section="strategy"><div class="section-shell"><p class="section-label">02 / Strategy</p></div></section>
       <span class="knowledge-entry__number" aria-hidden="true">11</span><span>404</span>`;
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
-    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 2, result.errors.join("\n"));
+    assert.ok(findings.some((item) => item.endsWith("numeric tokens: 01")), findings.join("\n"));
+    assert.ok(findings.some((item) => item.endsWith("numeric tokens: 02")), findings.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
   });
   await t.test("unapproved date", async () => {
     const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Established in 2001</p>';
@@ -7683,7 +7850,7 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
       `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 2026, 4`
     ]);
   });
-  await t.test("presentation indexes and literal 404 remain exempt", async () => {
+  await t.test("unreviewed presentation shapes remain factual while literal 404 stays exempt", async () => {
     const body = `<p data-fact-id="fixture.claim">Verified claim</p>
       <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">DOSSIER / ADVISORY 01</p></div></header>
       <section class="service-section" data-section="diagnosis"><div class="section-shell"><p class="section-label">01 / Diagnosis</p></div></section>
@@ -7691,7 +7858,10 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
       <span class="knowledge-entry__number" aria-hidden="true">11</span><p>404</p>`;
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
-    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 3, result.errors.join("\n"));
+    assert.ok(findings.every((item) => item.endsWith("unowned numeric tokens: 01")), findings.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
   });
   await t.test("codes dates decimals ranges models and quantities remain factual", async () => {
     const copies = ["A-01/data", "2026-08-27", "3.5", "10–20", "S/4HANA", "60 people"];
@@ -8214,11 +8384,15 @@ test("Plan 3 Task 1 fix round 4 requires semantic evidence for presentation inde
     const result = await runVerification({ root, scope: "metadata" });
     assert.ok(errorIds(result).includes("fact-visible-number"), result.errors.join("\n"));
   });
-  await t.test("approved real presentation structures and literal 404 stay exempt", async () => {
+  await t.test("former heuristic structures cannot impersonate reviewed presentation occurrences", async () => {
     const body = plan3RealPresentationBody();
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
-    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 10, result.errors.join("\n"));
+    assert.ok(findings.every((item) => item.endsWith("unowned numeric tokens: 01")), findings.join("\n"));
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
   });
 });
 
@@ -8345,21 +8519,20 @@ test("Plan 3 Task 1 fix round 5 binds presentation exemptions to exact numeric o
       `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>article[2]>span[1] has unowned numeric tokens: 01`
     ]);
   });
-  await t.test("a section prefix exempts only its own numeric occurrence", async () => {
+  await t.test("an unreviewed section prefix cannot exempt either numeric occurrence", async () => {
     const body = `<p data-fact-id="fixture.claim">Verified claim</p>
       <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Model quantity 01</p></article></div></div></section>`;
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
     assert.deepEqual(findings, [
-      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>article[1]>p[1] has unowned numeric tokens: 01`
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>article[1]>p[1] has unowned numeric tokens: 01, 01`
     ]);
   });
-  await t.test("actual accessibility and structurally related presentation indexes stay exempt", async () => {
-    const body = plan3RealPresentationBody();
-    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+  await t.test("the unchanged reviewed product consumes every presentation occurrence", async () => {
+    const root = await plan3ProductMetadataRoot();
     const result = await runVerification({ root, scope: "metadata" });
-    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("presentation-index-manifest"), false, result.errors.join("\n"));
   });
 });
 
@@ -8437,11 +8610,15 @@ test("Plan 3 Task 1 fix round 6 closes presentation-index class spoofing", async
     });
   }
 
-  await t.test("all real presentation relations and literal 404 remain exempt", async () => {
+  await t.test("the complete former heuristic inventory cannot recreate reviewed identities", async () => {
     const body = plan3RealPresentationBody();
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
-    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 10, result.errors.join("\n"));
+    assert.ok(findings.every((item) => item.endsWith("unowned numeric tokens: 01")), findings.join("\n"));
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
   });
 });
 
@@ -8476,6 +8653,121 @@ test("Plan 3 Task 1 fix round 6 treats static popovers as non-rendered landmarks
     assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
     assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
   });
+});
+
+test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", async () => {
+  const verifier = await import("./verify-site.mjs");
+  const entries = verifier.PRESENTATION_INDEX_OCCURRENCES;
+  assert.ok(Array.isArray(entries), "the verifier must export the reviewed occurrence manifest");
+  assert.equal(entries.length, 153, "every reviewed presentation index in the 24 public pages is inventoried");
+
+  const canonical = JSON.stringify([...entries].sort((left, right) => [
+    left.file,
+    left.sourcePath,
+    left.ownerPath,
+    left.token,
+    String(left.occurrence)
+  ].join("\0").localeCompare([
+    right.file,
+    right.sourcePath,
+    right.ownerPath,
+    right.token,
+    String(right.occurrence)
+  ].join("\0"))));
+  assert.equal(
+    createHash("sha256").update(canonical).digest("hex"),
+    "c550dab1065925f550a039fc3548574ae2bae7c79c8f41fe2711198963324a96",
+    "presentation markup changes require an explicit inventory audit and baseline refresh"
+  );
+});
+
+test("Plan 3 Task 1 fix round 7 validates manifest identities independently", async () => {
+  const verifier = await import("./verify-site.mjs");
+  assert.equal(typeof verifier.validatePresentationIndexOccurrences, "function");
+  const duplicate = structuredClone(verifier.PRESENTATION_INDEX_OCCURRENCES[0]);
+  const duplicateDiagnostics = verifier.validatePresentationIndexOccurrences([
+    ...verifier.PRESENTATION_INDEX_OCCURRENCES,
+    duplicate
+  ]);
+  assert.equal(duplicateDiagnostics.length, 1, duplicateDiagnostics.join("\n"));
+  assert.match(duplicateDiagnostics[0], /duplicate.*identity/iu);
+
+  const foreignFile = { ...duplicate, file: "fictional/index.html" };
+  const foreignDiagnostics = verifier.validatePresentationIndexOccurrences([foreignFile]);
+  assert.equal(foreignDiagnostics.length, 1, foreignDiagnostics.join("\n"));
+  assert.match(foreignDiagnostics[0], /PUBLIC_PAGES/u);
+});
+
+test("Plan 3 Task 1 fix round 7 consumes the unchanged real inventory exactly once", async () => {
+  const root = await plan3ProductMetadataRoot();
+  const result = await runVerification({ root, scope: "metadata" });
+  assert.equal(errorIds(result).includes("presentation-index-manifest"), false, result.errors.join("\n"));
+  const factualIndexes = result.errors.filter((item) => /^ERROR fact-visible-number .+ has unowned numeric tokens: (?:02|03|04|10)$/u.test(item));
+  assert.deepEqual(factualIndexes, [
+    "ERROR fact-visible-number wiedza/index.html: html[1]>body[1]>main[1]>header[1]>div[1]>p[1] has unowned numeric tokens: 02",
+    "ERROR fact-visible-number en/wiedza/index.html: html[1]>body[1]>main[1]>header[1]>div[1]>p[1] has unowned numeric tokens: 03",
+    "ERROR fact-visible-number procurement-2026/index.html: html[1]>body[1]>main[1]>header[1]>div[1]>p[1] has unowned numeric tokens: 04",
+    "ERROR fact-visible-number diagrams/diagram2_ariba.html: html[1]>body[1]>main[1]>div[1]>section[2]>div[1]>article[5]>p[1] has unowned numeric tokens: 10"
+  ]);
+});
+
+test("Plan 3 Task 1 fix round 7 rejects every reviewed identity mutation", async (t) => {
+  const original = plan3ProductPageHtml["index.html"];
+  const exact = '<p class="section-index">01 / Diagnoza</p>';
+  assert.equal(original.split(exact).length, 2, "the reviewed source occurs exactly once");
+  const mutations = [
+    ["source path", original.replace(exact, `<div>${exact}</div>`), true],
+    ["token", original.replace(exact, '<p class="section-index">02 / Diagnoza</p>'), true],
+    ["owner text", original.replace(exact, '<p class="section-index">01 / Model</p>'), true],
+    ["container signature", original.replace(exact, '<p class="section-index" data-review-spoof>01 / Diagnoza</p>'), true],
+    ["duplicate token in the same owner", original.replace(exact, '<p class="section-index">01 / Diagnoza 01</p>'), true],
+    ["missing reviewed index", original.replace(exact, ""), false]
+  ];
+  for (const [label, html, expectsNumeric] of mutations) await t.test(label, async () => {
+    const root = await plan3ProductMetadataRoot({ "index.html": html });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number index.html:")
+      && /numeric tokens: 0[12](?:, 01)?$/u.test(item));
+    assert.equal(numeric.length > 0, expectsNumeric, `${label}\n${result.errors.join("\n")}`);
+  });
+});
+
+test("Plan 3 Task 1 fix round 7 rejects reordered and duplicated aviation children", async (t) => {
+  const original = plan3ProductPageHtml["lotnictwo/index.html"];
+  const exact = '<div class="aviation-sector__index"><span>01</span><strong>OPS</strong></div>';
+  assert.equal(original.split(exact).length, 2, "the reviewed aviation index occurs exactly once");
+  for (const [label, replacement, minimumNumeric] of [
+    ["reordered children", '<div class="aviation-sector__index"><strong>OPS</strong><span>01</span></div>', 1],
+    ["duplicate token", '<div class="aviation-sector__index"><span>01</span><span>01</span><strong>OPS</strong></div>', 1]
+  ]) await t.test(label, async () => {
+    const root = await plan3ProductMetadataRoot({ "lotnictwo/index.html": original.replace(exact, replacement) });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number lotnictwo/index.html:")
+      && /numeric tokens: 01(?:, 01)?$/u.test(item));
+    assert.ok(numeric.length >= minimumNumeric, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 7 rejects the reviewer foreign-article and seven-branch spoof", async () => {
+  const entry = plan3ExpectedPublicPages[0];
+  const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+    <article data-foreign-wrapper>
+      <section class="service-section" data-section="problem"><div class="section-shell"><p class="section-label">01 / Problem</p></div></section>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Diagnosis</p></article></div></div></section>
+      <section class="applications-section application-evidence" data-section="evidence"><div class="section-shell"><div class="applications-evidence-list"><article class="evidence-row"><p class="evidence-row__context">Product / 01</p></article></div></div></section>
+      <section class="service-section" data-section="method"><div class="section-shell"><div class="service-method"><article data-method-step="1"><span>01</span></article></div></div></section>
+      <section class="speaking-group speaking-topics" data-section="topics"><div class="speaking-agenda"><article data-topic="spoof"><span>01</span></article></div></section>
+      <section class="procurement-artifacts"><article class="procurement-artifact" data-artifact="1"><header><span>01</span></header></article></section>
+    </article>
+    <section class="aviation-sector" data-section="operations"><div><div class="aviation-sector__index"><strong>MODEL</strong><span>01</span><span>01</span></div></div></section>`;
+  const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+  const result = await runVerification({ root, scope: "metadata" });
+  assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+  const numeric = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`)
+    && /numeric tokens: 01(?:, 01)?$/u.test(item));
+  assert.equal(numeric.length, 8, result.errors.join("\n"));
 });
 
 test("Plan 3 Task 1 package scripts expose exact deterministic validator commands", async () => {

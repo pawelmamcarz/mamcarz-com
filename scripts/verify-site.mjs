@@ -19,7 +19,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "139ad09341eb2c4160622391a79eab7ca6c6896d141eef4022396d17b450055d";
+const TASK10_REVIEWED_CSS_SHA256 = "198b7f6ca35fa734e5203f311b130d2bdc225f5892771a9b2b3038937f4834d8";
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
 const PLAN3_VALIDATION_DATE = "2026-08-27";
@@ -57,6 +57,1431 @@ export const PUBLIC_PAGE_PAIRS = Object.freeze(PUBLIC_PAGES
     const en = PUBLIC_PAGES.find((entry) => entry.lang === "en" && entry.route === pl.pair && entry.pair === pl.route);
     return Object.freeze([pl.file, en?.file ?? "", pl.route, en?.route ?? pl.pair]);
   }));
+
+// Reviewed exact presentation-index occurrences in the current static product.
+// Any presentation-index markup change requires an explicit inventory audit and digest baseline refresh.
+const PRESENTATION_INDEX_OCCURRENCE_DATA = [
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-problem\",data-section=\"problem\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / Problem Interfejs zaczyna się od procesu.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"section-title\\\"}\",\"Interfejs zaczyna się od procesu.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Delivery",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / Delivery Od rozpoznania do uruchomienia.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Delivery\"],[\"h2{class=\\\"section-title\\\"}\",\"Od rozpoznania do uruchomienia.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Rozpoznanie",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Droga do uruchomienia\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"discovery\"}>p{class=\"section-index\"}|parentText=\"01 / Rozpoznanie Discovery Problem, użytkownicy, decyzje i ograniczenia.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"01 / Rozpoznanie\"],[\"h3{}\",\"Discovery\"],[\"p{}\",\"Problem, użytkownicy, decyzje i ograniczenia.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[2]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[2]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Struktura",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Droga do uruchomienia\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"data-model\"}>p{class=\"section-index\"}|parentText=\"02 / Struktura Model danych Obiekty, źródła, reguły jakości i odpowiedzialność.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"02 / Struktura\"],[\"h3{}\",\"Model danych\"],[\"p{}\",\"Obiekty, źródła, reguły jakości i odpowiedzialność.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[3]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[3]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Przepływ",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Droga do uruchomienia\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"workflow\"}>p{class=\"section-index\"}|parentText=\"03 / Przepływ Workflow Stany, role, wyjątki i ślad decyzji.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"03 / Przepływ\"],[\"h3{}\",\"Workflow\"],[\"p{}\",\"Stany, role, wyjątki i ślad decyzji.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Operacja",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Droga do uruchomienia\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"launch\"}>p{class=\"section-index\"}|parentText=\"04 / Operacja Uruchomienie Przygotowanie danych, odbiór procesu i wejście do codziennej pracy.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"04 / Operacja\"],[\"h3{}\",\"Uruchomienie\"],[\"p{}\",\"Przygotowanie danych, odbiór procesu i wejście do codziennej pracy.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Evidence",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Evidence Wybrane produkty.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Evidence\"],[\"h2{class=\\\"section-title\\\"}\",\"Wybrane produkty.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "Produkt / 01",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.czympojade_pl portfolio.czympojade_pl.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 01 czympojade.pl Funkcja Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 01\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"czympojade.pl\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[2]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[2]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "Produkt / 02",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.przypominamy_com portfolio.przypominamy_com.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 02 Przypominamy.com Funkcja Platforma powiadomień dla organizacji.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 02\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"Przypominamy.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Platforma powiadomień dla organizacji.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[3]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[3]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "Produkt / 03",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 03 ProcuraCost Funkcja Kalkulator kosztów procedur zakupowych.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator kosztów procedur zakupowych.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Fit",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-fit\",data-section=\"fit\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"04 / Fit Warunki dobrego dopasowania.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Fit\"],[\"h2{class=\\\"section-title\\\"}\",\"Warunki dobrego dopasowania.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Kontakt",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-contact\",data-section=\"contact\"}>div{class=\"section-shell application-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"05 / Kontakt Zacznijmy od procesu.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Kontakt\"],[\"h2{class=\\\"section-title\\\"}\",\"Zacznijmy od procesu.\"]]"
+  },
+  {
+    "file": "case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>nav[1]>a[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>nav[1]>a[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01Doradztwo",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>nav{aria-label=\"Grupy projektów\",class=\"projects-index\"}>a{href=\"#advisory\"}>span{}|parentText=\"01Doradztwo\"|parentChildren=[[\"span{}\",\"01\"]]"
+  },
+  {
+    "file": "case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>nav[1]>a[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>nav[1]>a[2]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02Aplikacje",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>nav{aria-label=\"Grupy projektów\",class=\"projects-index\"}>a{href=\"#applications\"}>span{}|parentText=\"02Aplikacje\"|parentChildren=[[\"span{}\",\"02\"]]"
+  },
+  {
+    "file": "case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>nav[1]>a[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>nav[1]>a[3]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03Lotnictwo",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>nav{aria-label=\"Grupy projektów\",class=\"projects-index\"}>a{href=\"#aviation\"}>span{}|parentText=\"03Lotnictwo\"|parentChildren=[[\"span{}\",\"03\"]]"
+  },
+  {
+    "file": "case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Doradztwo",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"projects-group\",data-section=\"advisory\",id=\"advisory\"}>header{class=\"projects-group__head\"}>p{class=\"section-label\"}|parentText=\"01 / DoradztwoProgramy i wdrożenia\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Doradztwo\"],[\"h2{}\",\"Programy i wdrożenia\"]]"
+  },
+  {
+    "file": "case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Aplikacje",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"projects-group projects-group--band\",data-section=\"applications\",id=\"applications\"}>header{class=\"projects-group__head\"}>p{class=\"section-label\"}|parentText=\"02 / AplikacjeProdukty operacyjne i analityczne\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Aplikacje\"],[\"h2{}\",\"Produkty operacyjne i analityczne\"]]"
+  },
+  {
+    "file": "case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Lotnictwo",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"projects-group\",data-section=\"aviation\",id=\"aviation\"}>header{class=\"projects-group__head\"}>p{class=\"section-label\"}|parentText=\"03 / LotnictwoProdukty lotnicze\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Lotnictwo\"],[\"h2{}\",\"Produkty lotnicze\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-problem\",data-section=\"problem\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / Problem The interface starts with the process.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"section-title\\\"}\",\"The interface starts with the process.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Delivery",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / Delivery From discovery to launch.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Delivery\"],[\"h2{class=\\\"section-title\\\"}\",\"From discovery to launch.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Discovery",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Route to launch\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"discovery\"}>p{class=\"section-index\"}|parentText=\"01 / Discovery Discovery The problem, users, decisions and constraints.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"01 / Discovery\"],[\"h3{}\",\"Discovery\"],[\"p{}\",\"The problem, users, decisions and constraints.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[2]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[2]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Structure",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Route to launch\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"data-model\"}>p{class=\"section-index\"}|parentText=\"02 / Structure Data model Objects, sources, quality rules and responsibility.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"02 / Structure\"],[\"h3{}\",\"Data model\"],[\"p{}\",\"Objects, sources, quality rules and responsibility.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[3]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[3]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Flow",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Route to launch\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"workflow\"}>p{class=\"section-index\"}|parentText=\"03 / Flow Workflow States, roles, exceptions and a decision trail.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"03 / Flow\"],[\"h3{}\",\"Workflow\"],[\"p{}\",\"States, roles, exceptions and a decision trail.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[2]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Operation",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{aria-label=\"Route to launch\",class=\"route-sequence\"}>article{class=\"route-sequence__step\",data-step=\"launch\"}>p{class=\"section-index\"}|parentText=\"04 / Operation Launch Data preparation, process acceptance and entry into day-to-day work.\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"04 / Operation\"],[\"h3{}\",\"Launch\"],[\"p{}\",\"Data preparation, process acceptance and entry into day-to-day work.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Evidence",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Evidence Selected products.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Evidence\"],[\"h2{class=\\\"section-title\\\"}\",\"Selected products.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "Product / 01",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.czympojade_pl portfolio.czympojade_pl.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 01 czympojade.pl Function Fleet TCO calculator using the Bielik model to analyse total cost of ownership.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 01\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"czympojade.pl\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Fleet TCO calculator using the Bielik model to analyse total cost of ownership.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[2]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[2]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "Product / 02",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.przypominamy_com portfolio.przypominamy_com.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 02 Przypominamy.com Function Notification platform for organisations.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 02\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"Przypominamy.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Notification platform for organisations.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[3]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[3]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "Product / 03",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 03 ProcuraCost Function Procurement procedure cost calculator.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Procurement procedure cost calculator.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Fit",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-fit\",data-section=\"fit\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"04 / Fit Conditions for a good fit.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Fit\"],[\"h2{class=\\\"section-title\\\"}\",\"Conditions for a good fit.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Contact",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-contact\",data-section=\"contact\"}>div{class=\"section-shell application-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"05 / Contact Start with the process.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Contact\"],[\"h2{class=\\\"section-title\\\"}\",\"Start with the process.\"]]"
+  },
+  {
+    "file": "en/case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>nav[1]>a[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>nav[1]>a[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01Advisory",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>nav{aria-label=\"Project groups\",class=\"projects-index\"}>a{href=\"#advisory\"}>span{}|parentText=\"01Advisory\"|parentChildren=[[\"span{}\",\"01\"]]"
+  },
+  {
+    "file": "en/case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>nav[1]>a[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>nav[1]>a[2]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02Applications",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>nav{aria-label=\"Project groups\",class=\"projects-index\"}>a{href=\"#applications\"}>span{}|parentText=\"02Applications\"|parentChildren=[[\"span{}\",\"02\"]]"
+  },
+  {
+    "file": "en/case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>nav[1]>a[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>nav[1]>a[3]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03Aviation",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>nav{aria-label=\"Project groups\",class=\"projects-index\"}>a{href=\"#aviation\"}>span{}|parentText=\"03Aviation\"|parentChildren=[[\"span{}\",\"03\"]]"
+  },
+  {
+    "file": "en/case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Advisory",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"projects-group\",data-section=\"advisory\",id=\"advisory\"}>header{class=\"projects-group__head\"}>p{class=\"section-label\"}|parentText=\"01 / AdvisoryProgrammes and implementations\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Advisory\"],[\"h2{}\",\"Programmes and implementations\"]]"
+  },
+  {
+    "file": "en/case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Applications",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"projects-group projects-group--band\",data-section=\"applications\",id=\"applications\"}>header{class=\"projects-group__head\"}>p{class=\"section-label\"}|parentText=\"02 / ApplicationsOperational and analytical products\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Applications\"],[\"h2{}\",\"Operational and analytical products\"]]"
+  },
+  {
+    "file": "en/case-studies/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Aviation",
+    "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"projects-group\",data-section=\"aviation\",id=\"aviation\"}>header{class=\"projects-group__head\"}>p{class=\"section-label\"}|parentText=\"03 / AviationAviation products\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Aviation\"],[\"h2{}\",\"Aviation products\"]]"
+  },
+  {
+    "file": "en/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Diagnosis",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"01 / Diagnosis Diagnosis I establish the problem, stakeholders, constraints and state of the data. Artifact: Decision map\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"01 / Diagnosis\"],[\"h3{}\",\"Diagnosis\"],[\"p{}\",\"I establish the problem, stakeholders, constraints and state of the data.\"],[\"p{}\",\"Artifact: Decision map\"]]"
+  },
+  {
+    "file": "en/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Strategy",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"02 / Strategy Strategy I define the target model, priorities and sequence of changes. Artifact: Operational plan\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"02 / Strategy\"],[\"h3{}\",\"Strategy\"],[\"p{}\",\"I define the target model, priorities and sequence of changes.\"],[\"p{}\",\"Artifact: Operational plan\"]]"
+  },
+  {
+    "file": "en/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Implementation",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"03 / Implementation Implementation I connect the process, people, data and technology in an operational solution. Artifact: Operational system\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"03 / Implementation\"],[\"h3{}\",\"Implementation\"],[\"p{}\",\"I connect the process, people, data and technology in an operational solution.\"],[\"p{}\",\"Artifact: Operational system\"]]"
+  },
+  {
+    "file": "en/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Value",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"04 / Value Value I examine use, results and the next development decisions. Artifact: Measurement and iteration\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"04 / Value\"],[\"h3{}\",\"Value\"],[\"p{}\",\"I examine use, results and the next development decisions.\"],[\"p{}\",\"Artifact: Measurement and iteration\"]]"
+  },
+  {
+    "file": "en/lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "FLIGHT PLAN / CORE ROUTE 03",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero aviation-hero\"}>div{class=\"page-hero-content\"}>p{class=\"aviation-call-sign\"}|parentText=\"Home/AviationFLIGHT PLAN / CORE ROUTE 03AviationAviation is one of the core areas of my business. I connect operations, sales, training, safety, media and software in work that depends on clear procedures and accountability.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/Aviation\"],[\"p{class=\\\"aviation-call-sign\\\"}\",\"FLIGHT PLAN / CORE ROUTE 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Aviation\"],[\"p{class=\\\"page-lead\\\"}\",\"Aviation is one of the core areas of my business. I connect operations, sales, training, safety, media and software in work that depends on clear procedures and accountability.\"]]"
+  },
+  {
+    "file": "en/lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector\",data-section=\"operations\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"01OPS\"|parentChildren=[[\"span{}\",\"01\"],[\"strong{}\",\"OPS\"]]"
+  },
+  {
+    "file": "en/lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-sector--band\",data-section=\"training-safety\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"02SAFE\"|parentChildren=[[\"span{}\",\"02\"],[\"strong{}\",\"SAFE\"]]"
+  },
+  {
+    "file": "en/lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector\",data-section=\"media\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"03MEDIA\"|parentChildren=[[\"span{}\",\"03\"],[\"strong{}\",\"MEDIA\"]]"
+  },
+  {
+    "file": "en/lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-sector--band\",data-section=\"software\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"04DATA\"|parentChildren=[[\"span{}\",\"04\"],[\"strong{}\",\"DATA\"]]"
+  },
+  {
+    "file": "en/lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>div[1]>span[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-ventures\",data-section=\"ventures\"}>div{class=\"section-shell\"}>div{class=\"aviation-sector__grid aviation-sector__grid--heading\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"05LOG\"|parentChildren=[[\"span{}\",\"05\"],[\"strong{}\",\"LOG\"]]"
+  },
+  {
+    "file": "en/lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>span[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-sector--contact\",data-section=\"contact\"}>div{class=\"section-shell aviation-contact__inner\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"06COMMS\"|parentChildren=[[\"span{}\",\"06\"],[\"strong{}\",\"COMMS\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "DOSSIER / ADVISORY 03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Home/Public procurement advisoryDOSSIER / ADVISORY 03Public procurement advisoryI help structure procedure strategy, responsibilities, documents and decisions in public procurement projects. I work across procurement, technology and project governance, with a clear boundary around legal responsibility.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/Public procurement advisory\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Public procurement advisory\"],[\"p{class=\\\"page-lead\\\"}\",\"I help structure procedure strategy, responsibilities, documents and decisions in public procurement projects. I work across procurement, technology and project governance, with a clear boundary around legal responsibility.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-problem\",data-section=\"problem\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / ProblemDecisions before documents.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Decisions before documents.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Fit",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / FitThe responsibility boundary is part of scope.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Fit\"],[\"h2{class=\\\"service-section__title\\\"}\",\"The responsibility boundary is part of scope.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Scope",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeAdvisory work register.DecisionsDecision structure and acceptance points.StrategyProcurement strategy for the planned procedure.RolesResponsibility map for the team and stakeholders.EvaluationApproach to evaluation and documentation of choices.TechnologyTechnology requirements supporting the working process.CooperationGovernance and cooperation with legal counsel.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Advisory work register.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"DecisionsDecision structure and acceptance points.StrategyProcurement strategy for the planned procedure.RolesResponsibility map for the team and stakeholders.EvaluationApproach to evaluation and documentation of choices.TechnologyTechnology requirements supporting the working process.CooperationGovernance and cooperation with legal counsel.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"1\"}>span{}|parentText=\"01StrategyObjective, constraints and decision structure.\"|parentChildren=[[\"span{}\",\"01\"],[\"h3{}\",\"Strategy\"],[\"p{}\",\"Objective, constraints and decision structure.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"2\"}>span{}|parentText=\"02RolesResponsibilities, approvals and escalations.\"|parentChildren=[[\"span{}\",\"02\"],[\"h3{}\",\"Roles\"],[\"p{}\",\"Responsibilities, approvals and escalations.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"3\"}>span{}|parentText=\"03Working documentsConsistent record of requirements and agreements.\"|parentChildren=[[\"span{}\",\"03\"],[\"h3{}\",\"Working documents\"],[\"p{}\",\"Consistent record of requirements and agreements.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"4\"}>span{}|parentText=\"04GovernanceWorking cadence and cooperation across expert areas.\"|parentChildren=[[\"span{}\",\"04\"],[\"h3{}\",\"Governance\"],[\"p{}\",\"Working cadence and cooperation across expert areas.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Method",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MethodProcedure working order.01StrategyObjective, constraints and decision structure.02RolesResponsibilities, approvals and escalations.03Working documentsConsistent record of requirements and agreements.04GovernanceWorking cadence and cooperation across expert areas.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Method\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Procedure working order.\"],[\"div{class=\\\"service-method\\\"}\",\"01StrategyObjective, constraints and decision structure.02RolesResponsibilities, approvals and escalations.03Working documentsConsistent record of requirements and agreements.04GovernanceWorking cadence and cooperation across expert areas.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Evidence",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / EvidenceProfessional experience.OrganisationPKP Polskie Linie Kolejowe S.A.Period06.2013 – 09.2015RoleBoard AdvisorResponsibilityI negotiated an SAP AG framework agreement for the PKP Group.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Evidence\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Professional experience.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganisationPKP Polskie Linie Kolejowe S.A.Period06.2013 – 09.2015RoleBoard AdvisorResponsibilityI negotiated an SAP AG framework agreement for the PKP Group.\"]]"
+  },
+  {
+    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06 / Contact",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / ContactDefine the advisory scope.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Contact\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Define the advisory scope.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "DOSSIER / ADVISORY 01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Home/Procurement transformationDOSSIER / ADVISORY 01Procurement transformationI structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/Procurement transformation\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 01\"],[\"h1{class=\\\"page-title\\\"}\",\"Procurement transformation\"],[\"p{class=\\\"page-lead\\\"}\",\"I structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-problem\",data-section=\"problem\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / ProblemOperating model before tooling.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Operating model before tooling.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Fit",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / FitA clear decision on both sides.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Fit\"],[\"h2{class=\\\"service-section__title\\\"}\",\"A clear decision on both sides.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Scope",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeChange-design register.ModelTarget Operating Model and role allocation.ProcessSource-to-pay, S2P and P2P.DataSpend analysis and ownership of definitions.DecisionsCategory strategy and governance.TechnologyRequirements derived from process and data.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Change-design register.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"ModelTarget Operating Model and role allocation.ProcessSource-to-pay, S2P and P2P.DataSpend analysis and ownership of definitions.DecisionsCategory strategy and governance.TechnologyRequirements derived from process and data.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"1\"}>span{}|parentText=\"01DiagnosisCurrent process, spend, roles and data.\"|parentChildren=[[\"span{}\",\"01\"],[\"h3{}\",\"Diagnosis\"],[\"p{}\",\"Current process, spend, roles and data.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"2\"}>span{}|parentText=\"02DesignTarget way of working and accountability.\"|parentChildren=[[\"span{}\",\"02\"],[\"h3{}\",\"Design\"],[\"p{}\",\"Target way of working and accountability.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"3\"}>span{}|parentText=\"03SequenceOrder of change, dependencies and acceptance.\"|parentChildren=[[\"span{}\",\"03\"],[\"h3{}\",\"Sequence\"],[\"p{}\",\"Order of change, dependencies and acceptance.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"4\"}>span{}|parentText=\"04GovernanceDecision owners and project-control model.\"|parentChildren=[[\"span{}\",\"04\"],[\"h3{}\",\"Governance\"],[\"p{}\",\"Decision owners and project-control model.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Method",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MethodFour decision closures.01DiagnosisCurrent process, spend, roles and data.02DesignTarget way of working and accountability.03SequenceOrder of change, dependencies and acceptance.04GovernanceDecision owners and project-control model.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Method\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Four decision closures.\"],[\"div{class=\\\"service-method\\\"}\",\"01DiagnosisCurrent process, spend, roles and data.02DesignTarget way of working and accountability.03SequenceOrder of change, dependencies and acceptance.04GovernanceDecision owners and project-control model.\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Evidence",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / EvidenceExperience recorded as facts.OrganisationPZU S.A.RoleStrategic Project DirectorScopeI led a procurement transformation project from spend analysis to the target operating model.OrganisationPwC Polska Sp. z o.o.RoleAssociate Director, Advisory / Procurement ExpertMethodI worked with the CAPP (Complete & Agile Procurement) methodology.Project roleCONNECT Project ManagerPlatformCentral sourcing platform for the ORLEN GroupCONNECT scope15 ORLEN Group entities across 4 countries, 60-person team\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Evidence\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Experience recorded as facts.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganisationPZU S.A.RoleStrategic Project DirectorScopeI led a procurement transformation project from spend analysis to the target operating model.OrganisationPwC Polska Sp. z o.o.RoleAssociate Director, Advisory / Procurement ExpertMethodI worked with the CAPP (Complete & Agile Procurement) methodology.Project roleCONNECT Project ManagerPlatformCentral sourcing platform for the ORLEN GroupCONNECT scope15 ORLEN Group entities across 4 countries, 60-person team\"]]"
+  },
+  {
+    "file": "en/uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06 / Contact",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / ContactDefine the change project.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Contact\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Define the change project.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "DOSSIER / ADVISORY 02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Home/SAP Ariba implementationDOSSIER / ADVISORY 02SAP Ariba implementationI lead SAP Ariba implementations from process and data decisions through configuration, integration, testing and launch. The scope follows the real procurement operating model, not a feature checklist.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/SAP Ariba implementation\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 02\"],[\"h1{class=\\\"page-title\\\"}\",\"SAP Ariba implementation\"],[\"p{class=\\\"page-lead\\\"}\",\"I lead SAP Ariba implementations from process and data decisions through configuration, integration, testing and launch. The scope follows the real procurement operating model, not a feature checklist.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-problem\",data-section=\"problem\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / ProblemProcess determines configuration.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Process determines configuration.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Fit",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / FitImplementation needs decision owners.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Fit\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Implementation needs decision owners.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Scope",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeSolution scope register.SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingSuppliersSAP Ariba Supplier Lifecycle and PerformanceRiskSAP Ariba Supplier RiskExternal workforceSAP FieldglassIntegrationintegration with SAP S/4HANA\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Solution scope register.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingSuppliersSAP Ariba Supplier Lifecycle and PerformanceRiskSAP Ariba Supplier RiskExternal workforceSAP FieldglassIntegrationintegration with SAP S/4HANA\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"1\"}>span{}|parentText=\"01Process decisionsRoles, rules, exceptions and acceptance criteria.\"|parentChildren=[[\"span{}\",\"01\"],[\"h3{}\",\"Process decisions\"],[\"p{}\",\"Roles, rules, exceptions and acceptance criteria.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"2\"}>span{}|parentText=\"02Data and integrationObjects, sources, mappings and accountability.\"|parentChildren=[[\"span{}\",\"02\"],[\"h3{}\",\"Data and integration\"],[\"p{}\",\"Objects, sources, mappings and accountability.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"3\"}>span{}|parentText=\"03TestingScenarios reflecting the real working process.\"|parentChildren=[[\"span{}\",\"03\"],[\"h3{}\",\"Testing\"],[\"p{}\",\"Scenarios reflecting the real working process.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"4\"}>span{}|parentText=\"04LaunchReadiness of process, data, users and support.\"|parentChildren=[[\"span{}\",\"04\"],[\"h3{}\",\"Launch\"],[\"p{}\",\"Readiness of process, data, users and support.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Method",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MethodFrom decisions to launch.01Process decisionsRoles, rules, exceptions and acceptance criteria.02Data and integrationObjects, sources, mappings and accountability.03TestingScenarios reflecting the real working process.04LaunchReadiness of process, data, users and support.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Method\"],[\"h2{class=\\\"service-section__title\\\"}\",\"From decisions to launch.\"],[\"div{class=\\\"service-method\\\"}\",\"01Process decisionsRoles, rules, exceptions and acceptance criteria.02Data and integrationObjects, sources, mappings and accountability.03TestingScenarios reflecting the real working process.04LaunchReadiness of process, data, users and support.\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Evidence",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / EvidenceScopes confirmed by facts.SAP Ariba implementations20+KGHM, roleImplementation and integration deliveryKGHM, scopeSourcing and external workforce managementKGHM, integrationSAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANAŻabka, roleDelivery of the SAP Ariba implementationŻabka, scopeProcurement, supplier risk and sourcingŻabka, solutionSAP Ariba Buying, Supplier Risk and sourcingPLL LOTSAP Ariba implementation for PLL LOTMotor Oil HellasSAP procurement implementation for Motor Oil Hellas\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Evidence\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Scopes confirmed by facts.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"SAP Ariba implementations20+KGHM, roleImplementation and integration deliveryKGHM, scopeSourcing and external workforce managementKGHM, integrationSAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANAŻabka, roleDelivery of the SAP Ariba implementationŻabka, scopeProcurement, supplier risk and sourcingŻabka, solutionSAP Ariba Buying, Supplier Risk and sourcingPLL LOTSAP Ariba implementation for PLL LOTMotor Oil HellasSAP procurement implementation for Motor Oil Hellas\"]]"
+  },
+  {
+    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06 / Contact",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / ContactDefine the implementation scope.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Contact\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Define the implementation scope.\"]]"
+  },
+  {
+    "file": "en/wiedza/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"knowledge-page\",data-page=\"knowledge\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"knowledge-index\",data-section=\"resources\"}>article{class=\"knowledge-entry\",data-resource=null}>span{aria-hidden=\"true\",class=\"knowledge-entry__number\"}|parentText=\"01 Procurement 2026: From Traditional Cycle to AI Orchestration TypeInfographic LanguageEnglish StatusOn-site resource\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\",class=\\\"knowledge-entry__number\\\"}\",\"01\"],[\"h2{class=\\\"knowledge-entry__title\\\"}\",\"Procurement 2026: From Traditional Cycle to AI Orchestration\"],[\"dl{class=\\\"knowledge-entry__meta\\\"}\",\"TypeInfographic LanguageEnglish StatusOn-site resource\"]]"
+  },
+  {
+    "file": "en/wiedza/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"knowledge-page\",data-page=\"knowledge\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"knowledge-index\",data-section=\"resources\"}>article{class=\"knowledge-entry\",data-resource=null}>span{aria-hidden=\"true\",class=\"knowledge-entry__number\"}|parentText=\"02 Speaking & Lectures TypeTalks and lectures LanguageEnglish StatusOn-site resource\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\",class=\\\"knowledge-entry__number\\\"}\",\"02\"],[\"h2{class=\\\"knowledge-entry__title\\\"}\",\"Speaking & Lectures\"],[\"dl{class=\\\"knowledge-entry__meta\\\"}\",\"TypeTalks and lectures LanguageEnglish StatusOn-site resource\"]]"
+  },
+  {
+    "file": "en/wiedza/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"knowledge-page\",data-page=\"knowledge\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"knowledge-index\",data-section=\"resources\"}>article{class=\"knowledge-entry\",data-resource=null}>span{aria-hidden=\"true\",class=\"knowledge-entry__number\"}|parentText=\"03 Procurement Process 2026 TypeInteractive model LanguagePolish StatusPolish-language resource\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\",class=\\\"knowledge-entry__number\\\"}\",\"03\"],[\"h2{class=\\\"knowledge-entry__title\\\"}\",\"Procurement Process 2026\"],[\"dl{class=\\\"knowledge-entry__meta\\\"}\",\"TypeInteractive model LanguagePolish StatusPolish-language resource\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"transformation\"}>span{aria-hidden=\"true\"}|parentText=\"01Procurement transformationOperating model, roles, processes, data and technology.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"01\"],[\"div{}\",\"Procurement transformationOperating model, roles, processes, data and technology.\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"ariba\"}>span{aria-hidden=\"true\"}|parentText=\"02SAP AribaProcess decisions, implementation scope, integrations, testing and launch.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"02\"],[\"div{}\",\"SAP AribaProcess decisions, implementation scope, integrations, testing and launch.\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"digital\"}>span{aria-hidden=\"true\"}|parentText=\"03Digital procurementMoving from process design to an operational environment.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"03\"],[\"div{}\",\"Digital procurementMoving from process design to an operational environment.\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"public-procurement\"}>span{aria-hidden=\"true\"}|parentText=\"04Public procurement and technologyThe structure of decisions, responsibilities, documents and tools.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"04\"],[\"div{}\",\"Public procurement and technologyThe structure of decisions, responsibilities, documents and tools.\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[5]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[5]>span[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"leadership\"}>span{aria-hidden=\"true\"}|parentText=\"05Leading changeStructuring accountability, communication and implementation pace.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"05\"],[\"div{}\",\"Leading changeStructuring accountability, communication and implementation pace.\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Topics",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"01 / TopicsConversation agenda\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Topics\"],[\"h2{}\",\"Conversation agenda\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Formats",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-formats\",data-section=\"formats\",id=\"formats\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"02 / FormatsWorking format\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Formats\"],[\"h2{}\",\"Working format\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Audience",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-audience\",data-section=\"audience\",id=\"audience\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"03 / AudienceThree programme routes\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Audience\"],[\"h2{}\",\"Three programme routes\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>header[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Interview",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-recording\",data-section=\"interview\",id=\"interview\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"04 / InterviewA conversation about implementation\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Interview\"],[\"h2{}\",\"A conversation about implementation\"]]"
+  },
+  {
+    "file": "en/wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Contact",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-contact\",data-section=\"contact\",id=\"contact\"}>div{}>p{class=\"section-label\"}|parentText=\"05 / ContactContext first\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Contact\"],[\"h2{}\",\"Context first\"]]"
+  },
+  {
+    "file": "index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Diagnoza",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"01 / Diagnoza Diagnoza Ustalam problem, interesariuszy, ograniczenia i stan danych. Artefakt: Mapa decyzji\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"01 / Diagnoza\"],[\"h3{}\",\"Diagnoza\"],[\"p{}\",\"Ustalam problem, interesariuszy, ograniczenia i stan danych.\"],[\"p{}\",\"Artefakt: Mapa decyzji\"]]"
+  },
+  {
+    "file": "index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Strategia",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"02 / Strategia Strategia Wybieram docelowy model, priorytety i kolejność zmian. Artefakt: Plan operacyjny\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"02 / Strategia\"],[\"h3{}\",\"Strategia\"],[\"p{}\",\"Wybieram docelowy model, priorytety i kolejność zmian.\"],[\"p{}\",\"Artefakt: Plan operacyjny\"]]"
+  },
+  {
+    "file": "index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Wdrożenie",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"03 / Wdrożenie Wdrożenie Łączę proces, ludzi, dane i technologię w działającym rozwiązaniu. Artefakt: Uruchomiony system\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"03 / Wdrożenie\"],[\"h3{}\",\"Wdrożenie\"],[\"p{}\",\"Łączę proces, ludzi, dane i technologię w działającym rozwiązaniu.\"],[\"p{}\",\"Artefakt: Uruchomiony system\"]]"
+  },
+  {
+    "file": "index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Wartość",
+    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"04 / Wartość Wartość Sprawdzam użycie, wynik i kolejne decyzje rozwojowe. Artefakt: Pomiar i iteracja\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"04 / Wartość\"],[\"h3{}\",\"Wartość\"],[\"p{}\",\"Sprawdzam użycie, wynik i kolejne decyzje rozwojowe.\"],[\"p{}\",\"Artefakt: Pomiar i iteracja\"]]"
+  },
+  {
+    "file": "lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "FLIGHT PLAN / CORE ROUTE 03",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero aviation-hero\"}>div{class=\"page-hero-content\"}>p{class=\"aviation-call-sign\"}|parentText=\"Strona główna/Lotnictwo FLIGHT PLAN / CORE ROUTE 03 Lotnictwo Lotnictwo jest jednym z głównych obszarów mojej działalności. Łączę operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach, które wymagają jasnych procedur oraz odpowiedzialności.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Lotnictwo\"],[\"p{class=\\\"aviation-call-sign\\\"}\",\"FLIGHT PLAN / CORE ROUTE 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Lotnictwo\"],[\"p{class=\\\"page-lead\\\"}\",\"Lotnictwo jest jednym z głównych obszarów mojej działalności. Łączę operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach, które wymagają jasnych procedur oraz odpowiedzialności.\"]]"
+  },
+  {
+    "file": "lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector\",data-section=\"operations\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"01OPS\"|parentChildren=[[\"span{}\",\"01\"],[\"strong{}\",\"OPS\"]]"
+  },
+  {
+    "file": "lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-sector--band\",data-section=\"training-safety\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"02SAFE\"|parentChildren=[[\"span{}\",\"02\"],[\"strong{}\",\"SAFE\"]]"
+  },
+  {
+    "file": "lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector\",data-section=\"media\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"03MEDIA\"|parentChildren=[[\"span{}\",\"03\"],[\"strong{}\",\"MEDIA\"]]"
+  },
+  {
+    "file": "lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-sector--band\",data-section=\"software\"}>div{class=\"section-shell aviation-sector__grid\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"04DATA\"|parentChildren=[[\"span{}\",\"04\"],[\"strong{}\",\"DATA\"]]"
+  },
+  {
+    "file": "lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>div[1]>div[1]>span[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-ventures\",data-section=\"ventures\"}>div{class=\"section-shell\"}>div{class=\"aviation-sector__grid aviation-sector__grid--heading\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"05LOG\"|parentChildren=[[\"span{}\",\"05\"],[\"strong{}\",\"LOG\"]]"
+  },
+  {
+    "file": "lotnictwo/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>span[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06",
+    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"aviation-sector aviation-sector--contact\",data-section=\"contact\"}>div{class=\"section-shell aviation-contact__inner\"}>div{class=\"aviation-sector__index\"}>span{}|parentText=\"06COMMS\"|parentChildren=[[\"span{}\",\"06\"],[\"strong{}\",\"COMMS\"]]"
+  },
+  {
+    "file": "procurement-2026/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[1]>header[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[1]>header[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"1\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"01Materiał w języku angielskimInfografika: od cyklu do orkiestracji\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"01\"],[\"div{}\",\"Materiał w języku angielskimInfografika: od cyklu do orkiestracji\"]]"
+  },
+  {
+    "file": "procurement-2026/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[2]>header[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[2]>header[1]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"2\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"02Diagram procesu zakupowego\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"02\"],[\"div{}\",\"Diagram procesu zakupowego\"]]"
+  },
+  {
+    "file": "procurement-2026/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[3]>header[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[3]>header[1]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"3\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"03Mapowanie modułów SAP Ariba\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"03\"],[\"div{}\",\"Mapowanie modułów SAP Ariba\"]]"
+  },
+  {
+    "file": "procurement-2026/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[4]>header[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[4]>header[1]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"4\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"04Ocena dojrzałości zakupowej\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"04\"],[\"div{}\",\"Ocena dojrzałości zakupowej\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "DOSSIER / ADVISORY 03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Strona główna/Doradztwo w zamówieniach publicznychDOSSIER / ADVISORY 03Doradztwo w zamówieniach publicznychPomagam uporządkować strategię postępowania, odpowiedzialności, dokumenty i decyzje w projektach objętych zamówieniami publicznymi. Pracuję na styku zakupów, technologii i zarządzania projektem, z wyraźną granicą odpowiedzialności prawnej.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Doradztwo w zamówieniach publicznych\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Doradztwo w zamówieniach publicznych\"],[\"p{class=\\\"page-lead\\\"}\",\"Pomagam uporządkować strategię postępowania, odpowiedzialności, dokumenty i decyzje w projektach objętych zamówieniami publicznymi. Pracuję na styku zakupów, technologii i zarządzania projektem, z wyraźną granicą odpowiedzialności prawnej.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-problem\",data-section=\"problem\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / ProblemDecyzje przed dokumentami.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Decyzje przed dokumentami.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Dopasowanie",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / DopasowanieGranica odpowiedzialności jest częścią zakresu.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Dopasowanie\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Granica odpowiedzialności jest częścią zakresu.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Zakres",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresRejestr pracy doradczej.DecyzjeStruktura decyzji i punkty akceptacji.StrategiaStrategia zakupowa dla planowanego postępowania.RoleMapa odpowiedzialności zespołu i interesariuszy.OcenaPodejście do oceny i dokumentowania wyborów.TechnologiaWymagania technologiczne wspierające przebieg pracy.WspółpracaGovernance i współpraca z doradcą prawnym.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Rejestr pracy doradczej.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"DecyzjeStruktura decyzji i punkty akceptacji.StrategiaStrategia zakupowa dla planowanego postępowania.RoleMapa odpowiedzialności zespołu i interesariuszy.OcenaPodejście do oceny i dokumentowania wyborów.TechnologiaWymagania technologiczne wspierające przebieg pracy.WspółpracaGovernance i współpraca z doradcą prawnym.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"1\"}>span{}|parentText=\"01StrategiaCel, ograniczenia i układ decyzji.\"|parentChildren=[[\"span{}\",\"01\"],[\"h3{}\",\"Strategia\"],[\"p{}\",\"Cel, ograniczenia i układ decyzji.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"2\"}>span{}|parentText=\"02RoleOdpowiedzialności, akceptacje i eskalacje.\"|parentChildren=[[\"span{}\",\"02\"],[\"h3{}\",\"Role\"],[\"p{}\",\"Odpowiedzialności, akceptacje i eskalacje.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"3\"}>span{}|parentText=\"03Dokumenty roboczeSpójny zapis wymagań i uzgodnień.\"|parentChildren=[[\"span{}\",\"03\"],[\"h3{}\",\"Dokumenty robocze\"],[\"p{}\",\"Spójny zapis wymagań i uzgodnień.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"4\"}>span{}|parentText=\"04GovernanceRytm pracy i współpraca obszarów eksperckich.\"|parentChildren=[[\"span{}\",\"04\"],[\"h3{}\",\"Governance\"],[\"p{}\",\"Rytm pracy i współpraca obszarów eksperckich.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Metoda",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MetodaPorządek postępowania.01StrategiaCel, ograniczenia i układ decyzji.02RoleOdpowiedzialności, akceptacje i eskalacje.03Dokumenty roboczeSpójny zapis wymagań i uzgodnień.04GovernanceRytm pracy i współpraca obszarów eksperckich.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Metoda\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Porządek postępowania.\"],[\"div{class=\\\"service-method\\\"}\",\"01StrategiaCel, ograniczenia i układ decyzji.02RoleOdpowiedzialności, akceptacje i eskalacje.03Dokumenty roboczeSpójny zapis wymagań i uzgodnień.04GovernanceRytm pracy i współpraca obszarów eksperckich.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Dowody",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / DowodyDoświadczenie zawodowe.OrganizacjaPKP Polskie Linie Kolejowe S.A.Okres06.2013 – 09.2015RolaDoradca ZarząduOdpowiedzialnośćNegocjowałem umowę ramową z SAP AG dla grupy PKP.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Dowody\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Doświadczenie zawodowe.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganizacjaPKP Polskie Linie Kolejowe S.A.Okres06.2013 – 09.2015RolaDoradca ZarząduOdpowiedzialnośćNegocjowałem umowę ramową z SAP AG dla grupy PKP.\"]]"
+  },
+  {
+    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06 / Kontakt",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / KontaktUstalmy zakres doradztwa.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Kontakt\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Ustalmy zakres doradztwa.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "DOSSIER / ADVISORY 01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Strona główna/Transformacja zakupówDOSSIER / ADVISORY 01Transformacja zakupówPorządkuję model operacyjny zakupów: decyzje, role, procesy, dane i technologię. Efektem pracy jest uzgodniony projekt zmiany, który można wdrożyć i rozliczać.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Transformacja zakupów\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 01\"],[\"h1{class=\\\"page-title\\\"}\",\"Transformacja zakupów\"],[\"p{class=\\\"page-lead\\\"}\",\"Porządkuję model operacyjny zakupów: decyzje, role, procesy, dane i technologię. Efektem pracy jest uzgodniony projekt zmiany, który można wdrożyć i rozliczać.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-problem\",data-section=\"problem\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / ProblemModel operacyjny przed narzędziem.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Model operacyjny przed narzędziem.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Dopasowanie",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / DopasowanieJasna decyzja po obu stronach.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Dopasowanie\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Jasna decyzja po obu stronach.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Zakres",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresRejestr projektowanej zmiany.ModelTarget Operating Model i podział ról.ProcesSource-to-pay, S2P i P2P.DaneSpend analysis i odpowiedzialność za definicje.DecyzjeCategory strategy i governance.TechnologiaWymagania wynikające z procesu i danych.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Rejestr projektowanej zmiany.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"ModelTarget Operating Model i podział ról.ProcesSource-to-pay, S2P i P2P.DaneSpend analysis i odpowiedzialność za definicje.DecyzjeCategory strategy i governance.TechnologiaWymagania wynikające z procesu i danych.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"1\"}>span{}|parentText=\"01DiagnozaStan procesu, wydatków, ról i danych.\"|parentChildren=[[\"span{}\",\"01\"],[\"h3{}\",\"Diagnoza\"],[\"p{}\",\"Stan procesu, wydatków, ról i danych.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"2\"}>span{}|parentText=\"02ProjektDocelowy model pracy i odpowiedzialności.\"|parentChildren=[[\"span{}\",\"02\"],[\"h3{}\",\"Projekt\"],[\"p{}\",\"Docelowy model pracy i odpowiedzialności.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"3\"}>span{}|parentText=\"03SekwencjaKolejność zmian, zależności i odbiory.\"|parentChildren=[[\"span{}\",\"03\"],[\"h3{}\",\"Sekwencja\"],[\"p{}\",\"Kolejność zmian, zależności i odbiory.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"4\"}>span{}|parentText=\"04GovernanceWłaściciele decyzji i sposób rozliczania projektu.\"|parentChildren=[[\"span{}\",\"04\"],[\"h3{}\",\"Governance\"],[\"p{}\",\"Właściciele decyzji i sposób rozliczania projektu.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Metoda",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MetodaCztery zamknięcia decyzyjne.01DiagnozaStan procesu, wydatków, ról i danych.02ProjektDocelowy model pracy i odpowiedzialności.03SekwencjaKolejność zmian, zależności i odbiory.04GovernanceWłaściciele decyzji i sposób rozliczania projektu.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Metoda\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Cztery zamknięcia decyzyjne.\"],[\"div{class=\\\"service-method\\\"}\",\"01DiagnozaStan procesu, wydatków, ról i danych.02ProjektDocelowy model pracy i odpowiedzialności.03SekwencjaKolejność zmian, zależności i odbiory.04GovernanceWłaściciele decyzji i sposób rozliczania projektu.\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Dowody",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / DowodyDoświadczenie zapisane faktami.OrganizacjaPZU S.A.RolaDyrektor Projektu StrategicznegoZakresProwadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.OrganizacjaPwC Polska Sp. z o.o.RolaWicedyrektor w Advisory / Procurement ExpertMetodykaPracowałem z metodyką CAPP (Complete & Agile Procurement).Rola projektowaKierownik projektu CONNECTPlatformaCentralna platforma sourcingowa dla Grupy ORLENZakres CONNECT15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Dowody\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Doświadczenie zapisane faktami.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganizacjaPZU S.A.RolaDyrektor Projektu StrategicznegoZakresProwadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.OrganizacjaPwC Polska Sp. z o.o.RolaWicedyrektor w Advisory / Procurement ExpertMetodykaPracowałem z metodyką CAPP (Complete & Agile Procurement).Rola projektowaKierownik projektu CONNECTPlatformaCentralna platforma sourcingowa dla Grupy ORLENZakres CONNECT15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół\"]]"
+  },
+  {
+    "file": "uslugi/transformacja-zakupow/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06 / Kontakt",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / KontaktUstalmy projekt zmiany.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Kontakt\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Ustalmy projekt zmiany.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "DOSSIER / ADVISORY 02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Strona główna/Wdrożenie SAP AribaDOSSIER / ADVISORY 02Wdrożenie SAP AribaProwadzę wdrożenia SAP Ariba od decyzji procesowych i danych po konfigurację, integrację, testy i uruchomienie. Zakres wynika z realnego modelu zakupowego, a nie z listy funkcji systemu.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Wdrożenie SAP Ariba\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 02\"],[\"h1{class=\\\"page-title\\\"}\",\"Wdrożenie SAP Ariba\"],[\"p{class=\\\"page-lead\\\"}\",\"Prowadzę wdrożenia SAP Ariba od decyzji procesowych i danych po konfigurację, integrację, testy i uruchomienie. Zakres wynika z realnego modelu zakupowego, a nie z listy funkcji systemu.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Problem",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-problem\",data-section=\"problem\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"01 / ProblemProces wyznacza konfigurację.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Problem\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Proces wyznacza konfigurację.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Dopasowanie",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / DopasowanieWdrożenie potrzebuje właścicieli decyzji.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Dopasowanie\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Wdrożenie potrzebuje właścicieli decyzji.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Zakres",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresRejestr zakresu rozwiązania.SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingDostawcySAP Ariba Supplier Lifecycle and PerformanceRyzykoSAP Ariba Supplier RiskPracownicy zewnętrzniSAP FieldglassIntegracjaintegration with SAP S/4HANA\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Rejestr zakresu rozwiązania.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingDostawcySAP Ariba Supplier Lifecycle and PerformanceRyzykoSAP Ariba Supplier RiskPracownicy zewnętrzniSAP FieldglassIntegracjaintegration with SAP S/4HANA\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"1\"}>span{}|parentText=\"01Decyzje procesoweRole, reguły, wyjątki i kryteria odbioru.\"|parentChildren=[[\"span{}\",\"01\"],[\"h3{}\",\"Decyzje procesowe\"],[\"p{}\",\"Role, reguły, wyjątki i kryteria odbioru.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"2\"}>span{}|parentText=\"02Dane i integracjaObiekty, źródła, mapowania i odpowiedzialność.\"|parentChildren=[[\"span{}\",\"02\"],[\"h3{}\",\"Dane i integracja\"],[\"p{}\",\"Obiekty, źródła, mapowania i odpowiedzialność.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"3\"}>span{}|parentText=\"03TestyScenariusze odzwierciedlające rzeczywisty przebieg pracy.\"|parentChildren=[[\"span{}\",\"03\"],[\"h3{}\",\"Testy\"],[\"p{}\",\"Scenariusze odzwierciedlające rzeczywisty przebieg pracy.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>div{class=\"service-method\"}>article{data-method-step=\"4\"}>span{}|parentText=\"04UruchomienieGotowość procesu, danych, użytkowników i wsparcia.\"|parentChildren=[[\"span{}\",\"04\"],[\"h3{}\",\"Uruchomienie\"],[\"p{}\",\"Gotowość procesu, danych, użytkowników i wsparcia.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Metoda",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MetodaOd decyzji do uruchomienia.01Decyzje procesoweRole, reguły, wyjątki i kryteria odbioru.02Dane i integracjaObiekty, źródła, mapowania i odpowiedzialność.03TestyScenariusze odzwierciedlające rzeczywisty przebieg pracy.04UruchomienieGotowość procesu, danych, użytkowników i wsparcia.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Metoda\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Od decyzji do uruchomienia.\"],[\"div{class=\\\"service-method\\\"}\",\"01Decyzje procesoweRole, reguły, wyjątki i kryteria odbioru.02Dane i integracjaObiekty, źródła, mapowania i odpowiedzialność.03TestyScenariusze odzwierciedlające rzeczywisty przebieg pracy.04UruchomienieGotowość procesu, danych, użytkowników i wsparcia.\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Dowody",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / DowodyZakresy potwierdzone faktami.Wdrożenia SAP Ariba20+KGHM, rolaRealizacja wdrożenia i integracjiKGHM, zakresSourcing i obsługa pracowników zewnętrznychKGHM, integracjaSAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANAŻabka, rolaRealizacja wdrożenia SAP AribaŻabka, zakresZakupy, ryzyko dostawców i sourcingŻabka, rozwiązanieSAP Ariba Buying, Supplier Risk i sourcingPLL LOTWdrożenie SAP Ariba dla PLL LOTMotor Oil HellasWdrożenie SAP w obszarze zakupów dla Motor Oil Hellas\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Dowody\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Zakresy potwierdzone faktami.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"Wdrożenia SAP Ariba20+KGHM, rolaRealizacja wdrożenia i integracjiKGHM, zakresSourcing i obsługa pracowników zewnętrznychKGHM, integracjaSAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANAŻabka, rolaRealizacja wdrożenia SAP AribaŻabka, zakresZakupy, ryzyko dostawców i sourcingŻabka, rozwiązanieSAP Ariba Buying, Supplier Risk i sourcingPLL LOTWdrożenie SAP Ariba dla PLL LOTMotor Oil HellasWdrożenie SAP w obszarze zakupów dla Motor Oil Hellas\"]]"
+  },
+  {
+    "file": "uslugi/wdrozenie-sap-ariba/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[6]>div[1]>div[1]>p[1]",
+    "token": "06",
+    "occurrence": 1,
+    "ownerText": "06 / Kontakt",
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / KontaktUstalmy zakres wdrożenia.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Kontakt\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Ustalmy zakres wdrożenia.\"]]"
+  },
+  {
+    "file": "wiedza/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"knowledge-page\",data-page=\"knowledge\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"knowledge-index\",data-section=\"resources\"}>article{class=\"knowledge-entry\",data-resource=null}>span{aria-hidden=\"true\",class=\"knowledge-entry__number\"}|parentText=\"01 Procurement Process 2026 TypModel interaktywny JęzykPolski StatusZasób w serwisie\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\",class=\\\"knowledge-entry__number\\\"}\",\"01\"],[\"h2{class=\\\"knowledge-entry__title\\\"}\",\"Procurement Process 2026\"],[\"dl{class=\\\"knowledge-entry__meta\\\"}\",\"TypModel interaktywny JęzykPolski StatusZasób w serwisie\"]]"
+  },
+  {
+    "file": "wiedza/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"knowledge-page\",data-page=\"knowledge\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"knowledge-index\",data-section=\"resources\"}>article{class=\"knowledge-entry\",data-resource=null}>span{aria-hidden=\"true\",class=\"knowledge-entry__number\"}|parentText=\"02 Wystąpienia i wykłady TypWystąpienia i wykłady JęzykPolski StatusZasób w serwisie\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\",class=\\\"knowledge-entry__number\\\"}\",\"02\"],[\"h2{class=\\\"knowledge-entry__title\\\"}\",\"Wystąpienia i wykłady\"],[\"dl{class=\\\"knowledge-entry__meta\\\"}\",\"TypWystąpienia i wykłady JęzykPolski StatusZasób w serwisie\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[1]>span[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"transformation\"}>span{aria-hidden=\"true\"}|parentText=\"01Transformacja zakupówModel operacyjny, role, procesy, dane i technologia.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"01\"],[\"div{}\",\"Transformacja zakupówModel operacyjny, role, procesy, dane i technologia.\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[2]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[2]>span[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"ariba\"}>span{aria-hidden=\"true\"}|parentText=\"02SAP AribaDecyzje procesowe, zakres wdrożenia, integracje, testy i uruchomienie.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"02\"],[\"div{}\",\"SAP AribaDecyzje procesowe, zakres wdrożenia, integracje, testy i uruchomienie.\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[3]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[3]>span[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"digital\"}>span{aria-hidden=\"true\"}|parentText=\"03Digital procurementPrzejście od projektu procesu do działającego środowiska operacyjnego.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"03\"],[\"div{}\",\"Digital procurementPrzejście od projektu procesu do działającego środowiska operacyjnego.\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[4]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[4]>span[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"public-procurement\"}>span{aria-hidden=\"true\"}|parentText=\"04Zamówienia publiczne i technologiaStruktura decyzji, odpowiedzialności, dokumentów i narzędzi.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"04\"],[\"div{}\",\"Zamówienia publiczne i technologiaStruktura decyzji, odpowiedzialności, dokumentów i narzędzi.\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[5]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>article[5]>span[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>div{class=\"speaking-agenda\"}>article{data-topic=\"leadership\"}>span{aria-hidden=\"true\"}|parentText=\"05Przywództwo w zmianiePorządkowanie odpowiedzialności, komunikacji i tempa wdrożenia.\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"05\"],[\"div{}\",\"Przywództwo w zmianiePorządkowanie odpowiedzialności, komunikacji i tempa wdrożenia.\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>header[1]>p[1]",
+    "token": "01",
+    "occurrence": 1,
+    "ownerText": "01 / Tematy",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-topics\",data-section=\"topics\",id=\"topics\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"01 / TematyAgenda rozmowy\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"01 / Tematy\"],[\"h2{}\",\"Agenda rozmowy\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[2]>header[1]>p[1]",
+    "token": "02",
+    "occurrence": 1,
+    "ownerText": "02 / Formaty",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-formats\",data-section=\"formats\",id=\"formats\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"02 / FormatyForma pracy\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Formaty\"],[\"h2{}\",\"Forma pracy\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>header[1]>p[1]",
+    "token": "03",
+    "occurrence": 1,
+    "ownerText": "03 / Odbiorcy",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-audience\",data-section=\"audience\",id=\"audience\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"03 / OdbiorcyTrzy ścieżki programu\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Odbiorcy\"],[\"h2{}\",\"Trzy ścieżki programu\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[4]>header[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[4]>header[1]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "04 / Wywiad",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-recording\",data-section=\"interview\",id=\"interview\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"04 / WywiadRozmowa o wdrożeniach\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Wywiad\"],[\"h2{}\",\"Rozmowa o wdrożeniach\"]]"
+  },
+  {
+    "file": "wystapienia/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[5]>div[1]>p[1]",
+    "token": "05",
+    "occurrence": 1,
+    "ownerText": "05 / Kontakt",
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-contact\",data-section=\"contact\",id=\"contact\"}>div{}>p{class=\"section-label\"}|parentText=\"05 / KontaktNajpierw kontekst\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Kontakt\"],[\"h2{}\",\"Najpierw kontekst\"]]"
+  }
+];
+export const PRESENTATION_INDEX_OCCURRENCES = Object.freeze(
+  PRESENTATION_INDEX_OCCURRENCE_DATA.map((entry) => Object.freeze(entry))
+);
+
+const PRESENTATION_INDEX_FIELDS = Object.freeze([
+  "file", "sourcePath", "ownerPath", "token", "occurrence", "ownerText", "containerSignature"
+]);
+
+function plan3PresentationIdentity(entry) {
+  return [entry.file, entry.sourcePath, entry.ownerPath, entry.token, String(entry.occurrence)].join("\0");
+}
+
+export function validatePresentationIndexOccurrences(entries = PRESENTATION_INDEX_OCCURRENCES) {
+  if (!Array.isArray(entries)) {
+    return ["ERROR presentation-index-manifest scripts/verify-site.mjs: occurrence manifest must be an array"];
+  }
+  const diagnostics = [];
+  const publicFiles = new Set(PUBLIC_PAGES.map(({ file }) => file));
+  const identities = new Map();
+  entries.forEach((entry, index) => {
+    const cursor = `entries[${index}]`;
+    if (!isPlainObject(entry)
+      || JSON.stringify(Object.keys(entry)) !== JSON.stringify(PRESENTATION_INDEX_FIELDS)
+      || !PRESENTATION_INDEX_FIELDS.filter((field) => field !== "occurrence").every((field) => nonEmptyString(entry[field]))
+      || !/^(?:0[1-9]|1[01])$/u.test(entry.token ?? "")
+      || !Number.isInteger(entry.occurrence)
+      || entry.occurrence < 1) {
+      diagnostics.push(`ERROR presentation-index-manifest scripts/verify-site.mjs: ${cursor} has an invalid exact occurrence shape`);
+      return;
+    }
+    if (!publicFiles.has(entry.file)) {
+      diagnostics.push(`ERROR presentation-index-manifest scripts/verify-site.mjs: ${cursor} file ${entry.file} must be a member of PUBLIC_PAGES`);
+      return;
+    }
+    const identity = plan3PresentationIdentity(entry);
+    if (identities.has(identity)) {
+      diagnostics.push(`ERROR presentation-index-manifest scripts/verify-site.mjs: duplicate presentation index identity ${identity}`);
+      return;
+    }
+    identities.set(identity, index);
+  });
+  return diagnostics;
+}
 
 const PLAN3_ARTIFACT_FILES = new Set(PUBLIC_PAGES.slice(19).map(({ file }) => file));
 const PLAN3_VALID_SCOPES = new Set(["all", "facts", "foundation", "home", "pages", "metadata", "discovery", "seo"]);
@@ -3070,8 +4495,8 @@ const APPLICATION_PAGE_CONTRACT = {
 const APPLICATION_EVIDENCE_CONTRACT = Object.freeze([
   Object.freeze({
     ids: Object.freeze(["portfolio.czympojade_pl", "portfolio.czympojade_pl.type"]),
-    pl: Object.freeze({ context: "Produkt / 01", name: "czympojade.pl", label: "Funkcja", meaning: "Aplikacja transportowa do pracy z połączeniami i rozkładami." }),
-    en: Object.freeze({ context: "Product / 01", name: "czympojade.pl", label: "Function", meaning: "Transport application for working with connections and timetables." })
+    pl: Object.freeze({ context: "Produkt / 01", name: "czympojade.pl", label: "Funkcja", meaning: "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania." }),
+    en: Object.freeze({ context: "Product / 01", name: "czympojade.pl", label: "Function", meaning: "Fleet TCO calculator using the Bielik model to analyse total cost of ownership." })
   }),
   Object.freeze({
     ids: Object.freeze(["portfolio.przypominamy_com", "portfolio.przypominamy_com.type"]),
@@ -3134,7 +4559,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ]),
       evidence: Object.freeze([
         "03 / Evidence", "Wybrane produkty.", "Trzy różne zakresy pokazane przez ich zatwierdzone znaczenie produktowe.",
-        "Produkt / 01", "czympojade.pl", "Funkcja", "Aplikacja transportowa do pracy z połączeniami i rozkładami.",
+        "Produkt / 01", "czympojade.pl", "Funkcja", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
         "Produkt / 02", "Przypominamy.com", "Funkcja", "Platforma powiadomień dla organizacji.",
         "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych."
       ]),
@@ -3213,7 +4638,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ]),
       evidence: Object.freeze([
         "03 / Evidence", "Selected products.", "Three different scopes, shown through their approved product meaning.",
-        "Product / 01", "czympojade.pl", "Function", "Transport application for working with connections and timetables.",
+        "Product / 01", "czympojade.pl", "Function", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
         "Product / 02", "Przypominamy.com", "Function", "Notification platform for organisations.",
         "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator."
       ]),
@@ -5516,8 +6941,8 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"project.lot.implementation","value":"SAP Ariba implementation for PLL LOT","display_pl":"Wdrożenie SAP Ariba dla PLL LOT","display_en":"SAP Ariba implementation for PLL LOT","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","worker/index.js","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"client.motor_oil_hellas","value":"Motor Oil Hellas","display_pl":"Motor Oil Hellas","display_en":"Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"project.motor_oil.implementation","value":"SAP procurement implementation for Motor Oil Hellas","display_pl":"Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas","display_en":"SAP procurement implementation for Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","worker/index.js","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl transport application","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.czympojade_pl.type","value":"transport connection and timetable application","display_pl":"Aplikacja transportowa do pracy z połączeniami i rozkładami.","display_en":"Transport application for working with connections and timetables.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl fleet TCO calculator","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt","worker/index.js"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.czympojade_pl.type","value":"fleet TCO calculator using the Bielik model for ownership-cost analysis","display_pl":"Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.","display_en":"Fleet TCO calculator using the Bielik model to analyse total cost of ownership.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
@@ -5536,7 +6961,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "cbc4b44e16583076a70e6abd07a7a61b750ee1ae9584c1935527583d54c9442d", en: "c4625b32670ca06c9c3bb7f9db2c831acadb9951dc9d1a088f028e79037d9754" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "5b9b51c965db16dfc3314b57d41c262076973cc58e46be19d403d4997cd903fc", en: "e511ca93cbcaa2c50e94fd7099af0cad4bafd6d28df8504c97bd39d998954f73" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -6198,7 +7623,9 @@ function addDeferred(context, contract) {
   if (!context.deferred.includes(contract)) context.deferred.push(contract);
 }
 
-const SPEAKING_GROUP_ORDER = Object.freeze(["topics", "formats", "audience", "contact"]);
+const SPEAKING_GROUP_ORDER = Object.freeze(["topics", "formats", "audience", "interview", "contact"]);
+const SPEAKING_INTERVIEW_URL = "https://www.youtube.com/watch?v=5KYUdTLlvvg";
+const SPEAKING_INTERVIEW_TITLE = "Procurement&Beyond, odcinek 8. Nawet najlepsze narzędzie nie uratuje złego wdrożenia.";
 const SPEAKING_CONTRACT = Object.freeze({
   pl: Object.freeze({
     title: "Wystąpienia",
@@ -6219,6 +7646,12 @@ const SPEAKING_CONTRACT = Object.freeze({
       ["lecture", "Wykład", "Materiał osadzony w programie i poziomie przygotowania grupy."]
     ]),
     audiences: Object.freeze([["conferences", "Konferencje i fora branżowe"], ["teams", "Zespoły zakupowe i projektowe"], ["universities", "Uczelnie i programy executive"]]),
+    interviewHeading: "Rozmowa o wdrożeniach",
+    interviewSource: "YOUTUBE / PROCUREMENT&BEYOND / ODCINEK 8",
+    interviewSummary: "W rozmowie mówię o profesjonalizacji zakupów, odejściu od sztywnych procedur i roli wewnętrznego lidera wdrożenia. Pokazuję też Czym pojadę, kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania. Rozmowę zamyka pytanie, jak łączyć warsztat kupca z automatyzacją i analizą danych.",
+    interviewCta: "Obejrzyj na YouTube",
+    interviewAlt: "Infografika o roli lidera wdrożenia, politykach zakupowych oraz analizie TCO z modelem Bielik",
+    interviewCaption: "Infografika do odcinka. Skrót tematów rozmowy; pełny kontekst i założenia modelu znajdują się w nagraniu.",
     contactHeading: "Najpierw kontekst",
     contactText: "W wiadomości podaj temat, odbiorców i cel wydarzenia. Format i zakres ustalimy na tej podstawie.",
     ctaHref: "mailto:pawel@mamcarz.com?subject=Wyst%C4%85pienie",
@@ -6243,6 +7676,12 @@ const SPEAKING_CONTRACT = Object.freeze({
       ["lecture", "Lecture", "Material aligned with the programme and the group's level of preparation."]
     ]),
     audiences: Object.freeze([["conferences", "Industry conferences and forums"], ["teams", "Procurement and project teams"], ["universities", "Universities and executive programmes"]]),
+    interviewHeading: "A conversation about implementation",
+    interviewSource: "YOUTUBE / PROCUREMENT&BEYOND / EPISODE 8",
+    interviewSummary: "In the conversation I discuss the professionalisation of procurement, moving beyond rigid procedures, and the role of an internal implementation leader. I also present Czym pojadę, a fleet TCO calculator using the Bielik model to analyse ownership costs. The final theme is how to combine procurement judgement with automation and data analysis.",
+    interviewCta: "Watch on YouTube · Polish audio",
+    interviewAlt: "Infographic about the implementation leader, procurement policies and TCO analysis with the Bielik model",
+    interviewCaption: "Episode infographic. It summarises the conversation topics; the recording provides the full context and model assumptions.",
     contactHeading: "Context first",
     contactText: "In your message, include the topic, audience and purpose of the event. We will define the format and scope from there.",
     ctaHref: "mailto:pawel@mamcarz.com?subject=Speaking%20enquiry",
@@ -6250,19 +7689,57 @@ const SPEAKING_CONTRACT = Object.freeze({
   })
 });
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "ce016d189592e2f1c7bb5ce6b3bc6c91cd00d0bea2c22d741e215a580b2304ec", en: "7d5c274ba7752fd23eaa9585f4388a407f02d9fae111e6660450245625ea0b5c" });
+const SPEAKING_FACT_CONTRACT = Object.freeze([
+  Object.freeze({
+    id: "speaking.procurement_beyond.title",
+    value: SPEAKING_INTERVIEW_TITLE,
+    display_pl: SPEAKING_INTERVIEW_TITLE,
+    display_en: SPEAKING_INTERVIEW_TITLE,
+    kind: "constant",
+    as_of: null,
+    source_type: "public_source",
+    source_label: "Official YouTube oEmbed metadata inspected 2026-08-27",
+    source_url: SPEAKING_INTERVIEW_URL,
+    surfaces: SPEAKING_SURFACES,
+    status: "approved"
+  }),
+  Object.freeze({
+    id: "speaking.procurement_beyond.summary",
+    value: SPEAKING_CONTRACT.en.interviewSummary,
+    display_pl: SPEAKING_CONTRACT.pl.interviewSummary,
+    display_en: SPEAKING_CONTRACT.en.interviewSummary,
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: "Owner-provided interview summary, 2026-08-27",
+    source_url: SPEAKING_INTERVIEW_URL,
+    surfaces: SPEAKING_SURFACES,
+    status: "approved"
+  })
+]);
+
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "bb86ab678a7b697f531db055a6f00b2825c109d890ff2d2dbf534b2c6e5c7533", en: "7d0bc52acb0c591d0a07cf8ad50d80740e1e6cac31cce1c81aac5479cf13cbe8" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
   const surfaces = Array.isArray(factData.public_claim_surfaces) ? factData.public_claim_surfaces : [];
+  const contractIds = new Set(SPEAKING_FACT_CONTRACT.map((record) => record.id));
   const ownsState = surfaces.some((surface) => SPEAKING_SURFACES.includes(surface))
-    || records.some((record) => Array.isArray(record?.surfaces) && record.surfaces.some((surface) => SPEAKING_SURFACES.includes(surface)));
+    || records.some((record) => contractIds.has(record?.id)
+      || (Array.isArray(record?.surfaces) && record.surfaces.some((surface) => SPEAKING_SURFACES.includes(surface))));
   if (!required && !ownsState) return;
   const failures = [];
   if (JSON.stringify(surfaces) !== JSON.stringify(SERVICE_PUBLIC_SURFACE_CONTRACT)) failures.push("public_claim_surfaces must equal the exact Speaking-aware ordered contract");
   for (const surface of SPEAKING_SURFACES) {
     const ids = records.filter((record) => Array.isArray(record?.surfaces) && record.surfaces.includes(surface)).map((record) => record.id);
-    if (ids.length !== 0) failures.push(`${surface} must have an empty reverse fact inventory`);
+    const expected = SPEAKING_FACT_CONTRACT.map((record) => record.id);
+    if (JSON.stringify(ids) !== JSON.stringify(expected)) failures.push(`${surface} must authorize exactly ${expected.join(", ")}`);
+  }
+  for (const expected of SPEAKING_FACT_CONTRACT) {
+    const matches = records.filter((record) => record?.id === expected.id);
+    if (matches.length !== 1 || JSON.stringify(matches[0]) !== JSON.stringify(expected)) {
+      failures.push(`${expected.id} must retain its exact approved evidence contract`);
+    }
   }
   if (failures.length) error(errors, "speaking-registry-inventory", "content/site-facts.json", failures.join("; "));
 }
@@ -6310,10 +7787,112 @@ function verifySpeakingClaimBoundary(path, parsedRoot, errors) {
   }
 }
 
+function verifySpeakingInterview(path, section, contract, errors) {
+  const expectedLabel = path.startsWith("en/") ? "04 / Interview" : "04 / Wywiad";
+  const direct = directElementChildren(section);
+  const header = direct[0];
+  const entry = direct[1];
+  const headerChildren = directElementChildren(header);
+  const label = headerChildren[0];
+  const heading = headerChildren[1];
+  const entryChildren = directElementChildren(entry);
+  const figure = entryChildren[0];
+  const link = entryChildren[1];
+  const figureChildren = directElementChildren(figure);
+  const picture = figureChildren[0];
+  const caption = figureChildren[1];
+  const pictureChildren = directElementChildren(picture);
+  const source = pictureChildren[0];
+  const image = pictureChildren[1];
+  const linkChildren = directElementChildren(link);
+  const play = linkChildren[0];
+  const body = linkChildren[1];
+  const bodyChildren = directElementChildren(body);
+  const sourceLabel = bodyChildren[0];
+  const title = bodyChildren[1];
+  const summary = bodyChildren[2];
+  const cta = bodyChildren[3];
+  const titleBreaks = title ? directElementChildren(title) : [];
+
+  const exactStructure = direct.length === 2
+    && exactElementAttributes(header, { class: "speaking-group__head" })
+    && headerChildren.length === 2
+    && exactElementAttributes(label, { class: "section-label" })
+    && publishedStaticText(label) === expectedLabel
+    && exactElementAttributes(heading, {})
+    && heading.name === "h2"
+    && publishedStaticText(heading) === normalizeExactLiteral(contract.interviewHeading)
+    && exactElementAttributes(entry, { class: "speaking-recording__entry" })
+    && entry.name === "article"
+    && entryChildren.length === 2
+    && exactElementAttributes(figure, { class: "speaking-recording__visual" })
+    && figure.name === "figure"
+    && figureChildren.length === 2
+    && exactElementAttributes(picture, {})
+    && picture.name === "picture"
+    && pictureChildren.length === 2
+    && exactElementAttributes(source, {
+      type: "image/webp",
+      srcset: "/assets/img/speaking/procurement-beyond-episode-8-960.webp 960w, /assets/img/speaking/procurement-beyond-episode-8-1510.webp 1510w",
+      sizes: "100vw"
+    })
+    && source.name === "source"
+    && exactElementAttributes(image, {
+      src: "/assets/img/speaking/procurement-beyond-episode-8-1510.jpg",
+      alt: contract.interviewAlt,
+      width: "1510",
+      height: "780",
+      loading: "lazy",
+      decoding: "async"
+    })
+    && image.name === "img"
+    && exactElementAttributes(caption, {})
+    && caption.name === "figcaption"
+    && publishedStaticText(caption) === normalizeExactLiteral(contract.interviewCaption)
+    && exactElementAttributes(link, {
+      class: "speaking-recording__link",
+      href: SPEAKING_INTERVIEW_URL,
+      target: "_blank",
+      rel: "noopener noreferrer"
+    })
+    && link.name === "a"
+    && linkChildren.length === 2
+    && exactElementAttributes(play, { class: "speaking-recording__play", "aria-hidden": "true" })
+    && play.name === "span"
+    && publishedStaticText(play) === "PLAY"
+    && exactElementAttributes(body, { class: "speaking-recording__body" })
+    && body.name === "div"
+    && bodyChildren.length === 4
+    && exactElementAttributes(sourceLabel, { class: "speaking-recording__source" })
+    && sourceLabel.name === "span"
+    && publishedStaticText(sourceLabel) === normalizeExactLiteral(contract.interviewSource)
+    && exactElementAttributes(title, { "data-fact-id": "speaking.procurement_beyond.title", lang: "pl" })
+    && title.name === "h3"
+    && titleBreaks.length === 1
+    && titleBreaks[0].name === "wbr"
+    && exactElementAttributes(titleBreaks[0], {})
+    && normalizeExactHtmlLiteral(rawElementText(title)) === normalizeExactLiteral(SPEAKING_INTERVIEW_TITLE)
+    && exactElementAttributes(summary, { "data-fact-id": "speaking.procurement_beyond.summary" })
+    && summary.name === "p"
+    && publishedStaticText(summary) === normalizeExactLiteral(contract.interviewSummary)
+    && exactElementAttributes(cta, { class: "speaking-recording__cta" })
+    && cta.name === "span"
+    && publishedStaticText(cta) === normalizeExactLiteral(contract.interviewCta)
+    && pageElementIsActive(section)
+    && pageElementIsActive(link);
+  if (!exactStructure) {
+    error(errors, "speaking-interview", path, "requires the exact bilingual owner-approved interview, local visual, evidence copy and safe canonical YouTube link");
+  }
+}
+
 function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const all = elementDescendants(parsedRoot);
-  const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "object", "picture", "source", "style", "video"]);
+  const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "object", "style", "video"]);
   const signatureImages = all.filter((element) => element.name === "img" && elementIsWithin(element, all.find((candidate) => elementHasClass(candidate, "footer-sign"))));
+  const recording = all.find((element) => elementHasClass(element, "speaking-recording__entry"));
+  const recordingImages = all.filter((element) => element.name === "img" && elementIsWithin(element, recording));
+  const recordingPictures = all.filter((element) => element.name === "picture" && elementIsWithin(element, recording));
+  const recordingSources = all.filter((element) => element.name === "source" && elementIsWithin(element, recording));
   const validSignature = signatureImages.length === 1 && exactElementAttributes(signatureImages[0], {
     src: "/assets/img/signature.png",
     alt: "",
@@ -6321,17 +7900,26 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
     height: "50",
     loading: "lazy",
     decoding: "async"
-  }) && all.filter((element) => element.name === "img").length === 1;
+  });
+  const validRecordingAssets = recordingImages.length === 1
+    && recordingPictures.length === 1
+    && recordingSources.length === 1
+    && all.filter((element) => element.name === "img").length === 2
+    && all.filter((element) => element.name === "picture").length === 1
+    && all.filter((element) => element.name === "source").length === 1;
   const invalidAnchor = all.filter((element) => element.name === "a").some((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
-    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
+    const exactInterview = href === SPEAKING_INTERVIEW_URL
+      && exactElementAttributes(anchor, { class: "speaking-recording__link", href: SPEAKING_INTERVIEW_URL, target: "_blank", rel: "noopener noreferrer" })
+      && elementIsWithin(anchor, recording);
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref && !exactInterview);
   });
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
     && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-2" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
-  if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature) {
-    error(errors, "speaking-resource-census", path, "allows only the exact footer signature image and forbids embeds, forms, external URLs, inline styles, extra scripts or controls");
+  if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature || !validRecordingAssets) {
+    error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and canonical YouTube link; forbids embeds, forms, inline styles, extra scripts or controls");
   }
 }
 
@@ -6348,8 +7936,8 @@ function verifySpeakingPage(path, parsedRoot, lang, errors) {
   const groups = all.filter((element) => element.attributes.has("data-section"));
   const direct = directElementChildren(main, "section");
   if (JSON.stringify(groups.map((group) => elementAttribute(group, "data-section"))) !== JSON.stringify(SPEAKING_GROUP_ORDER)
-    || direct.length !== 4 || !direct.every((section, index) => section === groups[index] && pageElementIsActive(section))) {
-    error(errors, "speaking-groups", path, "requires exactly four direct ordered visible groups");
+    || direct.length !== 5 || !direct.every((section, index) => section === groups[index] && pageElementIsActive(section))) {
+    error(errors, "speaking-groups", path, "requires exactly five direct ordered visible groups");
   }
   const byId = new Map(groups.map((group) => [elementAttribute(group, "data-section"), group]));
   if (!exactLabeledEntries(byId.get("topics"), "data-topic", contract.topics)
@@ -6357,6 +7945,7 @@ function verifySpeakingPage(path, parsedRoot, lang, errors) {
     || !exactLabeledEntries(byId.get("audience"), "data-audience", contract.audiences)) {
     error(errors, "speaking-programme", path, "requires the exact localized ordered topic, format and audience manifests");
   }
+  verifySpeakingInterview(path, byId.get("interview"), contract, errors);
   const contact = byId.get("contact");
   const contactH2 = contact ? elementDescendants(contact, "h2") : [];
   const contactP = contact ? elementDescendants(contact, "p").filter((element) => publishedStaticText(element) === normalizeExactLiteral(contract.contactText)) : [];
@@ -6371,7 +7960,10 @@ function verifySpeakingPage(path, parsedRoot, lang, errors) {
     error(errors, "speaking-controls", path, "requires one exact localized contextual mail CTA");
   }
   const factNodes = all.filter((element) => element.attributes.has("data-fact-id"));
-  if (factNodes.length) error(errors, "speaking-fact-inventory", path, "Speaking pages must render no registry fact rows");
+  const expectedFacts = SPEAKING_FACT_CONTRACT.map((record) => record.id);
+  if (JSON.stringify(factNodes.map((element) => elementAttribute(element, "data-fact-id"))) !== JSON.stringify(expectedFacts)) {
+    error(errors, "speaking-fact-inventory", path, `Speaking pages must render exactly ${expectedFacts.join(", ")}`);
+  }
   const current = all.filter((element) => element.name === "a" && elementAttribute(element, "aria-current") === "page");
   const expectedCurrent = lang === "pl" ? "/wiedza/" : "/en/wiedza/";
   if (current.length !== 1 || elementAttribute(current[0], "href") !== expectedCurrent) error(errors, "speaking-shell", path, "requires Knowledge as the sole current local navigation route");
@@ -8286,225 +9878,104 @@ function plan3OccurrenceElements(representation, occurrence) {
     .filter((element) => element?.type === "element"))];
 }
 
-function plan3StandalonePresentationToken(representation, occurrence, token) {
-  return representation.text === token.value
-    && occurrence.start === 0
-    && occurrence.end === representation.text.length;
+function plan3PresentationElementSignature(element) {
+  const attributes = [...element.attributes]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
+    .join(",");
+  return `${element.name}{${attributes}}`;
 }
 
-function plan3PresentationRelationValue(element, attribute, token) {
-  const value = elementAttribute(element, attribute);
-  return /^(?:[1-9]|1[01])$/.test(value ?? "") && Number(value) === Number(token.value);
-}
-
-function plan3FirstDirectElement(parent, element) {
-  return directElementChildren(parent)[0] === element;
-}
-
-function plan3DirectElementPosition(parent, element, predicate = () => true) {
-  return directElementChildren(parent).filter(predicate).indexOf(element) + 1;
-}
-
-function plan3DirectMainChild(element) {
-  return element.parent?.type === "element" && element.parent.name === "main";
-}
-
-function plan3LeadingSectionLabelRelation(element) {
-  if (element.name !== "p" || !elementHasClass(element, "section-label")) return false;
-  let current = element;
-  while (current.parent?.type === "element" && current.parent.name !== "section") {
-    if (!plan3FirstDirectElement(current.parent, current)) return false;
-    current = current.parent;
+function plan3PresentationContainerSignature(element) {
+  const parts = [];
+  for (let current = element; current?.type === "element" && current.name !== "html"; current = current.parent) {
+    parts.unshift(plan3PresentationElementSignature(current));
   }
-  const section = current.parent;
-  if (section?.type !== "element"
-    || section.name !== "section"
-    || !section.attributes.has("data-section")
-    || !plan3FirstDirectElement(section, current)) return false;
-  return ["service-section", "applications-section", "projects-group", "speaking-group"]
-    .some((className) => elementHasClass(section, className));
+  const parent = element.parent?.type === "element" ? element.parent : null;
+  const parentText = parent === null ? "" : plan3NormalizeHtmlLiteral(rawElementText(parent));
+  const directChildren = parent === null ? [] : directElementChildren(parent).map((child) => [
+    plan3PresentationElementSignature(child),
+    plan3NormalizeHtmlLiteral(rawElementText(child))
+  ]);
+  return `${parts.join(">")}|parentText=${JSON.stringify(parentText)}|parentChildren=${JSON.stringify(directChildren)}`;
 }
 
-function plan3RouteSectionIndexRelation(element, token) {
-  if (element.name !== "p" || !elementHasClass(element, "section-index")) return false;
-  const article = element.parent;
-  const sequence = article?.parent;
-  if (article?.type !== "element"
-    || article.name !== "article"
-    || !elementHasClass(article, "route-sequence__step")
-    || sequence?.type !== "element"
-    || !elementHasClass(sequence, "route-sequence")
-    || !plan3FirstDirectElement(article, element)) return false;
-  const position = plan3DirectElementPosition(sequence, article, (candidate) => candidate.name === "article"
-    && elementHasClass(candidate, "route-sequence__step"));
-  if (position !== Number(token.value)) return false;
-  const shell = sequence.parent;
-  const section = shell?.parent;
-  if (shell?.type !== "element" || section?.type !== "element" || section.name !== "section") return false;
-  const homeProcess = elementHasClass(shell, "container") && elementAttribute(section, "id") === "process";
-  const applicationDelivery = elementHasClass(shell, "section-shell")
-    && elementHasClass(section, "applications-section")
-    && elementAttribute(section, "data-section") === "delivery";
-  return homeProcess || applicationDelivery;
+function plan3PresentationDescriptor(file, sourceElement, ownerElement, token, occurrence, ownerText) {
+  return {
+    file,
+    sourcePath: plan3ElementPath(sourceElement),
+    ownerPath: plan3ElementPath(ownerElement),
+    token,
+    occurrence,
+    ownerText,
+    containerSignature: plan3PresentationContainerSignature(sourceElement)
+  };
 }
 
-function plan3HeroCodeRelation(element, heroClass) {
-  const content = element.parent;
-  const header = content?.parent;
-  return content?.type === "element"
-    && content.name === "div"
-    && elementHasClass(content, "page-hero-content")
-    && header?.type === "element"
-    && header.name === "header"
-    && elementHasClass(header, "page-hero")
-    && elementHasClass(header, heroClass)
-    && plan3DirectMainChild(header);
+function plan3PresentationDescriptorKey(entry) {
+  return JSON.stringify(PRESENTATION_INDEX_FIELDS.map((field) => entry[field]));
 }
 
-function plan3ApplicationEvidenceRelation(element, token) {
-  const row = element.parent;
-  const list = row?.parent;
-  const shell = list?.parent;
-  const section = shell?.parent;
-  if (element.name !== "p"
-    || row?.type !== "element"
-    || row.name !== "article"
-    || !elementHasClass(row, "evidence-row")
-    || list?.type !== "element"
-    || !elementHasClass(list, "applications-evidence-list")
-    || shell?.type !== "element"
-    || !elementHasClass(shell, "section-shell")
-    || section?.type !== "element"
-    || section.name !== "section"
-    || !elementHasClass(section, "applications-section")
-    || !elementHasClass(section, "application-evidence")
-    || elementAttribute(section, "data-section") !== "evidence"
-    || !plan3FirstDirectElement(row, element)) return false;
-  return plan3DirectElementPosition(list, row, (candidate) => candidate.name === "article"
-    && elementHasClass(candidate, "evidence-row")) === Number(token.value);
+function plan3PresentationTokenKey(token) {
+  return `${token.start}\0${token.end}\0${token.value}`;
 }
 
-function plan3AviationSectorIndexRelation(element, token) {
-  const index = element.parent;
-  if (index?.type !== "element" || !elementHasClass(index, "aviation-sector__index")) return false;
-  let current = index;
-  while (current.parent?.type === "element" && current.parent.name !== "section") {
-    if (!plan3FirstDirectElement(current.parent, current)) return false;
-    current = current.parent;
+function plan3PresentationAudit(file, body, units, numericTokensByUnit, errors) {
+  const expected = PRESENTATION_INDEX_OCCURRENCES.filter((entry) => entry.file === file);
+  const expectedByDescriptor = new Map(expected.map((entry) => [plan3PresentationDescriptorKey(entry), entry]));
+  const observed = new Map(expected.map((entry) => [plan3PresentationDescriptorKey(entry), 0]));
+  const approvedByUnit = new Map();
+  const observe = (descriptor) => {
+    const key = plan3PresentationDescriptorKey(descriptor);
+    if (!expectedByDescriptor.has(key)) return false;
+    observed.set(key, (observed.get(key) ?? 0) + 1);
+    return true;
+  };
+
+  for (const unit of units) {
+    const ordinals = new Map();
+    for (const token of numericTokensByUnit.get(unit) ?? []) {
+      if (!/^(?:0[1-9]|1[01])$/u.test(token.value)) continue;
+      const occurrence = (ordinals.get(token.value) ?? 0) + 1;
+      ordinals.set(token.value, occurrence);
+      const sourceElements = plan3OccurrenceElements(unit, token);
+      if (sourceElements.length !== 1) continue;
+      const descriptor = plan3PresentationDescriptor(
+        file,
+        sourceElements[0],
+        unit.element,
+        token.value,
+        occurrence,
+        unit.text
+      );
+      if (!observe(descriptor)) continue;
+      const approved = approvedByUnit.get(unit) ?? new Set();
+      approved.add(plan3PresentationTokenKey(token));
+      approvedByUnit.set(unit, approved);
+    }
   }
-  const section = current.parent;
-  if (section?.type !== "element"
-    || section.name !== "section"
-    || !elementHasClass(section, "aviation-sector")
-    || !section.attributes.has("data-section")
-    || !plan3FirstDirectElement(section, current)
-    || !plan3DirectMainChild(section)) return false;
-  return plan3DirectElementPosition(section.parent, section, (candidate) => candidate.name === "section"
-    && elementHasClass(candidate, "aviation-sector")
-    && candidate.attributes.has("data-section")) === Number(token.value);
+
+  for (const element of elementDescendants(body)) {
+    if (normalize(elementAttribute(element, "aria-hidden") ?? "") !== "true") continue;
+    const ownerText = plan3NormalizeHtmlLiteral(rawElementText(element));
+    if (!/^(?:0[1-9]|1[01])$/u.test(ownerText)) continue;
+    observe(plan3PresentationDescriptor(file, element, element, ownerText, 1, ownerText));
+  }
+
+  const mismatches = expected.flatMap((entry) => {
+    const count = observed.get(plan3PresentationDescriptorKey(entry)) ?? 0;
+    return count === 1 ? [] : [`${entry.token}@${entry.sourcePath}#${entry.occurrence} observed ${count}`];
+  });
+  if (mismatches.length > 0) {
+    error(errors, "presentation-index-manifest", file, `reviewed occurrences must be observed exactly once: ${mismatches.join("; ")}`);
+  }
+  return approvedByUnit;
 }
 
-function plan3ServiceMethodIndexRelation(element, token) {
-  const article = element.parent;
-  const method = article?.parent;
-  const shell = method?.parent;
-  const section = shell?.parent;
-  return article?.type === "element"
-    && article.name === "article"
-    && plan3PresentationRelationValue(article, "data-method-step", token)
-    && method?.type === "element"
-    && elementHasClass(method, "service-method")
-    && shell?.type === "element"
-    && elementHasClass(shell, "section-shell")
-    && section?.type === "element"
-    && section.name === "section"
-    && elementHasClass(section, "service-section")
-    && elementAttribute(section, "data-section") === "method"
-    && plan3FirstDirectElement(article, element);
-}
-
-function plan3SpeakingTopicIndexRelation(element, token) {
-  const article = element.parent;
-  const agenda = article?.parent;
-  const section = agenda?.parent;
-  if (article?.type !== "element"
-    || article.name !== "article"
-    || !article.attributes.has("data-topic")
-    || agenda?.type !== "element"
-    || !elementHasClass(agenda, "speaking-agenda")
-    || section?.type !== "element"
-    || section.name !== "section"
-    || !elementHasClass(section, "speaking-group")
-    || !elementHasClass(section, "speaking-topics")
-    || elementAttribute(section, "data-section") !== "topics"
-    || !plan3FirstDirectElement(article, element)) return false;
-  return plan3DirectElementPosition(agenda, article, (candidate) => candidate.name === "article"
-    && candidate.attributes.has("data-topic")) === Number(token.value);
-}
-
-function plan3ProcurementArtifactIndexRelation(element, token) {
-  const header = element.parent;
-  const article = header?.parent;
-  const section = article?.parent;
-  return header?.type === "element"
-    && header.name === "header"
-    && article?.type === "element"
-    && article.name === "article"
-    && elementHasClass(article, "procurement-artifact")
-    && plan3PresentationRelationValue(article, "data-artifact", token)
-    && section?.type === "element"
-    && section.name === "section"
-    && elementHasClass(section, "procurement-artifacts")
-    && plan3FirstDirectElement(article, header)
-    && plan3FirstDirectElement(header, element);
-}
-
-function plan3ExactPresentationIndex(unit, element, token) {
-  const representation = plan3VisibleSubtreeRepresentation(element);
-  const occurrence = plan3MapRepresentationRange(unit, token.start, token.end, representation);
-  if (occurrence === null) return false;
-  const text = representation.text;
-  if (normalize(elementAttribute(element, "aria-hidden") ?? "") === "true"
-    && plan3StandalonePresentationToken(representation, occurrence, token)) return true;
-  if (plan3LeadingSectionLabelRelation(element)
-    && occurrence.start === 0
-    && new RegExp(`^${token.value}\\s*/\\s*\\S`, "u").test(text)) return true;
-  if (plan3RouteSectionIndexRelation(element, token)
-    && occurrence.start === 0
-    && new RegExp(`^${token.value}\\s*/\\s*\\S`, "u").test(text)) return true;
-  if (elementHasClass(element, "service-dossier-code")
-    && plan3HeroCodeRelation(element, "service-hero")
-    && new RegExp(`^DOSSIER\\s*/\\s*ADVISORY\\s+${token.value}$`, "u").test(text)) return true;
-  if (elementHasClass(element, "evidence-row__context")
-    && plan3ApplicationEvidenceRelation(element, token)
-    && new RegExp(`^(?:Produkt|Product)\\s*/\\s*${token.value}$`, "u").test(text)) return true;
-  if (elementHasClass(element, "aviation-call-sign")
-    && plan3HeroCodeRelation(element, "aviation-hero")
-    && new RegExp(`^FLIGHT PLAN\\s*/\\s*CORE ROUTE\\s+${token.value}$`, "u").test(text)) return true;
-  if (element.name !== "span" || !plan3StandalonePresentationToken(representation, occurrence, token)) return false;
-
-  const parent = element.parent;
-  if (parent?.type !== "element") return false;
-  if (parent.name === "a"
-    && parent.parent?.type === "element"
-    && parent.parent.name === "nav"
-    && elementHasClass(parent.parent, "projects-index")
-    && plan3DirectMainChild(parent.parent)
-    && parent.attributes.has("href")
-    && plan3FirstDirectElement(parent, element)
-    && plan3DirectElementPosition(parent.parent, parent, (candidate) => candidate.name === "a") === Number(token.value)) return true;
-  if (plan3AviationSectorIndexRelation(element, token)) return true;
-  if (plan3ServiceMethodIndexRelation(element, token)) return true;
-  if (plan3SpeakingTopicIndexRelation(element, token)) return true;
-  if (plan3ProcurementArtifactIndexRelation(element, token)) return true;
-  return false;
-}
-
-function plan3PresentationNumber(unit, token) {
+function plan3PresentationNumber(unit, token, approvedByUnit) {
   if (token.value === "404" && token.presentationText === "404") return true;
-  if (!/^(?:0[1-9]|1[01])$/.test(token.value)) return false;
-  const elements = plan3OccurrenceElements(unit, token);
-  return elements.length === 1 && plan3ExactPresentationIndex(unit, elements[0], token);
+  return /^(?:0[1-9]|1[01])$/u.test(token.value)
+    && (approvedByUnit.get(unit)?.has(plan3PresentationTokenKey(token)) ?? false);
 }
 
 function plan3DynamicOccurrences(text) {
@@ -8574,6 +10045,8 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
   const body = htmlBodyRoot(parsedRoot);
   const publicCopy = plan3VisibleSubtreeRepresentation(body);
   const units = plan3CopyUnits(body);
+  const numericTokensByUnit = new Map(units.map((unit) => [unit, plan3UnitNumericTokens(unit)]));
+  const approvedPresentationNumbers = plan3PresentationAudit(path, body, units, numericTokensByUnit, errors);
   const markers = elements.filter((element) => plan3ElementPublishesCopy(element)
     && (element.attributes.has("data-fact-id") || element.attributes.has("data-fact-ids")));
   const markerRepresentations = new Map();
@@ -8604,7 +10077,7 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
   }
 
   for (const unit of units) {
-    const unownedNumbers = plan3UnitNumericTokens(unit).filter((token) => !plan3PresentationNumber(unit, token)
+    const unownedNumbers = numericTokensByUnit.get(unit).filter((token) => !plan3PresentationNumber(unit, token, approvedPresentationNumbers)
       && !plan3FactOwnsOccurrence(unit, token, markers, markerRepresentations, state, path, entry.lang));
     if (unownedNumbers.length > 0) {
       error(errors, "fact-visible-number", path, `${plan3ElementPath(unit.element)} has unowned numeric tokens: ${unownedNumbers.map(({ value }) => value).join(", ")}`);
@@ -8714,6 +10187,7 @@ function plan3ExpectedHreflang(entry) {
 
 async function verifyMetadata(factData, context) {
   const state = plan3FactState(factData, context);
+  context.errors.push(...validatePresentationIndexOccurrences());
   for (const entry of PUBLIC_PAGES) {
     const html = await readRequired(context, entry.file, "metadata-file");
     const parsed = parseStaticHtml(html);
