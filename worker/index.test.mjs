@@ -324,3 +324,22 @@ test("plain-text AI navigation replies may use only approved destinations", asyn
   assert.equal(response.headers.get("Vary"), "Origin");
   assertRequestId(response, payload);
 });
+
+test("Wrangler configuration pins the reviewed limiter and observability contract", async () => {
+  const config = await readFile(new URL("./wrangler.toml", import.meta.url), "utf8");
+  for (const exact of [
+    'name = "mamcarz-chat-api"',
+    'main = "index.js"',
+    'compatibility_date = "2026-08-25"',
+    'compatibility_flags = ["nodejs_compat"]',
+    'binding = "AI"',
+    'name = "CHAT_RATE_LIMITER"',
+    'namespace_id = "2026082501"',
+    "limit = 10",
+    "period = 60",
+    "head_sampling_rate = 0.01"
+  ]) assert.ok(config.includes(exact), exact);
+  assert.equal((config.match(/\[\[ratelimits\]\]/gu) ?? []).length, 1);
+  assert.equal((config.match(/\[observability\]/gu) ?? []).length, 1);
+  assert.doesNotMatch(config, /DEV_ALLOWED_ORIGINS/u);
+});

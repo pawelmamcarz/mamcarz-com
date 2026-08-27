@@ -1,6 +1,26 @@
 name = "mamcarz-chat-api"
 main = "index.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2026-08-25"
+compatibility_flags = ["nodejs_compat"]
 
 [ai]
 binding = "AI"
+
+[[ratelimits]]
+name = "CHAT_RATE_LIMITER"
+namespace_id = "2026082501"
+
+[ratelimits.simple]
+limit = 10
+period = 60
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+
+[observability.traces]
+enabled = true
+head_sampling_rate = 0.01

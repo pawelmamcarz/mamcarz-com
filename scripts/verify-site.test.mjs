@@ -1122,15 +1122,15 @@ function applicationFactRecords() {
 
 function aviationFactRecords() {
   const records = [
-    { id: "aviation.ppl_h", value: "PPL(H)", display_pl: "PPL(H)", display_en: "PPL(H)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
-    { id: "aviation.ppl_a", value: "PPL(A)", display_pl: "PPL(A)", display_en: "PPL(A)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
-    { id: "aviation.aerobatics_rating", value: "aerobatics rating", display_pl: "uprawnienia do akrobacji", display_en: "aerobatics rating", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "aviation.ppl_h", value: "PPL(H)", display_pl: "PPL(H)", display_en: "PPL(H)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.ppl_a", value: "PPL(A)", display_pl: "PPL(A)", display_en: "PPL(A)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.aerobatics_rating", value: "aerobatics rating", display_pl: "uprawnienia do akrobacji", display_en: "aerobatics rating", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
     { id: "aviation.diverse_extreme_team", value: "Demonstration pilot, Diverse Extreme Team, 2013", display_pl: "pilot pokazowy Diverse Extreme Team (2013)", display_en: "display pilot for the Diverse Extreme Team (2013)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
     { id: "aviation.forum_photographer", value: "Press photographer for Forum Agency", display_pl: "fotograf prasowy agencji Forum", display_en: "Press photographer with Forum Agency", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
     { id: "aviation.air_to_air_media", value: "air-to-air, video and drone production", display_pl: "sesje air-to-air, realizacje wideo i dronem", display_en: "air-to-air shoots, video and drone production", source_label: "Owner-confirmed pre-Task-5 aviation history, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] },
-    { id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
-    { id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
-    { id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt", "worker/index.js"] },
+    { id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
     { id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", source_label: "Owner confirmed portfolio project, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] },
     { id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] }
   ];
@@ -3423,7 +3423,7 @@ test("Owner correction updates Czym pojadę from timetable wording to the fleet 
     source_type: "owner_verified",
     source_label: sourceLabel,
     source_url: procurementBeyondInterview.href,
-    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt", "worker/index.js"],
+    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
     status: "approved"
   });
   assert.deepEqual(type, {
@@ -3436,11 +3436,10 @@ test("Owner correction updates Czym pojadę from timetable wording to the fleet 
     source_type: "owner_verified",
     source_label: sourceLabel,
     source_url: procurementBeyondInterview.href,
-    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt", "worker/index.js"],
+    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
     status: "approved",
     surface_rules: {
-      "llms-full.txt": { approved_any: ["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."] },
-      "worker/index.js": { approved_any: ["czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania."] }
+      "llms-full.txt": { approved_any: ["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."] }
     }
   });
 
@@ -7936,21 +7935,60 @@ test("Plan 3 Task 2 closes every unresolved fact and removes it from all public 
   }
 });
 
-test("Plan 3 Task 2 synchronizes only approved Czym pojadę and PKP facts into the Worker and discovery copy", async () => {
+test("Plan 3 Task 7 limits the Worker to five approved navigation facts while discovery retains audited product facts", async () => {
   const factData = await readFacts();
   const type = factData.facts.find((fact) => fact.id === "portfolio.czympojade_pl.type");
-  assert.ok(type.surfaces.includes("worker/index.js"), "the approved product meaning declares the Worker surface");
+  assert.equal(type.surfaces.includes("worker/index.js"), false, "the product meaning is deliberately excluded from the navigation Worker");
+
+  const workerFactIds = factData.facts
+    .filter((fact) => fact.status === "approved" && fact.surfaces.includes("worker/index.js"))
+    .map((fact) => fact.id);
+  assert.deepEqual(workerFactIds, [
+    "brand.promise",
+    "core.advisory",
+    "core.applications",
+    "core.aviation",
+    "contact.email"
+  ]);
 
   const worker = await readFile(resolve("worker/index.js"), "utf8");
-  assert.ok(worker.includes("czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania."));
-  assert.ok(worker.includes("Negocjowałem umowę ramową z SAP AG dla grupy PKP."));
+  assert.match(worker, /import factRegistry from "\.\.\/content\/site-facts\.json" with \{ type: "json" \}/u);
+  assert.doesNotMatch(worker, /czympojade\.pl: Kalkulator TCO/u);
+  assert.doesNotMatch(worker, /Negocjowałem umowę ramową/u);
   assert.doesNotMatch(worker, /100\+\s*mln\s*PLN/iu, "an unregistered scale claim must not survive in the Worker prompt");
-  assert.equal((worker.match(/czympojade\.pl/giu) ?? []).length, 1, "the product appears once with its exact approved meaning");
+  assert.doesNotMatch(worker, /Kim jest Paweł:|\nKariera:|\nKlienci:/u, "the former static CV prompt must not survive");
 
   const llmsFull = await readFile(resolve("llms-full.txt"), "utf8");
   const exactDiscoveryLine = `- [portfolio.czympojade_pl.type] czympojade.pl: ${type.display_en}`;
   assert.equal(llmsFull.split(/\r?\n/u).filter((line) => line === exactDiscoveryLine).length, 1, "discovery copy publishes the exact registered display once");
   assert.equal((llmsFull.match(/^- \[portfolio\.czympojade_pl(?:\.type)?\] /gmu) ?? []).length, 2, "discovery copy has one independently owned line for the name and one for its type");
+});
+
+test("Plan 3 Task 7 verifier rejects Worker fact-surface expansion and the former CV prompt", async (t) => {
+  const factData = await readFacts();
+  const worker = await readFile(resolve("worker/index.js"), "utf8");
+  const baselineRoot = await plan3Root({ factData, files: { "worker/index.js": worker } });
+  const baseline = await runVerification({ root: baselineRoot, scope: "facts" });
+  assert.equal(errorIds(baseline).includes("worker-fact-inventory"), false, baseline.errors.join("\n"));
+  assert.equal(errorIds(baseline).includes("worker-fact-source"), false, baseline.errors.join("\n"));
+
+  await t.test("extra client surface", async () => {
+    const changedFacts = structuredClone(factData);
+    changedFacts.facts.find((fact) => fact.id === "client.orlen").surfaces.push("worker/index.js");
+    const root = await plan3Root({ factData: changedFacts, files: { "worker/index.js": worker } });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(errorIds(result).includes("worker-fact-inventory"), result.errors.join("\n"));
+  });
+
+  await t.test("static CV source", async () => {
+    const changedWorker = worker.replace(
+      'import factRegistry from "../content/site-facts.json" with { type: "json" };',
+      'const factRegistry = { facts: [] };\nconst retiredPrompt = "Kim jest Paweł:";'
+    );
+    const root = await plan3Root({ factData, files: { "worker/index.js": changedWorker } });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(errorIds(result).includes("worker-fact-source"), result.errors.join("\n"));
+  });
 });
 
 test("Plan 3 Task 2 leaves the verified episode number owned only by the official interview title", async () => {
