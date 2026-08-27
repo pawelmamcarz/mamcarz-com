@@ -7922,7 +7922,7 @@ function plan3CopyOwner(element) {
 }
 
 function plan3HasMeaningfulDirectText(element) {
-  return (element.children ?? []).some((child) => child.type === "text" && nonEmptyString(normalizeExactHtmlLiteral(child.value)));
+  return (element.children ?? []).some((child) => child.type === "text" && nonEmptyString(plan3NormalizeHtmlLiteral(child.value)));
 }
 
 function plan3SemanticCopyOwner(element) {
@@ -7943,23 +7943,137 @@ function plan3NodeWithin(node, element) {
   return false;
 }
 
+const PLAN3_LEGACY_SEMICOLONLESS_ENTITIES = Object.freeze(["quot", "nbsp", "shy", "amp", "lt", "gt"]);
+const PLAN3_GRAPHEME_SEGMENTER = new Intl.Segmenter("und", { granularity: "grapheme" });
+
+function plan3HtmlEntitySegments(value) {
+  const segments = [];
+  let cursor = 0;
+  const appendLiteral = (start, end) => segments.push({ raw: value.slice(start, end), decoded: value.slice(start, end), start, end, unsupported: false });
+  while (cursor < value.length) {
+    if (value[cursor] !== "&") {
+      const codePoint = value.codePointAt(cursor);
+      const width = codePoint > 0xFFFF ? 2 : 1;
+      appendLiteral(cursor, cursor + width);
+      cursor += width;
+      continue;
+    }
+
+    const remaining = value.slice(cursor);
+    const numeric = /^&#(?:[xX][0-9a-fA-F]+|\d+);?/.exec(remaining)?.[0];
+    if (numeric !== undefined) {
+      const entity = numeric.slice(2).replace(/;$/, "");
+      const hexadecimal = entity[0] === "x" || entity[0] === "X";
+      const codePoint = Number.parseInt(hexadecimal ? entity.slice(1) : entity, hexadecimal ? 16 : 10);
+      const decoded = codePoint > 0 && codePoint <= 0x10FFFF && !(codePoint >= 0xD800 && codePoint <= 0xDFFF)
+        ? String.fromCodePoint(codePoint)
+        : "�";
+      segments.push({ raw: numeric, decoded, start: cursor, end: cursor + numeric.length, unsupported: false });
+      cursor += numeric.length;
+      continue;
+    }
+
+    const terminated = /^&([A-Za-z][A-Za-z0-9]*);/.exec(remaining);
+    if (terminated !== null) {
+      const decoded = htmlNamedCharacterReferences.get(terminated[1]);
+      segments.push({
+        raw: terminated[0],
+        decoded: decoded ?? terminated[0],
+        start: cursor,
+        end: cursor + terminated[0].length,
+        unsupported: decoded === undefined
+      });
+      cursor += terminated[0].length;
+      continue;
+    }
+
+    const unterminated = /^&([A-Za-z][A-Za-z0-9]*)/.exec(remaining);
+    if (unterminated !== null) {
+      const legacy = PLAN3_LEGACY_SEMICOLONLESS_ENTITIES.find((name) => unterminated[1].startsWith(name));
+      if (legacy !== undefined) {
+        const raw = `&${legacy}`;
+        segments.push({
+          raw,
+          decoded: htmlNamedCharacterReferences.get(legacy),
+          start: cursor,
+          end: cursor + raw.length,
+          unsupported: false
+        });
+        cursor += raw.length;
+        continue;
+      }
+      const raw = unterminated[0];
+      segments.push({
+        raw,
+        decoded: raw,
+        start: cursor,
+        end: cursor + raw.length,
+        unsupported: unterminated[1].length >= 2
+      });
+      cursor += raw.length;
+      continue;
+    }
+
+    appendLiteral(cursor, cursor + 1);
+    cursor += 1;
+  }
+  return segments;
+}
+
+function plan3MergeOrigins(originGroups) {
+  const merged = [];
+  for (const origins of originGroups) {
+    for (const origin of origins) {
+      if (!merged.some((candidate) => candidate.node === origin.node
+        && candidate.start === origin.start
+        && candidate.end === origin.end)) merged.push(origin);
+    }
+  }
+  return merged;
+}
+
 function plan3TextRepresentation(chunks) {
   const raw = chunks.map(({ value }) => value).join("");
-  const text = normalizeExactHtmlLiteral(raw);
-  const rangesByNode = new Map();
-  let rawCursor = 0;
+  let decoded = "";
+  const decodedOrigins = [];
   for (const chunk of chunks) {
-    const rawStart = rawCursor;
-    rawCursor += chunk.value.length;
-    if (chunk.node === null) continue;
-    const start = normalizeExactHtmlLiteral(raw.slice(0, rawStart)).length;
-    const end = normalizeExactHtmlLiteral(raw.slice(0, rawCursor)).length;
-    if (end <= start) continue;
-    const ranges = rangesByNode.get(chunk.node) ?? [];
-    ranges.push({ start, end });
-    rangesByNode.set(chunk.node, ranges);
+    for (const segment of plan3HtmlEntitySegments(chunk.value)) {
+      const origins = chunk.node === null ? [] : [{ node: chunk.node, start: segment.start, end: segment.end }];
+      decoded += segment.decoded;
+      for (let index = 0; index < segment.decoded.length; index += 1) decodedOrigins.push(origins);
+    }
   }
-  return { raw, text, rangesByNode };
+
+  let text = "";
+  const originsByOffset = [];
+  let pendingWhitespace = [];
+  let hasPendingWhitespace = false;
+  const emit = (value, origins) => {
+    text += value;
+    for (let index = 0; index < value.length; index += 1) originsByOffset.push(origins);
+  };
+  for (const part of PLAN3_GRAPHEME_SEGMENTER.segment(decoded)) {
+    const origins = plan3MergeOrigins(decodedOrigins.slice(part.index, part.index + part.segment.length));
+    const normalized = part.segment.normalize("NFKC");
+    for (const character of normalized) {
+      if (/\p{Default_Ignorable_Code_Point}/u.test(character)) continue;
+      const rendered = character === "\u00a0" ? " " : character;
+      if (/\s/u.test(rendered)) {
+        hasPendingWhitespace = true;
+        pendingWhitespace = plan3MergeOrigins([pendingWhitespace, origins]);
+        continue;
+      }
+      if (hasPendingWhitespace && text !== "") emit(" ", pendingWhitespace);
+      pendingWhitespace = [];
+      hasPendingWhitespace = false;
+      emit(rendered, origins);
+    }
+  }
+  return { raw, text, originsByOffset };
+}
+
+function plan3NormalizeHtmlLiteral(value) {
+  return plan3TextRepresentation([{ value, node: null }]).text;
 }
 
 function plan3VisibleSubtreeRepresentation(element) {
@@ -8016,28 +8130,31 @@ function plan3CopyUnits(body) {
 }
 
 function plan3LocalizedFactDisplay(fact, lang) {
-  return normalizeExactHtmlLiteral(lang === "pl" ? fact.display_pl : fact.display_en);
+  return normalizeExactLiteral(lang === "pl" ? fact.display_pl : fact.display_en);
+}
+
+function plan3OriginsOverlap(left, right) {
+  return left.node === right.node && left.start < right.end && right.start < left.end;
+}
+
+function plan3OccurrenceOrigins(representation, start, end) {
+  return plan3MergeOrigins(representation.originsByOffset.slice(start, end));
 }
 
 function plan3MapRepresentationRange(source, start, end, target) {
-  const pieces = [];
-  for (const [node, sourceRanges] of source.rangesByNode) {
-    for (const sourceRange of sourceRanges) {
-      const overlapStart = Math.max(start, sourceRange.start);
-      const overlapEnd = Math.min(end, sourceRange.end);
-      if (overlapStart >= overlapEnd) continue;
-      const targetRanges = target.rangesByNode.get(node);
-      if (!Array.isArray(targetRanges) || targetRanges.length !== 1) return null;
-      const targetRange = targetRanges[0];
-      const mappedStart = targetRange.start + overlapStart - sourceRange.start;
-      const mappedEnd = targetRange.start + overlapEnd - sourceRange.start;
-      if (mappedStart < targetRange.start || mappedEnd > targetRange.end) return null;
-      pieces.push({ sourceStart: overlapStart, start: mappedStart, end: mappedEnd });
+  const sourceOrigins = plan3OccurrenceOrigins(source, start, end);
+  if (sourceOrigins.length === 0) return null;
+  const targetOffsets = [];
+  for (let offset = 0; offset < target.originsByOffset.length; offset += 1) {
+    if (target.originsByOffset[offset].some((targetOrigin) => sourceOrigins.some((sourceOrigin) => plan3OriginsOverlap(sourceOrigin, targetOrigin)))) {
+      targetOffsets.push(offset);
     }
   }
-  if (pieces.length === 0) return null;
-  pieces.sort((left, right) => left.sourceStart - right.sourceStart);
-  return { start: pieces[0].start, end: pieces[pieces.length - 1].end };
+  if (targetOffsets.length === 0) return null;
+  if (sourceOrigins.some((sourceOrigin) => !target.originsByOffset.some((origins) => origins.some((targetOrigin) => plan3OriginsOverlap(sourceOrigin, targetOrigin))))) {
+    return null;
+  }
+  return { start: targetOffsets[0], end: targetOffsets[targetOffsets.length - 1] + 1 };
 }
 
 function plan3DisplayRanges(representation, marker, state, path, lang, predicate) {
@@ -8079,11 +8196,9 @@ function plan3FactOwnsOccurrence(source, occurrence, markers, markerRepresentati
 const PLAN3_PUBLIC_TEXT_ATTRIBUTES = new Set(["alt", "title", "aria-label", "content", "placeholder", "value"]);
 
 function plan3UnsupportedNamedReferences(value) {
-  const unsupported = [];
-  for (const match of value.matchAll(/&([A-Za-z][A-Za-z0-9]+);/g)) {
-    if (!htmlNamedCharacterReferences.has(match[1]) && !unsupported.includes(match[0])) unsupported.push(match[0]);
-  }
-  return unsupported;
+  return [...new Set(plan3HtmlEntitySegments(value)
+    .filter((segment) => segment.unsupported)
+    .map((segment) => segment.raw))];
 }
 
 function plan3ReportUnsupportedHtmlEntities(parsedRoot, body, path, errors) {
@@ -8136,49 +8251,107 @@ function plan3NumericTokens(text) {
   return tokens;
 }
 
-function plan3UnitFragmentRanges(unit) {
+function plan3RepresentationNodeRuns(representation, node) {
   const ranges = [];
-  let cursor = 0;
-  for (const fragment of unit.fragments) {
-    const text = normalizeExactHtmlLiteral(fragment.value);
-    if (!nonEmptyString(text)) continue;
-    const start = unit.text.indexOf(text, cursor);
-    if (start === -1) return [];
-    ranges.push({ text, start, end: start + text.length });
-    cursor = start + text.length;
+  let start = null;
+  for (let offset = 0; offset <= representation.text.length; offset += 1) {
+    const includesNode = offset < representation.text.length
+      && representation.originsByOffset[offset].some((origin) => origin.node === node);
+    if (includesNode && start === null) start = offset;
+    if (!includesNode && start !== null) {
+      ranges.push({ start, end: offset, text: representation.text.slice(start, offset) });
+      start = null;
+    }
   }
   return ranges;
 }
 
 function plan3UnitNumericTokens(unit) {
-  const ranges = plan3UnitFragmentRanges(unit);
-  if (ranges.length === 0) return plan3NumericTokens(unit.text).map((token) => ({ ...token, presentationText: unit.text }));
-  return ranges.flatMap((range) => plan3NumericTokens(range.text).map((token) => ({
-    ...token,
-    start: range.start + token.start,
-    end: range.start + token.end,
-    presentationText: range.text
-  })));
+  const nodes = [...new Set(unit.chunks.map(({ node }) => node).filter((node) => node !== null))];
+  const tokens = nodes.flatMap((node) => plan3RepresentationNodeRuns(unit, node)
+    .flatMap((range) => plan3NumericTokens(range.text).map((token) => ({
+      ...token,
+      start: range.start + token.start,
+      end: range.start + token.end,
+      presentationText: range.text
+    }))));
+  return tokens.filter((token, index) => tokens.findIndex((candidate) => candidate.start === token.start
+    && candidate.end === token.end
+    && candidate.value === token.value) === index);
 }
 
-function plan3PresentationNumber(text, token) {
-  if (token.value === "404" && text === "404") return true;
+const PLAN3_PRESENTATION_INDEX_CLASSES = new Set([
+  "section-label",
+  "section-index",
+  "section-number",
+  "projects-index",
+  "aviation-sector__index",
+  "knowledge-entry__number",
+  "service-dossier-code",
+  "evidence-row__context",
+  "aviation-call-sign",
+  "knowledge-kicker",
+  "procurement-kicker"
+]);
+const PLAN3_PRESENTATION_INDEX_ATTRIBUTES = new Set(["data-method-step", "data-topic", "data-artifact"]);
+
+function plan3OccurrenceElements(representation, occurrence) {
+  return [...new Set(plan3OccurrenceOrigins(representation, occurrence.start, occurrence.end)
+    .map(({ node }) => node?.parent)
+    .filter((element) => element?.type === "element"))];
+}
+
+function plan3HasPresentationIndexMarkup(element) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (normalize(elementAttribute(current, "aria-hidden") ?? "") === "true") return true;
+    if ([...PLAN3_PRESENTATION_INDEX_ATTRIBUTES].some((name) => current.attributes.has(name))) return true;
+    const classes = (elementAttribute(current, "class") ?? "").split(/\s+/).filter(Boolean);
+    if (classes.some((name) => PLAN3_PRESENTATION_INDEX_CLASSES.has(name))) return true;
+    if (current.name === "body") break;
+  }
+  return false;
+}
+
+function plan3PresentationNumber(unit, token) {
+  if (token.value === "404" && token.presentationText === "404") return true;
   if (!/^(?:0[1-9]|1[01])$/.test(token.value)) return false;
-  const escaped = escapeRegExp(token.value);
-  return new RegExp(`^${escaped}$`).test(text)
-    || new RegExp(`^${escaped}\\s*\\/\\s*[^\\d]+$`).test(text)
-    || new RegExp(`^[^\\d]+\\/[^\\d]*\\s${escaped}$`).test(text);
+  return plan3OccurrenceElements(unit, token).some(plan3HasPresentationIndexMarkup);
 }
 
 function plan3DynamicOccurrences(text) {
   const flags = PLAN3_DYNAMIC_COPY.flags.includes("g") ? PLAN3_DYNAMIC_COPY.flags : `${PLAN3_DYNAMIC_COPY.flags}g`;
   return [...text.matchAll(new RegExp(PLAN3_DYNAMIC_COPY.source, flags))]
-    .map((match) => ({ value: match[0], start: match.index, end: match.index + match[0].length }))
-    .filter((occurrence) => {
-      if (!/^(?:active|aktywn)/iu.test(occurrence.value)) return true;
-      const prefix = text.slice(0, occurrence.start);
-      return !new RegExp(`(?:^|[^${PLAN3_TOKEN_CHARACTER}])(?:not|nie)(?:\\s+|-)$`, "iu").test(prefix);
-    });
+    .map((match) => ({ value: match[0], start: match.index, end: match.index + match[0].length }));
+}
+
+function plan3DynamicOccurrenceIsNegated(text, occurrence) {
+  if (!/^(?:active|aktywn)/iu.test(occurrence.value)) return false;
+  const prefix = text.slice(0, occurrence.start);
+  return new RegExp(`(?:^|[^${PLAN3_TOKEN_CHARACTER}])(?:not|nie)(?:\\s+|-)$`, "iu").test(prefix);
+}
+
+function plan3PublicDynamicOccurrences(publicCopy, units) {
+  const candidates = [...plan3DynamicOccurrences(publicCopy.text)];
+  for (const unit of units) {
+    for (const occurrence of plan3DynamicOccurrences(unit.text)) {
+      const mapped = plan3MapRepresentationRange(unit, occurrence.start, occurrence.end, publicCopy);
+      if (mapped !== null) candidates.push({ ...mapped, value: publicCopy.text.slice(mapped.start, mapped.end) });
+    }
+  }
+  return candidates
+    .filter((occurrence, index) => candidates.findIndex((candidate) => candidate.start === occurrence.start
+      && candidate.end === occurrence.end) === index)
+    .filter((occurrence) => !plan3DynamicOccurrenceIsNegated(publicCopy.text, occurrence));
+}
+
+function plan3OccurrenceOwner(representation, occurrence) {
+  const elements = plan3OccurrenceElements(representation, occurrence);
+  if (elements.length === 0) return null;
+  if (elements.length === 1) return plan3SemanticCopyOwner(elements[0]) ?? elements[0];
+  for (let candidate = elements[0]; candidate?.type === "element"; candidate = candidate.parent) {
+    if (elements.every((element) => element === candidate || plan3NodeWithin(element, candidate))) return candidate;
+  }
+  return null;
 }
 
 function plan3HtmlFactSearchTexts(parsedRoot, publicCopy) {
@@ -8188,10 +8361,10 @@ function plan3HtmlFactSearchTexts(parsedRoot, publicCopy) {
     if (!inHead && !plan3ElementPublishesCopy(element)) continue;
     if (inHead && (element.name === "title"
       || (element.name === "script" && normalize(elementAttribute(element, "type") ?? "") === "application/ld+json"))) {
-      values.push(normalizeExactHtmlLiteral(rawElementText(element)));
+      values.push(plan3NormalizeHtmlLiteral(rawElementText(element)));
     }
     for (const [name, value] of element.attributes) {
-      if (PLAN3_PUBLIC_TEXT_ATTRIBUTES.has(name)) values.push(normalizeExactHtmlLiteral(value));
+      if (PLAN3_PUBLIC_TEXT_ATTRIBUTES.has(name)) values.push(plan3NormalizeHtmlLiteral(value));
     }
   }
   return values.filter(nonEmptyString).map(normalize);
@@ -8242,7 +8415,7 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
   }
 
   for (const unit of units) {
-    const unownedNumbers = plan3UnitNumericTokens(unit).filter((token) => !plan3PresentationNumber(token.presentationText, token)
+    const unownedNumbers = plan3UnitNumericTokens(unit).filter((token) => !plan3PresentationNumber(unit, token)
       && !plan3FactOwnsOccurrence(unit, token, markers, markerRepresentations, state, path, entry.lang));
     if (unownedNumbers.length > 0) {
       error(errors, "fact-visible-number", path, `${plan3ElementPath(unit.element)} has unowned numeric tokens: ${unownedNumbers.map(({ value }) => value).join(", ")}`);
@@ -8254,12 +8427,17 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
       && isIsoDate(fact.as_of)
       && fact.as_of <= PLAN3_VALIDATION_DATE
       && plan3DirectHttpsUrl(fact.source_url);
-  for (const unit of units) {
-    const unownedDynamic = plan3DynamicOccurrences(unit.text)
-      .filter((occurrence) => !plan3FactOwnsOccurrence(unit, occurrence, markers, markerRepresentations, state, path, entry.lang, dynamicPredicate));
-    if (unownedDynamic.length > 0) {
-      error(errors, "fact-dynamic-claim", path, `${plan3ElementPath(unit.element)} has dynamic copy outside an exact approved dated display: ${unownedDynamic.map(({ value }) => value).join(", ")}`);
-    }
+  const dynamicByOwner = new Map();
+  for (const occurrence of plan3PublicDynamicOccurrences(publicCopy, units)) {
+    if (plan3FactOwnsOccurrence(publicCopy, occurrence, markers, markerRepresentations, state, path, entry.lang, dynamicPredicate)) continue;
+    const owner = plan3OccurrenceOwner(publicCopy, occurrence);
+    if (owner === null) continue;
+    const occurrences = dynamicByOwner.get(owner) ?? [];
+    occurrences.push(occurrence);
+    dynamicByOwner.set(owner, occurrences);
+  }
+  for (const [owner, occurrences] of dynamicByOwner) {
+    error(errors, "fact-dynamic-claim", path, `${plan3ElementPath(owner)} has dynamic copy outside an exact approved dated display: ${occurrences.map(({ value }) => value).join(", ")}`);
   }
 }
 
@@ -8284,9 +8462,15 @@ function plan3DocumentElements(parsedRoot, name = null) {
 
 function plan3ElementInActualPublicBody(element, parsedRoot) {
   const bodies = plan3DocumentElements(parsedRoot, "body");
-  return bodies.length === 1
-    && plan3NodeWithin(element, bodies[0])
-    && plan3ElementPublishesCopy(element);
+  if (bodies.length !== 1 || !plan3NodeWithin(element, bodies[0])) return false;
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (current.name === "template" || current.name === "noscript" || current.name === "head") return false;
+    if (elementHasHiddenState(current) || elementHasHiddenInlineStyle(current)) return false;
+    if (current.name === "details" && !current.attributes.has("open")) return false;
+    if (current.name === "dialog" && !current.attributes.has("open")) return false;
+    if (current === bodies[0]) return true;
+  }
+  return false;
 }
 
 function plan3MetadataElements(parsedRoot, name) {

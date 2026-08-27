@@ -7216,7 +7216,7 @@ test("Plan 3 Task 1 binds singular and plural fact attributes to approved exact 
 test("Plan 3 Task 1 requires approved enclosing fact IDs for visible numbers with only exact presentation exemptions", async (t) => {
   const entry = plan3ExpectedPublicPages[0];
   await t.test("legal section indices and 404", async () => {
-    const body = '<p data-fact-id="fixture.claim">Verified claim</p><span>01</span><span>11</span><span>01 / Diagnosis</span><span>404</span>';
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><span class="section-index">01</span><span class="section-number">11</span><span class="section-label">01 / Diagnosis</span><span>404</span>';
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -7665,7 +7665,7 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
     ]);
   });
   await t.test("presentation indexes and literal 404 remain exempt", async () => {
-    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>DOSSIER / ADVISORY 01</p><p>01 / Diagnosis</p><p>01</p><p>11</p><p>404</p>';
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="section-label">DOSSIER / ADVISORY 01</p><p class="section-label">01 / Diagnosis</p><p class="section-index">01</p><p class="section-number">11</p><p>404</p>';
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -8090,6 +8090,214 @@ test("Plan 3 Task 1 fix round 3 requires landmarks inside the actual public body
     const result = await runVerification({ root, scope: "metadata" });
     assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
     assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 fails closed on semicolonless public-copy entities", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  await t.test("semicolonless shy cannot hide blocked and known names", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol&shypharma</p><p>Warsaw&shyFlightSafety</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma") || errorIds(result).includes("copy-entity-unsupported"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("fact-known-nonapproved") || errorIds(result).includes("copy-entity-unsupported"), result.errors.join("\n"));
+  });
+  await t.test("an unknown semicolonless entity-like reference is named fail-closed", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Public&MadeUpEntitycopy</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR copy-entity-unsupported ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[2\].*&MadeUpEntitycopy/);
+  });
+  await t.test("ordinary ampersands and supported references remain safe", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>R&amp;D, R&ampD, AT&T, A & B, X&nbsp;Y, X&nbspY, Z&#173;Z, Z&#xADZ</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("private attributes do not become public entity surfaces", async () => {
+    const body = '<p data-private-note="&MadeUpEntity" data-fact-id="fixture.claim">Verified claim</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 evaluates dynamic negation in the public lexical stream", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("English negation split across inline siblings suppresses active", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>not </span><span>active</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("Polish negation split across inline siblings suppresses aktywny", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>nie </span><span>aktywny</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("true active and current split across inline siblings remain actionable", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p><span>act</span><span>ive</span></p>
+      <p><span>cur</span><span>rent</span></p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(findings.length, 2, result.errors.join("\n"));
+    assert.ok(findings.some((item) => /p\[2\].*: active$/.test(item)), findings.join("\n"));
+    assert.ok(findings.some((item) => /p\[3\].*: current$/.test(item)), findings.join("\n"));
+  });
+  await t.test("a block-separated negation cannot suppress the next block claim", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>not</p><p>active</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[3\].*: active$/);
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 requires semantic evidence for presentation indexes", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("bare model sibling numbers are facts rather than presentation indexes", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Model <span>01</span><span>02</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[2\].*01, 02$/);
+  });
+  await t.test("a model-number class cannot grant the presentation exemption", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="model-number">01 / Model</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[2\].*01$/);
+  });
+  await t.test("model prose shaped like a section label remains factual", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Model / 01</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-visible-number"), result.errors.join("\n"));
+  });
+  await t.test("approved real presentation structures and literal 404 stay exempt", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p class="section-label">01 / Problem</p><p class="section-index">02 / Stage</p>
+      <nav class="projects-index"><a><span>03</span>Advisory</a></nav>
+      <div class="aviation-sector__index"><span>04</span><strong>OPS</strong></div>
+      <article data-method-step="1"><span>05</span></article>
+      <article data-topic="scope"><span>06</span></article>
+      <article data-artifact="1"><span>07</span></article>
+      <p class="service-dossier-code">DOSSIER / ADVISORY 08</p>
+      <p class="evidence-row__context">Product / 09</p>
+      <p class="aviation-call-sign">FLIGHT PLAN / 10</p>
+      <p class="knowledge-kicker">INDEX / 11</p>
+      <p class="procurement-kicker">ARTIFACT DOSSIER / 04 MATERIALS</p><p>404</p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 maps normalized occurrences to source nodes in one pass", async (t) => {
+  const pl = plan3ExpectedPublicPages[0];
+  const en = plan3ExpectedPublicPages[1];
+  await t.test("a nested year marker after direct-text whitespace owns the exact 2026 occurrence", async () => {
+    const year = plan3Fact({ id: "fixture.year", value: 2026, display_pl: "2026", display_en: "2026", surfaces: [pl.file] });
+    const body = '<p>Probe: <span data-fact-id="fixture.year">2026</span></p>';
+    const root = await plan3Root({ facts: [year], files: { [pl.file]: plan3Page(pl, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("entities multiple spaces and nested inline display map to the exact fact marker", async () => {
+    const year = plan3Fact({ id: "fixture.year", value: 2026, display_pl: "Rok 2026", display_en: "Year 2026", surfaces: [pl.file] });
+    const body = '<p>Probe:</p><strong data-fact-id="fixture.year"><span>Rok</span>&nbsp;   <em>2026</em></strong>';
+    const root = await plan3Root({ facts: [year], files: { [pl.file]: plan3Page(pl, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("Unicode normalization length changes preserve PL and EN source ownership", async () => {
+    const year = plan3Fact({
+      id: "fixture.year",
+      value: 2026,
+      display_pl: "Å 2026",
+      display_en: "Year 2026",
+      surfaces: [pl.file, en.file]
+    });
+    const plBody = '<p data-fact-id="fixture.year"><span>A</span>\u030A&nbsp; <em>2026</em></p>';
+    const enBody = '<p data-fact-id="fixture.year"><span>Year</span>   <em>2026</em></p>';
+    const root = await plan3Root({ facts: [year], files: {
+      [pl.file]: plan3Page(pl, { body: plBody }),
+      [en.file]: plan3Page(en, { body: enBody })
+    } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("an unrelated sibling occurrence remains unowned at its own stable path", async () => {
+    const year = plan3Fact({ id: "fixture.year", value: 2026, display_pl: "2026", display_en: "2026", surfaces: [pl.file] });
+    const body = '<p data-fact-id="fixture.year">2026</p><p><span>2026</span></p>';
+    const root = await plan3Root({ facts: [year], files: { [pl.file]: plan3Page(pl, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${pl.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /html\[1\]>body\[1\]>main\[1\]>p\[2\]>span\[1\].*: 2026$/);
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 separates public copy from rendered landmark visibility", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const wrapped = (tag, attributes = "") => plan3Page(entry)
+    .replace("<body><main>", `<body><${tag}${attributes}><main>`)
+    .replace("</main></body>", `</main></${tag}></body>`);
+  await t.test("closed details cannot contain the sole rendered main or h1", async () => {
+    const root = await plan3Root({ files: { [entry.file]: wrapped("details") } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("a sole h1 in closed details cannot satisfy a visible main", async () => {
+    const html = plan3Page(entry).replace(
+      "<body><main><h1>Fixture page</h1>",
+      "<body><main><details><h1>Fixture page</h1></details>"
+    );
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("a non-open dialog cannot contain the sole rendered main or h1", async () => {
+    const root = await plan3Root({ files: { [entry.file]: wrapped("dialog") } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("open details and dialog landmarks remain valid", async () => {
+    for (const html of [wrapped("details", " open"), wrapped("dialog", " open")]) {
+      const root = await plan3Root({ files: { [entry.file]: html } });
+      const result = await runVerification({ root, scope: "metadata" });
+      assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+      assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+    }
+  });
+  await t.test("closed details copy remains public to rejected-copy scans", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><details><p>not just software</p></details>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("copy-rejected"), result.errors.join("\n"));
   });
 });
 
