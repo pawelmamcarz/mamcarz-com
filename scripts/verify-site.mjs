@@ -8280,42 +8280,86 @@ function plan3UnitNumericTokens(unit) {
     && candidate.value === token.value) === index);
 }
 
-const PLAN3_PRESENTATION_INDEX_CLASSES = new Set([
-  "section-label",
-  "section-index",
-  "section-number",
-  "projects-index",
-  "aviation-sector__index",
-  "knowledge-entry__number",
-  "service-dossier-code",
-  "evidence-row__context",
-  "aviation-call-sign",
-  "knowledge-kicker",
-  "procurement-kicker"
-]);
-const PLAN3_PRESENTATION_INDEX_ATTRIBUTES = new Set(["data-method-step", "data-topic", "data-artifact"]);
-
 function plan3OccurrenceElements(representation, occurrence) {
   return [...new Set(plan3OccurrenceOrigins(representation, occurrence.start, occurrence.end)
     .map(({ node }) => node?.parent)
     .filter((element) => element?.type === "element"))];
 }
 
-function plan3HasPresentationIndexMarkup(element) {
-  for (let current = element; current?.type === "element"; current = current.parent) {
-    if (normalize(elementAttribute(current, "aria-hidden") ?? "") === "true") return true;
-    if ([...PLAN3_PRESENTATION_INDEX_ATTRIBUTES].some((name) => current.attributes.has(name))) return true;
-    const classes = (elementAttribute(current, "class") ?? "").split(/\s+/).filter(Boolean);
-    if (classes.some((name) => PLAN3_PRESENTATION_INDEX_CLASSES.has(name))) return true;
-    if (current.name === "body") break;
+function plan3StandalonePresentationToken(representation, occurrence, token) {
+  return representation.text === token.value
+    && occurrence.start === 0
+    && occurrence.end === representation.text.length;
+}
+
+function plan3PresentationRelationValue(element, attribute, token) {
+  const value = elementAttribute(element, attribute);
+  return /^(?:[1-9]|1[01])$/.test(value ?? "") && Number(value) === Number(token.value);
+}
+
+function plan3FirstDirectElement(parent, element) {
+  return directElementChildren(parent)[0] === element;
+}
+
+function plan3ExactPresentationIndex(unit, element, token) {
+  const representation = plan3VisibleSubtreeRepresentation(element);
+  const occurrence = plan3MapRepresentationRange(unit, token.start, token.end, representation);
+  if (occurrence === null) return false;
+  const text = representation.text;
+  if (normalize(elementAttribute(element, "aria-hidden") ?? "") === "true"
+    && plan3StandalonePresentationToken(representation, occurrence, token)) return true;
+  if (elementHasClass(element, "knowledge-entry__number")
+    && element.name === "span"
+    && plan3StandalonePresentationToken(representation, occurrence, token)) return true;
+  if ((elementHasClass(element, "section-label") || elementHasClass(element, "section-index"))
+    && occurrence.start === 0
+    && new RegExp(`^${token.value}\\s*/\\s*\\S`, "u").test(text)) return true;
+  if (elementHasClass(element, "service-dossier-code")
+    && new RegExp(`^DOSSIER\\s*/\\s*ADVISORY\\s+${token.value}$`, "u").test(text)) return true;
+  if (elementHasClass(element, "evidence-row__context")
+    && new RegExp(`^(?:Produkt|Product)\\s*/\\s*${token.value}$`, "u").test(text)) return true;
+  if (elementHasClass(element, "aviation-call-sign")
+    && new RegExp(`^FLIGHT PLAN\\s*/\\s*CORE ROUTE\\s+${token.value}$`, "u").test(text)) return true;
+  if (element.name !== "span" || !plan3StandalonePresentationToken(representation, occurrence, token)) return false;
+
+  const parent = element.parent;
+  if (parent?.type !== "element") return false;
+  if (parent.name === "a"
+    && parent.parent?.type === "element"
+    && parent.parent.name === "nav"
+    && elementHasClass(parent.parent, "projects-index")
+    && plan3FirstDirectElement(parent, element)) return true;
+  if (elementHasClass(parent, "aviation-sector__index")
+    && plan3FirstDirectElement(parent, element)) return true;
+  if (parent.name === "article"
+    && plan3PresentationRelationValue(parent, "data-method-step", token)
+    && parent.parent?.type === "element"
+    && elementHasClass(parent.parent, "service-method")
+    && plan3FirstDirectElement(parent, element)) return true;
+  if (parent.name === "article"
+    && parent.attributes.has("data-topic")
+    && parent.parent?.type === "element"
+    && elementHasClass(parent.parent, "speaking-agenda")
+    && plan3FirstDirectElement(parent, element)) {
+    const topics = directElementChildren(parent.parent, "article")
+      .filter((candidate) => candidate.attributes.has("data-topic"));
+    if (topics.indexOf(parent) + 1 === Number(token.value)) return true;
   }
+  if (parent.name === "header"
+    && parent.parent?.type === "element"
+    && parent.parent.name === "article"
+    && elementHasClass(parent.parent, "procurement-artifact")
+    && plan3PresentationRelationValue(parent.parent, "data-artifact", token)
+    && plan3FirstDirectElement(parent.parent, parent)
+    && plan3FirstDirectElement(parent, element)) return true;
   return false;
 }
 
 function plan3PresentationNumber(unit, token) {
   if (token.value === "404" && token.presentationText === "404") return true;
   if (!/^(?:0[1-9]|1[01])$/.test(token.value)) return false;
-  return plan3OccurrenceElements(unit, token).some(plan3HasPresentationIndexMarkup);
+  const elements = plan3OccurrenceElements(unit, token);
+  return elements.length === 1 && plan3ExactPresentationIndex(unit, elements[0], token);
 }
 
 function plan3DynamicOccurrences(text) {
@@ -8465,7 +8509,7 @@ function plan3ElementInActualPublicBody(element, parsedRoot) {
   if (bodies.length !== 1 || !plan3NodeWithin(element, bodies[0])) return false;
   for (let current = element; current?.type === "element"; current = current.parent) {
     if (current.name === "template" || current.name === "noscript" || current.name === "head") return false;
-    if (elementHasHiddenState(current) || elementHasHiddenInlineStyle(current)) return false;
+    if (current.attributes.has("inert") || elementHasHiddenState(current) || elementHasHiddenInlineStyle(current)) return false;
     if (current.name === "details" && !current.attributes.has("open")) return false;
     if (current.name === "dialog" && !current.attributes.has("open")) return false;
     if (current === bodies[0]) return true;

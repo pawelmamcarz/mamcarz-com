@@ -7216,7 +7216,7 @@ test("Plan 3 Task 1 binds singular and plural fact attributes to approved exact 
 test("Plan 3 Task 1 requires approved enclosing fact IDs for visible numbers with only exact presentation exemptions", async (t) => {
   const entry = plan3ExpectedPublicPages[0];
   await t.test("legal section indices and 404", async () => {
-    const body = '<p data-fact-id="fixture.claim">Verified claim</p><span class="section-index">01</span><span class="section-number">11</span><span class="section-label">01 / Diagnosis</span><span>404</span>';
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="section-index">01 / Diagnosis</p><span class="knowledge-entry__number">11</span><p class="section-label">02 / Strategy</p><span>404</span>';
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -7665,7 +7665,7 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
     ]);
   });
   await t.test("presentation indexes and literal 404 remain exempt", async () => {
-    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="section-label">DOSSIER / ADVISORY 01</p><p class="section-label">01 / Diagnosis</p><p class="section-index">01</p><p class="section-number">11</p><p>404</p>';
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="service-dossier-code">DOSSIER / ADVISORY 01</p><p class="section-label">01 / Diagnosis</p><p class="section-index">02 / Stage</p><span class="knowledge-entry__number">11</span><p>404</p>';
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -8196,14 +8196,13 @@ test("Plan 3 Task 1 fix round 4 requires semantic evidence for presentation inde
       <p class="section-label">01 / Problem</p><p class="section-index">02 / Stage</p>
       <nav class="projects-index"><a><span>03</span>Advisory</a></nav>
       <div class="aviation-sector__index"><span>04</span><strong>OPS</strong></div>
-      <article data-method-step="1"><span>05</span></article>
-      <article data-topic="scope"><span>06</span></article>
-      <article data-artifact="1"><span>07</span></article>
+      <div class="service-method"><article data-method-step="5"><span>05</span></article></div>
+      <div class="speaking-agenda"><article data-topic="scope"><span>01</span></article></div>
+      <article class="procurement-artifact" data-artifact="7"><header><span>07</span></header></article>
       <p class="service-dossier-code">DOSSIER / ADVISORY 08</p>
       <p class="evidence-row__context">Product / 09</p>
-      <p class="aviation-call-sign">FLIGHT PLAN / 10</p>
-      <p class="knowledge-kicker">INDEX / 11</p>
-      <p class="procurement-kicker">ARTIFACT DOSSIER / 04 MATERIALS</p><p>404</p>`;
+      <p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 03</p>
+      <span class="knowledge-entry__number">10</span><span aria-hidden="true">11</span><p>404</p>`;
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
@@ -8298,6 +8297,103 @@ test("Plan 3 Task 1 fix round 4 separates public copy from rendered landmark vis
     const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
     const result = await runVerification({ root, scope: "metadata" });
     assert.ok(errorIds(result).includes("copy-rejected"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 5 binds presentation exemptions to exact numeric occurrences", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("real research and material quantities remain numeric facts at stable paths", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p class="knowledge-kicker">RESEARCH INDEX / 02 ENTRIES</p>
+      <p class="knowledge-kicker">RESEARCH INDEX / 03 ENTRIES</p>
+      <p class="procurement-kicker">ARTIFACT DOSSIER / 04 MATERIAŁY</p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 02`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[3] has unowned numeric tokens: 03`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[4] has unowned numeric tokens: 04`
+    ]);
+  });
+  await t.test("suggestive classes and attributes cannot exempt quantities or model numbers", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p class="section-index">Model 01</p>
+      <article data-artifact="model"><p>Quantity 03 units</p></article>
+      <nav class="projects-index"><p>Model 02</p></nav>
+      <article data-method-step="1"><span>01</span></article>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 01`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>article[1]>p[1] has unowned numeric tokens: 03`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>nav[1]>p[1] has unowned numeric tokens: 02`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>article[2]>span[1] has unowned numeric tokens: 01`
+    ]);
+  });
+  await t.test("a section prefix exempts only its own numeric occurrence", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="section-index">01 / Model quantity 01</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 01`
+    ]);
+  });
+  await t.test("actual standalone and structurally related presentation indexes stay exempt", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p class="section-label">01 / Problem</p>
+      <p class="section-index">02 / Stage</p>
+      <p class="service-dossier-code">DOSSIER / ADVISORY 03</p>
+      <p class="evidence-row__context">Product / 04</p>
+      <p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 05</p>
+      <span class="knowledge-entry__number">06</span>
+      <nav class="projects-index"><a><span>07</span>Advisory</a></nav>
+      <div class="aviation-sector__index"><span>08</span><strong>OPS</strong></div>
+      <div class="service-method"><article data-method-step="9"><span>09</span><h3>Method</h3></article></div>
+      <div class="speaking-agenda"><article data-topic="one"><span>01</span><h3>Topic one</h3></article><article data-topic="two"><span>02</span><h3>Topic two</h3></article></div>
+      <article class="procurement-artifact" data-artifact="10"><header><span>10</span><h2>Artifact</h2></header></article>
+      <span aria-hidden="true">11</span><p>404</p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 5 rejects inert landmarks without changing structural counts", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("an inert ancestor makes the sole main and h1 non-rendered", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main>", "<body><div inert><main>")
+      .replace("</main></body>", "</main></div></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("inert on the landmark itself is non-rendered", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main>", "<body><main inert>")
+      .replace("<h1>Fixture page</h1>", "<h1 inert>Fixture page</h1>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("an inert non-landmark sibling does not hide visible body landmarks", async () => {
+    const html = plan3Page(entry).replace("<body><main>", "<body><div inert><p>Inactive copy</p></div><main>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+  await t.test("inert landmark duplicates still violate exact structural cardinality", async () => {
+    const html = plan3Page(entry).replace("</main></body>", "</main><div inert><main><h1>Duplicate</h1></main></div></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
   });
 });
 
