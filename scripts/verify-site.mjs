@@ -7309,23 +7309,64 @@ const SITE_SHELL_COPY = Object.freeze({
   })
 });
 
+function shellElementHasOnlyTextAndComments(element) {
+  return (element?.children ?? []).every((child) => child.type === "text" || child.type === "comment");
+}
+
+function shellElementHasOnlyEmptyContent(element) {
+  return shellElementHasOnlyTextAndComments(element) && rawElementText(element).trim() === "";
+}
+
+function shellElementHasExactDirectElements(element, expected) {
+  const children = element?.children ?? [];
+  const elements = children.filter((child) => child.type === "element");
+  return elements.length === expected.length
+    && elements.every((child, index) => child === expected[index])
+    && children.every((child) => child.type === "element"
+      || child.type === "comment"
+      || (child.type === "text" && child.value.trim() === ""));
+}
+
 function exactShellAnchor(anchor, href, label, current = false, className = null) {
   const attributes = { href };
   if (className !== null) attributes.class = className;
   if (current) attributes["aria-current"] = "page";
   return anchor?.name === "a"
     && exactApplicationResourceAttributes(anchor, attributes)
+    && shellElementHasOnlyTextAndComments(anchor)
     && normalizeExactHtmlLiteral(rawElementText(anchor)) === label;
 }
 
+function exactShellLogo(anchor, href, current) {
+  const attributes = { href, class: "nav-logo" };
+  if (current) attributes["aria-current"] = "page";
+  const children = anchor?.children ?? [];
+  const mark = children.find((child) => child.type === "element");
+  const markIndex = children.indexOf(mark);
+  const prefix = children.slice(0, markIndex).filter((child) => child.type === "text").map((child) => child.value).join("");
+  const suffix = children.slice(markIndex + 1).filter((child) => child.type === "text").map((child) => child.value).join("");
+  return anchor?.name === "a"
+    && exactApplicationResourceAttributes(anchor, attributes)
+    && directElementChildren(anchor).length === 1
+    && mark?.name === "b"
+    && exactApplicationResourceAttributes(mark, {})
+    && shellElementHasOnlyTextAndComments(mark)
+    && normalizeExactHtmlLiteral(rawElementText(mark)) === "PM"
+    && prefix.trim() === ""
+    && normalizeExactHtmlLiteral(suffix) === "· Mamcarz.com";
+}
+
 function exactShellListLinks(list, expected, active) {
-  const items = directElementChildren(list, "li");
-  if (items.length !== expected.length || items.some((item) => !exactApplicationResourceAttributes(item, {}))) return false;
+  const items = directElementChildren(list);
+  if (items.length !== expected.length
+    || items.some((item) => item.name !== "li" || !exactApplicationResourceAttributes(item, {}))) return false;
   return items.every((item, index) => {
     const children = directElementChildren(item);
     const [href, label] = expected[index];
-    return children.length === 1 && exactShellAnchor(children[0], href, label, active === href);
-  });
+    return shellElementHasExactDirectElements(item, children)
+      && children.length === 1
+      && exactShellAnchor(children[0], href, label, active === href);
+  }) && shellElementHasExactDirectElements(list, items);
 }
 
 function shellElementsHaveNoBehaviorDrift(elements) {
@@ -7347,7 +7388,7 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
     && nav?.parent === body
     && exactApplicationResourceAttributes(nav, { class: "site-nav", "aria-label": copy.navLabel })
     && navChildren.length === 4
-    && exactShellAnchor(logo, copy.home, "PM · Mamcarz.com", entry.active === "logo", "nav-logo")
+    && exactShellLogo(logo, copy.home, entry.active === "logo")
     && menu?.name === "ul"
     && exactApplicationResourceAttributes(menu, { class: "nav-list", id: "nav-menu" })
     && exactShellAnchor(language, entry.counterpart, copy.language, false, "nav-lang")
@@ -7357,9 +7398,12 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
       "aria-controls": "nav-menu", "aria-expanded": "false"
     });
   const toggleSpans = directElementChildren(toggle, "span");
-  navValid = navValid && toggleSpans.length === 3
-    && toggleSpans.every((span) => exactApplicationResourceAttributes(span, {}) && rawElementText(span).trim() === "");
-  const menuItems = directElementChildren(menu, "li");
+  navValid = navValid
+    && shellElementHasExactDirectElements(nav, navChildren)
+    && shellElementHasExactDirectElements(toggle, toggleSpans)
+    && toggleSpans.length === 3
+    && toggleSpans.every((span) => exactApplicationResourceAttributes(span, {}) && shellElementHasOnlyEmptyContent(span));
+  const menuItems = directElementChildren(menu);
   const disclosure = directElementChildren(menuItems[0]);
   const details = disclosure[0];
   const detailsChildren = directElementChildren(details);
@@ -7367,13 +7411,17 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
   const submenu = detailsChildren[1];
   navValid = navValid
     && menuItems.length === 7
-    && menuItems.every((item) => exactApplicationResourceAttributes(item, {}))
+    && menuItems.every((item) => item.name === "li" && exactApplicationResourceAttributes(item, {}))
+    && shellElementHasExactDirectElements(menu, menuItems)
     && disclosure.length === 1
+    && shellElementHasExactDirectElements(menuItems[0], disclosure)
     && details?.name === "details"
     && exactApplicationResourceAttributes(details, { class: "nav-group" })
     && detailsChildren.length === 2
+    && shellElementHasExactDirectElements(details, detailsChildren)
     && summary?.name === "summary"
     && exactApplicationResourceAttributes(summary, {})
+    && shellElementHasOnlyTextAndComments(summary)
     && normalizeExactHtmlLiteral(rawElementText(summary)) === copy.group
     && submenu?.name === "ul"
     && exactApplicationResourceAttributes(submenu, { class: "nav-submenu" })
@@ -7395,10 +7443,12 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
     && overlays[0].name === "div"
     && overlays[0].parent === body
     && exactApplicationResourceAttributes(overlays[0], { class: "nav-overlay", id: "nav-overlay" })
+    && shellElementHasOnlyEmptyContent(overlays[0])
     && backs.length === 1
     && backs[0].name === "button"
     && backs[0].parent === body
     && exactApplicationResourceAttributes(backs[0], { class: "back-to-top", id: "backToTop", "aria-label": copy.back })
+    && shellElementHasOnlyTextAndComments(backs[0])
     && normalizeExactHtmlLiteral(rawElementText(backs[0])) === "↑";
   if (!controlsValid) error(errors, "site-shell-controls", entry.path, "requires one exact overlay and back-to-top control");
 
@@ -7416,17 +7466,22 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
     && footer?.parent === body
     && exactApplicationResourceAttributes(footer, { class: "site-footer" })
     && footerChildren.length === 2
+    && shellElementHasExactDirectElements(footer, footerChildren)
     && brand?.name === "div"
     && exactApplicationResourceAttributes(brand, { class: "footer-brand" })
     && brandChildren.length === 2
+    && shellElementHasExactDirectElements(brand, brandChildren)
+    && sign?.name === "a"
     && exactApplicationResourceAttributes(sign, { class: "footer-sign", href: copy.home, "aria-label": copy.logoLabel })
     && signChildren.length === 1
+    && shellElementHasExactDirectElements(sign, signChildren)
     && signature?.name === "img"
     && exactApplicationResourceAttributes(signature, {
       src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async"
     })
     && owner?.name === "div"
     && exactApplicationResourceAttributes(owner, { class: "footer-copy" })
+    && shellElementHasOnlyTextAndComments(owner)
     && normalizeExactHtmlLiteral(rawElementText(owner)) === "© 2026 Paweł Mamcarz · mamcarz.com"
     && footerList?.name === "ul"
     && exactApplicationResourceAttributes(footerList, { class: "footer-links" })

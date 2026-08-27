@@ -6721,6 +6721,42 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
     ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260825-flightplan-2", "main.js?v=20260825-flightplan-1"))],
     ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-2"></head>'))],
     ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260825-flightplan-2" defer></script></body>'))],
+    ["wrapper inside direct navigation text anchor", task9Mutate("index.html", (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
+      '<a href="/aplikacje-operacyjne/"><span>Aplikacje</span></a>'
+    ))],
+    ["wrapper inside footer text anchor", task9Mutate("index.html", (html) => html.replace(
+      '<li><a href="/">Strona główna</a></li>',
+      '<li><a href="/"><span>Strona główna</span></a></li>'
+    ))],
+    ["wrapper inside language text anchor", task9Mutate(enApplicationsPath, (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/" class="nav-lang">PL</a>',
+      '<a href="/aplikacje-operacyjne/" class="nav-lang"><span>PL</span></a>'
+    ))],
+    ["nested image inside navigation text anchor", task9Mutate("index.html", (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
+      '<a href="/aplikacje-operacyjne/">Aplikacje<img src="/assets/img/signature.png" alt=""></a>'
+    ))],
+    ["footer signature owner changed to span", task9Mutate("index.html", (html) => html
+      .replace('<a class="footer-sign" href="/" aria-label="Paweł Mamcarz, strona główna">', '<span class="footer-sign" href="/" aria-label="Paweł Mamcarz, strona główna">')
+      .replace('</a><div class="footer-copy">', '</span><div class="footer-copy">'))],
+    ["wrapper around logo suffix", task9Mutate("index.html", (html) => html.replace(
+      '<b>PM</b> · Mamcarz.com</a>',
+      '<b>PM</b><span> · Mamcarz.com</span></a>'
+    ))],
+    ["wrapper inside logo mark", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<b><span>PM</span></b>'))],
+    ["logo mark changed from b to span", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<span>PM</span>'))],
+    ["wrapper inside disclosure summary", task9Mutate("index.html", (html) => html.replace('<summary>Doradztwo</summary>', '<summary><span>Doradztwo</span></summary>'))],
+    ["wrapper inside footer owner", task9Mutate("index.html", (html) => html.replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '<span>© 2026 Paweł Mamcarz · mamcarz.com</span></div>'))],
+    ["wrapper inside back-to-top", task9Mutate("index.html", (html) => html.replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę"><span>↑</span></button>'))],
+    ["nested element inside toggle span", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span><i></i></span><span></span><span></span></button>'))],
+    ["non-span direct child inside toggle", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span></span><span></span><span></span><i></i></button>'))],
+    ["nested element inside overlay", task9Mutate("index.html", (html) => html.replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay"><span></span></div>'))],
+    ["second image inside footer signature owner", task9Mutate("index.html", (html) => html.replace('</a><div class="footer-copy">', '<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">'))],
+    ["literal text inside footer signature owner", task9Mutate("index.html", (html) => html.replace('</a><div class="footer-copy">', 'signature</a><div class="footer-copy">'))],
+    ["non-list child inside primary list", task9Mutate("index.html", (html) => html.replace('<ul class="nav-list" id="nav-menu">', '<ul class="nav-list" id="nav-menu"><div></div>'))],
+    ["non-list child inside advisory submenu", task9Mutate("index.html", (html) => html.replace('<ul class="nav-submenu">', '<ul class="nav-submenu"><div></div>'))],
+    ["non-list child inside footer list", task9Mutate("index.html", (html) => html.replace('<ul class="footer-links">', '<ul class="footer-links"><div></div>'))],
     ["coordinated PL EN wrong shell", {
       "index.html": plHome.replace(">Aplikacje<", ">Aplikacje operacyjne<"),
       "en/index.html": enHome.replace(">Applications<", ">Operational applications<")
@@ -6734,6 +6770,24 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
         `${label}: expected a dedicated site-shell error, got\n${result.errors.join("\n")}`
       );
     });
+});
+
+test("Plan 2 Task 9 permits formatting whitespace and comments in exact shell topology", async () => {
+  const overrides = task9Mutate("index.html", (html) => html
+    .replace('<b>PM</b> · Mamcarz.com</a>', '\n<!-- logo --><b>PM</b><!-- suffix --> · Mamcarz.com\n</a>')
+    .replace('<summary>Doradztwo</summary>', '<summary><!-- group -->Doradztwo</summary>')
+    .replace('<a href="/aplikacje-operacyjne/">Aplikacje</a>', '<a href="/aplikacje-operacyjne/">\n<!-- label -->Aplikacje\n</a>')
+    .replace('<a href="/en/" class="nav-lang">EN</a>', '<a href="/en/" class="nav-lang">\n<!-- language -->EN\n</a>')
+    .replace('<span></span><span></span><span></span></button>', '<span>\n<!-- bar --></span><span></span><span></span></button>')
+    .replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay">\n<!-- overlay -->\n</div>')
+    .replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę">\n<!-- back -->↑\n</button>')
+    .replace('<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
+    .replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '\n<!-- owner -->© 2026 Paweł Mamcarz · mamcarz.com\n</div>')
+    .replace('<ul class="footer-links">', '<ul class="footer-links">\n<!-- links -->'));
+  const root = await task9SiteShellRoot(overrides);
+  const result = await runVerification({ root, scope: "pages", family: "all" });
+  const shellErrors = result.errors.filter((entry) => entry.startsWith("ERROR site-shell-"));
+  assert.deepEqual(shellErrors, [], shellErrors.join("\n"));
 });
 
 test("Plan 2 Task 9 requires the repository's current 19 pages to use the exact shell", async () => {
