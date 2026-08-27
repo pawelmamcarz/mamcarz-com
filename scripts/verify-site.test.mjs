@@ -232,8 +232,8 @@ const task9ProtectedContentHashes = Object.freeze({
   "en/case-studies/index.html": "c3b9e4f6e3be641d724f026fb368ef3de901752f2f605af33e668c927873cf0f",
   "wiedza/index.html": "b471c00ec348cc63c48490d1aee1a19120fd51e4534ee39c3004dbd15b2a4929",
   "en/wiedza/index.html": "7c66c2b275be381b58aec854b7ae4f27f11d24567f14c32479be27510126e485",
-  "wystapienia/index.html": "ba9e3b46847b0d7d6651fc915f2106125c0f159745556f04360ef8e1f46e0a2e",
-  "en/wystapienia/index.html": "0a7a091bfc8a5813087a5b42fa43a3fe0288a5c07518bcfb3b989f81506bccf1",
+  "wystapienia/index.html": "9b635f6ac9f325ebb3480382f28b75d7c6d15fb10352877b271262818274fab0",
+  "en/wystapienia/index.html": "5343e9848212b4384cc807f2e398060b6ef0b45085057843d8fbcfdffed6b80d",
   "procurement-2026/index.html": "36c3e5b4e287bd1d6c9b310d5a7e2be07167d756474ed2ac5440779c205970bc"
 });
 
@@ -778,6 +778,7 @@ const productionFactSurfaceControls = {
     "Total value of delivered projects: EUR 500M.",
     "Current aviation venture: akrobacja.com.",
     "Voucher sales platform for aerobatic flights.",
+    "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
     "Neutral context after the controlled claims."
   ].join("\n"),
   worker: `const verifiedFacts = ${JSON.stringify([
@@ -787,6 +788,7 @@ const productionFactSurfaceControls = {
     "Łączna wartość zrealizowanych projektów: 500 mln EUR.",
     "Aktualna marka działalności lotniczej: akrobacja.com.",
     "Platforma sprzedaży voucherów na loty akrobacyjne.",
+    "czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
     "Neutral context after the controlled claims."
   ].join("\n"))};`
 };
@@ -3440,8 +3442,12 @@ test("Owner correction updates Czym pojadę from timetable wording to the fleet 
     source_type: "owner_verified",
     source_label: sourceLabel,
     source_url: procurementBeyondInterview.href,
-    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
-    status: "approved"
+    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt", "worker/index.js"],
+    status: "approved",
+    surface_rules: {
+      "llms-full.txt": { approved_any: ["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."] },
+      "worker/index.js": { approved_any: ["czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania."] }
+    }
   });
 
   const surfaces = await Promise.all([
@@ -3456,7 +3462,7 @@ test("Owner correction updates Czym pojadę from timetable wording to the fleet 
       : "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.";
     assert.ok(content.includes(expected), `${path}: corrected product meaning`);
   }
-  assert.ok(surfaces.find(([path]) => path === "llms-full.txt")[1].includes("czympojade.pl (fleet TCO calculator using the Bielik model)"));
+  assert.ok(surfaces.find(([path]) => path === "llms-full.txt")[1].includes("czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."));
 });
 
 test("Plan 2 Task 7 rejects Procurement route, hreflang and iframe inventory drift", async () => {
@@ -6972,14 +6978,15 @@ test("Plan 2 Task 10 freezes the exact conservative llms-full correction", async
   const requiredLines = [
     "- **2016–2017**: Strategic Project Director, PZU S.A., procurement transformation from spend analysis to the target operating model",
     "Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX.",
-    "Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), czympojade.pl (fleet TCO calculator using the Bielik model), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator)."
+    "Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator).",
+    "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
   ];
   for (const line of requiredLines) {
     assert.equal(text.split(/\r?\n/).filter((candidate) => candidate === line).length, 1, line);
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "2c38b4dda14d634fe105f34805fefb09bd344193d1f11a7bae9f6cd6e7c8bb0a",
+    "4dc732ddebe4aa70bcef67d2749d4f53bd1eb7e721532d7d5827edb8b0b048d3",
     "llms-full.txt must retain the approved conservative corrections and owner-corrected Czym pojadę meaning"
   );
 });
@@ -7373,6 +7380,18 @@ test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and 
     const result = await runVerification({ root, scope: "metadata" });
     assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
   });
+  await t.test("closed public-source candidates may remain without a URL", async () => {
+    const candidate = plan3Fact({
+      status: "review",
+      surfaces: [],
+      source_type: "public_source",
+      source_url: null,
+      source_label: "Expected primary source; not inspected"
+    });
+    const root = await plan3Root({ facts: [candidate] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-source-url"), false, result.errors.join("\n"));
+  });
 });
 
 test("Plan 3 Task 1 binds singular and plural fact attributes to approved exact surfaces and displays", async (t) => {
@@ -7586,6 +7605,104 @@ test("Plan 3 Task 1 CLI rejects unsupported and separated arguments before verif
   }
 });
 
+test("Plan 3 Task 2 formats the complete owner fact decision report as exact TSV", async () => {
+  const verifier = await import("./verify-site.mjs");
+  assert.equal(typeof verifier.formatFactDecisionReport, "function");
+  const factData = await readFacts();
+  const report = verifier.formatFactDecisionReport(factData);
+  const lines = report.split("\n");
+  assert.equal(lines[0], "id\tstatus\tkind\tdisplay_pl\tdisplay_en\tsource_type\tsource_label\tas_of\tsurfaces");
+  assert.equal(lines.length, factData.facts.length + 1, "one ordered row per registry fact plus the header");
+  assert.deepEqual(
+    lines.slice(1).map((line) => line.split("\t").length),
+    Array(factData.facts.length).fill(9),
+    "every row has the exact nine owner-decision columns"
+  );
+  assert.ok(lines.some((line) => line.startsWith("portfolio.czympojade_pl.type\tapproved\tconstant\t")));
+  assert.ok(lines.some((line) => line.startsWith("aviation.warsaw_flight_safety\tretired\tconstant\t")));
+});
+
+test("Plan 3 Task 2 CLI prints only the facts report and rejects malformed report options", async () => {
+  const factData = await readFacts();
+  const { stdout, stderr } = await execFileAsync(process.execPath, [modulePath, "--report=facts"]);
+  assert.equal(stderr, "");
+  assert.equal(stdout.trim().split("\n").length, factData.facts.length + 1);
+  assert.match(stdout, /^id\tstatus\tkind\tdisplay_pl\tdisplay_en\tsource_type\tsource_label\tas_of\tsurfaces\n/u);
+  assert.doesNotMatch(stdout, /OK site verification/u);
+
+  for (const [label, args] of [
+    ["unsupported report", ["--report=other"]],
+    ["bare report", ["--report"]],
+    ["duplicate report", ["--report=facts", "--report=facts"]],
+    ["mixed verification mode", ["--report=facts", "--scope=home"]]
+  ]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [modulePath, ...args]),
+      (cause) => {
+        assert.equal(cause.stdout, "", `${label}: no partial report`);
+        assert.match(cause.stderr, /^ERROR cli-(?:argument|report) scripts\/verify-site\.mjs:/u, label);
+        return true;
+      }
+    );
+  }
+});
+
+test("Plan 3 Task 2 closes every unresolved fact and removes it from all public surfaces", async () => {
+  const factData = await readFacts();
+  const expectedClosedIds = [
+    "career.orlen_general.annual_portfolio",
+    "portfolio.organisations_count",
+    "project.zabka.store_count",
+    "project.zabka.market_position",
+    "project.kghm.market_position",
+    "aviation.warsaw_flight_safety",
+    "chat.response_sla",
+    "aviation.current_helicopter_flying",
+    "availability.current"
+  ];
+  const closedFacts = factData.facts.filter((fact) => fact.status !== "approved");
+  assert.deepEqual(closedFacts.map((fact) => fact.id), expectedClosedIds, "the owner decision report has one exact closed set");
+  for (const fact of closedFacts) {
+    assert.deepEqual(fact.surfaces, [], `${fact.id}: review or retired facts have no publication surface`);
+  }
+
+  const publicCorpus = (await Promise.all(factData.public_claim_surfaces.map((path) => readFile(resolve(path), "utf8")))).join("\n");
+  const candidates = closedFacts.flatMap((fact) => [
+    fact.value,
+    fact.display_pl,
+    fact.display_en,
+    ...Object.values(fact.aliases ?? {}).flat(),
+    ...(fact.forbidden_variants ?? [])
+  ]);
+  for (const candidate of candidates) {
+    assert.equal(publicCorpus.toLocaleLowerCase("pl-PL").includes(String(candidate).toLocaleLowerCase("pl-PL")), false, `closed wording is not published: ${candidate}`);
+  }
+});
+
+test("Plan 3 Task 2 synchronizes only approved Czym pojadę and PKP facts into the Worker and discovery copy", async () => {
+  const factData = await readFacts();
+  const type = factData.facts.find((fact) => fact.id === "portfolio.czympojade_pl.type");
+  assert.ok(type.surfaces.includes("worker/index.js"), "the approved product meaning declares the Worker surface");
+
+  const worker = await readFile(resolve("worker/index.js"), "utf8");
+  assert.ok(worker.includes("czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania."));
+  assert.ok(worker.includes("Negocjowałem umowę ramową z SAP AG dla grupy PKP."));
+  assert.doesNotMatch(worker, /100\+\s*mln\s*PLN/iu, "an unregistered scale claim must not survive in the Worker prompt");
+  assert.equal((worker.match(/czympojade\.pl/giu) ?? []).length, 1, "the product appears once with its exact approved meaning");
+
+  const llmsFull = await readFile(resolve("llms-full.txt"), "utf8");
+  const exactDiscoveryLine = `czympojade.pl: ${type.display_en}`;
+  assert.equal(llmsFull.split(/\r?\n/u).filter((line) => line === exactDiscoveryLine).length, 1, "discovery copy publishes the exact registered display once");
+  assert.equal((llmsFull.match(/czympojade\.pl/giu) ?? []).length, 1, "discovery copy does not repeat a shortened product claim");
+});
+
+test("Plan 3 Task 2 leaves the verified episode number owned only by the official interview title", async () => {
+  for (const [lang, html] of Object.entries(speakingProductHtml)) {
+    assert.ok(html.includes('<span class="speaking-recording__source">YOUTUBE / PROCUREMENT&amp;BEYOND</span>'), `${lang}: neutral source label`);
+    assert.equal((html.match(/\b(?:odcinek|episode)\s+8\b/giu) ?? []).length, 1, `${lang}: episode number appears only in the verified title`);
+  }
+});
+
 test("Plan 3 Task 1 fix round 1 gives closed facts empty surfaces without weakening approved surface validation", async (t) => {
   const entry = plan3ExpectedPublicPages[0];
   const pageWithoutFactCopy = plan3Page(entry, { body: "Page copy" });
@@ -7596,8 +7713,10 @@ test("Plan 3 Task 1 fix round 1 gives closed facts empty surfaces without weaken
   });
   for (const status of ["review", "retired"]) await t.test(`${status} facts may be closed with no public surfaces`, async () => {
     const root = await plan3Root({ facts: [plan3Fact({ status, surfaces: [] })], files: { [entry.file]: pageWithoutFactCopy } });
-    const result = await runVerification({ root, scope: "metadata" });
-    assert.equal(errorIds(result).includes("fact-surfaces"), false, result.errors.join("\n"));
+    for (const scope of ["metadata", "facts"]) {
+      const result = await runVerification({ root, scope });
+      assert.equal(errorIds(result).includes("fact-surfaces"), false, `${scope}: ${result.errors.join("\n")}`);
+    }
   });
   await t.test("closed facts still reject non-string and duplicate surfaces", async () => {
     const roots = await Promise.all([

@@ -13,7 +13,7 @@ Kariera:
 - SAP Polska (2017–2021), SAP Ariba Senior Account Executive
 - PZU (2016–2017), Dyrektor Projektu Strategicznego
 - PwC Polska (2015–2016), Wicedyrektor Advisory, metodyka CAPP
-- PKP PLK (2013–2015), Doradca Zarządu, przetargi PZP 100+ mln PLN
+- PKP PLK (2013–2015), Doradca Zarządu. Negocjowałem umowę ramową z SAP AG dla grupy PKP.
 - PKP Intercity (2014–2015), Dyrektor Programu, Revenue Management System
 - PKN ORLEN (2012–2014), Project Manager platformy CONNECT (15 spółek, 4 kraje, 60 osób)
 - PKN ORLEN (2006–2008), Kierownik Działu Zamówień Generalnych, wdrożenie SAP SRM
@@ -37,7 +37,8 @@ Poza pracą:
 - Platforma sprzedaży voucherów na loty akrobacyjne.
 - Pilot pokazowy Diverse Extreme Team (2013)
 - Fotograf prasowy agencji Forum: sesje air-to-air, realizacje wideo i dronem dla TVP i samorządów greckich wysp (Samos, Chios)
-- Projekty własne: akrobacja.com, filmolot.pl, czympojade.pl, przypominamy.com, procuracost.com, silence-tax.com
+- Projekty własne: akrobacja.com, filmolot.pl, przypominamy.com, procuracost.com i silence-tax.com
+- czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.
 - Z Internetem związany od 1993: pierwsza strona WWW na VAX UMCS w Lublinie
 
 Kontakt:

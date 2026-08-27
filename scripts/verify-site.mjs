@@ -3196,8 +3196,14 @@ function verifyFactSchema(factData, publicSurfaces, errors) {
     if (!sourceTypes.has(fact.source_type)) error(errors, "fact-source-type", path, `facts[${index}] source_type is invalid`);
     if (!nonEmptyString(fact.source_label)) error(errors, "fact-source-label", path, `facts[${index}] source_label must be a non-empty string`);
     if (fact.source_url !== null && (!nonEmptyString(fact.source_url) || !isHttpUrl(fact.source_url))) error(errors, "fact-source-url", path, `facts[${index}] source_url must be null or an http(s) URL`);
-    if (!Array.isArray(fact.surfaces) || fact.surfaces.length === 0 || !fact.surfaces.every(nonEmptyString)) error(errors, "fact-surfaces", path, `facts[${index}] surfaces must be a non-empty string array`);
-    else if (fact.surfaces.some((surface) => !publicSurfaces.includes(surface))) error(errors, "fact-surfaces", path, `facts[${index}] surfaces must be declared in public_claim_surfaces`);
+    const closedStatus = fact.status === "review" || fact.status === "retired";
+    if (!Array.isArray(fact.surfaces) || (!closedStatus && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
+      error(errors, "fact-surfaces", path, `facts[${index}] approved surfaces must be non-empty; review and retired surfaces must be an empty string array`);
+    } else if (closedStatus && fact.surfaces.length > 0) {
+      error(errors, "fact-surfaces", path, `facts[${index}] ${fact.status} facts must have no public surfaces`);
+    } else if (fact.surfaces.some((surface) => !publicSurfaces.includes(surface))) {
+      error(errors, "fact-surfaces", path, `facts[${index}] surfaces must be declared in public_claim_surfaces`);
+    }
     if (!statuses.has(fact.status)) error(errors, "fact-status", path, `facts[${index}] status is invalid`);
     verifyAliases(fact, index, errors);
     verifySurfaceRules(fact, index, publicSurfaces, errors);
@@ -6942,7 +6948,7 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"client.motor_oil_hellas","value":"Motor Oil Hellas","display_pl":"Motor Oil Hellas","display_en":"Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","worker/index.js","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"project.motor_oil.implementation","value":"SAP procurement implementation for Motor Oil Hellas","display_pl":"Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas","display_en":"SAP procurement implementation for Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","worker/index.js","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl fleet TCO calculator","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt","worker/index.js"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.czympojade_pl.type","value":"fleet TCO calculator using the Bielik model for ownership-cost analysis","display_pl":"Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.","display_en":"Fleet TCO calculator using the Bielik model to analyse total cost of ownership.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.czympojade_pl.type","value":"fleet TCO calculator using the Bielik model for ownership-cost analysis","display_pl":"Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.","display_en":"Fleet TCO calculator using the Bielik model to analyse total cost of ownership.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt","worker/index.js"],"status":"approved","surface_rules":{"llms-full.txt":{"approved_any":["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."]},"worker/index.js":{"approved_any":["czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania."]}}}),
   Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
@@ -7647,7 +7653,7 @@ const SPEAKING_CONTRACT = Object.freeze({
     ]),
     audiences: Object.freeze([["conferences", "Konferencje i fora branżowe"], ["teams", "Zespoły zakupowe i projektowe"], ["universities", "Uczelnie i programy executive"]]),
     interviewHeading: "Rozmowa o wdrożeniach",
-    interviewSource: "YOUTUBE / PROCUREMENT&BEYOND / ODCINEK 8",
+    interviewSource: "YOUTUBE / PROCUREMENT&BEYOND",
     interviewSummary: "W rozmowie mówię o profesjonalizacji zakupów, odejściu od sztywnych procedur i roli wewnętrznego lidera wdrożenia. Pokazuję też Czym pojadę, kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania. Rozmowę zamyka pytanie, jak łączyć warsztat kupca z automatyzacją i analizą danych.",
     interviewCta: "Obejrzyj na YouTube",
     interviewAlt: "Infografika o roli lidera wdrożenia, politykach zakupowych oraz analizie TCO z modelem Bielik",
@@ -7677,7 +7683,7 @@ const SPEAKING_CONTRACT = Object.freeze({
     ]),
     audiences: Object.freeze([["conferences", "Industry conferences and forums"], ["teams", "Procurement and project teams"], ["universities", "Universities and executive programmes"]]),
     interviewHeading: "A conversation about implementation",
-    interviewSource: "YOUTUBE / PROCUREMENT&BEYOND / EPISODE 8",
+    interviewSource: "YOUTUBE / PROCUREMENT&BEYOND",
     interviewSummary: "In the conversation I discuss the professionalisation of procurement, moving beyond rigid procedures, and the role of an internal implementation leader. I also present Czym pojadę, a fleet TCO calculator using the Bielik model to analyse ownership costs. The final theme is how to combine procurement judgement with automation and data analysis.",
     interviewCta: "Watch on YouTube · Polish audio",
     interviewAlt: "Infographic about the implementation leader, procurement policies and TCO analysis with the Bielik model",
@@ -7718,7 +7724,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "bb86ab678a7b697f531db055a6f00b2825c109d890ff2d2dbf534b2c6e5c7533", en: "7d0bc52acb0c591d0a07cf8ad50d80740e1e6cac31cce1c81aac5479cf13cbe8" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "74c0c2efb484ac210b14ca67df8127b22aee10d1f9c113420ff99ce879c382e8", en: "521e93bf03fb436d4ccabc832a1196d7c29f5511e84719730ede63ffcc700167" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -9438,8 +9444,8 @@ function plan3FactState(factData, context) {
     }
     if (!sourceTypes.has(fact.source_type)) error(context.errors, "fact-source-type", path, `facts[${index}] source_type is invalid`);
     if (!nonEmptyString(fact.source_label)) error(context.errors, "fact-source-label", path, `facts[${index}] source_label must be public-safe and non-empty`);
-    if (fact.source_type === "public_source") {
-      if (!plan3DirectHttpsUrl(fact.source_url)) error(context.errors, "fact-source-url", path, `facts[${index}] public_source requires a direct HTTPS source_url`);
+    if (fact.source_type === "public_source" && fact.status === "approved") {
+      if (!plan3DirectHttpsUrl(fact.source_url)) error(context.errors, "fact-source-url", path, `facts[${index}] approved public_source requires a direct HTTPS source_url`);
     } else if (fact.source_url !== null && !plan3DirectHttpsUrl(fact.source_url)) {
       error(context.errors, "fact-source-url", path, `facts[${index}] source_url must be null or a direct HTTPS URL`);
     }
@@ -9449,6 +9455,9 @@ function plan3FactState(factData, context) {
     } else {
       if (new Set(fact.surfaces).size !== fact.surfaces.length) {
         error(context.errors, "fact-duplicate-surface", path, `facts[${index}] surfaces must not contain duplicates`);
+      }
+      if (closedStatus && fact.surfaces.length > 0) {
+        error(context.errors, "fact-surfaces", path, `facts[${index}] ${fact.status} facts must have no public surfaces`);
       }
       for (const surface of fact.surfaces) {
         if (!publicSurfaces.includes(surface)) error(context.errors, "fact-surfaces", path, `facts[${index}] undeclared public surface ${surface}`);
@@ -10463,15 +10472,55 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   return { facts, errors, deferred };
 }
 
+const FACT_DECISION_REPORT_COLUMNS = Object.freeze([
+  "id", "status", "kind", "display_pl", "display_en", "source_type", "source_label", "as_of", "surfaces"
+]);
+
+function factDecisionReportCell(value) {
+  return String(value ?? "").replace(/[\t\r\n]+/g, " ").trim();
+}
+
+export function formatFactDecisionReport(factData) {
+  const records = Array.isArray(factData?.facts) ? factData.facts : [];
+  const rows = records.map((record) => FACT_DECISION_REPORT_COLUMNS.map((column) => {
+    if (column !== "surfaces") return factDecisionReportCell(record?.[column]);
+    return factDecisionReportCell(Array.isArray(record?.surfaces) ? record.surfaces.join(",") : record?.surfaces);
+  }).join("\t"));
+  return [FACT_DECISION_REPORT_COLUMNS.join("\t"), ...rows].join("\n");
+}
+
 async function cli() {
   const args = process.argv.slice(2);
   const unsupportedArgs = args.filter((arg) => arg !== "--family"
     && !arg.startsWith("--scope=")
     && !arg.startsWith("--lang=")
-    && !arg.startsWith("--family="));
+    && !arg.startsWith("--family=")
+    && arg !== "--report"
+    && !arg.startsWith("--report="));
   if (unsupportedArgs.length > 0) {
     console.error(`ERROR cli-argument scripts/verify-site.mjs: unsupported argument syntax ${unsupportedArgs.join(", ")}`);
     process.exitCode = 1;
+    return;
+  }
+  const reportArgs = args.filter((arg) => arg === "--report" || arg.startsWith("--report="));
+  if (reportArgs.length > 0) {
+    const report = reportArgs[0];
+    const valid = reportArgs.length === 1
+      && args.length === 1
+      && report === "--report=facts";
+    if (!valid) {
+      console.error("ERROR cli-report scripts/verify-site.mjs: report mode must be supplied alone and exactly as --report=facts");
+      process.exitCode = 1;
+      return;
+    }
+    const reportErrors = [];
+    const facts = await readFacts({ onError: (id, path, message) => error(reportErrors, id, path, message) });
+    if (reportErrors.length > 0) {
+      console.error(reportErrors.join("\n"));
+      process.exitCode = 1;
+      return;
+    }
+    console.log(formatFactDecisionReport(facts));
     return;
   }
   const optionSpecs = [
