@@ -7400,6 +7400,330 @@ test("Plan 3 Task 1 CLI rejects unsupported and separated arguments before verif
   }
 });
 
+test("Plan 3 Task 1 fix round 1 gives closed facts empty surfaces without weakening approved surface validation", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const pageWithoutFactCopy = plan3Page(entry, { body: "Page copy" });
+  await t.test("approved facts still require at least one surface", async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ surfaces: [] })], files: { [entry.file]: pageWithoutFactCopy } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-surfaces"), result.errors.join("\n"));
+  });
+  for (const status of ["review", "retired"]) await t.test(`${status} facts may be closed with no public surfaces`, async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ status, surfaces: [] })], files: { [entry.file]: pageWithoutFactCopy } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-surfaces"), false, result.errors.join("\n"));
+  });
+  await t.test("closed facts still reject non-string and duplicate surfaces", async () => {
+    const roots = await Promise.all([
+      plan3Root({ facts: [plan3Fact({ status: "review", surfaces: [42] })], files: { [entry.file]: pageWithoutFactCopy } }),
+      plan3Root({ facts: [plan3Fact({ status: "retired", surfaces: ["index.html", "index.html"] })], files: { [entry.file]: pageWithoutFactCopy } })
+    ]);
+    const results = await Promise.all(roots.map((root) => runVerification({ root, scope: "metadata" })));
+    assert.ok(errorIds(results[0]).includes("fact-surfaces"), results[0].errors.join("\n"));
+    assert.ok(errorIds(results[1]).includes("fact-duplicate-surface"), results[1].errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 joins inline public claims without crossing block boundaries", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  const cases = [
+    ["blocked inline split", "<p>Pol<span>pharma</span></p>", "blocked-client.polpharma"],
+    ["known inline split", "<p>Warsaw<span>FlightSafety</span></p>", "fact-known-nonapproved"],
+    ["comment entity and case split", "<p>pOl<!-- join --><span>ph&#97;rma</span></p>", "blocked-client.polpharma"]
+  ];
+  for (const [label, copy, expected] of cases) await t.test(label, async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copy}`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
+  });
+  await t.test("separate blocks do not invent a joined claim", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p>Pol</p><p>pharma</p><p>Warsaw</p><p>FlightSafety</p>
+      <div>Pol<p>block boundary</p>pharma</div>
+      <div>Warsaw<section>block boundary</section>FlightSafety</div>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("blocked-client.polpharma"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-known-nonapproved"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 counts structural metadata and landmarks outside inert templates", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("hidden head duplicates remain structural duplicates", async () => {
+    const head = `<title hidden>Hidden duplicate</title>
+      <link rel="canonical" href="https://mamcarz.com/wrong/" hidden>
+      <meta aria-hidden="true" name="description" content="Hidden duplicate">`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const expected of ["metadata-title", "metadata-canonical", "metadata-description"]) {
+      assert.ok(errorIds(result).includes(expected), `${expected}\n${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("hidden and aria-hidden main and h1 remain structural duplicates", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <main hidden><h1>Hidden duplicate</h1></main>
+      <main aria-hidden="true"><h1 aria-hidden="true">ARIA duplicate</h1></main>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("template decoys stay semantically inert", async () => {
+    const head = `<template><title>Template title</title><link rel="canonical" href="https://mamcarz.com/wrong/"><meta name="description" content="Template description"></template>`;
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p><template><main><h1>Template heading</h1></main></template>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head, body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const id of ["metadata-title", "metadata-canonical", "metadata-description", "metadata-main", "metadata-h1"]) {
+      assert.equal(errorIds(result).includes(id), false, `${id}\n${result.errors.join("\n")}`);
+    }
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 parses every real JSON-LD script once in DOM order", async (t) => {
+  const entry = plan3ExpectedPublicPages[2];
+  const variants = [
+    ["object with spaced single-quoted type", "object", "type = 'application/ld+json'"],
+    ["array with uppercase type", "array", "TYPE=\"APPLICATION/LD+JSON\""],
+    ["graph with padded mixed-case type", "graph", "TyPe = \" Application/LD+JSON \""]
+  ];
+  for (const [label, shape, attribute] of variants) await t.test(label, async () => {
+    const page = plan3Page(entry, { schema: plan3Schema(entry, shape) })
+      .replace('type="application/ld+json"', attribute);
+    const root = await plan3Root({ files: { [entry.file]: page } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("jsonld-parse"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-schema"), false, result.errors.join("\n"));
+  });
+  await t.test("malformed normalized first block is named and cannot satisfy schema", async () => {
+    const page = plan3Page(entry, { schema: '{"@type":' })
+      .replace('type="application/ld+json"', "TyPe = ' Application/LD+JSON '");
+    const root = await plan3Root({ files: { [entry.file]: page } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const parseErrors = result.errors.filter((item) => item.startsWith(`ERROR jsonld-parse ${entry.file}:`));
+    assert.equal(parseErrors.length, 1, result.errors.join("\n"));
+    assert.match(parseErrors[0], /block 1:/);
+    assert.ok(errorIds(result).includes("metadata-schema"), result.errors.join("\n"));
+  });
+  await t.test("template scripts do not change one-based real block indexes", async () => {
+    const head = `<template><script type="application/ld+json">{"@type":"Service"}</script></template>
+      <script type = "Application/LD+JSON">{"@type":</script>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const parseErrors = result.errors.filter((item) => item.startsWith(`ERROR jsonld-parse ${entry.file}:`));
+    assert.equal(parseErrors.length, 1, result.errors.join("\n"));
+    assert.match(parseErrors[0], /block 2:/);
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 treats closed disclosures as public copy but excludes inert content", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  await t.test("closed details emits every relevant public-copy finding", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p><details><summary>More</summary>
+      <p>innovative Currently active in 2026 Warsaw<span>FlightSafety</span></p></details>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const id of ["copy-rejected", "fact-visible-number", "fact-dynamic-claim", "fact-known-nonapproved"]) {
+      assert.ok(errorIds(result).includes(id), `${id}\n${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("script style comment template noscript and inert copy stays excluded", async () => {
+    const unsafe = "innovative Currently active in 2026 Polpharma WarsawFlightSafety";
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p><!-- ${unsafe} -->
+      <script>${unsafe}</script><style>${unsafe}</style><template><p>${unsafe}</p></template>
+      <noscript><p>${unsafe}</p></noscript><div inert>${unsafe}</div>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const id of ["copy-rejected", "fact-visible-number", "fact-dynamic-claim", "fact-known-nonapproved", "blocked-client.polpharma"]) {
+      assert.equal(errorIds(result).includes(id), false, `${id}\n${result.errors.join("\n")}`);
+    }
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 binds dynamic claims to their exact localized fact display", async (t) => {
+  const plEntry = plan3ExpectedPublicPages[0];
+  const enEntry = plan3ExpectedPublicPages[1];
+  const dynamic = plan3Fact({
+    id: "fixture.dynamic",
+    value: "Currently active",
+    display_pl: "Obecnie aktywny",
+    display_en: "Currently active",
+    kind: "dated",
+    as_of: "2026-08-27",
+    source_type: "public_source",
+    source_label: "Direct public source checked 2026-08-27",
+    source_url: "https://example.com/current",
+    surfaces: ["index.html", "en/index.html"]
+  });
+  await t.test("a broad component marker cannot authorize a descendant claim", async () => {
+    const body = '<div data-fact-id="fixture.dynamic"><p>Obecnie aktywny</p></div>';
+    const root = await plan3Root({ facts: [{ ...dynamic, surfaces: ["index.html"] }], files: { [plEntry.file]: plan3Page(plEntry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("a second dynamic assertion cannot borrow the first exact display", async () => {
+    const body = '<p data-fact-id="fixture.dynamic">Obecnie aktywny. Wiodący dostawca.</p>';
+    const root = await plan3Root({ facts: [{ ...dynamic, surfaces: ["index.html"] }], files: { [plEntry.file]: plan3Page(plEntry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("exact localized displays may contain harmless inline markup", async () => {
+    const root = await plan3Root({
+      facts: [dynamic],
+      files: {
+        [plEntry.file]: plan3Page(plEntry, { body: '<p data-fact-id="fixture.dynamic">Obecnie <span>aktywny</span></p>' }),
+        [enEntry.file]: plan3Page(enEntry, { body: '<p data-fact-id="fixture.dynamic">Currently <span>active</span></p>' })
+      }
+    });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+  });
+  await t.test("a multi-fact copy authorizes only the exact included dynamic display", async () => {
+    const stable = plan3Fact({ surfaces: ["en/index.html"] });
+    const body = '<p data-fact-ids="fixture.claim fixture.dynamic">Verified claim. Currently <span>active</span></p>';
+    const root = await plan3Root({
+      facts: [stable, { ...dynamic, surfaces: ["en/index.html"] }],
+      files: {
+        [plEntry.file]: plan3Page(plEntry, { body: "Page copy" }),
+        [enEntry.file]: plan3Page(enEntry, { body })
+      }
+    });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 rejects every malformed or repeated CLI option before verification", async (t) => {
+  const cases = [
+    ["duplicate scope", ["--scope=metadata", "--scope=seo"], "cli-scope"],
+    ["duplicate language", ["--scope=home", "--lang=pl", "--lang=en"], "cli-lang"],
+    ["duplicate family", ["--scope=pages", "--family=home", "--family=home"], "cli-family"],
+    ["empty scope", ["--scope="], "cli-scope"],
+    ["empty language", ["--scope=metadata", "--lang="], "cli-lang"],
+    ["empty family", ["--scope=pages", "--family="], "cli-family"],
+    ["scope with multiple equals", ["--scope=metadata=garbage"], "cli-scope"],
+    ["language with multiple equals", ["--scope=home", "--lang=pl=garbage"], "cli-lang"],
+    ["family with multiple equals", ["--scope=pages", "--family=home=garbage"], "cli-family"],
+    ["separated scope", ["--scope", "home"], "cli-argument"],
+    ["unknown positional argument", ["unexpected"], "cli-argument"]
+  ];
+  for (const [label, args, id] of cases) await t.test(label, async () => {
+    await assert.rejects(execFileAsync(process.execPath, [modulePath, ...args]), (cause) => {
+      assert.equal(cause.stdout, "", `${label} must not print success`);
+      const errors = cause.stderr.trim().split("\n").filter((line) => line.startsWith("ERROR "));
+      assert.equal(errors.length, 1, `${label} must stop before running validators\n${cause.stderr}`);
+      assert.match(errors[0], new RegExp(`^ERROR ${id} scripts/verify-site\\.mjs:`), label);
+      return true;
+    });
+  });
+  await t.test("one normalized option of each kind remains valid", async () => {
+    const result = await execFileAsync(process.execPath, [modulePath, "--scope=home", "--lang=pl", "--family=all"]);
+    assert.match(result.stdout, /OK site verification \(home\)/);
+    assert.equal(result.stderr, "");
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element location", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("identical claims in different elements have distinct stable locations", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Year 2026 and 500 units in 2026</p><p>Year 2026 and 500 units in 2026</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 2026, 500, 2026`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[3] has unowned numeric tokens: 2026, 500, 2026`
+    ]);
+  });
+  await t.test("inline numeric fragments produce one finding for their owning element", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Built in <span>2026</span> across <strong>4</strong> countries</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 2026, 4`
+    ]);
+  });
+  await t.test("presentation indexes and literal 404 remain exempt", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>DOSSIER / ADVISORY 01</p><p>01 / Diagnosis</p><p>01</p><p>11</p><p>404</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("codes dates decimals ranges models and quantities remain factual", async () => {
+    const copies = ["A-01/data", "2026-08-27", "3.5", "10–20", "S/4HANA", "60 people"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copies.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, copies.length, findings.join("\n"));
+    for (const copy of copies) assert.ok(findings.some((item) => item.endsWith(`unowned numeric tokens: ${copy.includes(" ") ? "60" : copy}`)), `${copy}\n${findings.join("\n")}`);
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 derives exactly nine bilingual pairs from the public manifest", async () => {
+  const verifier = await import("./verify-site.mjs");
+  const expected = [
+    ["index.html", "en/index.html", "/", "/en/"],
+    ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html", "/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/"],
+    ["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html", "/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/"],
+    ["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html", "/uslugi/doradztwo-zamowienia-publiczne/", "/en/uslugi/doradztwo-zamowienia-publiczne/"],
+    ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/"],
+    ["lotnictwo/index.html", "en/lotnictwo/index.html", "/lotnictwo/", "/en/lotnictwo/"],
+    ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/"],
+    ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/"],
+    ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/"]
+  ];
+  assert.deepEqual(verifier.PUBLIC_PAGE_PAIRS, expected);
+  assert.equal(expected.some((pair) => pair.flat().some((value) => value.includes("procurement-2026") || value.includes("diagram"))), false);
+});
+
+test("Plan 3 Task 1 fix round 1 rejects normalized secret keys and private relative paths", async (t) => {
+  for (const key of ["accessToken", "clientSecret", "apiKey", "private-key", "access.token"]) await t.test(`secret key ${key}`, async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ evidence: { [key]: "not-public" } })] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-secret-key"), result.errors.join("\n"));
+  });
+  await t.test("parent traversal into a private relative path is rejected", async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ source_label: "../../private/cv.pdf" })] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-private-material"), result.errors.join("\n"));
+  });
+  await t.test("ordinary public keys and relative public routes remain allowed", async () => {
+    const root = await plan3Root({ facts: [plan3Fact({
+      evidence: {
+        publicTokenization: "documented",
+        clientSecretariat: "public team",
+        documentationPath: "../../public/cv.pdf",
+        assetPath: "../assets/img/photo.webp",
+        route: "../case-studies/"
+      }
+    })] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-secret-key"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-private-material"), false, result.errors.join("\n"));
+  });
+});
+
 test("Plan 3 Task 1 package scripts expose exact deterministic validator commands", async () => {
   const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
   assert.equal(pkg.scripts["verify:metadata"], "node scripts/verify-site.mjs --scope=metadata");

@@ -51,6 +51,13 @@ export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) })
 ]);
 
+export const PUBLIC_PAGE_PAIRS = Object.freeze(PUBLIC_PAGES
+  .filter((entry) => entry.lang === "pl" && entry.pair !== null)
+  .map((pl) => {
+    const en = PUBLIC_PAGES.find((entry) => entry.lang === "en" && entry.route === pl.pair && entry.pair === pl.route);
+    return Object.freeze([pl.file, en?.file ?? "", pl.route, en?.route ?? pl.pair]);
+  }));
+
 const PLAN3_ARTIFACT_FILES = new Set(PUBLIC_PAGES.slice(19).map(({ file }) => file));
 const PLAN3_VALID_SCOPES = new Set(["all", "facts", "foundation", "home", "pages", "metadata", "discovery", "seo"]);
 const PLAN3_REJECTED_COPY = Object.freeze([
@@ -64,26 +71,29 @@ const PLAN3_REJECTED_COPY = Object.freeze([
 ]);
 const PLAN3_DYNAMIC_COPY = /#\s*1\b|\bnajwiększ(?:y|a|e|ym|ych)?\b|\blargest\b|\bwiodąc(?:y|a|e|ym|ych)?\b|\bleading\b|\baktywn(?:y|a|e|ie|ych)?\b|\bactive\b|\bcurrently\b|\b(?:as of|stan na|według stanu na|czerwiec|june)\b[^.!?\n]{0,80}\b\d{4}\b/iu;
 
-const ROUTE_PAIRS = [
-  ["index.html", "en/index.html", "/", "/en/", "home"],
-  ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html", "/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/", "services"],
-  ["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html", "/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/", "services"],
-  ["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html", "/uslugi/doradztwo-zamowienia-publiczne/", "/en/uslugi/doradztwo-zamowienia-publiczne/", "services"],
-  ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/", "applications"],
-  ["lotnictwo/index.html", "en/lotnictwo/index.html", "/lotnictwo/", "/en/lotnictwo/", "aviation"],
-  ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/", "projects"],
-  ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/", "knowledge"],
-  ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/", "speaking"]
-];
-
 const VALID_FAMILIES = new Set([
   "all", "home", "services", "applications", "aviation",
   "projects", "knowledge", "speaking", "artifacts"
 ]);
 
-const ROUTE_FILE_FAMILIES = new Map(ROUTE_PAIRS.flatMap(([plFile, enFile, , , family]) => [
-  [plFile, family],
-  [enFile, family]
+const ROUTE_FAMILY_SECTIONS = new Map([
+  ["index.html", "home"],
+  ["uslugi", "services"],
+  ["aplikacje-operacyjne", "applications"],
+  ["lotnictwo", "aviation"],
+  ["case-studies", "projects"],
+  ["wiedza", "knowledge"],
+  ["wystapienia", "speaking"]
+]);
+
+function publicPageFamily(file) {
+  const localFile = file.replace(/^en\//, "");
+  return ROUTE_FAMILY_SECTIONS.get(localFile === "index.html" ? localFile : localFile.split("/")[0]) ?? null;
+}
+
+const ROUTE_FILE_FAMILIES = new Map(PUBLIC_PAGE_PAIRS.flatMap(([plFile, enFile]) => [
+  [plFile, publicPageFamily(plFile)],
+  [enFile, publicPageFamily(enFile)]
 ]));
 
 function error(errors, id, path, message) {
@@ -7611,10 +7621,11 @@ async function verifySiteShellManifest(context) {
 }
 
 async function verifyPages(factData, family, context) {
-  const selectedPairs = ROUTE_PAIRS.filter((pair) => family === "all" || pair[4] === family);
+  const selectedPairs = PUBLIC_PAGE_PAIRS.filter(([plFile]) => family === "all" || publicPageFamily(plFile) === family);
   if (family === "services" || family === "all") verifyServiceRegistryInventory(factData, context.errors, { required: true });
   if (family === "projects" || family === "all") verifyProjectRegistryInventory(factData, context.errors, { required: true });
-  for (const [plFile, enFile, plRoute, enRoute, routeFamily] of selectedPairs) {
+  for (const [plFile, enFile, plRoute, enRoute] of selectedPairs) {
+    const routeFamily = publicPageFamily(plFile);
     const pl = await readRequired(context, plFile, "route-file");
     const en = await readRequired(context, enFile, "route-file");
     const plRoot = verifyPageShell(plFile, pl, "pl", plRoute, enRoute, context.errors);
@@ -7740,8 +7751,7 @@ function plan3DirectHttpsUrl(value) {
 }
 
 function plan3RegistryMaterialFailures(value, errors, path = "content/site-facts.json", cursor = "registry") {
-  const secretKey = /(?:^|[_-])(?:secret|token|password|passwd|api[_-]?key|private[_-]?key|authorization|cookie)(?:$|[_-])/i;
-  const privateMaterial = /(?:\/Users\/[^\s"']+|\/home\/[^/\s"']+\/|[A-Za-z]:\\Users\\|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|rk)-[A-Za-z0-9_-]{12,}|\bBearer\s+[A-Za-z0-9._~-]{8,})/i;
+  const privateMaterial = /(?:\/Users\/[^\s"']+|\/home\/[^/\s"']+\/|[A-Za-z]:\\Users\\|(?:^|[\s"'(])(?:\.\.[\\/])+(?:private|secrets?|internal|confidential)(?:[\\/])|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|rk)-[A-Za-z0-9_-]{12,}|\bBearer\s+[A-Za-z0-9._~-]{8,})/i;
   if (typeof value === "string") {
     if (privateMaterial.test(value)) error(errors, "fact-private-material", path, `${cursor} contains private-path or secret-like material`);
     return;
@@ -7752,7 +7762,12 @@ function plan3RegistryMaterialFailures(value, errors, path = "content/site-facts
   }
   if (!isPlainObject(value)) return;
   for (const [key, nested] of Object.entries(value)) {
-    if (secretKey.test(key)) error(errors, "fact-secret-key", path, `${cursor}.${key} is a secret-like field name`);
+    const normalizedKey = key
+      .replace(/([\p{Ll}\d])(\p{Lu})/gu, "$1_$2")
+      .replace(/[^\p{L}\p{N}]+/gu, "_")
+      .toLocaleLowerCase("en-US");
+    const secretKey = /(?:^|_)(?:secret|token|password|passwd|authorization|cookie|api_key|private_key|access_token|client_secret)(?:$|_)/u;
+    if (secretKey.test(normalizedKey)) error(errors, "fact-secret-key", path, `${cursor}.${key} is a secret-like field name`);
     plan3RegistryMaterialFailures(nested, errors, path, `${cursor}.${key}`);
   }
 }
@@ -7810,8 +7825,9 @@ function plan3FactState(factData, context) {
     } else if (fact.source_url !== null && !plan3DirectHttpsUrl(fact.source_url)) {
       error(context.errors, "fact-source-url", path, `facts[${index}] source_url must be null or a direct HTTPS URL`);
     }
-    if (!Array.isArray(fact.surfaces) || fact.surfaces.length === 0 || !fact.surfaces.every(nonEmptyString)) {
-      error(context.errors, "fact-surfaces", path, `facts[${index}] surfaces must be a non-empty string array`);
+    const closedStatus = fact.status === "review" || fact.status === "retired";
+    if (!Array.isArray(fact.surfaces) || (!closedStatus && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
+      error(context.errors, "fact-surfaces", path, `facts[${index}] surfaces must be a string array; approved facts require at least one surface`);
     } else {
       if (new Set(fact.surfaces).size !== fact.surfaces.length) {
         error(context.errors, "fact-duplicate-surface", path, `facts[${index}] surfaces must not contain duplicates`);
@@ -7860,30 +7876,182 @@ function plan3FactCandidates(fact) {
   return [...new Set([fact.value, fact.display_pl, fact.display_en, ...aliases, ...forbidden].filter(nonEmptyString))];
 }
 
-function plan3EnclosingApprovedFacts(element, state, path) {
-  const facts = [];
+const PLAN3_INERT_COPY_ELEMENTS = new Set(["script", "style", "template", "noscript"]);
+
+function plan3ElementPublishesCopy(element) {
   for (let current = element; current?.type === "element"; current = current.parent) {
-    if (["section", "main", "body", "html"].includes(current.name)) break;
-    for (const id of plan3ElementFactIds(current, path, [])) {
-      const fact = state.byId.get(id);
-      if (fact?.status === "approved" && Array.isArray(fact.surfaces) && fact.surfaces.includes(path)) facts.push(fact);
-    }
+    if (PLAN3_INERT_COPY_ELEMENTS.has(current.name)
+      || current.attributes.has("inert")
+      || elementHasHiddenState(current)
+      || elementHasHiddenInlineStyle(current)) return false;
   }
-  return facts;
+  return true;
 }
 
-function plan3VisibleTextNodes(root) {
-  const nodes = [];
-  const visit = (node, hidden = false) => {
-    const currentHidden = hidden || (node.type === "element" && !elementIsStaticallyVisible(node));
+function plan3CopyOwner(element) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (blockTextElements.has(current.name)) return current;
+  }
+  return null;
+}
+
+function plan3NodeWithin(node, element) {
+  for (let current = node?.parent; current?.type === "element"; current = current.parent) {
+    if (current === element) return true;
+  }
+  return false;
+}
+
+function plan3CopyUnits(body) {
+  const units = [];
+  const byElement = new Map();
+  const append = (owner, value, fragment = null) => {
+    let unit = byElement.get(owner);
+    if (unit === undefined) {
+      unit = { element: owner, raw: "", fragments: [] };
+      byElement.set(owner, unit);
+      units.push(unit);
+    }
+    unit.raw += value;
+    if (fragment !== null) unit.fragments.push(fragment);
+  };
+  const visit = (node, owner = null) => {
+    if (node.type === "element" && !plan3ElementPublishesCopy(node)) return;
     if (node.type === "text") {
-      if (!currentHidden && node.parent?.type === "element") nodes.push(node);
+      if (owner === null || node.parent?.type !== "element" || !plan3ElementPublishesCopy(node.parent)) return;
+      append(owner, node.value, node);
       return;
     }
-    for (const child of node.children ?? []) visit(child, currentHidden);
+    const nextOwner = node.type === "element" && blockTextElements.has(node.name) ? node : owner;
+    const separatesOwner = owner !== null && nextOwner !== owner;
+    if (separatesOwner) append(owner, " ");
+    for (const child of node.children ?? []) visit(child, nextOwner);
+    if (separatesOwner) append(owner, " ");
   };
-  visit(root);
-  return nodes;
+  visit(body);
+  return units
+    .map((unit) => ({ ...unit, text: normalizeExactHtmlLiteral(unit.raw) }))
+    .filter((unit) => nonEmptyString(unit.text));
+}
+
+function plan3UnitElementText(unit, element) {
+  if (element === unit.element) return unit.text;
+  const raw = unit.fragments.filter((node) => plan3NodeWithin(node, element)).map((node) => node.value).join("");
+  return normalizeExactHtmlLiteral(raw);
+}
+
+function plan3UnitFactMarkers(unit) {
+  return [unit.element, ...elementDescendants(unit.element)]
+    .filter((element) => (element === unit.element || plan3CopyOwner(element) === unit.element)
+      && plan3ElementPublishesCopy(element)
+      && (element.attributes.has("data-fact-id") || element.attributes.has("data-fact-ids")));
+}
+
+function plan3LocalizedFactDisplay(fact, lang) {
+  return normalizeExactHtmlLiteral(lang === "pl" ? fact.display_pl : fact.display_en);
+}
+
+function plan3FactDisplayRanges(unit, state, path, lang, predicate = () => true) {
+  const ranges = [];
+  for (const marker of plan3UnitFactMarkers(unit)) {
+    const markerText = plan3UnitElementText(unit, marker);
+    if (!nonEmptyString(markerText)) continue;
+    const markerOffset = marker === unit.element ? 0 : unit.text.indexOf(markerText);
+    if (markerOffset === -1) continue;
+    for (const id of plan3ElementFactIds(marker, path, [])) {
+      const fact = state.byId.get(id);
+      if (fact?.status !== "approved"
+        || !Array.isArray(fact.surfaces)
+        || !fact.surfaces.includes(path)
+        || !predicate(fact)) continue;
+      const display = plan3LocalizedFactDisplay(fact, lang);
+      if (!nonEmptyString(display)) continue;
+      let cursor = 0;
+      while (cursor <= markerText.length - display.length) {
+        const index = markerText.indexOf(display, cursor);
+        if (index === -1) break;
+        ranges.push({ start: markerOffset + index, end: markerOffset + index + display.length, fact });
+        cursor = index + Math.max(display.length, 1);
+      }
+    }
+  }
+  return ranges;
+}
+
+function plan3RangeOwns(ranges, start, end) {
+  return ranges.some((range) => start >= range.start && end <= range.end);
+}
+
+function plan3ElementPath(element) {
+  const parts = [];
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    const siblings = (current.parent?.children ?? []).filter((item) => item.type === "element" && item.name === current.name);
+    parts.unshift(`${current.name}[${siblings.indexOf(current) + 1}]`);
+  }
+  return parts.join(">");
+}
+
+function plan3NumericTokens(text) {
+  const tokens = [];
+  for (const match of text.matchAll(/\S*\d\S*/gu)) {
+    const raw = match[0];
+    const leading = /^(?:\(|\[|\{|"|'|“|‘)+/u.exec(raw)?.[0].length ?? 0;
+    const withoutLeading = raw.slice(leading);
+    const trailing = /[)\]}.,;:!?"'”’]+$/u.exec(withoutLeading)?.[0].length ?? 0;
+    const value = withoutLeading.slice(0, trailing === 0 ? undefined : -trailing);
+    if (value !== "") tokens.push({ value, start: match.index + leading, end: match.index + leading + value.length });
+  }
+  return tokens;
+}
+
+function plan3PresentationNumber(text, token) {
+  if (token.value === "404" && text === "404") return true;
+  if (!/^(?:0[1-9]|1[01])$/.test(token.value)) return false;
+  const escaped = escapeRegExp(token.value);
+  return new RegExp(`^${escaped}$`).test(text)
+    || new RegExp(`^${escaped}\\s*\\/\\s*[^\\d]+$`).test(text)
+    || new RegExp(`^[^\\d]+\\/[^\\d]*\\s${escaped}$`).test(text);
+}
+
+function plan3PresentationOnlyInlineChildren(unit) {
+  const childRaw = new Map();
+  for (const fragment of unit.fragments) {
+    if (!nonEmptyString(normalizeExactHtmlLiteral(fragment.value))) continue;
+    if (fragment.parent === unit.element) return false;
+    let child = fragment.parent;
+    while (child?.parent?.type === "element" && child.parent !== unit.element) child = child.parent;
+    if (child?.parent !== unit.element) return false;
+    childRaw.set(child, `${childRaw.get(child) ?? ""}${fragment.value}`);
+  }
+  if (childRaw.size === 0) return false;
+  return [...childRaw.values()].every((raw) => {
+    const text = normalizeExactHtmlLiteral(raw);
+    const tokens = plan3NumericTokens(text);
+    return tokens.length > 0 && tokens.every((token) => plan3PresentationNumber(text, token));
+  });
+}
+
+function plan3DynamicOccurrences(text) {
+  const flags = PLAN3_DYNAMIC_COPY.flags.includes("g") ? PLAN3_DYNAMIC_COPY.flags : `${PLAN3_DYNAMIC_COPY.flags}g`;
+  return [...text.matchAll(new RegExp(PLAN3_DYNAMIC_COPY.source, flags))]
+    .map((match) => ({ value: match[0], start: match.index, end: match.index + match[0].length }));
+}
+
+function plan3HtmlFactSearchTexts(parsedRoot, units) {
+  const values = units.map((unit) => unit.text);
+  const publicAttributes = new Set(["alt", "title", "aria-label", "content", "placeholder", "value"]);
+  for (const element of plan3DocumentElements(parsedRoot)) {
+    const inHead = plan3HeadElement(element);
+    if (!inHead && !plan3ElementPublishesCopy(element)) continue;
+    if (inHead && (element.name === "title"
+      || (element.name === "script" && normalize(elementAttribute(element, "type") ?? "") === "application/ld+json"))) {
+      values.push(normalizeExactHtmlLiteral(rawElementText(element)));
+    }
+    for (const [name, value] of element.attributes) {
+      if (publicAttributes.has(name)) values.push(normalizeExactHtmlLiteral(value));
+    }
+  }
+  return values.filter(nonEmptyString).map(normalize);
 }
 
 function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
@@ -7898,48 +8066,51 @@ function plan3VerifyHtmlFacts(entry, html, parsedRoot, state, errors) {
     }
   }
 
-  const rawPublic = normalize(decodeHtmlEntities(stripHtmlComments(html)));
+  const body = htmlBodyRoot(parsedRoot);
+  const units = plan3CopyUnits(body);
+  const publicSearchTexts = plan3HtmlFactSearchTexts(parsedRoot, units);
+  const publishes = (candidate) => publicSearchTexts.some((text) => text.includes(normalize(candidate)));
   for (const fact of state.records) {
     if (fact.status === "approved" && Array.isArray(fact.surfaces) && fact.surfaces.includes(path)) {
       const display = entry.lang === "pl" ? fact.display_pl : fact.display_en;
-      if (nonEmptyString(display) && !rawPublic.includes(normalize(display))) {
+      if (nonEmptyString(display) && !publishes(display)) {
         error(errors, "fact-display-missing", path, `${fact.id} is missing its approved ${entry.lang} display`);
       }
     }
     if (fact.status === "review" || fact.status === "retired") {
-      const published = plan3FactCandidates(fact).find((candidate) => rawPublic.includes(normalize(candidate)));
+      const published = plan3FactCandidates(fact).find(publishes);
       if (published) error(errors, "fact-known-nonapproved", path, `${fact.id} publishes non-approved known display ${published}`);
     }
   }
   for (const claim of Array.isArray(state.blockedClaims) ? state.blockedClaims : []) {
-    if (nonEmptyString(claim.pattern) && rawPublic.includes(normalize(claim.pattern))) {
+    if (nonEmptyString(claim.pattern) && publishes(claim.pattern)) {
       error(errors, `blocked-${claim.id}`, path, `blocked claim ${claim.pattern} is public`);
     }
   }
 
-  const body = htmlBodyRoot(parsedRoot);
-  const visibleCopy = staticVisibleText(body);
   for (const pattern of PLAN3_REJECTED_COPY) {
-    pattern.lastIndex = 0;
-    if (pattern.test(visibleCopy)) error(errors, "copy-rejected", path, `visible copy matches ${pattern}`);
+    if (units.some((unit) => {
+      pattern.lastIndex = 0;
+      return pattern.test(unit.text);
+    })) error(errors, "copy-rejected", path, `visible copy matches ${pattern}`);
   }
 
-  for (const textNode of plan3VisibleTextNodes(body)) {
-    const literal = normalizeExactHtmlLiteral(textNode.value);
-    if (!nonEmptyString(literal)) continue;
-    const enclosing = plan3EnclosingApprovedFacts(textNode.parent, state, path);
-    const presentationNumber = /^(?:(?:0[1-9]|1[01])(?:\s*\/\s*[^\d]+)?|404)$/.test(literal);
-    if (/\d/u.test(literal) && !presentationNumber && enclosing.length === 0) {
-      error(errors, "fact-visible-number", path, `visible numeric claim lacks an enclosing approved fact ID: ${literal}`);
+  for (const unit of units) {
+    const factRanges = plan3FactDisplayRanges(unit, state, path, entry.lang);
+    const unownedNumbers = plan3PresentationOnlyInlineChildren(unit) ? [] : plan3NumericTokens(unit.text).filter((token) => !plan3PresentationNumber(unit.text, token)
+      && !plan3RangeOwns(factRanges, token.start, token.end));
+    if (unownedNumbers.length > 0) {
+      error(errors, "fact-visible-number", path, `${plan3ElementPath(unit.element)} has unowned numeric tokens: ${unownedNumbers.map(({ value }) => value).join(", ")}`);
     }
-    PLAN3_DYNAMIC_COPY.lastIndex = 0;
-    if (PLAN3_DYNAMIC_COPY.test(literal)) {
-      const validDynamic = enclosing.some((fact) => fact.kind === "dated"
-        && nonEmptyString(fact.as_of)
-        && isIsoDate(fact.as_of)
-        && fact.as_of <= PLAN3_VALIDATION_DATE
-        && plan3DirectHttpsUrl(fact.source_url));
-      if (!validDynamic) error(errors, "fact-dynamic-claim", path, `dynamic claim lacks an enclosing approved dated fact with a direct source URL: ${literal}`);
+    const dynamicRanges = plan3FactDisplayRanges(unit, state, path, entry.lang, (fact) => fact.kind === "dated"
+      && nonEmptyString(fact.as_of)
+      && isIsoDate(fact.as_of)
+      && fact.as_of <= PLAN3_VALIDATION_DATE
+      && plan3DirectHttpsUrl(fact.source_url));
+    const unownedDynamic = plan3DynamicOccurrences(unit.text)
+      .filter((occurrence) => !plan3RangeOwns(dynamicRanges, occurrence.start, occurrence.end));
+    if (unownedDynamic.length > 0) {
+      error(errors, "fact-dynamic-claim", path, `${plan3ElementPath(unit.element)} has dynamic copy outside an exact approved dated display: ${unownedDynamic.map(({ value }) => value).join(", ")}`);
     }
   }
 }
@@ -7952,8 +8123,19 @@ function plan3HeadElement(element) {
   return false;
 }
 
+function plan3InsideTemplate(element) {
+  for (let current = element; current?.type === "element"; current = current.parent) {
+    if (current.name === "template") return true;
+  }
+  return false;
+}
+
+function plan3DocumentElements(parsedRoot, name = null) {
+  return elementDescendants(parsedRoot, name).filter((element) => !plan3InsideTemplate(element));
+}
+
 function plan3MetadataElements(parsedRoot, name) {
-  return elementDescendants(parsedRoot, name).filter((element) => elementIsActiveResource(element) && plan3HeadElement(element));
+  return plan3DocumentElements(parsedRoot, name).filter(plan3HeadElement);
 }
 
 function plan3MetaValue(parsedRoot, attribute, key) {
@@ -7961,11 +8143,12 @@ function plan3MetaValue(parsedRoot, attribute, key) {
   return { candidates, value: candidates.length === 1 ? elementAttribute(candidates[0], "content") : null };
 }
 
-function parseJsonLd(path, html, errors) {
-  const blocks = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
-  return blocks.flatMap((match, index) => {
+function parseJsonLd(path, parsedRoot, errors) {
+  const blocks = plan3DocumentElements(parsedRoot, "script")
+    .filter((element) => normalize(elementAttribute(element, "type") ?? "") === "application/ld+json");
+  return blocks.flatMap((element, index) => {
     try {
-      const value = JSON.parse(match[1]);
+      const value = JSON.parse(rawElementText(element));
       return Array.isArray(value) ? value : [value];
     } catch (cause) {
       error(errors, "jsonld-parse", path, `block ${index + 1}: ${cause.message}`);
@@ -8005,17 +8188,17 @@ async function verifyMetadata(factData, context) {
     const parsed = parseStaticHtml(html);
     for (const syntaxError of parsed.errors) error(context.errors, "metadata-html", entry.file, syntaxError);
     const all = elementDescendants(parsed.root);
-    const active = all.filter(elementIsStaticallyVisible);
-    const htmlElements = all.filter((element) => element.name === "html" && elementIsActiveResource(element));
-    const htmlStart = /<html\b[^>]*>/i.exec(html)?.[0] ?? "";
+    const structural = plan3DocumentElements(parsed.root);
+    const htmlElements = structural.filter((element) => element.name === "html");
+    const htmlStart = htmlElements.length === 1 ? htmlElements[0].source : "";
     const langAttributes = htmlStart.match(/\blang\s*=/gi) ?? [];
     if (htmlElements.length !== 1 || elementAttribute(htmlElements[0], "lang") !== entry.lang || langAttributes.length !== 1) {
       error(context.errors, "metadata-lang", entry.file, `requires exactly one html lang=${entry.lang}`);
     }
-    const mains = active.filter((element) => element.name === "main");
-    const headings = active.filter((element) => element.name === "h1");
-    if (mains.length !== 1) error(context.errors, "metadata-main", entry.file, `expected exactly one visible main; found ${mains.length}`);
-    if (headings.length !== 1) error(context.errors, "metadata-h1", entry.file, `expected exactly one visible h1; found ${headings.length}`);
+    const mains = structural.filter((element) => element.name === "main");
+    const headings = structural.filter((element) => element.name === "h1");
+    if (mains.length !== 1) error(context.errors, "metadata-main", entry.file, `expected exactly one structural main; found ${mains.length}`);
+    if (headings.length !== 1) error(context.errors, "metadata-h1", entry.file, `expected exactly one structural h1; found ${headings.length}`);
 
     const titles = plan3MetadataElements(parsed.root, "title");
     if (titles.length !== 1 || !nonEmptyString(normalizeExactHtmlLiteral(rawElementText(titles[0])))) {
@@ -8065,20 +8248,7 @@ async function verifyMetadata(factData, context) {
       error(context.errors, "metadata-og-locale", entry.file, `paired page requires alternate OG locale ${wantedAlternate}`);
     }
 
-    parseJsonLd(entry.file, html, context.errors);
-    const activeJsonLd = all
-      .filter((element) => element.name === "script"
-        && normalize(elementAttribute(element, "type") ?? "") === "application/ld+json"
-        && elementIsActiveResource(element))
-      .flatMap((element) => {
-        try {
-          const value = JSON.parse(rawElementText(element));
-          return Array.isArray(value) ? value : [value];
-        } catch {
-          return [];
-        }
-      });
-    const schemaTypes = plan3SchemaTypes(activeJsonLd);
+    const schemaTypes = plan3SchemaTypes(parseJsonLd(entry.file, parsed.root, context.errors));
     for (const expected of entry.schema) {
       if (!schemaTypes.has(expected)) error(context.errors, "metadata-schema", entry.file, `missing conservative Schema.org type ${expected}`);
     }
@@ -8247,15 +8417,20 @@ export async function runVerification({ root = defaultRoot, scope = "all", lang 
   const errors = [];
   const deferred = [];
   const context = { root, scope, lang, family, errors, deferred };
-  if (!["all", "pl", "en"].includes(lang)) error(errors, "cli-lang", "scripts/verify-site.mjs", `unsupported language ${lang}`);
+  const emptyFacts = { version: 0, public_claim_surfaces: [], facts: [], blocked_claims: [] };
   if (!PLAN3_VALID_SCOPES.has(scope)) {
     error(errors, "cli-scope", "scripts/verify-site.mjs", `unsupported scope ${scope}`);
-    return { facts: { version: 0, public_claim_surfaces: [], facts: [], blocked_claims: [] }, errors, deferred };
+    return { facts: emptyFacts, errors, deferred };
+  }
+  if (!["all", "pl", "en"].includes(lang)) {
+    error(errors, "cli-lang", "scripts/verify-site.mjs", `unsupported language ${lang}`);
+    return { facts: emptyFacts, errors, deferred };
   }
   const repeatedFamilyOption = !Number.isInteger(familyOptionCount) || familyOptionCount < 0 || familyOptionCount > 1;
   const validFamily = !repeatedFamilyOption && typeof family === "string" && VALID_FAMILIES.has(family);
   if (repeatedFamilyOption) error(errors, "cli-family", "scripts/verify-site.mjs", `family option must be supplied at most once; found ${familyOptionCount}`);
   else if (!validFamily) error(errors, "cli-family", "scripts/verify-site.mjs", `unsupported family ${family}`);
+  if (!validFamily) return { facts: emptyFacts, errors, deferred };
   const facts = await readFacts({ root, onError: (id, path, message) => error(errors, id, path, message) });
   if (scope === "facts" || scope === "all") {
     const completeServiceContext = await hasCompleteServiceDocumentContext(root);
@@ -8292,11 +8467,28 @@ async function cli() {
     process.exitCode = 1;
     return;
   }
-  const scope = args.find((arg) => arg.startsWith("--scope="))?.split("=")[1] ?? "all";
-  const lang = args.find((arg) => arg.startsWith("--lang="))?.split("=")[1] ?? "all";
-  const familyPrefix = "--family=";
-  const familyArgs = args.filter((arg) => arg === "--family" || arg.startsWith(familyPrefix));
-  const family = familyArgs.length === 0 ? "all" : familyArgs[0].startsWith(familyPrefix) ? familyArgs[0].slice(familyPrefix.length) : "";
+  const optionSpecs = [
+    { name: "scope", id: "cli-scope", fallback: "all", allowBare: false },
+    { name: "lang", id: "cli-lang", fallback: "all", allowBare: false },
+    { name: "family", id: "cli-family", fallback: "all", allowBare: true }
+  ];
+  const parsedOptions = new Map();
+  for (const spec of optionSpecs) {
+    const prefix = `--${spec.name}=`;
+    const matches = args.filter((arg) => arg.startsWith(prefix) || (spec.allowBare && arg === `--${spec.name}`));
+    const malformed = matches.length > 1
+      || matches.some((arg) => arg === `--${spec.name}` || arg.indexOf("=") !== arg.lastIndexOf("=") || arg.slice(prefix.length).length === 0);
+    if (malformed) {
+      console.error(`ERROR ${spec.id} scripts/verify-site.mjs: ${spec.name} must be supplied once as --${spec.name}=VALUE`);
+      process.exitCode = 1;
+      return;
+    }
+    parsedOptions.set(spec.name, matches.length === 0 ? spec.fallback : matches[0].slice(prefix.length));
+  }
+  const scope = parsedOptions.get("scope");
+  const lang = parsedOptions.get("lang");
+  const family = parsedOptions.get("family");
+  const familyArgs = args.filter((arg) => arg === "--family" || arg.startsWith("--family="));
   const result = await runVerification({ scope, lang, family, familyOptionCount: familyArgs.length });
   const deferredLabel = result.deferred.length > 0 ? `; deferred: ${result.deferred.join(", ")}` : "";
   if (result.errors.length) {
