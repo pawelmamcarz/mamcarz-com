@@ -6967,21 +6967,22 @@ test("Plan 2 Task 10 rejects the unsupported legacy llms-full clauses independen
   }
 });
 
-test("Plan 2 Task 10 freezes the exact conservative llms-full correction", async () => {
+test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index", async () => {
   const text = await readFile(resolve("llms-full.txt"), "utf8");
   const requiredLines = [
-    "- **2016–2017**: Strategic Project Director, PZU S.A., procurement transformation from spend analysis to the target operating model",
-    "Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX.",
-    "Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator).",
-    "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
+    "# Paweł Mamcarz: approved public fact index",
+    "- [hero.experience_years] 25+ years of procurement experience.",
+    "- [career.apsolut.title] Associate Partner, CEE Region",
+    "- [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.",
+    "- [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
   ];
   for (const line of requiredLines) {
     assert.equal(text.split(/\r?\n/).filter((candidate) => candidate === line).length, 1, line);
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "4dc732ddebe4aa70bcef67d2749d4f53bd1eb7e721532d7d5827edb8b0b048d3",
-    "llms-full.txt must retain the approved conservative corrections and owner-corrected Czym pojadę meaning"
+    "2fbaf0a295f937d2a2c8a2686af8ab97e0827d1a7e2775b1d782bde965d5928e",
+    "llms-full.txt must retain the exact approved fact index without regenerated biography"
   );
 });
 
@@ -7141,6 +7142,8 @@ const plan3ProductPageHtml = Object.freeze(Object.fromEntries(await Promise.all(
   plan3ExpectedPublicPages.map(async ({ file }) => [file, await readFile(resolve(file), "utf8")])
 )));
 const plan3ProductFactData = JSON.parse(await readFile(resolve("content/site-facts.json"), "utf8"));
+const plan3ProductLlms = await readFile(resolve("llms.txt"), "utf8");
+const plan3ProductLlmsFull = await readFile(resolve("llms-full.txt"), "utf8");
 
 async function plan3ProductMetadataRoot(files = {}) {
   return plan3Root({
@@ -7253,9 +7256,10 @@ function plan3RealPresentationBody() {
 }
 
 function plan3Sitemap() {
-  const blocks = plan3ExpectedPublicPages.map((entry) => {
+  const blocks = plan3ExpectedPublicPages.map((entry, index) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}</url>`;
+    const lastmod = index < 19 ? "2026-08-27" : "2026-08-26";
+    return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
   });
   return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
 }
@@ -7633,7 +7637,87 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
     const result = await runVerification({ root: changedRoot, scope: "discovery" });
     assert.ok(errorIds(result).includes("discovery-sitemap-routes"), result.errors.join("\n"));
   });
-  await t.test("a JavaScript comment cannot satisfy a Worker fact surface", async () => {
+  await t.test("sitemap pins one exact content-change date per route", async () => {
+    const cases = [
+      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-25</lastmod>")],
+      ["future date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-28</lastmod>")],
+      ["missing date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "")],
+      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-27</lastmod><lastmod>2026-08-27</lastmod>")]
+    ];
+    for (const [label, sitemap] of cases) {
+      const changedRoot = await plan3Root({ sitemap });
+      const result = await runVerification({ root: changedRoot, scope: "discovery" });
+      assert.ok(errorIds(result).includes("discovery-sitemap-lastmod"), `${label}: ${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("sitemap omits speculative editorial cadence", async () => {
+    const sitemap = plan3Sitemap().replace("</url>", "<changefreq>monthly</changefreq><priority>1.0</priority></url>");
+    const changedRoot = await plan3Root({ sitemap });
+    const result = await runVerification({ root: changedRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-sitemap-editorial"), result.errors.join("\n"));
+  });
+  await t.test("LLM navigation lists every canonical URL exactly once", async () => {
+    const urls = plan3ExpectedPublicPages.map(({ route }) => `https://mamcarz.com${route}`).join("\n");
+    const duplicateRoot = await plan3Root({ llms: `${urls}\nhttps://mamcarz.com/` });
+    const result = await runVerification({ root: duplicateRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-llms-routes"), result.errors.join("\n"));
+  });
+  await t.test("LLM discovery files accept only registry-derived fact lines and the reviewed navigation shell", async () => {
+    const validRoot = await plan3Root({
+      factData: plan3ProductFactData,
+      files: {
+        ...plan3ProductPageHtml,
+        "llms.txt": plan3ProductLlms,
+        "llms-full.txt": plan3ProductLlmsFull
+      }
+    });
+    const valid = await runVerification({ root: validRoot, scope: "discovery" });
+    assert.equal(errorIds(valid).includes("discovery-llms-contract"), false, valid.errors.join("\n"));
+    assert.equal(errorIds(valid).includes("discovery-llms-full-contract"), false, valid.errors.join("\n"));
+
+    const cases = [
+      [
+        "navigation narrative",
+        "llms.txt",
+        plan3ProductLlms.replace(
+          "This file is a navigation index.",
+          "This file presents a leading procurement profile."
+        ),
+        "discovery-llms-contract"
+      ],
+      [
+        "changed approved short fact",
+        "llms.txt",
+        plan3ProductLlms.replace("25+ years of procurement experience.", "30+ years of procurement experience."),
+        "discovery-llms-contract"
+      ],
+      [
+        "unknown full fact",
+        "llms-full.txt",
+        `${plan3ProductLlmsFull.trimEnd()}\n- [client.unknown] Unknown client\n`,
+        "discovery-llms-full-contract"
+      ],
+      [
+        "free-form full biography",
+        "llms-full.txt",
+        plan3ProductLlmsFull.replace("## Roles", "A generated biography claim.\n\n## Roles"),
+        "discovery-llms-full-contract"
+      ]
+    ];
+    for (const [label, path, text, expected] of cases) {
+      const changedRoot = await plan3Root({
+        factData: plan3ProductFactData,
+        files: {
+          ...plan3ProductPageHtml,
+          "llms.txt": path === "llms.txt" ? text : plan3ProductLlms,
+          "llms-full.txt": path === "llms-full.txt" ? text : plan3ProductLlmsFull
+        }
+      });
+      const result = await runVerification({ root: changedRoot, scope: "discovery" });
+      assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("discovery scope does not duplicate the Worker fact-surface gate", async () => {
     const workerFact = plan3Fact({ id: "fixture.worker", value: "Worker truth", display_pl: "Worker truth", display_en: "Worker truth", surfaces: ["worker/index.js"] });
     const indexEntry = plan3ExpectedPublicPages[0];
     const commentRoot = await plan3Root({
@@ -7641,7 +7725,7 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
       files: { "worker/index.js": "// Worker truth", [indexEntry.file]: plan3Page(indexEntry, { body: "Page copy" }) }
     });
     const commentResult = await runVerification({ root: commentRoot, scope: "discovery" });
-    assert.ok(errorIds(commentResult).includes("fact-display-missing"), commentResult.errors.join("\n"));
+    assert.equal(errorIds(commentResult).includes("fact-display-missing"), false, commentResult.errors.join("\n"));
 
     const literalRoot = await plan3Root({
       facts: [workerFact],
@@ -7807,9 +7891,9 @@ test("Plan 3 Task 2 synchronizes only approved Czym pojadę and PKP facts into t
   assert.equal((worker.match(/czympojade\.pl/giu) ?? []).length, 1, "the product appears once with its exact approved meaning");
 
   const llmsFull = await readFile(resolve("llms-full.txt"), "utf8");
-  const exactDiscoveryLine = `czympojade.pl: ${type.display_en}`;
+  const exactDiscoveryLine = `- [portfolio.czympojade_pl.type] czympojade.pl: ${type.display_en}`;
   assert.equal(llmsFull.split(/\r?\n/u).filter((line) => line === exactDiscoveryLine).length, 1, "discovery copy publishes the exact registered display once");
-  assert.equal((llmsFull.match(/czympojade\.pl/giu) ?? []).length, 1, "discovery copy does not repeat a shortened product claim");
+  assert.equal((llmsFull.match(/^- \[portfolio\.czympojade_pl(?:\.type)?\] /gmu) ?? []).length, 2, "discovery copy has one independently owned line for the name and one for its type");
 });
 
 test("Plan 3 Task 2 leaves the verified episode number owned only by the official interview title", async () => {

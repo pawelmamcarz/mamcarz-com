@@ -1,164 +1,62 @@
-# Paweł Mamcarz · Procurement Expert & SAP Ariba
+# Paweł Mamcarz: approved public fact index
 
-> Associate Partner CEE at apsolut Group (part of All for One Group SE).
+Only fact displays approved in content/site-facts.json are listed below. The identifier in brackets is the registry key.
 
-25+ years of procurement experience.
+## Scale
 
-## About
+- [hero.experience_years] 25+ years of procurement experience.
+- [hero.implementations] 20+ SAP Ariba implementations.
+- [hero.project_value_eur] Total value of delivered projects: EUR 500M.
 
-Paweł Mamcarz is a procurement transformation expert based in Warsaw, Poland. He builds the CEE region for apsolut Group, a SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year (part of All for One Group SE since March 2026).
+## Organisations
 
-20+ SAP Ariba implementations.
+- [client.orlen] ORLEN
+- [client.kghm] KGHM
+- [client.zabka_polska] Żabka Polska
+- [client.pll_lot] PLL LOT
+- [client.motor_oil_hellas] Motor Oil Hellas
+- [client.mol] MOL
+- [client.pge] PGE SA
+- [client.pgnig] PGNiG SA
+- [client.pzu] PZU SA
+- [client.orange_tp] Orange / TP SA
+- [client.pkp_plk] PKP PLK
+- [client.pkp_intercity] PKP Intercity
+- [client.adamed] Adamed
+- [client.ciech] CIECH
+- [client.lotte_wedel] Lotte Wedel
+- [client.bank_millennium] Bank Millennium
+- [client.pfleiderer] Pfleiderer
+- [client.aeroflot] Aeroflot
+- [client.hitachi_energy] Hitachi Energy
+- [client.pkp_energetyka] PKP Energetyka
+- [client.elektrownia_pulawy] Elektrownia Puławy
+- [client.kopex] Kopex SA
+- [client.brw] BRW SA
 
-His work spans Poland, Czech Republic, Slovakia, Hungary, and Romania.
+## Approved project displays
 
-Key clients: KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, ORLEN (formerly PKN Orlen), PGE, PGNiG, PZU, Orange/TP SA, Adamed, CIECH, Lotte Wedel, Hitachi Energy, Pfleiderer, Bank Millennium, Aeroflot, PKP PLK, PKP Intercity, PKP Energetyka, Elektrownia Puławy, Kopex, BRW.
+- [project.orlen.connect_scope] 15 ORLEN Group entities across 4 countries, 60-person team
+- [project.zabka.implementation] Procurement, supplier risk and sourcing
+- [project.kghm.integration] SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA
+- [project.lot.implementation] SAP Ariba implementation for PLL LOT
+- [project.motor_oil.implementation] SAP procurement implementation for Motor Oil Hellas
 
-Total value of delivered projects: EUR 500M.
+## Roles
 
-## Career History
+- [career.apsolut.title] Associate Partner, CEE Region
+- [career.sap.title] SAP Ariba Senior Account Executive
+- [career.orlen_general.title] Head of General Procurement
 
-- **2021–present**: Associate Partner CEE, apsolut Group / All for One Group, building the CEE region and delivering SAP procurement transformations
-- **2017–2021**: SAP Ariba Senior Account Executive, SAP Polska, built the SAP Ariba market in Poland and CEE from zero, first SAP Ariba deployments in Poland
-- **2016–2017**: Strategic Project Director, PZU S.A., procurement transformation from spend analysis to the target operating model
-- **2015–2016**: Vice Director Advisory / Procurement Expert, PwC Polska, CAPP methodology, projects for PGE, PGNiG, PKN Orlen, PZU, Aeroflot, Russian Railways
-- **2013–2015**: Board Advisor, PKP PLK, public procurement expert (PZP) for tenders 100M+ PLN, SAP AG framework agreement for PKP group (4 companies)
-- **2014–2015**: Program Director, PKP Intercity, Revenue Management System (JDA/RPO), 30+ person team, integration with sales channels
-- **2012–2014**: Project Manager CONNECT Platform, PKN ORLEN (15 companies, 4 countries, 60-person team, SAP SRM/MM + Oracle EBS)
-- **2006–2008**: Head of General Procurement, PKN ORLEN, SAP SRM implementation
-- **2004–2006**: Critical Changes Manager, Telekomunikacja Polska, Oracle EBS for SSC, coordinating 215 team members
-- **2002–2004**: Buyer / IT/Telco Stream Lead, Bank Millennium, IT procurement centralisation, contract renegotiations
-- **1999–2002**: Financial Controller & Risk Management, Elektrim / Bank Austria Creditanstalt Vienna, bond issuance (200M PLN), commercial papers (460M PLN), CEE fixed income analysis
+## Aviation and verified ventures
 
-## Education & Certifications
-
-- SGH Warsaw School of Economics, Finance & Banking / Statistical Methods & Information Systems (1995–2000)
-- Wirtschaftsuniversität Wien, CEMS Master (2001)
-- Warsaw Executive MBA, University of Minnesota / SGH (2005)
-- PMP Project Management, PMI (2008)
-- Languages: Polish (native), English (fluent), German (advanced), Russian (communicative)
-
-## Services
-
-### SAP Ariba Implementation
-End-to-end deployment of SAP Ariba modules across CEE:
-- SAP Ariba Sourcing: RFx, e-auctions, award scenarios
-- SAP Ariba Contracts: contract lifecycle management, compliance
-- SAP Ariba Buying & Invoicing: catalog-based purchasing, PO management
-- SAP Ariba Supplier Lifecycle & Performance (SLP): onboarding, qualification, scorecards
-- SAP Ariba Supplier Risk: risk monitoring, financial health, compliance tracking
-- SAP Fieldglass: external workforce and services procurement
-- SAP S/4HANA Procurement: integration with MM, local fiscal requirements (KSeF Poland, NAV Hungary, e-Factura Romania)
-- Also experienced with: Oracle EBS, SAP SRM, Marketplanet, Ivalua, Basware
-
-apsolut Group is a consultancy focused exclusively on SAP Procurement: an SAP Gold Partner and multiple-time SAP Ariba MEE Partner of the Year.
-
-### Procurement Transformation
-- Procurement maturity assessment and diagnostics
-- Target Operating Model (TOM) design
-- Category strategy development
-- Spend analytics and visibility
-- Process redesign and optimisation
-- Change management and user adoption
-- Technology selection and implementation support (platform-agnostic advisory)
-
-### Public Procurement Advisory (PZP, Prawo Zamówień Publicznych)
-- Expert advisory for large public sector tenders (100M+ PLN)
-- Tender strategy and documentation support (SIWZ/SWZ)
-- Framework agreement negotiation (e.g., SAP AG for PKP group)
-- E-procurement platform audit and selection
-- Procurement strategy under PZP regime
-- IT procurement specialisation (software, hardware, maintenance, SLA)
-- KIO (National Appeals Chamber) support
-
-### Operational Application Development
-- Purpose-built applications for procurement, field service management, and aviation
-- Procurement: calculators, approval workflows, cost analytics, and decision-support tools
-- Field service management: work orders, technician dispatch, SLAs, and asset history
-- Aviation: booking, document, operations, and settlement workflows
-- Delivery from discovery and data modelling through to a working deployment
-
-## Key Projects (Case Studies)
-
-### ORLEN CONNECT
-- **Client**: ORLEN Group (formerly PKN ORLEN; 15 subsidiaries at programme peak)
-- **Scope**: Central sourcing platform across 4 countries (PL, CZ, DE, LT)
-- **Scale**: 15 entities across 4 countries, 60-person delivery team
-- **Technology**: SAP SRM/MM + Oracle EBS
-- **Modules**: RFx, e-auctions, contracts, central category tree, supplier database
-
-### Żabka Polska
-- **Client**: Żabka Polska
-- **Scope**: Procurement, supplier risk and sourcing
-- **Technology**: SAP Ariba Buying, Supplier Risk and sourcing
-
-### KGHM
-- **Client**: KGHM Polska Miedź
-- **Scope**: Sourcing and external workforce management
-- **Technology**: SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA
-
-### PLL LOT
-- **Client**: PLL LOT (Poland's national airline)
-- **Scope**: SAP Ariba implementation for procurement optimisation
-- **Technology**: SAP Ariba
-
-### Motor Oil Hellas
-- **Client**: Motor Oil Hellas (Greek energy sector)
-- **Scope**: Cross-border SAP Ariba implementation (CEE/SEE)
-- **Technology**: SAP Ariba
-
-## Speaking & Lectures
-
-Available as keynote speaker, panelist, or workshop facilitator on:
-- Digital procurement transformation in CEE
-- SAP Ariba implementation: lessons from 20+ SAP Ariba implementations
-- Building procurement function from scratch
-- Public procurement meets digital: PZP and e-procurement
-- Leadership in procurement organisations
-- From corporate career to entrepreneurship and back
-
-Formats: keynote (30–45 min), panel discussion, workshop (half-day/full-day)
-Languages: Polish, English, German
-Available for: conferences, corporate events, universities (guest lectures, semester courses, MBA modules)
-
-## Beyond Procurement
-
-Paweł holds a helicopter pilot license PPL(H) and airplane license PPL(A) with aerobatics rating. Current aviation venture: akrobacja.com. Voucher sales platform for aerobatic flights. Former display pilot for Diverse Extreme Team (2013). Press photographer for Forum Agency: air-to-air photography, video production for TVP and Greek island municipalities.
-
-Improv performer at Resort Komedii: live improvised comedy shows at Resort Komedii in Warsaw (resortkomedii.pl).
-
-Websites and applications: akrobacja.com (aerobatic flight vouchers), filmolot.pl (aerial photography), przypominamy.com (SMS/MMS SaaS platform), procuracost.com (procurement cost calculator), and silence-tax.com (organisational cost calculator).
-czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.
-
-Connected to technology since 1993: first website on VAX at UMCS Lublin, network administrator at SGH. Experience with SUN, SGI Indigo, IBM AIX.
-
-## Contact
-
-- Email: pawel@mamcarz.com
-- LinkedIn: https://www.linkedin.com/in/pawelmamcarz/
-- Website: https://mamcarz.com
-
-## Site Map
-
-- Homepage (PL): https://mamcarz.com/
-- Homepage (EN): https://mamcarz.com/en/
-- SAP Ariba Implementation (PL): https://mamcarz.com/uslugi/wdrozenie-sap-ariba
-- SAP Ariba Implementation (EN): https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba
-- Procurement Transformation (PL): https://mamcarz.com/uslugi/transformacja-zakupow
-- Procurement Transformation (EN): https://mamcarz.com/en/uslugi/transformacja-zakupow
-- Public Procurement Advisory (PL): https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne
-- Public Procurement Advisory (EN): https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne
-- Case Studies (PL): https://mamcarz.com/case-studies
-- Case Studies (EN): https://mamcarz.com/en/case-studies
-- Speaking & Lectures (PL): https://mamcarz.com/wystapienia
-- Speaking & Lectures (EN): https://mamcarz.com/en/wystapienia
-
-## Polskie słowa kluczowe / Polish Keywords
-
-Ekspert zakupowy, konsultant zakupowy, konsulting zakupowy, doradztwo zakupowe, wdrożenie systemu zakupowego, system zakupowy, platforma zakupowa, transformacja zakupów, optymalizacja zakupów, zakupy strategiczne, zarządzanie zakupami, procurement, sourcing strategiczny, e-procurement, zamówienia publiczne, PZP, przetargi publiczne, SAP Ariba wdrożenie, SAP Ariba Polska, SAP Ariba CEE, SAP Fieldglass, SAP S/4HANA zakupy, digitalizacja zakupów, cyfryzacja zakupów, audyt zakupów, analiza wydatków, spend analysis, strategie kategoriowe, zarządzanie dostawcami, supplier management, SRM, Ariba Sourcing, Ariba Contracts, Ariba Buying, zarządzanie ryzykiem dostawców, compliance zakupowy.
-
-Paweł Mamcarz · ekspert ds. zakupów, Associate Partner CEE w apsolut Group (All for One Group).
-
-25+ lat doświadczenia w zakupach.
-
-Specjalizacja: SAP Ariba, SAP Fieldglass, SAP S/4HANA, transformacja funkcji zakupowej, prawo zamówień publicznych (PZP). Klienci: ORLEN, KGHM, Żabka Polska, PLL LOT, Motor Oil Hellas, MOL, PGE, PGNiG, PZU, Orange, Adamed, PKP PLK, PKP Intercity, Bank Millennium.
+- [aviation.ppl_h] PPL(H)
+- [aviation.ppl_a] PPL(A)
+- [aviation.aerobatics_rating] aerobatics rating
+- [aviation.diverse_extreme_team] display pilot for the Diverse Extreme Team (2013)
+- [aviation.forum_photographer] Press photographer with Forum Agency
+- [portfolio.akrobacja_com] akrobacja.com
+- [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.
+- [portfolio.akrobacja_com.type] Voucher sales platform for aerobatic flights.
+- [portfolio.czympojade_pl] czympojade.pl
+- [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.

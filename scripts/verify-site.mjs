@@ -51,6 +51,83 @@ export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) })
 ]);
 
+const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
+  "/": "2026-08-27",
+  "/en/": "2026-08-27",
+  "/uslugi/transformacja-zakupow/": "2026-08-27",
+  "/en/uslugi/transformacja-zakupow/": "2026-08-27",
+  "/uslugi/wdrozenie-sap-ariba/": "2026-08-27",
+  "/en/uslugi/wdrozenie-sap-ariba/": "2026-08-27",
+  "/uslugi/doradztwo-zamowienia-publiczne/": "2026-08-27",
+  "/en/uslugi/doradztwo-zamowienia-publiczne/": "2026-08-27",
+  "/aplikacje-operacyjne/": "2026-08-27",
+  "/en/aplikacje-operacyjne/": "2026-08-27",
+  "/lotnictwo/": "2026-08-27",
+  "/en/lotnictwo/": "2026-08-27",
+  "/case-studies/": "2026-08-27",
+  "/en/case-studies/": "2026-08-27",
+  "/wiedza/": "2026-08-27",
+  "/en/wiedza/": "2026-08-27",
+  "/wystapienia/": "2026-08-27",
+  "/en/wystapienia/": "2026-08-27",
+  "/procurement-2026/": "2026-08-27",
+  "/diagrams/diagram1_universal.html": "2026-08-26",
+  "/diagrams/diagram2_ariba.html": "2026-08-26",
+  "/diagrams/diagram3_maturity.html": "2026-08-26",
+  "/diagrams/infographic.html": "2026-08-26",
+  "/infographic_procurement_2026_EN.html": "2026-08-26"
+});
+
+const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
+  "# Paweł Mamcarz",
+  "This file is a navigation index. The three core areas have equal status: Advisory, Operational applications and Aviation.",
+  "## Canonical public pages",
+  "### Home",
+  "- PL | Home: https://mamcarz.com/",
+  "- EN | Home: https://mamcarz.com/en/",
+  "### Advisory / Doradztwo",
+  "- PL | Procurement transformation: https://mamcarz.com/uslugi/transformacja-zakupow/",
+  "- EN | Procurement transformation: https://mamcarz.com/en/uslugi/transformacja-zakupow/",
+  "- PL | SAP Ariba implementation: https://mamcarz.com/uslugi/wdrozenie-sap-ariba/",
+  "- EN | SAP Ariba implementation: https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba/",
+  "- PL | Public procurement advisory: https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne/",
+  "- EN | Public procurement advisory: https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne/",
+  "### Operational applications / Aplikacje operacyjne",
+  "- PL | Operational applications: https://mamcarz.com/aplikacje-operacyjne/",
+  "- EN | Operational applications: https://mamcarz.com/en/aplikacje-operacyjne/",
+  "### Aviation / Lotnictwo",
+  "- PL | Aviation: https://mamcarz.com/lotnictwo/",
+  "- EN | Aviation: https://mamcarz.com/en/lotnictwo/",
+  "### Projects, knowledge and speaking",
+  "- PL | Projects: https://mamcarz.com/case-studies/",
+  "- EN | Projects: https://mamcarz.com/en/case-studies/",
+  "- PL | Knowledge: https://mamcarz.com/wiedza/",
+  "- EN | Insights: https://mamcarz.com/en/wiedza/",
+  "- PL | Speaking: https://mamcarz.com/wystapienia/",
+  "- EN | Speaking: https://mamcarz.com/en/wystapienia/",
+  "### Procurement model and helper materials",
+  "- PL only | Procurement Process 2026: https://mamcarz.com/procurement-2026/",
+  "- EN only | Procurement process reference model: https://mamcarz.com/diagrams/diagram1_universal.html",
+  "- EN only | Conceptual SAP procurement map: https://mamcarz.com/diagrams/diagram2_ariba.html",
+  "- EN only | Editable procurement maturity scenario: https://mamcarz.com/diagrams/diagram3_maturity.html",
+  "- EN only | Procurement process reference infographic: https://mamcarz.com/diagrams/infographic.html",
+  "- EN only | Procurement process reference infographic: https://mamcarz.com/infographic_procurement_2026_EN.html",
+  "## Contact routes",
+  "- PL: /#contact",
+  "- EN: /en/#contact",
+  "## Approved short facts"
+]);
+
+const LLMS_FULL_STATIC_LINES = Object.freeze([
+  "# Paweł Mamcarz: approved public fact index",
+  "Only fact displays approved in content/site-facts.json are listed below. The identifier in brackets is the registry key.",
+  "## Scale",
+  "## Organisations",
+  "## Approved project displays",
+  "## Roles",
+  "## Aviation and verified ventures"
+]);
+
 export const PUBLIC_PAGE_PAIRS = Object.freeze(PUBLIC_PAGES
   .filter((entry) => entry.lang === "pl" && entry.pair !== null)
   .map((pl) => {
@@ -10563,20 +10640,67 @@ async function verifyDiscovery(factData, context) {
       || [...expected].some(([lang, href]) => alternates.actual.get(lang) !== href)) {
       error(context.errors, "discovery-sitemap-hreflang", "sitemap.xml", `${entry.route} must use its exact true-language alternates`);
     }
+    const lastmods = [...urlBlocks[indexes[0]].matchAll(/<lastmod\b[^>]*>\s*([^<]+?)\s*<\/lastmod>/gi)]
+      .map((match) => decodeHtmlEntities(match[1]));
+    const expectedLastmod = SITEMAP_LASTMOD_BY_ROUTE[entry.route];
+    const validLastmod = lastmods.length === 1
+      && /^\d{4}-\d{2}-\d{2}$/.test(lastmods[0])
+      && lastmods[0] <= PLAN3_VALIDATION_DATE
+      && lastmods[0] === expectedLastmod;
+    if (!validLastmod) {
+      error(context.errors, "discovery-sitemap-lastmod", "sitemap.xml", `${entry.route} requires the reviewed content-change date ${expectedLastmod}`);
+    }
+  }
+  if (/<(?:changefreq|priority)\b/i.test(sitemap)) {
+    error(context.errors, "discovery-sitemap-editorial", "sitemap.xml", "must omit speculative change frequency and priority declarations");
   }
 
   const llms = await readRequired(context, "llms.txt", "discovery-file");
   const sameDomainUrls = [...llms.matchAll(/https:\/\/mamcarz\.com(?:\/[^\s<>()\]"']*)?/g)].map((match) => match[0].replace(/[.,;:]+$/, ""));
-  const llmsValid = expectedUrls.every((url) => sameDomainUrls.includes(url))
+  const llmsValid = sameDomainUrls.length === expectedUrls.length
+    && new Set(sameDomainUrls).size === sameDomainUrls.length
+    && expectedUrls.every((url) => sameDomainUrls.includes(url))
     && sameDomainUrls.every((url) => expectedUrls.includes(url))
     && !llms.includes("/projekty/")
     && !llms.includes("/en/procurement-2026/");
   if (!llmsValid) error(context.errors, "discovery-llms-routes", "llms.txt", "canonical route list must cover only and all PUBLIC_PAGES routes");
+  plan3VerifyDiscoveryTextContract("llms.txt", llms, state, context.errors);
 
-  const discoverySurfaces = state.publicSurfaces.filter((path) => !path.endsWith(".html"));
-  for (const path of discoverySurfaces) {
-    const text = await readRequired(context, path, "discovery-surface-file");
-    plan3VerifyTextFactSurface(path, text, state, context.errors);
+  const llmsFull = await readRequired(context, "llms-full.txt", "discovery-file");
+  plan3VerifyDiscoveryTextContract("llms-full.txt", llmsFull, state, context.errors);
+
+  plan3VerifyTextFactSurface("llms.txt", llms, state, context.errors);
+  plan3VerifyTextFactSurface("llms-full.txt", llmsFull, state, context.errors);
+}
+
+function plan3DiscoveryFactLines(path, state) {
+  return state.records
+    .filter((fact) => fact.status === "approved"
+      && Array.isArray(fact.surfaces)
+      && fact.surfaces.includes(path))
+    .map((fact) => {
+      const rule = isPlainObject(fact.surface_rules?.[path]) ? fact.surface_rules[path] : null;
+      const display = Array.isArray(rule?.approved_any) && nonEmptyString(rule.approved_any[0])
+        ? rule.approved_any[0]
+        : nonEmptyString(fact.display_en)
+          ? fact.display_en
+          : fact.display_pl;
+      return `- [${fact.id}] ${display}`;
+    });
+}
+
+function plan3VerifyDiscoveryTextContract(path, text, state, errors) {
+  const factLines = plan3DiscoveryFactLines(path, state);
+  if (factLines.length === 0) return;
+  const actual = text.split(/\r?\n/).map((line) => line.trim()).filter(nonEmptyString);
+  const actualFacts = actual.filter((line) => /^- \[[a-z0-9._-]+\] /u.test(line));
+  const actualStatic = actual.filter((line) => !/^- \[[a-z0-9._-]+\] /u.test(line));
+  const expectedStatic = path === "llms.txt" ? LLMS_NAVIGATION_STATIC_LINES : LLMS_FULL_STATIC_LINES;
+  const valid = JSON.stringify(actualFacts) === JSON.stringify(factLines)
+    && JSON.stringify(actualStatic) === JSON.stringify(expectedStatic);
+  if (!valid) {
+    const id = path === "llms.txt" ? "discovery-llms-contract" : "discovery-llms-full-contract";
+    error(errors, id, path, "requires the exact navigation shell and one registry-derived line per approved fact, with no narrative additions");
   }
 }
 
