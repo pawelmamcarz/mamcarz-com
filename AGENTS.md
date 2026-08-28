@@ -39,8 +39,8 @@ Brak frameworka, brak buildu — pliki HTML serwowane bezpośrednio. Jedyny krok
 Każda zmiana treściowa musi trafić do **obu wersji** — PL (`index.html`, `uslugi/*/`, `case-studies/`, `wystapienia/`) i EN (`en/...` z tą samą strukturą katalogów). Slug katalogów pozostaje polski również w EN (np. `en/uslugi/wdrozenie-sap-ariba/`).
 
 ## Konwencje CSS/UI
-- Zmienne kolorów w `:root` w `assets/css/style.css` — `--bg`, `--bg2`, `--border`, `--gold`, `--muted`, `--text-secondary`.
-- Fonty: Playfair Display (nagłówki), DM Sans (body), DM Mono (mono/etykiety).
+- Zmienne kolorów w `:root` w `assets/css/style.css` (jasny schemat, `color-scheme: light`) — `--bg`, `--bg2`, `--bg3`, `--paper`, `--night`, `--gold`, `--gold-light`, `--accent`, `--text`, `--text-secondary`, `--muted`, `--border`, `--border-strong`. Nie dodawać nowej warstwy override na końcu pliku — jeden arkusz, edytować w miejscu.
+- Fonty: Playfair Display (nagłówki), DM Sans (body), DM Mono (mono/etykiety) — self-hosted WOFF2 w `assets/fonts/` przez `@font-face` (bez Google Fonts).
 - Sekcje HTML oznaczone komentarzami `<!-- SEKCJA -->`.
 - Grid skills: 3 kolumny, ostatnia karta rozciąga się na pełną szerokość jeśli jest samotna.
 
@@ -62,7 +62,12 @@ Identyczna kolejność i numeracja sekcji obowiązuje również w `en/index.html
 - Stat: **"25+ lat doświadczenia"** (nie 20+).
 - Ton: premium, profesjonalny, wiarygodny — **nigdy prostacki ani nachalny**.
 - Worker chat: model `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, system prompt zawiera kompletne CV — przy zmianach faktów na stronie zsynchronizuj `worker/index.js`.
-- Frontend wywołuje worker pod stałym URL-em `https://mamcarz-chat-api.pawel-767.workers.dev` (hardcoded w `assets/js/main.js:146`). Przy zmianie nazwy workera (`worker/wrangler.toml: name`) zsynchronizuj również ten URL.
+- Frontend wywołuje worker pod stałym URL-em `https://mamcarz-chat-api.pawel-767.workers.dev` (hardcoded w `assets/js/main.js:158`). Przy zmianie nazwy workera (`worker/wrangler.toml: name`) zsynchronizuj również ten URL.
+
+## Redesign „Flight Plan" (w toku, 2026-08)
+- Spec: `docs/superpowers/specs/2026-08-25-mamcarz-platform-redesign-design.md`; plany wykonawcze: `docs/superpowers/plans/2026-08-25-flight-plan-*.md` (foundation-home → pages-content → seo-facts-worker).
+- Plany przewidują `content/site-facts.json` (rejestr faktów ze statusem `approved`/`review`/`retired`) i `scripts/verify-site.mjs` (walidator bez zależności) — **jeszcze nie istnieją**; do czasu ich powstania źródłem prawdy o faktach jest CV w `worker/index.js` i sekcja „Fakty i ton" powyżej.
+- Plany zakazują push/merge/deploy w ramach ich realizacji — te kroki są osobne i jawne.
 
 ## SEO / metadata
 - Każda strona ma `<link rel="canonical">`, `hreflang` (pl / en / x-default), Open Graph i Schema.org (`Person` na home, `Service`/`Article` na podstronach gdzie ma sens).
