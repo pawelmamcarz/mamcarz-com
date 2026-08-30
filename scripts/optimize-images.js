@@ -7,9 +7,10 @@ import sharp from "sharp";
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const OUT_DIR = path.join(ROOT, "assets", "img");
 
-const SOURCES = [
-  { file: "IMG_3284.jpeg", name: "IMG_3284" },
-];
+// Źródła podpina się tu ręcznie na czas optymalizacji. Oryginałów nie trzymamy
+// w repozytorium: katalog główny jest publikowany przez Cloudflare Pages w całości,
+// więc każdy plik tutaj jest dostępny pod bezpośrednim adresem.
+const SOURCES = [];
 
 const WIDTHS = [480, 960, 1920];
 const WEBP_QUALITY = 78;
