@@ -262,7 +262,8 @@ test("the system prompt is generated only from the five approved Worker navigati
   assert.match(system.content, /nie wymyślaj/iu);
   assert.match(system.content, /pawel@mamcarz\.com/u);
   for (const fact of workerFacts) {
-    assert.ok(system.content.includes(`- ${fact.id}: ${fact.display_pl} / ${fact.display_en}`), fact.id);
+    assert.ok(system.content.includes(`- ${fact.display_pl} / ${fact.display_en}`), fact.id);
+    assert.equal(system.content.includes(fact.id), false, `prompt leaked ${fact.id}`);
   }
   for (const fact of factRegistry.facts.filter((candidate) => ["review", "retired"].includes(candidate.status))) {
     for (const display of [fact.display_pl, fact.display_en].filter(Boolean)) {
@@ -295,6 +296,31 @@ test("high-risk PL, EN and bare-client questions use a deterministic response be
     assert.match(payload.reply, /pawel@mamcarz\.com/u);
     assert.equal(calls.limiter.length, 1);
     assert.equal(calls.ai.length, 0);
+  }
+});
+
+test("internal fact registry identifiers never reach the prompt or a reply", async () => {
+  // Prompt: identyfikatory rejestru są wewnętrzne i nie mogą być podawane modelowi.
+  const { env, calls } = makeEnv();
+  await worker.fetch(post(validBody("Czym zajmuje się Paweł Mamcarz?")), env);
+  const systemPrompt = calls.ai[0].input.messages.find((message) => message.role === "system").content;
+  for (const id of ["brand.promise", "core.advisory", "core.applications", "core.aviation", "contact.email"]) {
+    assert.equal(systemPrompt.includes(id), false, `prompt leaked ${id}`);
+  }
+
+  // Odpowiedź: gdyby model mimo to wypisał identyfikator, odpowiedź jest niewiarygodna.
+  const leaks = [
+    "Paweł zajmuje się doradztwem (core.advisory) i lotnictwem (core.aviation).",
+    "Moja specjalność to doradztwo i transformacja zakupów (core.advisory).",
+    "Zobacz brand.promise oraz contact.email."
+  ];
+  for (const aiReply of leaks) {
+    const leaked = makeEnv({ aiPayload: { response: aiReply } });
+    const response = await worker.fetch(post(validBody("Pomóż mi znaleźć właściwą stronę.")), leaked.env);
+    const payload = await json(response);
+    assert.equal(response.status, 200);
+    assert.notEqual(payload.reply, aiReply);
+    assert.match(payload.reply, /nie mam potwierdzonej informacji/iu);
   }
 });
 

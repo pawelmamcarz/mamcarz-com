@@ -23,8 +23,11 @@ const workerFacts = registryFacts.filter((fact) => WORKER_FACT_IDS.has(fact.id)
   && Array.isArray(fact.surfaces)
   && fact.surfaces.includes("worker/index.js"));
 const approvedFactLines = workerFacts.map(
-  (fact) => `- ${fact.id}: ${fact.display_pl} / ${fact.display_en}`
+  (fact) => `- ${fact.display_pl} / ${fact.display_en}`
 );
+// Identyfikatory rejestru są wewnętrzne. Nigdy nie trafiają do promptu i nie mogą
+// wyciec do odpowiedzi; wzorzec poniżej wyłapuje je, gdyby model je jednak wypisał.
+const FACT_ID_PATTERN = /\b(?:brand|core|contact|client|career|project|portfolio|education|aviation|award|availability|hero)\.[a-z0-9_]+(?:\.[a-z0-9_]+)*\b/iu;
 
 const SYSTEM_PROMPT = `Jesteś krótkim nawigatorem serwisu mamcarz.com. Odpowiadaj w języku użytkownika i pomagaj wybrać właściwy obszar lub stronę.
 
@@ -211,6 +214,7 @@ function hasApprovedUrl(value) {
 
 function unsafeAiReply(reply) {
   const normalized = normalizeForComparison(reply);
+  if (FACT_ID_PATTERN.test(reply)) return true;
   if (numericTokens(reply).some((token) => !approvedNumberTokens.has(token))) return true;
   if (disallowedStatusDisplays.some((display) => normalized.includes(display))) return true;
   if (blockedPatterns.some((pattern) => normalized.includes(pattern))) return true;
