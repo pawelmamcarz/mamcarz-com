@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy · Paweł Mamcarz</title>
+<meta name="description" content="What this site does with data: no cookies, no analytics and no third-party embeds. It describes only the mechanisms that actually run in the code.">
+<meta name="author" content="Paweł Mamcarz">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://mamcarz.com/en/prywatnosc/">
+<link rel="alternate" hreflang="pl" href="https://mamcarz.com/prywatnosc/">
+<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/prywatnosc/">
+<link rel="alternate" hreflang="x-default" href="https://mamcarz.com/prywatnosc/">
+<meta property="og:title" content="Privacy · Paweł Mamcarz">
+<meta property="og:description" content="What this site does with data: no cookies, no analytics and no third-party embeds. It describes only the mechanisms that actually run in the code.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mamcarz.com/en/prywatnosc/">
+<meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="pl_PL">
+<meta property="og:site_name" content="Paweł Mamcarz">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Privacy","url":"https://mamcarz.com/en/prywatnosc/","description":"What this site does with data: no cookies, no analytics and no third-party embeds.","inLanguage":"en"}</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+</head>
+
+<body class="knowledge-page" data-page="privacy">
+<a href="#main" class="skip-link">Skip to content</a>
+<nav class="site-nav" aria-label="Main navigation">
+  <a href="/en/" class="nav-logo"><b>PM</b> · Mamcarz.com</a>
+  <ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>Advisory</summary><ul class="nav-submenu"><li><a href="/en/uslugi/transformacja-zakupow/">Procurement transformation</a></li><li><a href="/en/uslugi/wdrozenie-sap-ariba/">SAP Ariba implementation</a></li><li><a href="/en/uslugi/doradztwo-zamowienia-publiczne/">Public procurement</a></li></ul></details></li><li><a href="/en/aplikacje-operacyjne/">Applications</a></li><li><a href="/en/lotnictwo/">Aviation</a></li><li><a href="/en/case-studies/">Projects</a></li><li><a href="/en/wiedza/">Insights</a></li><li><a href="/en/#about">About</a></li><li><a href="/en/#contact">Contact</a></li></ul>
+  <a href="/prywatnosc/" class="nav-lang">PL</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Navigation menu" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="nav-overlay" id="nav-overlay"></div>
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+<main id="main" tabindex="-1">
+  <header class="page-hero">
+    <div class="page-hero-content">
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/en/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Privacy</span></nav>
+      <h1 class="page-title">Privacy</h1>
+      <p class="page-lead">This site sets no cookies, runs no analytics and embeds nothing from third-party domains. What follows describes only the mechanisms that actually run in the site's code.</p>
+    </div>
+  </header>
+
+  <section class="section-shell legal-body">
+    <h2>Who runs this site</h2>
+    <p>mamcarz.com is run by Paweł Mamcarz. For anything concerning data: <a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>.</p>
+
+    <h2>What this site does not do</h2>
+    <ul>
+      <li>It sets no cookies.</li>
+      <li>It uses no analytics tools and no tracking pixels.</li>
+      <li>It embeds nothing from third-party domains. Links to external sites, including YouTube and LinkedIn, are plain links. Nothing loads from them until you click.</li>
+      <li>It loads no fonts from third-party providers. Every typeface is served from this domain.</li>
+      <li>It runs no newsletter and no sign-up forms.</li>
+    </ul>
+
+    <h2>The chat on the contact section</h2>
+    <p>The only component that processes data is the chat. It works as follows:</p>
+    <ul>
+      <li><strong>Technical identifier.</strong> On first use your browser stores a random identifier in local storage. It contains no name, no email address and no device data: it is a random string generated on your own machine.</li>
+      <li><strong>What it is for.</strong> Abuse limiting only, namely a cap of ten messages per minute. The limiter receives only a one-way cryptographic digest of that identifier, never the identifier itself.</li>
+      <li><strong>Message content.</strong> What you type is sent to Cloudflare Workers AI, which generates the reply. Do not enter anything you would rather not have processed.</li>
+      <li><strong>Logs.</strong> On failure the service records a request identifier, the path and the error class. Message content is not written to logs.</li>
+    </ul>
+    <p>You can remove the chat identifier by clearing site data for mamcarz.com in your browser settings. The chat keeps working: a new random identifier is created on next use.</p>
+
+    <h2>Hosting</h2>
+    <p>The site runs on Cloudflare Pages and the chat on Cloudflare Workers. As the infrastructure provider, Cloudflare processes technical request data, including IP addresses, to the extent needed to serve the site and protect it from abuse. This happens at platform level, independently of this site's code.</p>
+
+    <h2>Email contact</h2>
+    <p>If you write to <a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>, I keep the message and the sender address for as long as the correspondence requires.</p>
+
+    <h2>Your rights</h2>
+    <p>You may ask what data concerns you, request correction or deletion, or object to processing. Write to <a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>.</p>
+
+    <p class="legal-updated">Last updated: 30 August 2026</p>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="/en/" aria-label="Paweł Mamcarz, homepage"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links"><li><a href="/en/">Home</a></li><li><a href="/en/uslugi/transformacja-zakupow/">Advisory</a></li><li><a href="/en/aplikacje-operacyjne/">Applications</a></li><li><a href="/en/lotnictwo/">Aviation</a></li><li><a href="/en/case-studies/">Projects</a></li><li><a href="/en/wiedza/">Insights</a></li><li><a href="/en/#contact">Contact</a></li></ul></footer>
+
+<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+</body>
+</html>

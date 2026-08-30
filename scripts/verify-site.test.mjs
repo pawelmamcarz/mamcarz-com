@@ -7105,7 +7105,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "a8c31e555dae4c6f0a65183eb6e9ecf77dd17cca138e8ec8818b7995c1a52ce4",
+    "82fa61d632f0cc98921e818bca2a2089ba6d8eb8840eb49cfdca0e55766ff21f",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });

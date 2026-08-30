@@ -310,6 +310,32 @@ main, section { min-width: 0; }
 em { font-style: normal; }
 ::selection { background: var(--signal-dark); color: var(--white); }
 
+/* Proza dokumentowa (polityka prywatności). Baza nie ma rytmu pionowego,
+   więc odstępy definiujemy tu, zamiast rozsypywać style w znacznikach. */
+.legal-body { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+
+.legal-body h2 {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+}
+
+.legal-body h2:first-of-type { margin-top: 0; }
+.legal-body p { margin-bottom: 0.9rem; }
+.legal-body ul { margin-bottom: 0.9rem; display: grid; gap: 0.45rem; }
+.legal-body li { max-width: 68ch; }
+.legal-body a { text-decoration: underline; text-underline-offset: 3px; }
+
+.legal-updated {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  padding-top: 1rem;
+  border-top: var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 /* 03 Layout primitives */
 .section-shell,
 .container {
