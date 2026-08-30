@@ -1,1 +1,2 @@
-https://www.mamcarz.com/* https://mamcarz.com/:splat 301
+# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.
+# No path redirects are currently defined.

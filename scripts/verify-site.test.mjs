@@ -1,0 +1,9254 @@
+import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
+import { promisify } from "node:util";
+import test from "node:test";
+import { runInNewContext } from "node:vm";
+
+import { PUBLIC_PAGES, parseCssRules, readFacts, runVerification } from "./verify-site.mjs";
+
+const execFileAsync = promisify(execFile);
+const modulePath = resolve("scripts/verify-site.mjs");
+const foundationCss = await readFile(resolve("assets/css/style.css"), "utf8");
+const notFoundProductHtml = await readFile(resolve("404.html"), "utf8");
+const applicationProductHtml = {
+  pl: await readFile(resolve("aplikacje-operacyjne/index.html"), "utf8"),
+  en: await readFile(resolve("en/aplikacje-operacyjne/index.html"), "utf8")
+};
+const aviationProductHtml = {
+  pl: await readFile(resolve("lotnictwo/index.html"), "utf8"),
+  en: await readFile(resolve("en/lotnictwo/index.html"), "utf8")
+};
+const projectProductHtml = {
+  pl: await readFile(resolve("case-studies/index.html"), "utf8"),
+  en: await readFile(resolve("en/case-studies/index.html"), "utf8")
+};
+const speakingProductHtml = {
+  pl: await readFile(resolve("wystapienia/index.html"), "utf8"),
+  en: await readFile(resolve("en/wystapienia/index.html"), "utf8")
+};
+const speakingProductAssets = Object.freeze(Object.fromEntries(await Promise.all([
+  "assets/img/speaking/procurement-beyond-episode-8-960.webp",
+  "assets/img/speaking/procurement-beyond-episode-8-1510.webp",
+  "assets/img/speaking/procurement-beyond-episode-8-1510.jpg"
+].map(async (path) => [path, await readFile(resolve(path))]))));
+const procurementParentProductHtml = await readFile(resolve("procurement-2026/index.html"), "utf8");
+const artifactPaths = Object.freeze([
+  "diagrams/diagram1_universal.html",
+  "diagrams/diagram2_ariba.html",
+  "diagrams/diagram3_maturity.html",
+  "diagrams/infographic.html",
+  "infographic_procurement_2026_EN.html"
+]);
+const artifactProductHtml = Object.freeze(Object.fromEntries(await Promise.all(
+  artifactPaths.map(async (path) => [path, await readFile(resolve(path), "utf8")])
+)));
+const approvedArtifactInlineScriptHashes = Object.freeze({
+  "diagrams/diagram1_universal.html": Object.freeze(["b2f9c2b8cb795bb4f09d7a4ba7772a03bba263047d88d2ab8d11f1538ba7ef02"]),
+  "diagrams/diagram2_ariba.html": Object.freeze([]),
+  "diagrams/diagram3_maturity.html": Object.freeze(["9fa92ccde0dc26f042889289a609bd0ccaac9bfcad6ec2d0e78f34ca4f0de3b3"]),
+  "diagrams/infographic.html": Object.freeze([]),
+  "infographic_procurement_2026_EN.html": Object.freeze([])
+});
+const artifactFaviconLink = '<link rel="icon" type="image/svg+xml" href="/favicon.svg">';
+const approvedArtifactSemanticCopy = Object.freeze({
+  "diagrams/diagram1_universal.html": {
+    titles: ["Procurement process reference model"],
+    kickers: ["Reference model", "Decision index"],
+    headings: [["h1", "Procurement process reference model"], ["h2", "Explore fifteen logical records"]],
+    captions: [["figcaption", "The geometry groups a real sequence and optional lenses. Labels, state and descriptions are repeated in the adjacent control index."]],
+    prose: [],
+    svgText: [
+      ["title", "Grouped procurement process geometry"],
+      ["desc", "Strategic steps occupy the upper route, operational steps occupy the lower route, and scenario lenses surround the sequence. The adjacent fifteen-button index provides the full text alternative and keyboard controls."],
+      ["text", "PROCUREMENT"], ["text", "REFERENCE"], ["text", "SELECT A RECORD"],
+      ["text", "STRATEGIC SEQUENCE"], ["text", "OPERATIONAL SEQUENCE"]
+    ],
+    tableText: []
+  },
+  "diagrams/diagram2_ariba.html": {
+    titles: ["Conceptual SAP procurement map"],
+    kickers: ["Workshop vocabulary"],
+    headings: [["h1", "Conceptual SAP procurement map"], ["h2", "Strategic sequence"], ["h2", "Operational sequence"], ["h2", "Scenario lenses"]],
+    captions: [],
+    prose: [
+      "Five ordered decision areas before operational buying.",
+      "Five ordered areas from stated need to invoice and payment decisions.",
+      "Five cross-process questions that require implementation-specific validation."
+    ],
+    svgText: [],
+    tableText: []
+  },
+  "diagrams/diagram3_maturity.html": {
+    titles: ["Editable procurement maturity scenario"],
+    kickers: ["Editable example"],
+    headings: [["h1", "Editable procurement maturity scenario"], ["h2", "Scenario score"], ["h3", "Largest scenario gaps"]],
+    captions: [],
+    prose: ["Scale: 1 initial, 2 developing, 3 defined, 4 managed, 5 optimised for this illustrative scenario."],
+    svgText: [],
+    tableText: []
+  },
+  "diagrams/infographic.html": {
+    titles: ["Procurement process reference model and scenario lenses"],
+    kickers: ["Reference and scenario"],
+    headings: [["h1", "Procurement process: reference model and scenario lenses"], ["h2", "Reference model"], ["h2", "Illustrative target-state scenario"], ["h2", "Model boundaries"]],
+    captions: [["caption", "Scenario lenses to validate"]],
+    prose: [
+      "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+      "Use the comparison as an agenda for validation, not as a product or compliance statement."
+    ],
+    svgText: [],
+    tableText: [
+      ["th", "Lens"], ["th", "Reference model"], ["th", "Illustrative target-state scenario"],
+      ["th", "Decision boundary"], ["td", "Named process stage and ownership question"], ["td", "Decision rights, exceptions and escalation to define"],
+      ["th", "Control boundary"], ["td", "Inputs and handoffs to define"], ["td", "Data, automation, control and evidence choices"]
+    ]
+  },
+  "infographic_procurement_2026_EN.html": {
+    titles: ["Procurement process reference model and scenario lenses"],
+    kickers: ["Reference and scenario"],
+    headings: [["h1", "Procurement process: reference model and scenario lenses"], ["h2", "Reference model"], ["h2", "Illustrative target-state scenario"], ["h2", "Model boundaries"]],
+    captions: [["caption", "Scenario lenses to validate"]],
+    prose: [
+      "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+      "Use the comparison as an agenda for validation, not as a product or compliance statement."
+    ],
+    svgText: [],
+    tableText: [
+      ["th", "Lens"], ["th", "Reference model"], ["th", "Illustrative target-state scenario"],
+      ["th", "Decision boundary"], ["td", "Named process stage and ownership question"], ["td", "Decision rights, exceptions and escalation to define"],
+      ["th", "Control boundary"], ["td", "Inputs and handoffs to define"], ["td", "Data, automation, control and evidence choices"]
+    ]
+  }
+});
+
+function sourceSemanticText(value) {
+  return value.replaceAll("&amp;", "&").replace(/\s+/g, " ").trim();
+}
+
+function sourceTagText(source, pattern) {
+  return [...source.matchAll(pattern)].map((match) => sourceSemanticText(match.at(-1)));
+}
+
+function testOwnedArtifactSemanticCopy(path, html) {
+  const headings = sourceTagText(html, /<h1\b[^>]*>([^<]+)<\/h1>/gi).map((text) => ["h1", text]);
+  if (path === "diagrams/diagram1_universal.html") {
+    headings.push(...sourceTagText(html, /<h2 id="process-workbench-title">([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+  } else if (path === "diagrams/diagram2_ariba.html") {
+    headings.push(...sourceTagText(html, /<header class="model-group__heading">[\s\S]*?<h2>([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+  } else if (path === "diagrams/diagram3_maturity.html") {
+    headings.push(...sourceTagText(html, /<h2 id="scenario-summary-title">([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+    headings.push(...sourceTagText(html, /<h3\b[^>]*>([^<]+)<\/h3>/gi).map((text) => ["h3", text]));
+  } else {
+    headings.push(...sourceTagText(html, /<h2\b[^>]*>([^<]+)<\/h2>/gi).map((text) => ["h2", text]));
+  }
+  const svg = /<svg\b[^>]*>([\s\S]*?)<\/svg>/i.exec(html)?.[1] ?? "";
+  return {
+    titles: sourceTagText(html, /<title>([^<]+)<\/title>/gi),
+    kickers: sourceTagText(html, /<p class="artifact-kicker">([^<]+)<\/p>/gi),
+    headings,
+    captions: [...html.matchAll(/<(figcaption|caption)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])]),
+    prose: sourceTagText(html, /<p(?: class="scenario-scale")?>([^<]+)<\/p>/gi),
+    svgText: [...svg.matchAll(/<(title|desc|text)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])]),
+    tableText: [...html.matchAll(/<(th|td)\b[^>]*>([^<]+)<\/\1>/gi)].map((match) => [match[1].toLowerCase(), sourceSemanticText(match[2])])
+  };
+}
+
+function testOwnedArtifactInlineScriptHashes(html) {
+  return [...html.matchAll(/<script(?:\s([^>]*))?>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => !/\btype\s*=\s*["']application\/ld\+json["']/i.test(match[1] ?? ""))
+    .map((match) => createHash("sha256").update(match[2]).digest("hex"));
+}
+
+function round2ArtifactHtml(path, html) {
+  let updated = html.includes(artifactFaviconLink)
+    ? html
+    : html.replace("</title>", `</title>\n  ${artifactFaviconLink}`);
+  if (path === "diagrams/diagram3_maturity.html") {
+    updated = updated.replace(
+      '<dt>Scenario score</dt><dd id="baseline-score">38%</dd>',
+      '<dt>Illustrative baseline score</dt><dd id="baseline-score">38%</dd>'
+    );
+  }
+  return updated;
+}
+
+function round2ArtifactOverrides() {
+  return Object.fromEntries(artifactPaths.map((path) => [path, round2ArtifactHtml(path, artifactProductHtml[path])]));
+}
+const serviceProductHtml = Object.freeze({
+  transformation: Object.freeze({
+    pl: await readFile(resolve("uslugi/transformacja-zakupow/index.html"), "utf8"),
+    en: await readFile(resolve("en/uslugi/transformacja-zakupow/index.html"), "utf8")
+  }),
+  ariba: Object.freeze({
+    pl: await readFile(resolve("uslugi/wdrozenie-sap-ariba/index.html"), "utf8"),
+    en: await readFile(resolve("en/uslugi/wdrozenie-sap-ariba/index.html"), "utf8")
+  }),
+  publicProcurement: Object.freeze({
+    pl: await readFile(resolve("uslugi/doradztwo-zamowienia-publiczne/index.html"), "utf8"),
+    en: await readFile(resolve("en/uslugi/doradztwo-zamowienia-publiczne/index.html"), "utf8")
+  })
+});
+const task9SiteShellEntries = Object.freeze([
+  Object.freeze({ path: "index.html", lang: "pl", route: "/", counterpart: "/en/", active: "logo" }),
+  Object.freeze({ path: "en/index.html", lang: "en", route: "/en/", counterpart: "/", active: "logo" }),
+  Object.freeze({ path: "uslugi/transformacja-zakupow/index.html", lang: "pl", route: "/uslugi/transformacja-zakupow/", counterpart: "/en/uslugi/transformacja-zakupow/", active: "/uslugi/transformacja-zakupow/" }),
+  Object.freeze({ path: "en/uslugi/transformacja-zakupow/index.html", lang: "en", route: "/en/uslugi/transformacja-zakupow/", counterpart: "/uslugi/transformacja-zakupow/", active: "/en/uslugi/transformacja-zakupow/" }),
+  Object.freeze({ path: "uslugi/wdrozenie-sap-ariba/index.html", lang: "pl", route: "/uslugi/wdrozenie-sap-ariba/", counterpart: "/en/uslugi/wdrozenie-sap-ariba/", active: "/uslugi/wdrozenie-sap-ariba/" }),
+  Object.freeze({ path: "en/uslugi/wdrozenie-sap-ariba/index.html", lang: "en", route: "/en/uslugi/wdrozenie-sap-ariba/", counterpart: "/uslugi/wdrozenie-sap-ariba/", active: "/en/uslugi/wdrozenie-sap-ariba/" }),
+  Object.freeze({ path: "uslugi/doradztwo-zamowienia-publiczne/index.html", lang: "pl", route: "/uslugi/doradztwo-zamowienia-publiczne/", counterpart: "/en/uslugi/doradztwo-zamowienia-publiczne/", active: "/uslugi/doradztwo-zamowienia-publiczne/" }),
+  Object.freeze({ path: "en/uslugi/doradztwo-zamowienia-publiczne/index.html", lang: "en", route: "/en/uslugi/doradztwo-zamowienia-publiczne/", counterpart: "/uslugi/doradztwo-zamowienia-publiczne/", active: "/en/uslugi/doradztwo-zamowienia-publiczne/" }),
+  Object.freeze({ path: "aplikacje-operacyjne/index.html", lang: "pl", route: "/aplikacje-operacyjne/", counterpart: "/en/aplikacje-operacyjne/", active: "/aplikacje-operacyjne/" }),
+  Object.freeze({ path: "en/aplikacje-operacyjne/index.html", lang: "en", route: "/en/aplikacje-operacyjne/", counterpart: "/aplikacje-operacyjne/", active: "/en/aplikacje-operacyjne/" }),
+  Object.freeze({ path: "lotnictwo/index.html", lang: "pl", route: "/lotnictwo/", counterpart: "/en/lotnictwo/", active: "/lotnictwo/" }),
+  Object.freeze({ path: "en/lotnictwo/index.html", lang: "en", route: "/en/lotnictwo/", counterpart: "/lotnictwo/", active: "/en/lotnictwo/" }),
+  Object.freeze({ path: "case-studies/index.html", lang: "pl", route: "/case-studies/", counterpart: "/en/case-studies/", active: "/case-studies/" }),
+  Object.freeze({ path: "en/case-studies/index.html", lang: "en", route: "/en/case-studies/", counterpart: "/case-studies/", active: "/en/case-studies/" }),
+  Object.freeze({ path: "wiedza/index.html", lang: "pl", route: "/wiedza/", counterpart: "/en/wiedza/", active: "/wiedza/" }),
+  Object.freeze({ path: "en/wiedza/index.html", lang: "en", route: "/en/wiedza/", counterpart: "/wiedza/", active: "/en/wiedza/" }),
+  Object.freeze({ path: "wystapienia/index.html", lang: "pl", route: "/wystapienia/", counterpart: "/en/wystapienia/", active: "/wiedza/" }),
+  Object.freeze({ path: "en/wystapienia/index.html", lang: "en", route: "/en/wystapienia/", counterpart: "/wystapienia/", active: "/en/wiedza/" }),
+  Object.freeze({ path: "procurement-2026/index.html", lang: "pl", route: "/procurement-2026/", counterpart: "/en/wiedza/", active: "/wiedza/" })
+]);
+const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise.all(
+  task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
+)));
+const task9ProtectedContentHashes = Object.freeze({
+  "index.html": "92163887546d2caea214d15bdeec4c49cf3bfb6670c7f9a68b4378726a99bf0f",
+  "en/index.html": "12e7e7528416be8f1ce3e0a52f742d5c7662922898fafbf89cfff7d7a1350141",
+  "uslugi/transformacja-zakupow/index.html": "aed3ecc755910dbf61ec6f74f3ac91ef3fd6928b017c3af8e5a2b2c3b177f9d3",
+  "en/uslugi/transformacja-zakupow/index.html": "aa4306ca8eded0a9f3abe124a322cff05412a75c7c38ad969b26f26c625459d4",
+  "uslugi/wdrozenie-sap-ariba/index.html": "771726a6b6756400553f5acb3bc368b744e02a1e949ce3e8c3fb326b98ee9db0",
+  "en/uslugi/wdrozenie-sap-ariba/index.html": "d95877ab82f2168495be252d63fabad892a8a4362727be55d00f08088e350e2e",
+  "uslugi/doradztwo-zamowienia-publiczne/index.html": "ef2b81271888f56b89309a072b60845a8ebada1c65c7d089766f5f04769b3bf2",
+  "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "8340055950d73a3c4753f97d63654c270d7857d0d17f668a68f2b47b8c88ca40",
+  "aplikacje-operacyjne/index.html": "a708e697c34d8ec29067472c1452f0d323977aac317b3c87b43b3c64962acbff",
+  "en/aplikacje-operacyjne/index.html": "9bcc65302c996a9e00cf17d39376769c708182b9da3b7f941358c5ab9ed412da",
+  "lotnictwo/index.html": "6ca4adea7ab3232c31f5f96894734376b73043b856ab0c69bb66e26faa706d0b",
+  "en/lotnictwo/index.html": "0823777ace817d243ed8dbe68ad4f0819141886dac7aebeabf627c541b9068f1",
+  "case-studies/index.html": "2b625df6c188032b8d91845dfc0193f24a110fb991bab34a1e0a462752ce6f75",
+  "en/case-studies/index.html": "c2ec2ae6ab45f02969707045f38ab715d1e1ab21f58143e6094767c136476969",
+  "wiedza/index.html": "01e3ff51f0ea944751df396bc604d879ad1bd994f154a0162a781c5bcda84235",
+  "en/wiedza/index.html": "ecfc2ac93e5baca1290a06bde5c11064bbcb4b2750d04ab6ad6d3f74971f0b0f",
+  "wystapienia/index.html": "6aa5850a51f4d2583ace3db4983bfa2f5cebd9ed6f65f4f2924765429c3ee7e9",
+  "en/wystapienia/index.html": "25bce5bb1478d6e0ea7875866c8d952fa7e1bb1be5f3a7d84d42f7b4a7e7e5b6",
+  "procurement-2026/index.html": "81e3cc05c2ba55df668a79a257b150ac2398ffbf1b09c4e9634886fed7815827"
+});
+
+const task9ShellCopy = Object.freeze({
+  pl: Object.freeze({
+    navLabel: "Nawigacja główna", home: "/", logoLabel: "Paweł Mamcarz, strona główna", group: "Doradztwo",
+    submenu: Object.freeze([
+      Object.freeze(["/uslugi/transformacja-zakupow/", "Transformacja zakupów"]),
+      Object.freeze(["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"]),
+      Object.freeze(["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"])
+    ]),
+    primary: Object.freeze([
+      Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
+      Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
+      Object.freeze(["/#about", "O mnie"]), Object.freeze(["/#contact", "Kontakt"])
+    ]),
+    language: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
+    footer: Object.freeze([
+      Object.freeze(["/", "Strona główna"]), Object.freeze(["/uslugi/transformacja-zakupow/", "Doradztwo"]),
+      Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
+      Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
+      Object.freeze(["/#contact", "Kontakt"])
+    ])
+  }),
+  en: Object.freeze({
+    navLabel: "Main navigation", home: "/en/", logoLabel: "Paweł Mamcarz, homepage", group: "Advisory",
+    submenu: Object.freeze([
+      Object.freeze(["/en/uslugi/transformacja-zakupow/", "Procurement transformation"]),
+      Object.freeze(["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"]),
+      Object.freeze(["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"])
+    ]),
+    primary: Object.freeze([
+      Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
+      Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
+      Object.freeze(["/en/#about", "About"]), Object.freeze(["/en/#contact", "Contact"])
+    ]),
+    language: "PL", toggle: "Navigation menu", back: "Back to top",
+    footer: Object.freeze([
+      Object.freeze(["/en/", "Home"]), Object.freeze(["/en/uslugi/transformacja-zakupow/", "Advisory"]),
+      Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
+      Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
+      Object.freeze(["/en/#contact", "Contact"])
+    ])
+  })
+});
+
+function task9ExpectedShell(entry) {
+  const copy = task9ShellCopy[entry.lang];
+  const current = (href) => entry.active === href ? ' aria-current="page"' : "";
+  const logoCurrent = entry.active === "logo" ? ' aria-current="page"' : "";
+  const submenu = copy.submenu.map(([href, label]) => `<li><a href="${href}"${current(href)}>${label}</a></li>`).join("");
+  const primary = copy.primary.map(([href, label]) => `<li><a href="${href}"${current(href)}>${label}</a></li>`).join("");
+  const footer = copy.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
+  return Object.freeze({
+    nav: `<nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"${logoCurrent}><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.group}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${entry.counterpart}" class="nav-lang">${copy.language}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>`,
+    controls: `<div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${copy.back}">↑</button>`,
+    footer: `<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>`
+  });
+}
+
+function task9CanonicalHtml(entry, html = task9SiteShellProductHtml[entry.path]) {
+  const shell = task9ExpectedShell(entry);
+  return html
+    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260825-flightplan-3")
+    .replace(/<nav class="site-nav"[\s\S]*?<\/nav>/, shell.nav)
+    .replace(/<div class="nav-overlay"[\s\S]*?<\/div>\s*<button class="back-to-top"[\s\S]*?<\/button>/, shell.controls)
+    .replace(/<footer(?: class="site-footer")?>[\s\S]*?<\/footer>/, shell.footer)
+    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>');
+}
+
+function task9ProtectedContent(html) {
+  return html
+    .replace(/<link rel="stylesheet" href="\/assets\/css\/style\.css\?v=[^"]+">/, "<TASK9_STYLESHEET>")
+    .replace(/<nav class="site-nav"[\s\S]*?<\/nav>/, "<TASK9_SITE_NAV>")
+    .replace(/<div class="nav-overlay"[\s\S]*?<\/div>\s*<button class="back-to-top"[\s\S]*?<\/button>/, "<TASK9_OVERLAY_BACK>")
+    .replace(/<footer(?: class="site-footer")?>[\s\S]*?<\/footer>/, "<TASK9_FOOTER>")
+    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, "<TASK9_SCRIPT>");
+}
+
+async function task9SiteShellRoot(overrides = {}, { canonical = true } = {}) {
+  const files = Object.fromEntries(task9SiteShellEntries
+    .filter(({ path }) => path !== "procurement-2026/index.html")
+    .map((entry) => [entry.path, overrides[entry.path] ?? (canonical ? task9CanonicalHtml(entry) : task9SiteShellProductHtml[entry.path])]));
+  const procurementEntry = task9SiteShellEntries.at(-1);
+  const procurement = overrides[procurementEntry.path] ?? (canonical ? task9CanonicalHtml(procurementEntry) : task9SiteShellProductHtml[procurementEntry.path]);
+  return pageArchitectureFixture({ files, extraFiles: { [procurementEntry.path]: procurement } });
+}
+
+function task9Mutate(path, mutate) {
+  const entry = task9SiteShellEntries.find((candidate) => candidate.path === path);
+  assert.ok(entry, `unknown Task 9 path ${path}`);
+  return { [path]: mutate(task9CanonicalHtml(entry)) };
+}
+const publicClaimSurfaceFixture = [
+  "index.html",
+  "en/index.html",
+  "llms.txt",
+  "llms-full.txt",
+  "worker/index.js",
+  "assets/js/main.js"
+];
+
+const navigationFixture = {
+  pl: `
+    <nav class="site-nav" aria-label="Nawigacja główna">
+      <a href="/" class="nav-logo"><b>PM</b> · Mamcarz.com</a>
+      <ul class="nav-list" id="nav-menu">
+        <li><details class="nav-group"><summary>Doradztwo</summary><ul class="nav-submenu">
+          <li><a href="/uslugi/transformacja-zakupow/">Transformacja zakupów</a></li>
+          <li><a href="/uslugi/wdrozenie-sap-ariba/">Wdrożenie SAP Ariba</a></li>
+          <li><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></li>
+        </ul></details></li>
+        <li><a href="/aplikacje-operacyjne/">Aplikacje</a></li>
+        <li><a href="/lotnictwo/">Lotnictwo</a></li>
+        <li><a href="/case-studies/">Projekty</a></li>
+        <li><a href="/wiedza/">Wiedza</a></li>
+        <li><a href="/#about">O mnie</a></li>
+        <li><a href="/#contact">Kontakt</a></li>
+      </ul>
+      <a href="/en/" class="nav-lang">EN</a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Menu nawigacyjne" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>`,
+  en: `
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/en/" class="nav-logo"><b>PM</b> · Mamcarz.com</a>
+      <ul class="nav-list" id="nav-menu">
+        <li><details class="nav-group"><summary>Advisory</summary><ul class="nav-submenu">
+          <li><a href="/en/uslugi/transformacja-zakupow/">Procurement transformation</a></li>
+          <li><a href="/en/uslugi/wdrozenie-sap-ariba/">SAP Ariba implementation</a></li>
+          <li><a href="/en/uslugi/doradztwo-zamowienia-publiczne/">Public procurement</a></li>
+        </ul></details></li>
+        <li><a href="/en/aplikacje-operacyjne/">Applications</a></li>
+        <li><a href="/en/lotnictwo/">Aviation</a></li>
+        <li><a href="/en/case-studies/">Projects</a></li>
+        <li><a href="/en/wiedza/">Insights</a></li>
+        <li><a href="/en/#about">About</a></li>
+        <li><a href="/en/#contact">Contact</a></li>
+      </ul>
+      <a href="/" class="nav-lang">PL</a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Navigation menu" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>`
+};
+
+const plan2RoutePairs = [
+  ["index.html", "en/index.html", "/", "/en/", "home"],
+  ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html", "/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/", "services"],
+  ["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html", "/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/", "services"],
+  ["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html", "/uslugi/doradztwo-zamowienia-publiczne/", "/en/uslugi/doradztwo-zamowienia-publiczne/", "services"],
+  ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/", "applications"],
+  ["lotnictwo/index.html", "en/lotnictwo/index.html", "/lotnictwo/", "/en/lotnictwo/", "aviation"],
+  ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/", "projects"],
+  ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/", "knowledge"],
+  ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/", "speaking"]
+];
+
+const plan2Families = ["all", "home", "services", "applications", "aviation", "projects", "knowledge", "speaking", "artifacts"];
+
+function pageNavigationFixture(lang, pairedRoute, route) {
+  const currentLanguageLink = lang === "pl"
+    ? '<a href="/en/" class="nav-lang">EN</a>'
+    : '<a href="/" class="nav-lang">PL</a>';
+  const pairedLanguageLink = lang === "pl"
+    ? `<a href="${pairedRoute}" class="nav-lang">EN</a>`
+    : `<a href="${pairedRoute}" class="nav-lang">PL</a>`;
+  let navigation = navigationFixture[lang].replace(currentLanguageLink, pairedLanguageLink);
+  const home = lang === "pl" ? "/" : "/en/";
+  if (route === home) navigation = navigation.replace(`href="${home}" class="nav-logo"`, `href="${home}" class="nav-logo" aria-current="page"`);
+  return navigation;
+}
+
+function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title = "Page", lead = "", dataPage = "fixture" }) {
+  const route = lang === "pl" ? plRoute : enRoute;
+  const pairedRoute = lang === "pl" ? enRoute : plRoute;
+  return `<!doctype html><html lang="${lang}"><head>
+    <title>${title}</title>
+    <link rel="canonical" href="https://mamcarz.com${route}">
+    <link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}">
+    <link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}">
+    <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    ${head}
+  </head><body data-page="${dataPage}">
+    <a class="skip-link" href="#main">Skip</a>
+    ${pageNavigationFixture(lang, pairedRoute, route)}
+    <button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
+    <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
+    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+  </body></html>`;
+}
+
+function pagePairFiles(pair, overrides = {}) {
+  const [plFile, enFile, plRoute, enRoute, family] = pair;
+  const serviceKey = plFile.includes("transformacja-zakupow")
+    ? "transformation"
+    : plFile.includes("wdrozenie-sap-ariba")
+      ? "ariba"
+      : "publicProcurement";
+  const defaultPl = family === "applications"
+    ? applicationPageFixture("pl")
+    : family === "aviation"
+      ? aviationProductHtml.pl
+    : family === "projects"
+      ? projectProductHtml.pl
+    : family === "speaking"
+      ? speakingProductHtml.pl
+    : family === "knowledge"
+      ? knowledgePageFixture("pl")
+    : family === "services"
+      ? serviceProductHtml[serviceKey].pl
+    : pageShellFixture({ lang: "pl", plRoute, enRoute, title: "Strona" });
+  const defaultEn = family === "applications"
+    ? applicationPageFixture("en")
+    : family === "aviation"
+      ? aviationProductHtml.en
+    : family === "projects"
+      ? projectProductHtml.en
+    : family === "speaking"
+      ? speakingProductHtml.en
+    : family === "knowledge"
+      ? knowledgePageFixture("en")
+    : family === "services"
+      ? serviceProductHtml[serviceKey].en
+    : pageShellFixture({ lang: "en", plRoute, enRoute, title: "Page" });
+  return {
+    [plFile]: overrides.pl ?? defaultPl,
+    [enFile]: overrides.en ?? defaultEn
+  };
+}
+
+async function pageArchitectureFixture({ files, facts, public_claim_surfaces, extraFiles = {} } = {}) {
+  const completeManifest = files === undefined;
+  const currentFactData = completeManifest && (facts === undefined || public_claim_surfaces === undefined) ? await readFacts() : null;
+  const routeFiles = files ?? Object.assign({}, ...plan2RoutePairs.map((pair) => pagePairFiles(pair)));
+  const remaining = { ...routeFiles, ...extraFiles };
+  const plHtml = remaining["index.html"];
+  const enHtml = remaining["en/index.html"];
+  const serviceHtml = remaining["uslugi/wdrozenie-sap-ariba/index.html"];
+  delete remaining["index.html"];
+  delete remaining["en/index.html"];
+  delete remaining["uslugi/wdrozenie-sap-ariba/index.html"];
+  return fixture({
+    facts: withApplicationFacts(completeManifest && facts === undefined ? currentFactData.facts : facts),
+    public_claim_surfaces: public_claim_surfaces ?? (completeManifest ? currentFactData.public_claim_surfaces : publicClaimSurfaceFixture),
+    plHtml,
+    enHtml,
+    serviceHtml,
+    extraFiles: {
+      "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+      "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
+      "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
+      "assets/fonts/dmsans-latin.woff2": "fixture-font",
+      "assets/fonts/dmmono-latin.woff2": "fixture-font",
+      "assets/img/signature.png": "fixture-image",
+      "assets/img/portfolio/akrobacja.webp": "fixture-webp",
+      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      ...speakingProductAssets,
+      "procurement-2026/index.html": procurementParentProductHtml,
+      ...artifactProductHtml,
+      ...remaining
+    }
+  });
+}
+
+const legacyNavigationFixture = `
+  <nav aria-label="Main navigation">
+    <a href="/" class="nav-logo">PM</a>
+    <ul class="nav-links" id="navLinks"><li><a href="/#about">About</a></li></ul>
+    <button class="nav-hamburger" id="navHamburger" aria-controls="navLinks" aria-expanded="false"><span></span><span></span><span></span></button>
+  </nav>`;
+
+const validBrowserScript = `
+function getChatClientId() {
+  const key = "mamcarz-chat-client-v1";
+  try {
+    const existing = localStorage.getItem(key);
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(existing ?? "")) return existing;
+    const created = crypto.randomUUID();
+    localStorage.setItem(key, created);
+    return created;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+function initNavigation() {
+  const toggle = document.getElementById("nav-toggle");
+  const menu = document.getElementById("nav-menu");
+  const overlay = document.getElementById("nav-overlay");
+  if (!toggle || !menu) return;
+  document.documentElement.classList.add("js");
+  toggle.addEventListener("click", () => menu.classList.toggle("is-open"));
+  overlay?.addEventListener("click", () => menu.classList.remove("is-open"));
+}
+function initBackToTop() {
+  const backToTop = document.getElementById("backToTop");
+  if (!backToTop) return;
+  backToTop.addEventListener("click", () => window.scrollTo({ top: 0 }));
+}
+function initChat() {
+  const chatMessages = document.getElementById("chat-messages");
+  const chatInput = document.getElementById("chat-input");
+  const chatSendButton = document.getElementById("chat-send");
+  if (!chatMessages || !chatInput || !chatSendButton) return;
+  const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
+  const localizedFallbacks = { 400: "invalid", 413: "too large", 429: "rate limited", 500: "unavailable" };
+  const requestHeaders = { "Content-Type": "application/json", "X-Chat-Client": getChatClientId() };
+  async function sendMessage() {
+    const response = await fetch(CHAT_API, { headers: requestHeaders });
+    if (!response.ok) message.textContent = localizedFallbacks[response.status] ?? localizedFallbacks[500];
+  }
+  void sendMessage;
+  function addChatMessage(text, role) {
+    const message = document.createElement("div");
+    message.className = \`chat-msg chat-msg--\${role}\`;
+    message.textContent = text;
+    chatMessages.append(message);
+    return message;
+  }
+  const message = document.createElement("div");
+  const fallbackLink = document.createElement("a");
+  fallbackLink.href = "mailto:pawel@mamcarz.com";
+  fallbackLink.textContent = "pawel@mamcarz.com";
+  message.append(fallbackLink);
+  addChatMessage(CHAT_API, "bot");
+}
+initNavigation();
+initBackToTop();
+initChat();`;
+
+const controlledAboutCopy = {
+  pl: {
+    label: "O mnie",
+    narratives: [
+      ["decision-before-tool", "Zaczynam od ustalenia, kto podejmuje decyzję, na jakich danych i w jakich ograniczeniach. Dopiero potem wybieram proces, technologię i sposób wdrożenia."],
+      ["responsibility-across-domains", "W zakupach pracuję z odpowiedzialnością za pieniądze, ryzyko i interesariuszy. W aplikacjach przekładam te decyzje na przepływ pracy, dane i kontrolę. Lotnictwo wnosi dyscyplinę procedur oraz jasny podział odpowiedzialności."]
+    ]
+  },
+  en: {
+    label: "About me",
+    narratives: [
+      ["decision-before-tool", "I begin by establishing who makes the decision, what data they use and what constraints apply. Only then do I choose the process, technology and implementation approach."],
+      ["responsibility-across-domains", "In procurement, I take responsibility for money, risk and stakeholders. In applications, I translate those decisions into workflows, data and controls. Aviation brings procedural discipline and a clear division of responsibility."]
+    ]
+  }
+};
+
+const controlledAboutFacts = [
+  ["aviation.ppl_h", "PPL(H)", "PPL(H)"],
+  ["aviation.ppl_a", "PPL(A)", "PPL(A)"],
+  ["aviation.aerobatics_rating", "uprawnienia do akrobacji", "aerobatics rating"],
+  ["aviation.diverse_extreme_team", "pilot pokazowy Diverse Extreme Team (2013)", "display pilot for the Diverse Extreme Team (2013)"],
+  ["aviation.forum_photographer", "fotograf prasowy agencji Forum", "Press photographer with Forum Agency"],
+  ["aviation.air_to_air_media", "sesje air-to-air, realizacje wideo i dronem", "air-to-air shoots, video and drone production"]
+];
+
+function controlledAboutFixture(lang) {
+  const copy = controlledAboutCopy[lang];
+  const factItems = controlledAboutFacts.map(([id, displayPl, displayEn]) => `
+        <li class="about-fact" data-fact-id="${id}">${lang === "pl" ? displayPl : displayEn}</li>`).join("");
+  return `<div class="about-text">
+      <p class="section-label">${copy.label}</p>
+      <h2>Controlled About</h2>
+      ${copy.narratives.map(([id, text]) => `<p data-about-copy="${id}">${text}</p>`).join("\n      ")}
+      <ul class="about-facts">${factItems}
+      </ul>
+      <div class="expertise-list"><div class="expertise-item">Decision</div><div class="expertise-item">Process</div><div class="expertise-item">Delivery</div></div>
+    </div>`;
+}
+
+function publicProcurementSkillsFixture(lang, { href, labels, outcome } = {}) {
+  const localized = lang === "pl"
+    ? { href: "/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Działanie", "Możliwy wynik"], title: "Zamówienia publiczne" }
+    : { href: "/en/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Action", "Possible outcome"], title: "Public procurement" };
+  const ledgerLabels = labels ?? [localized.labels[0], localized.labels[1], outcome ?? localized.labels[2]];
+  const ledger = ledgerLabels.map((label) => `<div><dt>${label}</dt><dd>One</dd></div>`).join("");
+  return `<article class="evidence-row" data-domain="advisory" data-service="public-procurement"><h3><a href="${href ?? localized.href}">${localized.title}</a></h3><dl>${ledger}</dl></article>`;
+}
+
+function replaceHomepageSection(html, sectionId, replacement) {
+  return html.replace(new RegExp(`<section id="${sectionId}">[\\s\\S]*?<\\/section>`), replacement);
+}
+
+function homepageFixture(lang, content) {
+  const projectsHref = lang === "pl" ? "/case-studies/" : "/en/case-studies/";
+  const projectsLabel = lang === "pl" ? "Projekty" : "Projects";
+  const processLabels = lang === "pl"
+    ? ["Diagnoza", "Strategia", "Wdrożenie", "Wartość"]
+    : ["Diagnosis", "Strategy", "Implementation", "Value"];
+  const contactIntents = lang === "pl"
+    ? [["Doradztwo", "Doradztwo"], ["Aplikacja operacyjna", "Aplikacja%20operacyjna"], ["Lotnictwo", "Lotnictwo"]]
+    : [["Advisory", "Advisory"], ["Operational application", "Operational%20application"], ["Aviation", "Aviation"]];
+  const skipLabel = lang === "pl" ? "Przejdź do treści" : "Skip to main content";
+  return `<!doctype html><html lang="${lang}"><head>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite"},{"@type":"Person"}]}</script>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+  </head><body>
+    <a href="#main" class="skip-link">${skipLabel}</a>
+    ${navigationFixture[lang]}<main id="main">
+    <section id="hero"><h1 data-fact-id="brand.promise">${content}</h1><img src="/assets/img/IMG_3284-480.webp" alt="" width="960" height="1280" fetchpriority="high"></section>
+    <section data-section="trust"></section>
+    <section id="process">${processLabels.map((label, index) => `<article class="route-sequence__step"><p class="section-index">0${index + 1} / ${label}</p><h3>${label}</h3></article>`).join("")}</section>
+    <aside data-cta-after="process"></aside>
+    <section id="cases"></section>
+    <aside data-cta-after="cases"></aside>
+    <section id="about">${controlledAboutFixture(lang)}</section>
+    <section id="education"></section>
+    <section id="resume"></section>
+    <section id="skills"><article class="evidence-row" data-domain="applications"><h3>${lang === "pl" ? "Aplikacje operacyjne" : "Operational applications"}</h3><dl><div><dt>Problem</dt><dd>One</dd></div><div><dt>${lang === "pl" ? "Działanie" : "Action"}</dt><dd>Two</dd></div><div><dt>${lang === "pl" ? "Możliwy wynik" : "Possible outcome"}</dt><dd>Three</dd></div></dl></article>${publicProcurementSkillsFixture(lang)}</section>
+    <section id="portfolio"></section>
+    <section id="clients"></section>
+    <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
+  </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><input id="chat-input" maxlength="2000">
+    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+  </body></html>`;
+}
+
+function parityInventoryFixture(lang) {
+  const title = (id, value) => `<div class="pcard__title" data-fact-id="${id}">${value}</div>`;
+  const client = (id, value) => `<div class="client-item" data-fact-id="${id}">${value}</div>`;
+  return homepageFixture(lang, lang === "pl" ? "Marka" : "Brand")
+    .replace('<section id="portfolio"></section>', `<section id="portfolio"><div class="portfolio-cards"><a class="pcard" href="https://alpha.example">${title("portfolio.alpha", "Alpha")}</a><a class="pcard" href="https://beta.example">${title("portfolio.beta", "Beta")}</a></div></section>`)
+    .replace('<section id="clients"></section>', `<section id="clients">${client("client.alpha", "Alpha Client")}${client("client.beta", "Beta Client")}</section>`);
+}
+
+function fact(overrides = {}) {
+  return {
+    id: "brand.promise",
+    value: "decision-to-operational-system",
+    display_pl: "Marka",
+    display_en: "Brand",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: "Owner decision, 2026-08-25",
+    source_url: null,
+    surfaces: ["index.html", "en/index.html"],
+    status: "approved",
+    ...overrides
+  };
+}
+
+function blockedClaim(overrides = {}) {
+  return {
+    id: "client.polpharma",
+    pattern: "Polpharma",
+    forbidden_contexts: ["trust", "clients", "client list", "worked for"],
+    reason: "Owner confirmed Polpharma is not a client",
+    ...overrides
+  };
+}
+
+async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], public_claim_surfaces = publicClaimSurfaceFixture, pl = "Marka", en = "Brand", plHtml, enHtml, serviceHtml = legacyNavigationFixture, notFoundHtml = notFoundProductHtml, css = "body{}", js = validBrowserScript, llms = "", llmsFull = "", worker = "", heroImage = Buffer.from("fixture"), extraFiles = {} } = {}) {
+  const root = await mkdtemp(resolve(tmpdir(), "verify-site-test-"));
+  const fixtureFacts = [...facts];
+  for (const [id, displayPl, displayEn] of controlledAboutFacts) {
+    if (!fixtureFacts.some((record) => record.id === id)) {
+      fixtureFacts.push(fact({ id, value: displayEn, display_pl: displayPl, display_en: displayEn }));
+    }
+  }
+  await Promise.all([
+    mkdir(resolve(root, "content"), { recursive: true }),
+    mkdir(resolve(root, "assets/css"), { recursive: true }),
+    mkdir(resolve(root, "assets/js"), { recursive: true }),
+    mkdir(resolve(root, "assets/img"), { recursive: true }),
+    mkdir(resolve(root, "en"), { recursive: true }),
+    mkdir(resolve(root, "uslugi/wdrozenie-sap-ariba"), { recursive: true }),
+    mkdir(resolve(root, "worker"), { recursive: true })
+  ]);
+  await Promise.all([
+    writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, public_claim_surfaces, facts: fixtureFacts, blocked_claims })),
+    writeFile(resolve(root, "index.html"), plHtml ?? homepageFixture("pl", pl)),
+    writeFile(resolve(root, "en/index.html"), enHtml ?? homepageFixture("en", en)),
+    writeFile(resolve(root, "uslugi/wdrozenie-sap-ariba/index.html"), serviceHtml),
+    writeFile(resolve(root, "404.html"), notFoundHtml),
+    writeFile(resolve(root, "assets/css/style.css"), css),
+    writeFile(resolve(root, "assets/js/main.js"), js),
+    ...(heroImage === null ? [] : [writeFile(resolve(root, "assets/img/IMG_3284-480.webp"), heroImage)]),
+    writeFile(resolve(root, "llms.txt"), llms),
+    writeFile(resolve(root, "llms-full.txt"), llmsFull),
+    writeFile(resolve(root, "worker/index.js"), worker),
+    ...Object.entries(extraFiles).map(async ([relativePath, content]) => {
+      const filePath = resolve(root, relativePath);
+      await mkdir(resolve(filePath, ".."), { recursive: true });
+      await writeFile(filePath, content);
+    })
+  ]);
+  return root;
+}
+
+async function currentHomepageMutationFixture(lang, mutate) {
+  const [factData, plHtml, enHtml] = await Promise.all([
+    readFacts(),
+    readFile(resolve("index.html"), "utf8"),
+    readFile(resolve("en/index.html"), "utf8")
+  ]);
+  const current = lang === "pl" ? plHtml : enHtml;
+  const mutated = mutate(current);
+  assert.notEqual(mutated, current, `current ${lang} homepage mutation must change the fixture`);
+  return fixture({
+    facts: factData.facts,
+    blocked_claims: factData.blocked_claims,
+    plHtml: lang === "pl" ? mutated : plHtml,
+    enHtml: lang === "en" ? mutated : enHtml
+  });
+}
+
+function errorIds(result) {
+  return result.errors.map((error) => error.split(" ")[1]);
+}
+
+async function artifactFamilyMutation({ path = null, mutate = (html) => html, overrides = {}, omit = [], includeFavicon = true } = {}) {
+  const files = { ...artifactProductHtml, ...overrides };
+  for (const omittedPath of omit) delete files[omittedPath];
+  if (path !== null) {
+    const current = files[path];
+    assert.equal(typeof current, "string", `${path} must be an artifact fixture`);
+    const mutated = mutate(current);
+    assert.notEqual(mutated, current, `${path} mutation must change the fixture`);
+    files[path] = mutated;
+  }
+  const root = await fixture({
+    extraFiles: {
+      ...files,
+      "procurement-2026/index.html": "<!doctype html><html lang=\"pl\"><head><title>Procurement 2026</title></head><body><h1>Procurement 2026</h1></body></html>",
+      "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
+      "assets/fonts/dmsans-latin.woff2": "fixture-font",
+      "assets/fonts/dmmono-latin.woff2": "fixture-font",
+      ...(includeFavicon ? { "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>" } : {})
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "artifacts" });
+}
+
+function publicSurfaceOptions(surface, text) {
+  if (surface === "index.html") return { plHtml: `<p>${text}</p>` };
+  if (surface === "en/index.html") return { enHtml: `<p>${text}</p>` };
+  if (surface === "llms.txt") return { llms: text };
+  if (surface === "llms-full.txt") return { llmsFull: text };
+  if (surface === "worker/index.js") return { worker: `const publicCopy = ${JSON.stringify(text)};` };
+  if (surface === "assets/js/main.js") return { js: `const publicCopy = ${JSON.stringify(text)};` };
+  throw new Error(`Unsupported public claim surface fixture: ${surface}`);
+}
+
+const productionFactSurfaceControls = {
+  llms: [
+    "Neutral context before the controlled claims.",
+    "25+ years of procurement experience.",
+    "Neutral context between the controlled claims.",
+    "20+ SAP Ariba implementations.",
+    "Neutral context after the controlled claims."
+  ].join("\n"),
+  llmsFull: [
+    "Neutral context before the controlled claims.",
+    "25+ years of procurement experience.",
+    "20+ SAP Ariba implementations.",
+    "Total value of delivered projects: EUR 500M.",
+    "Current aviation venture: akrobacja.com.",
+    "Voucher sales platform for aerobatic flights.",
+    "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
+    "Neutral context after the controlled claims."
+  ].join("\n"),
+  worker: `import factRegistry from "../content/site-facts.json" with { type: "json" };\nconst verifiedFacts = ${JSON.stringify([
+    "Neutral context before the controlled claims.",
+    "25+ lat doświadczenia w zakupach",
+    "20+ wdrożeń SAP Ariba",
+    "Łączna wartość zrealizowanych projektów: 500 mln EUR.",
+    "Aktualna marka działalności lotniczej: akrobacja.com.",
+    "Platforma sprzedaży voucherów na loty akrobacyjne.",
+    "czympojade.pl: Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
+    "Neutral context after the controlled claims."
+  ].join("\n"))};`
+};
+
+async function productionRegistryFixture(overrides = {}) {
+  const factData = await readFacts();
+  const { extraFiles = {}, ...fixtureOverrides } = overrides;
+  return fixture({
+    facts: factData.facts,
+    blocked_claims: factData.blocked_claims,
+    public_claim_surfaces: factData.public_claim_surfaces,
+    llms: productionFactSurfaceControls.llms,
+    llmsFull: productionFactSurfaceControls.llmsFull,
+    worker: productionFactSurfaceControls.worker,
+    serviceHtml: serviceProductHtml.ariba.pl,
+    ...fixtureOverrides,
+    extraFiles: {
+      "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
+      "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
+      "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
+      "assets/img/signature.png": "fixture-image",
+      "uslugi/transformacja-zakupow/index.html": serviceProductHtml.transformation.pl,
+      "en/uslugi/transformacja-zakupow/index.html": serviceProductHtml.transformation.en,
+      "en/uslugi/wdrozenie-sap-ariba/index.html": serviceProductHtml.ariba.en,
+      "uslugi/doradztwo-zamowienia-publiczne/index.html": serviceProductHtml.publicProcurement.pl,
+      "en/uslugi/doradztwo-zamowienia-publiczne/index.html": serviceProductHtml.publicProcurement.en,
+      "aplikacje-operacyjne/index.html": applicationPageFixture("pl"),
+      "en/aplikacje-operacyjne/index.html": applicationPageFixture("en"),
+      "lotnictwo/index.html": aviationProductHtml.pl,
+      "en/lotnictwo/index.html": aviationProductHtml.en,
+      "case-studies/index.html": projectProductHtml.pl,
+      "en/case-studies/index.html": projectProductHtml.en,
+      "wystapienia/index.html": speakingProductHtml.pl,
+      "en/wystapienia/index.html": speakingProductHtml.en,
+      "assets/img/portfolio/akrobacja.webp": "fixture-webp",
+      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      ...speakingProductAssets,
+      ...extraFiles
+    }
+  });
+}
+
+async function verifyFixtureCss(css) {
+  const root = await fixture({ css });
+  return runVerification({ root, scope: "foundation" });
+}
+
+const applicationsPair = plan2RoutePairs.find((pair) => pair[4] === "applications");
+const genericParserPair = plan2RoutePairs.find((pair) => pair[4] === "speaking");
+const aviationPair = plan2RoutePairs.find((pair) => pair[4] === "aviation");
+const knowledgePair = plan2RoutePairs.find((pair) => pair[4] === "knowledge");
+const servicePairs = plan2RoutePairs.filter((pair) => pair[4] === "services");
+const serviceFactIdFixture = new Set([
+  "career.pzu.organization", "career.pzu.title", "career.pzu.responsibility",
+  "career.pwc.organization", "career.pwc.title", "career.pwc.responsibility",
+  "project.orlen.role", "project.orlen.platform_scope", "project.orlen.connect_scope",
+  "hero.implementations", "project.kghm.role", "project.kghm.scope", "project.kghm.integration",
+  "project.zabka.role", "project.zabka.implementation", "project.zabka.proof",
+  "project.lot.implementation", "project.motor_oil.implementation",
+  "career.pkp_plk.organization", "career.pkp_plk.dates", "career.pkp_plk.title", "career.pkp_plk.responsibility"
+]);
+const serviceSurfaceFixture = new Set(servicePairs.flatMap(([plFile, enFile]) => [plFile, enFile]));
+const projectsPair = plan2RoutePairs.find((pair) => pair[4] === "projects");
+const speakingPair = plan2RoutePairs.find((pair) => pair[4] === "speaking");
+const speakingSurfaceFixture = new Set(["wystapienia/index.html", "en/wystapienia/index.html"]);
+
+async function speakingPageMutation({ lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces, mutateProcurement = (html) => html } = {}) {
+  const factData = await readFacts();
+  const current = speakingProductHtml[lang];
+  const changed = mutate(current);
+  const files = pagePairFiles(speakingPair, {
+    pl: lang === "pl" ? changed : speakingProductHtml.pl,
+    en: lang === "en" ? changed : speakingProductHtml.en
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    facts: mutateFacts(structuredClone(factData.facts)),
+    public_claim_surfaces: mutateSurfaces(structuredClone(factData.public_claim_surfaces)),
+    extraFiles: {
+      ...speakingProductAssets,
+      "procurement-2026/index.html": mutateProcurement(procurementParentProductHtml),
+      "diagrams/infographic.html": "<!doctype html><title>Infographic</title>",
+      "diagrams/diagram1_universal.html": "<!doctype html><title>Process</title>",
+      "diagrams/diagram2_ariba.html": "<!doctype html><title>Ariba</title>",
+      "diagrams/diagram3_maturity.html": "<!doctype html><title>Maturity</title>"
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "speaking" });
+}
+
+async function projectPageMutation({ lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
+  const factData = await readFacts();
+  const current = projectProductHtml[lang];
+  const changed = mutate(current);
+  const files = pagePairFiles(projectsPair, {
+    pl: lang === "pl" ? changed : projectProductHtml.pl,
+    en: lang === "en" ? changed : projectProductHtml.en
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    facts: mutateFacts(structuredClone(factData.facts)),
+    public_claim_surfaces: mutateSurfaces(structuredClone(factData.public_claim_surfaces))
+  });
+  return runVerification({ root, scope: "pages", family: "projects" });
+}
+
+const projectFactIdFixture = new Set([
+  "client.orlen", "project.orlen.role", "project.orlen.platform_scope", "project.orlen.connect_scope",
+  "client.zabka_polska", "project.zabka.role", "project.zabka.implementation", "project.zabka.proof",
+  "client.kghm", "project.kghm.role", "project.kghm.scope", "project.kghm.integration",
+  "client.pll_lot", "project.lot.implementation", "client.motor_oil_hellas", "project.motor_oil.implementation",
+  "portfolio.czympojade_pl", "portfolio.czympojade_pl.type", "portfolio.przypominamy_com", "portfolio.przypominamy_com.type",
+  "portfolio.procuracost", "portfolio.procuracost.type", "portfolio.procurement_process_2026", "portfolio.procurement_process_2026.type",
+  "portfolio.silence_tax", "portfolio.silence_tax.type", "portfolio.akrobacja_com", "portfolio.akrobacja_com.current_status",
+  "portfolio.akrobacja_com.type", "portfolio.filmolot_pl", "portfolio.filmolot_pl.type"
+]);
+const projectSurfaceFixture = new Set(["case-studies/index.html", "en/case-studies/index.html"]);
+
+async function projectRegistryMutation({ mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
+  const factData = await readFacts();
+  const facts = mutateFacts(structuredClone(factData.facts));
+  const publicClaimSurfaces = mutateSurfaces(structuredClone(factData.public_claim_surfaces));
+  const roots = await Promise.all([
+    pageArchitectureFixture({ files: pagePairFiles(projectsPair, { pl: projectProductHtml.pl, en: projectProductHtml.en }), facts, public_claim_surfaces: publicClaimSurfaces }),
+    productionRegistryFixture({ facts, public_claim_surfaces: publicClaimSurfaces })
+  ]);
+  const [pages, factsResult, all] = await Promise.all([
+    runVerification({ root: roots[0], scope: "pages", family: "projects" }),
+    runVerification({ root: roots[1], scope: "facts" }),
+    runVerification({ root: roots[1], scope: "all" })
+  ]);
+  return { pages, facts: factsResult, all };
+}
+
+function assertProjectRegistryInventoryErrors(results, label) {
+  const missing = Object.entries(results).filter(([, result]) => !errorIds(result).includes("project-registry-inventory"));
+  assert.deepEqual(missing, [], `${label}: ${missing.map(([scope, result]) => `${scope}: ${result.errors.join("\n") || "no errors"}`).join("\n")}`);
+}
+
+function servicePairKey(pair) {
+  return pair[0].includes("transformacja-zakupow")
+    ? "transformation"
+    : pair[0].includes("wdrozenie-sap-ariba")
+      ? "ariba"
+      : "publicProcurement";
+}
+
+async function servicePageMutation({ key = "transformation", lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts } = {}) {
+  const factData = await readFacts();
+  const facts = mutateFacts(structuredClone(factData.facts));
+  const files = Object.assign({}, ...servicePairs.map((pair) => {
+    const pairKey = servicePairKey(pair);
+    const pairHtml = serviceProductHtml[pairKey];
+    return pagePairFiles(pair, {
+      pl: pairKey === key && lang === "pl" ? mutate(pairHtml.pl) : pairHtml.pl,
+      en: pairKey === key && lang === "en" ? mutate(pairHtml.en) : pairHtml.en
+    });
+  }));
+  const root = await pageArchitectureFixture({ files, facts, public_claim_surfaces: factData.public_claim_surfaces });
+  return runVerification({ root, scope: "pages", family: "services" });
+}
+
+async function serviceRegistryMutation({ mutateFacts = (facts) => facts, mutateSurfaces = (surfaces) => surfaces } = {}) {
+  const factData = await readFacts();
+  const facts = mutateFacts(structuredClone(factData.facts));
+  const publicClaimSurfaces = mutateSurfaces(structuredClone(factData.public_claim_surfaces));
+  const root = await productionRegistryFixture({
+    facts,
+    public_claim_surfaces: publicClaimSurfaces
+  });
+  const pagesAllRoot = await pageArchitectureFixture({ facts, public_claim_surfaces: publicClaimSurfaces });
+  const [pages, pagesAll, factsResult, all] = await Promise.all([
+    runVerification({ root, scope: "pages", family: "services" }),
+    runVerification({ root: pagesAllRoot, scope: "pages", family: "all" }),
+    runVerification({ root, scope: "facts" }),
+    runVerification({ root, scope: "all" })
+  ]);
+  return { pages, pagesAll, facts: factsResult, all };
+}
+
+function assertServiceRegistryInventoryErrors(results, label) {
+  const missing = Object.entries(results)
+    .filter(([, result]) => !errorIds(result).includes("service-registry-inventory"))
+    .map(([scope, result]) => `${scope}: ${result.errors.join("\n") || "no errors"}`);
+  assert.deepEqual(missing, [], `${label}, missing dedicated error in:\n${missing.join("\n")}`);
+}
+
+const knowledgeContract = Object.freeze({
+  pl: Object.freeze({
+    title: "Wiedza",
+    purpose: "Analizy, wystąpienia i narzędzia, które porządkują decyzje w procurement, technologii i operacjach.",
+    ctaHref: "/#contact",
+    ctaLabel: "Przejdź do kontaktu",
+    resources: Object.freeze([
+      Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Model interaktywny", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl" }),
+      Object.freeze({ href: "/wystapienia/", title: "Wystąpienia i wykłady", type: "Wystąpienia i wykłady", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl" })
+    ])
+  }),
+  en: Object.freeze({
+    title: "Insights",
+    purpose: "Analysis, talks and tools that clarify decisions in procurement, technology and operations.",
+    ctaHref: "/en/#contact",
+    ctaLabel: "Go to contact",
+    resources: Object.freeze([
+      Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement process reference model and scenario lenses", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en" }),
+      Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en" }),
+      Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Interactive model", language: "Polish", status: "Polish-language resource", inLanguage: "pl", lang: "pl" })
+    ])
+  })
+});
+
+function knowledgePageFixture(lang) {
+  const contract = knowledgeContract[lang];
+  const [,, plRoute, enRoute] = knowledgePair;
+  const url = `https://mamcarz.com${lang === "pl" ? plRoute : enRoute}`;
+  const resources = contract.resources.map((resource, index) => `
+    <article class="knowledge-entry" data-resource>
+      <span class="knowledge-entry__number" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+      <h2 class="knowledge-entry__title"><a href="${resource.href}"${resource.lang ? ` lang="${resource.lang}"` : ""}>${resource.title}</a></h2>
+      <dl class="knowledge-entry__meta">
+        <div><dt>${lang === "pl" ? "Typ" : "Type"}</dt><dd data-meta="type">${resource.type}</dd></div>
+        <div><dt>${lang === "pl" ? "Język" : "Language"}</dt><dd data-meta="language">${resource.language}</dd></div>
+        <div><dt>Status</dt><dd data-meta="status">${resource.status}</dd></div>
+      </dl>
+    </article>`).join("");
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: contract.title,
+    url,
+    description: contract.purpose,
+    inLanguage: lang
+  };
+  const copy = lang === "pl" ? {
+    description: contract.purpose, ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna",
+    home: "/", logoLabel: "Paweł Mamcarz, strona główna", advisory: "Doradztwo",
+    submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
+    primary: [["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]],
+    paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", breadcrumbLabel: "Okruszki", breadcrumbHome: "Strona główna",
+    kicker: "RESEARCH INDEX / 02 ENTRIES", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
+    contactLabel: "KONTAKT / NASTĘPNY KROK", contactCopy: "Jeśli materiał dotyczy decyzji, nad którą pracujesz, przejdź do rozmowy.",
+    footer: [["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"]]
+  } : {
+    description: contract.purpose, ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation",
+    home: "/en/", logoLabel: "Paweł Mamcarz, homepage", advisory: "Advisory",
+    submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
+    primary: [["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]],
+    paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", breadcrumbLabel: "Breadcrumb", breadcrumbHome: "Home",
+    kicker: "RESEARCH INDEX / 03 ENTRIES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
+    contactLabel: "CONTACT / NEXT STEP", contactCopy: "If a resource relates to a decision you are working on, continue to the conversation.",
+    footer: [["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"]]
+  };
+  const submenu = copy.submenu.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
+  const primary = copy.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
+  const footer = copy.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
+  return `<!DOCTYPE html><html lang="${lang}"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title>
+    <meta name="description" content="${copy.description}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow">
+    <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
+    <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
+    <script type="application/ld+json">${JSON.stringify(schema)}</script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+  </head><body class="knowledge-page" data-page="knowledge">
+    <a href="#main" class="skip-link">${copy.skip}</a>
+    <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
+    <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
+    <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
+    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+  </body></html>`;
+}
+
+async function knowledgePageMutation({ lang = "pl", mutate = (html) => html, mutatePair = null } = {}) {
+  const files = pagePairFiles(knowledgePair, {
+    pl: mutatePair ? mutatePair(knowledgePageFixture("pl"), "pl") : (lang === "pl" ? mutate(knowledgePageFixture("pl")) : knowledgePageFixture("pl")),
+    en: mutatePair ? mutatePair(knowledgePageFixture("en"), "en") : (lang === "en" ? mutate(knowledgePageFixture("en")) : knowledgePageFixture("en"))
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    extraFiles: {
+      "procurement-2026/index.html": "<!doctype html><html><body>PL resource</body></html>",
+      "infographic_procurement_2026_EN.html": "<!doctype html><html><body>EN resource</body></html>"
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "knowledge" });
+}
+
+const applicationContract = {
+  pl: {
+    title: "Aplikacje operacyjne",
+    lead: "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji.",
+    description: "Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.",
+    url: "https://mamcarz.com/aplikacje-operacyjne/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna"
+  },
+  en: {
+    title: "Operational applications",
+    lead: "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work.",
+    description: "Operational application design around process, data, user responsibility and day-to-day work.",
+    url: "https://mamcarz.com/en/aplikacje-operacyjne/",
+    contactHref: "mailto:pawel@mamcarz.com?subject=Operational%20application"
+  }
+};
+
+const applicationEvidenceFacts = [
+  ["portfolio.czympojade_pl", "czympojade.pl", "czympojade.pl"],
+  ["portfolio.czympojade_pl.type", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership."],
+  ["portfolio.przypominamy_com", "Przypominamy.com", "Przypominamy.com"],
+  ["portfolio.przypominamy_com.type", "Platforma powiadomień dla organizacji.", "Notification platform for organisations."],
+  ["portfolio.procuracost", "ProcuraCost", "ProcuraCost"],
+  ["portfolio.procuracost.type", "Kalkulator kosztów procedur zakupowych.", "Procurement procedure cost calculator."]
+];
+
+const applicationEvidenceRows = [
+  ["portfolio.czympojade_pl", "portfolio.czympojade_pl.type"],
+  ["portfolio.przypominamy_com", "portfolio.przypominamy_com.type"],
+  ["portfolio.procuracost", "portfolio.procuracost.type"]
+];
+
+function applicationFactRecords() {
+  const surfaces = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
+  return applicationEvidenceFacts.map(([id, displayPl, displayEn]) => fact({
+    id,
+    value: displayEn,
+    display_pl: displayPl,
+    display_en: displayEn,
+    surfaces,
+    status: "approved"
+  }));
+}
+
+function aviationFactRecords() {
+  const records = [
+    { id: "aviation.ppl_h", value: "PPL(H)", display_pl: "PPL(H)", display_en: "PPL(H)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.ppl_a", value: "PPL(A)", display_pl: "PPL(A)", display_en: "PPL(A)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.aerobatics_rating", value: "aerobatics rating", display_pl: "uprawnienia do akrobacji", display_en: "aerobatics rating", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.diverse_extreme_team", value: "Demonstration pilot, Diverse Extreme Team, 2013", display_pl: "pilot pokazowy Diverse Extreme Team (2013)", display_en: "display pilot for the Diverse Extreme Team (2013)", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.forum_photographer", value: "Press photographer for Forum Agency", display_pl: "fotograf prasowy agencji Forum", display_en: "Press photographer with Forum Agency", source_label: "Owner confirmed aviation fact, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "aviation.air_to_air_media", value: "air-to-air, video and drone production", display_pl: "sesje air-to-air, realizacje wideo i dronem", display_en: "air-to-air shoots, video and drone production", source_label: "Owner-confirmed pre-Task-5 aviation history, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] },
+    { id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", source_label: "Owner confirmed portfolio project, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] },
+    { id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] }
+  ];
+  return records.map((record) => fact({ status: "approved", source_url: null, ...record }));
+}
+
+function withApplicationFacts(records) {
+  const merged = [...(records ?? [fact()])];
+  for (const record of applicationFactRecords()) {
+    if (!merged.some((candidate) => candidate.id === record.id)) merged.push(record);
+  }
+  for (const record of aviationFactRecords()) {
+    if (!merged.some((candidate) => candidate.id === record.id)) merged.push(record);
+  }
+  return merged;
+}
+
+function applicationSchemaFixture(lang) {
+  const schema = applicationProductHtml[lang].match(/<script type="application\/ld\+json">[\s\S]*?<\/script>/)?.[0];
+  assert.ok(schema, `${lang} application product fixture must contain Service JSON-LD`);
+  return schema;
+}
+
+function applicationPageFixture(lang, { extraBody = "" } = {}) {
+  const contactOpening = '<section class="applications-section application-contact" data-section="contact">';
+  assert.ok(applicationProductHtml[lang].includes(contactOpening), `${lang} application product fixture must contain contact`);
+  return applicationProductHtml[lang].replace(contactOpening, `${extraBody}${contactOpening}`);
+}
+
+async function applicationPageMutation({ lang = "pl", mutate = (html) => html, facts, body = "", extraFiles = {} } = {}) {
+  const base = applicationPageFixture(lang, { extraBody: body });
+  const mutated = mutate(base);
+  assert.notEqual(mutated, "", "application page mutation must leave a fixture document");
+  const overrides = lang === "pl" ? { pl: mutated } : { en: mutated };
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair, overrides), facts: withApplicationFacts(facts), extraFiles });
+  return runVerification({ root, scope: "pages", family: "applications" });
+}
+
+async function genericPageMutation({ lang = "pl", mutate = (html) => html, facts, body = "", extraFiles = {} } = {}) {
+  const [, , plRoute, enRoute, family] = genericParserPair;
+  const base = pageShellFixture({ lang, plRoute, enRoute, title: lang === "pl" ? "Strona" : "Page", body });
+  const mutated = mutate(base);
+  assert.notEqual(mutated, "", "generic page mutation must leave a fixture document");
+  const overrides = lang === "pl" ? { pl: mutated } : { en: mutated };
+  const root = await pageArchitectureFixture({ files: pagePairFiles(genericParserPair, overrides), facts, extraFiles });
+  return runVerification({ root, scope: "pages", family });
+}
+
+async function genericAviationPageMutation({ lang = "pl" } = {}) {
+  const [, , plRoute, enRoute] = aviationPair;
+  const generic = pageShellFixture({ lang, plRoute, enRoute, title: lang === "pl" ? "Strona" : "Page" });
+  const overrides = lang === "pl" ? { pl: generic } : { en: generic };
+  const root = await pageArchitectureFixture({ files: pagePairFiles(aviationPair, overrides) });
+  return runVerification({ root, scope: "pages", family: "aviation" });
+}
+
+async function aviationPageMutation({ lang = "pl", mutate = (html) => html, mutateFacts = (facts) => facts } = {}) {
+  const [factData, pl, en] = await Promise.all([
+    readFacts(),
+    readFile(resolve("lotnictwo/index.html"), "utf8"),
+    readFile(resolve("en/lotnictwo/index.html"), "utf8")
+  ]);
+  const current = lang === "pl" ? pl : en;
+  const mutated = mutate(current);
+  const facts = mutateFacts(structuredClone(factData.facts));
+  assert.notEqual(mutated, "", "aviation mutation must leave a fixture document");
+  assert.ok(Array.isArray(facts), "aviation fact mutation must leave a fact array");
+  const files = pagePairFiles(aviationPair, {
+    pl: lang === "pl" ? mutated : pl,
+    en: lang === "en" ? mutated : en
+  });
+  const root = await pageArchitectureFixture({
+    files,
+    facts,
+    extraFiles: {
+      "assets/img/portfolio/akrobacja.webp": "fixture-webp",
+      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg"
+    }
+  });
+  return runVerification({ root, scope: "pages", family: "aviation" });
+}
+
+function movePageMetadata(html, destination) {
+  const metadata = [
+    '<link rel="canonical" href="https://mamcarz.com/aplikacje-operacyjne/">',
+    '<link rel="alternate" hreflang="pl" href="https://mamcarz.com/aplikacje-operacyjne/">',
+    '<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/aplikacje-operacyjne/">',
+    '<link rel="alternate" hreflang="x-default" href="https://mamcarz.com/aplikacje-operacyjne/">'
+  ];
+  let moved = html;
+  for (const tag of metadata) {
+    assert.ok(moved.includes(tag), `fixture must contain ${tag}`);
+    moved = moved.replace(tag, "");
+  }
+  return moved.replace('<body class="applications-page" data-page="applications">', `<body class="applications-page" data-page="applications">${destination(metadata.join(""))}`);
+}
+
+test("Plan 2 Task 1 uses the exact route manifest and accepts every declared family", async () => {
+  const root = await pageArchitectureFixture();
+  await Promise.all(plan2RoutePairs.flatMap((pair) => pair.slice(0, 2)).map((path) => rm(resolve(root, path), { force: true })));
+
+  for (const family of plan2Families) {
+    const result = await runVerification({ root, scope: "pages", family });
+    const expectedFiles = plan2RoutePairs
+      .filter((pair) => family === "all" || pair[4] === family)
+      .flatMap((pair) => pair.slice(0, 2));
+    const actualFiles = result.errors
+      .filter((entry) => entry.startsWith("ERROR route-file "))
+      .map((entry) => /^ERROR route-file ([^:]+):/.exec(entry)?.[1]);
+    assert.deepEqual(actualFiles, expectedFiles, `${family} must select only its exact manifest files`);
+    assert.ok(!errorIds(result).includes("cli-family"), `${family} must be accepted`);
+    assert.ok(!errorIds(result).includes("cli-scope"), "pages must be an accepted scope");
+  }
+});
+
+test("Plan 2 Task 1 rejects an unsupported family before page verification", async () => {
+  const root = await pageArchitectureFixture();
+  const result = await runVerification({ root, scope: "pages", family: "unsupported" });
+  assert.ok(errorIds(result).includes("cli-family"));
+  assert.equal(result.errors.some((entry) => entry.startsWith("ERROR route-file ")), false);
+});
+
+test("Plan 2 Task 1 CLI accepts artifacts explicitly and rejects an invalid family", async () => {
+  const accepted = await execFileAsync(process.execPath, [modulePath, "--scope=pages", "--family=artifacts"]);
+  assert.match(accepted.stdout, /OK site verification \(pages\)/);
+  await assert.rejects(
+    execFileAsync(process.execPath, [modulePath, "--scope=pages", "--family=invalid-family"]),
+    (cause) => cause.stderr.includes("ERROR cli-family scripts/verify-site.mjs: unsupported family invalid-family")
+  );
+});
+
+test("Plan 2 Task 1 package exposes the isolated pages command", async () => {
+  const packageData = JSON.parse(await readFile(resolve("package.json"), "utf8"));
+  assert.equal(packageData.scripts["verify:pages"], "node scripts/verify-site.mjs --scope=pages");
+});
+
+test("Plan 2 Task 1 aggregates both missing files in the selected family", async () => {
+  const root = await fixture();
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR route-file "));
+  assert.deepEqual(missing, [
+    "ERROR route-file aplikacje-operacyjne/index.html: required file is missing",
+    "ERROR route-file en/aplikacje-operacyjne/index.html: required file is missing"
+  ]);
+});
+
+test("Plan 2 Task 1 isolates another unfinished family but all still requires every target", async () => {
+  const files = pagePairFiles(applicationsPair);
+  const root = await pageArchitectureFixture({ files });
+  const selected = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(selected.errors, [], selected.errors.join("\n"));
+
+  const all = await runVerification({ root, scope: "pages", family: "all" });
+  assert.ok(all.errors.some((entry) => entry === "ERROR route-file lotnictwo/index.html: required file is missing"));
+  assert.ok(all.errors.some((entry) => entry === "ERROR route-file en/wiedza/index.html: required file is missing"));
+});
+
+test("Plan 2 Task 1 accepts a complete paired shell and exposes bounded future hooks", async () => {
+  const root = await pageArchitectureFixture();
+  const result = await runVerification({ root, scope: "pages", family: "all" });
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.deferred, []);
+});
+
+test("Plan 2 Task 1 counts only active h1 and main elements", async () => {
+  const mutations = [
+    ["hidden h1 decoy", "page-h1", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" hidden>Aplikacje operacyjne</h1><template><h1>Aplikacje operacyjne</h1></template>')],
+    ["duplicate visible h1", "page-h1", (html) => html.replace("</header>", "<h1>Drugi nagłówek</h1></header>")],
+    ["hidden main decoy", "page-main", (html) => html.replace('<main id="main"', '<main hidden id="main"')],
+    ["duplicate visible main", "page-main", (html) => html.replace('<footer class="site-footer">', '<main id="duplicate"><p>Duplicate</p></main><footer class="site-footer">')]
+  ];
+  for (const [label, expectedId, mutate] of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), label);
+  }
+});
+
+test("Plan 2 Task 1 requires exact canonical, real hreflang and paired language switch", async () => {
+  const [, , plRoute, enRoute] = applicationsPair;
+  const correctCanonical = `https://mamcarz.com${plRoute}`;
+  const correctEnglish = `https://mamcarz.com${enRoute}`;
+  const mutations = [
+    ["canonical hidden decoy", "page-canonical", (html) => html
+      .replace(`href="${correctCanonical}"`, 'href="https://mamcarz.com/wrong/"')
+      .replace("</head>", `<link rel="canonical" href="${correctCanonical}" hidden></head>`)],
+    ["hreflang template decoy", "page-hreflang", (html) => html
+      .replace(`hreflang="en" href="${correctEnglish}"`, 'hreflang="en" href="https://mamcarz.com/en/wrong/"')
+      .replace("</head>", `<template><link rel="alternate" hreflang="en" href="${correctEnglish}"></template></head>`)],
+    ["wrong paired language switch", "page-language", (html) => html
+      .replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, '<a href="/en/" class="nav-lang">EN</a>')
+      .replace("</nav>", `<a href="${enRoute}" class="nav-lang" hidden>EN</a></nav>`)]
+  ];
+  for (const [label, expectedId, mutate] of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), label);
+  }
+});
+
+test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside site-nav", async () => {
+  const mutations = [
+    ["stylesheet template decoy", "page-stylesheet", (html) => html.replace(
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></template>'
+    )],
+    ["stylesheet hidden decoy", "page-stylesheet", (html) => html.replace(
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" hidden>'
+    )],
+    ["script noscript decoy", "page-script", (html) => html.replace(
+      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
+      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><noscript><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></noscript>'
+    )],
+    ["script template decoy", "page-script", (html) => html.replace(
+      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
+      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><template><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></template>'
+    )],
+    ["script hidden decoy", "page-script", (html) => html.replace(
+      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
+      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><script src="/assets/js/main.js?v=20260825-flightplan-3" defer hidden></script>'
+    )],
+    ["route outside navigation", "page-navigation", (html) => html
+      .replace('<a href="/lotnictwo/">Lotnictwo</a>', '<a href="/usunieta-trasa/">Lotnictwo</a>')
+      .replace("</main>", '<a href="/lotnictwo/">Lotnictwo decoy</a></main>')]
+  ];
+  for (const [label, expectedId, mutate] of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), label);
+  }
+});
+
+test("Plan 2 Task 1 tokenizes approved data-fact-ids on HTML whitespace", async () => {
+  const result = await genericPageMutation({
+    body: '<article data-fact-ids="brand.promise\n\taviation.ppl_h">Evidence</article>'
+  });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 rejects unknown and comma-joined data-fact-ids", async () => {
+  for (const value of ["claim.unknown", "brand.promise,aviation.ppl_h"]) {
+    const result = await applicationPageMutation({ body: `<article data-fact-ids="${value}">Evidence</article>` });
+    assert.ok(errorIds(result).includes("page-fact-unknown"), value);
+  }
+});
+
+test("Plan 2 Task 1 rejects review and retired data-fact-ids", async () => {
+  const nonApproved = [
+    fact({ id: "claim.review", value: "review", display_pl: "review", display_en: "review", status: "review" }),
+    fact({ id: "claim.retired", value: "retired", display_pl: "retired", display_en: "retired", status: "retired" })
+  ];
+  for (const record of nonApproved) {
+    const result = await applicationPageMutation({
+      facts: [fact(), ...nonApproved],
+      body: `<article data-fact-ids="${record.id}">Evidence</article>`
+    });
+    assert.ok(result.errors.some((entry) => entry.startsWith(`ERROR page-fact-status aplikacje-operacyjne/index.html: ${record.id} has status ${record.status}`)));
+  }
+});
+
+test("Plan 2 Task 1 resolves href, src and srcset after query and fragment stripping", async () => {
+  const body = `
+    <a href="/?from=applications#top">Home</a>
+    <a href="/downloads/?mode=full#section">Download hub</a>
+    <a href="/assets/docs/probe.pdf?download=1#page-2">PDF</a>
+    <img src="/assets/img/probe.webp?v=1#hero" srcset="/assets/img/probe-480.webp?v=1 480w, /assets/img/probe-960.webp#wide 960w" alt="">`;
+  const result = await genericPageMutation({
+    body,
+    extraFiles: {
+      "downloads/index.html": "download fixture",
+      "assets/docs/probe.pdf": "pdf fixture",
+      "assets/img/probe.webp": "image fixture",
+      "assets/img/probe-480.webp": "image fixture",
+      "assets/img/probe-960.webp": "image fixture"
+    }
+  });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 aggregates missing href, src and every srcset target", async () => {
+  const body = `
+    <a href="/missing-page/?mode=full#section">Missing page</a>
+    <img src="/assets/img/missing.png?v=1#hero" srcset="/assets/img/missing-480.webp 480w, /assets/img/missing-960.webp#wide 960w" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  assert.equal(missing.length, 4, missing.join("\n"));
+  for (const target of ["missing-page/index.html", "assets/img/missing.png", "assets/img/missing-480.webp", "assets/img/missing-960.webp"]) {
+    assert.ok(missing.some((entry) => entry.includes(target)), target);
+  }
+});
+
+test("Plan 2 Task 1 ignores fragments, mail, external URLs, protocol-relative URLs and the Worker", async () => {
+  const body = `
+    <a href="#main">Fragment</a>
+    <a href="mailto:pawel@mamcarz.com">Mail</a>
+    <a href="https://example.com/missing">External</a>
+    <a href="//cdn.example.com/missing.png">CDN</a>
+    <a href="https://mamcarz-chat-api.pawel-767.workers.dev">Worker</a>
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="">`;
+  const result = await genericPageMutation({ body });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 never defers assets or non-manifest local routes", async () => {
+  const body = '<a href="/lotnictwo/">Deferred route</a><a href="/unplanned/">Missing local page</a><img src="/assets/img/missing.webp" alt="">';
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  assert.equal(missing.length, 2, missing.join("\n"));
+  assert.ok(missing.some((entry) => entry.includes("unplanned/index.html")));
+  assert.ok(missing.some((entry) => entry.includes("assets/img/missing.webp")));
+  assert.equal(missing.some((entry) => entry.includes("lotnictwo/index.html")), false);
+});
+
+test("Plan 2 Task 1 fix round 1 rejects repeated, empty and complete malformed family CLI values", async () => {
+  const cases = [
+    ["repeated valid and invalid", ["--scope=pages", "--family=artifacts", "--family=invalid-family"]],
+    ["repeated valid", ["--scope=pages", "--family=artifacts", "--family=artifacts"]],
+    ["complete value after first equals", ["--scope=pages", "--family=artifacts=invalid-family"]],
+    ["missing equals", ["--scope=pages", "--family"]],
+    ["empty value", ["--scope=pages", "--family="]]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, args]) => {
+    try {
+      const result = await execFileAsync(process.execPath, [modulePath, ...args]);
+      return { label, rejected: false, stdout: result.stdout, stderr: result.stderr };
+    } catch (cause) {
+      return { label, rejected: true, stdout: cause.stdout, stderr: cause.stderr };
+    }
+  }));
+  for (const outcome of outcomes) {
+    assert.equal(outcome.rejected, true, `${outcome.label} must exit nonzero`);
+    assert.equal(outcome.stdout, "", `${outcome.label} must not print a success`);
+    const errorLines = outcome.stderr.trim().split("\n").filter((line) => line.startsWith("ERROR "));
+    assert.equal(errorLines.length, 1, `${outcome.label} must stop before page verification`);
+    assert.match(errorLines[0], /^ERROR cli-family scripts\/verify-site\.mjs:/, outcome.label);
+  }
+
+  const root = await pageArchitectureFixture();
+  for (const family of ["", "artifacts=invalid-family"]) {
+    const result = await runVerification({ root, scope: "pages", family });
+    assert.ok(errorIds(result).includes("cli-family"), `direct API must reject ${JSON.stringify(family)}`);
+    assert.equal(result.errors.length, 1, "invalid direct API family must skip pages");
+    assert.deepEqual(result.deferred, [], "invalid direct API family must not run future hooks");
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 requires metadata in exactly one active head", async () => {
+  const mutations = [
+    ["body metadata", ["page-canonical", "page-hreflang"], (html) => movePageMetadata(html, (metadata) => metadata)],
+    ["template metadata", ["page-canonical", "page-hreflang"], (html) => movePageMetadata(html, (metadata) => `<template>${metadata}</template>`)],
+    ["noscript metadata", ["page-canonical", "page-hreflang"], (html) => movePageMetadata(html, (metadata) => `<noscript>${metadata}</noscript>`)],
+    ["duplicate head", ["page-head"], (html) => html.replace("</head>", "</head><head></head>")],
+    ["malformed head", ["page-html-syntax"], (html) => html.replace("</head>", "</hed>")]
+  ];
+  const outcomes = await Promise.all(mutations.map(async ([label, expectedIds, mutate]) => ({
+    label,
+    expectedIds,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, expectedIds, result } of outcomes) {
+    for (const expectedId of expectedIds) assert.ok(errorIds(result).includes(expectedId), `${label}: ${expectedId}`);
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 requires the exact visible paired-language label", async () => {
+  const [, , plRoute, enRoute] = applicationsPair;
+  const cases = [
+    ["wrong PL-page label", "pl", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">FR</a>`), true],
+    ["wrong EN-page label", "en", (html) => html.replace(`<a href="${plRoute}" class="nav-lang">PL</a>`, `<a href="${plRoute}" class="nav-lang">EN</a>`), true],
+    ["hidden label plus unrelated body decoy", "pl", (html) => html
+      .replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang"><span hidden>EN</span></a>`)
+      .replace("</main>", "<span>EN</span></main>"), true],
+    ["visible inline label", "pl", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang"><span>E</span><span>N</span></a>`), false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, lang, mutate, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ lang, mutate })
+  })));
+  for (const { label, shouldFail, result } of outcomes) {
+    assert.equal(errorIds(result).includes("page-language"), shouldFail, label);
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 treats inline CSS and closed details as statically hidden", async () => {
+  const cases = [
+    ["display none", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display:none">Aplikacje operacyjne</h1>'), true],
+    ["mixed-case important display none", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="  DiSpLaY :  NoNe !IMPORTANT  ">Aplikacje operacyjne</h1>'), true],
+    ["mixed-case visibility hidden", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style=" VISIBILITY : Hidden ">Aplikacje operacyjne</h1>'), true],
+    ["hidden ancestor", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<div hidden><h1 class="page-title">Aplikacje operacyjne</h1></div>'), true],
+    ["aria-hidden ancestor", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<div aria-hidden="true"><h1 class="page-title">Aplikacje operacyjne</h1></div>'), true],
+    ["closed details", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<details><h1 class="page-title">Aplikacje operacyjne</h1></details>'), true],
+    ["open details", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<details open><h1 class="page-title">Aplikacje operacyjne</h1></details>'), false],
+    ["benign inline style", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="color: red">Aplikacje operacyjne</h1>'), false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, shouldFail, result } of outcomes) {
+    assert.equal(errorIds(result).includes("page-h1"), shouldFail, label);
+  }
+});
+
+test("Plan 2 Task 1 fix round 1 normalizes browser whitespace and HTML entities in local URLs", async () => {
+  const body = `
+    <a href=" \t/missing-leading/ \n">Leading whitespace</a>
+    <a href="&#47;missing-decimal/">Decimal slash</a>
+    <a href="&#x2f;missing-hex/">Hex slash</a>
+    <a href="&sol;missing-named/">Named slash</a>
+    <img src=" \n&#x2f;assets/img/missing-src.webp\t " alt="">
+    <img srcset="&sol;assets/img/missing-srcset.webp&Tab;1x, &#47;assets/img/missing-srcset-2.webp 2x" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  for (const target of [
+    "missing-leading/index.html",
+    "missing-decimal/index.html",
+    "missing-hex/index.html",
+    "missing-named/index.html",
+    "assets/img/missing-src.webp",
+    "assets/img/missing-srcset.webp",
+    "assets/img/missing-srcset-2.webp"
+  ]) {
+    assert.ok(missing.some((entry) => entry.includes(target)), target);
+  }
+  assert.equal(missing.length, 7, missing.join("\n"));
+});
+
+test("Plan 2 Task 1 fix round 1 preserves internal URL whitespace and ignores normalized non-local schemes", async () => {
+  const body = `
+    <a href=" /space target/ ">Internal whitespace</a>
+    <a href=" \t#main \n">Fragment</a>
+    <a href=" mailto:pawel@mamcarz.com ">Mail</a>
+    <a href=" https://example.com/missing ">External</a>
+    <a href=" &sol;&sol;cdn.example.com/missing.png ">Protocol-relative</a>`;
+  const result = await genericPageMutation({
+    body,
+    extraFiles: { "space target/index.html": "internal-space fixture" }
+  });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 1 fix round 1 reports another-family manifest targets that are not files", async () => {
+  const files = pagePairFiles(applicationsPair);
+  const root = await pageArchitectureFixture({ files });
+  await mkdir(resolve(root, "lotnictwo/index.html"), { recursive: true });
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.ok(result.errors.some((entry) => entry.startsWith("ERROR local-target aplikacje-operacyjne/index.html:")
+    && entry.includes("lotnictwo/index.html (NOT_FILE)")), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 1 fix round 1 rejects duplicate fact tokens while accepting a unique list", async () => {
+  const [duplicate, unique] = await Promise.all([
+    genericPageMutation({ body: '<article data-fact-ids="brand.promise\n\tbrand.promise">Duplicate</article>' }),
+    genericPageMutation({ body: '<article data-fact-ids="brand.promise\n\taviation.ppl_h">Unique</article>' })
+  ]);
+  assert.ok(errorIds(duplicate).includes("page-fact-ids"));
+  assert.equal(errorIds(unique).includes("page-fact-ids"), false);
+  assert.deepEqual(unique.errors, []);
+});
+
+test("Plan 2 Task 1 fix round 2 rejects nested, misordered and duplicate document roots", async () => {
+  const extractBlock = (html, opening, closing) => {
+    const start = html.indexOf(opening);
+    const end = html.indexOf(closing, start) + closing.length;
+    assert.ok(start >= 0 && end >= closing.length, `${opening} fixture block must exist`);
+    return { block: html.slice(start, end), start, end };
+  };
+  const moveHeadIntoBody = (html) => {
+    const head = extractBlock(html, "<head>", "</head>");
+    const withoutHead = html.slice(0, head.start) + html.slice(head.end);
+    return withoutHead.replace('<body class="applications-page" data-page="applications">', `<body class="applications-page" data-page="applications">${head.block}`);
+  };
+  const putBodyBeforeHead = (html) => {
+    const head = extractBlock(html, "<head>", "</head>");
+    const body = extractBlock(html, '<body class="applications-page" data-page="applications">', "</body>");
+    assert.ok(head.end <= body.start, "fixture head must precede body");
+    return html.slice(0, head.start) + body.block + head.block + html.slice(body.end);
+  };
+  const cases = [
+    ["head nested in body", moveHeadIntoBody],
+    ["body before head", putBodyBeforeHead],
+    ["duplicate head", (html) => html.replace("</head>", "</head><head></head>")],
+    ["duplicate body", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body></body><body class="applications-page" data-page="applications">')],
+    ["duplicate html root", (html) => html.replace("</html>", "</html><html></html>")],
+    ["body nested below div", (html) => html
+      .replace('<body class="applications-page" data-page="applications">', '<div><body class="applications-page" data-page="applications">')
+      .replace("</body></html>", "</body></div></html>")],
+    ["missing body element", (html) => html.replace('<body class="applications-page" data-page="applications">', "").replace("</body>", "")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-document"), label);
+  }
+  const valid = await applicationPageMutation();
+  assert.deepEqual(valid.errors, []);
+});
+
+test("Plan 2 Task 1 fix round 2 decodes and comment-normalizes hidden inline styles", async () => {
+  const cases = [
+    ["comment before colon", 'style="display/**/:none"', true],
+    ["comment after colon", 'style="display:/**/none"', true],
+    ["mixed-case comment and whitespace", 'style=" DiSpLaY /**/ : NoNe !IMPORTANT "', true],
+    ["visibility comment", 'style="VISIBILITY/**/: hidden"', true],
+    ["decimal colon", 'style="display&#58;none"', true],
+    ["hex colon", 'style="visibility&#x3A;hidden"', true],
+    ["named colon", 'style="display&colon;none"', true],
+    ["entity-encoded comment", 'style="display&sol;**&sol;&colon;none"', true],
+    ["unterminated comment", 'style="display/*:none"', true],
+    ["benign comment", 'style="color: red /**/"', false],
+    ["quoted comment markers", 'style="font-family: \'/*\'; color: red"', false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', `<h1 class="page-title" ${style}>Aplikacje operacyjne</h1>`) })
+  })));
+  for (const { label, shouldFail, result } of outcomes) {
+    assert.equal(errorIds(result).includes("page-h1"), shouldFail, label);
+  }
+});
+
+test("Plan 2 Task 1 fix round 2 decodes the complete srcset before candidate splitting", async () => {
+  const body = `
+    <img srcset="/assets/css/style.css 1x&#44; /missing-decimal-comma.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&#x2c; &#x2f;missing-hex-comma.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&comma; &sol;missing-named-comma.webp&Tab;2x" alt="">
+    <img src="/assets/css/style.css?first=1&amp;second=2" alt="">
+    <img srcset="&amp;sol;not-root-after-one-decode.webp 1x, &sol;&sol;cdn.example.com/external.webp 2x" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  for (const target of [
+    "missing-decimal-comma.webp",
+    "missing-hex-comma.webp",
+    "missing-named-comma.webp"
+  ]) {
+    assert.ok(missing.some((entry) => entry.includes(target)), target);
+  }
+  assert.equal(missing.length, 3, missing.join("\n"));
+});
+
+test("Plan 2 Task 1 fix round 3 parses complete srcset URLs without comma false positives", async () => {
+  const body = `
+    <img srcset="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ 1x" alt="">
+    <img srcset="https://cdn.example.com/a,/missing-external.webp 1x" alt="">
+    <img srcset="//cdn.example.com/a,/missing-protocol-relative.webp 1x" alt="">
+    <img srcset="/assets/img/image,wide.webp 2x" alt="">
+    <img srcset="/assets/img/ordinary-a.jpg 1x, /missing-ordinary-b.jpg 2x" alt="">
+    <img srcset="/assets/img/no-descriptor-a.jpg, /missing-no-descriptor-b.jpg" alt="">
+    <img srcset="/assets/img/multiple-descriptors.jpg 480w 320h, /missing-after-multiple.webp 2x" alt="">
+    <img srcset=",,, /missing-leading.webp 1x,, /missing-after-empty.webp 2x,," alt="">`;
+  const result = await applicationPageMutation({
+    body,
+    extraFiles: {
+      "assets/img/image,wide.webp": "comma-bearing local image fixture",
+      "assets/img/ordinary-a.jpg": "ordinary candidate fixture",
+      "assets/img/no-descriptor-a.jpg": "no-descriptor candidate fixture",
+      "assets/img/multiple-descriptors.jpg": "multiple-descriptor candidate fixture"
+    }
+  });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  const expectedTargets = [
+    "missing-ordinary-b.jpg",
+    "missing-no-descriptor-b.jpg",
+    "missing-after-multiple.webp",
+    "missing-leading.webp",
+    "missing-after-empty.webp"
+  ];
+  assert.equal(missing.length, expectedTargets.length, missing.join("\n"));
+  for (const target of expectedTargets) assert.ok(missing.some((entry) => entry.includes(target)), target);
+});
+
+test("Plan 2 Task 1 fix round 3 decodes browser numeric references and CSS escapes in hidden styles", async () => {
+  const cases = [
+    ["decimal colon without semicolon", 'style="display&#58none"', true],
+    ["hex colon without semicolon", 'style="visibility&#x3Ahidden"', true],
+    ["decimal colon with semicolon", 'style="display&#58;none"', true],
+    ["hex colon with semicolon", 'style="visibility&#x3A;hidden"', true],
+    ["escaped property", 'style="d\\69splay:none"', true],
+    ["escaped property with terminator", 'style="d\\69 splay:none"', true],
+    ["escaped value with terminator", 'style="display:n\\6f ne"', true],
+    ["mixed-case escaped property", 'style="D\\69SPLAY:NoNe !IMPORTANT"', true],
+    ["simple escaped property character", 'style="displa\\y:none"', true],
+    ["trailing escape", 'style="color:red\\"', true],
+    ["escape before newline", 'style="color:red\\\n"', true],
+    ["one-pass entity control", 'style="d&amp;#92;69splay:none"', false],
+    ["benign quoted backslash", 'style="font-family: \'C:\\Fonts\'; color:red"', false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', `<h1 class="page-title" ${style}>Aplikacje operacyjne</h1>`) })
+  })));
+  const mismatches = outcomes
+    .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `visibility mismatches: ${mismatches.join(", ")}`);
+});
+
+test("Plan 2 Task 1 fix round 4 honors exact-case named references in rendered text and inline styles", async () => {
+  const [, , , enRoute] = applicationsPair;
+  const cases = [
+    ["exact whitespace names in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&Tab;EN&NewLine;</a>`), "page-language", false],
+    ["invalid whitespace name case in rendered text", (html) => html.replace(`<a href="${enRoute}" class="nav-lang">EN</a>`, `<a href="${enRoute}" class="nav-lang">&TAB;EN&NEWLINE;</a>`), "page-language", true],
+    ["exact lowercase colon hides the heading", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&colon;none">Aplikacje operacyjne</h1>'), "page-h1", true],
+    ["invalid uppercase colon leaves the heading visible", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&COLON;none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["exact lowercase bsol exposes a CSS escape", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="d&bsol;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", true],
+    ["invalid uppercase bsol remains literal", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="d&BSOL;69splay:none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["numeric to named reference stays one pass", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&#38;colon;none">Aplikacje operacyjne</h1>'), "page-h1", false],
+    ["named to numeric reference stays one pass", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title" style="display&AMP;#58;none">Aplikacje operacyjne</h1>'), "page-h1", false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate, expectedId, shouldFail]) => ({
+    label,
+    expectedId,
+    shouldFail,
+    result: await applicationPageMutation({ mutate })
+  })));
+  const mismatches = outcomes
+    .filter(({ expectedId, shouldFail, result }) => errorIds(result).includes(expectedId) !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `named-reference mismatches: ${mismatches.join(", ")}`);
+});
+
+test("Plan 2 Task 1 fix round 4 honors exact-case and one-pass references in href and src", async () => {
+  const body = `
+    <a href="&Tab;&sol;missing-valid-tab/">Exact Tab and sol</a>
+    <a href="&NewLine;&sol;missing-valid-newline/">Exact NewLine and sol</a>
+    <a href="&TAB;&sol;not-local-invalid-tab/">Invalid uppercase Tab</a>
+    <a href="&newline;&sol;not-local-invalid-newline/">Invalid lowercase newline</a>
+    <a href="&#38;sol;not-local-numeric-one-pass/">Numeric to named one pass</a>
+    <a href="&AMP;sol;not-local-named-one-pass/">Uppercase AMP alias one pass</a>
+    <img src="&sol;assets/img/missing-valid-src.webp" alt="">
+    <img src="&SOL;assets/img/not-local-invalid-src.webp" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  const expectedTargets = [
+    "missing-valid-tab/index.html",
+    "missing-valid-newline/index.html",
+    "assets/img/missing-valid-src.webp"
+  ];
+  assert.equal(missing.length, expectedTargets.length, missing.join("\n"));
+  for (const target of expectedTargets) assert.ok(missing.some((entry) => entry.includes(target)), target);
+});
+
+test("Plan 2 Task 1 fix round 4 decodes only exact-case comma references in srcset", async () => {
+  const body = `
+    <img srcset="/assets/css/style.css 1x&comma; /missing-valid-comma.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&COMMA; /not-a-browser-candidate.webp 2x" alt="">
+    <img srcset="/assets/css/style.css 1x&#38;comma; /not-a-one-pass-candidate.webp 2x" alt="">`;
+  const result = await applicationPageMutation({ body });
+  const missing = result.errors.filter((entry) => entry.startsWith("ERROR local-target "));
+  assert.deepEqual(missing.map((entry) => /missing ([^ ]+)/.exec(entry)?.[1]), ["missing-valid-comma.webp"], missing.join("\n"));
+});
+
+test("Plan 2 Task 1 fix round 4 fails closed on unterminated CSS strings and preserves valid escapes", async () => {
+  const cases = [
+    ["unterminated quoted value with trailing escape", String.raw`style="font-family:'abc\"`, true],
+    ["unterminated quoted value", `style="font-family:'abc"`, true],
+    ["closed quoted value", `style="font-family:'abc'; color:red"`, false],
+    ["escaped quote", String.raw`style="font-family:'abc\'def'; color:red"`, false],
+    ["escaped backslash", String.raw`style="font-family:'abc\\'; color:red"`, false],
+    ["line continuation", `style="font-family:'abc\\\ndef'; color:red"`, false],
+    ["CRLF continuation", `style="font-family:'abc\\\r\ndef'; color:red"`, false],
+    ["quoted comments and declaration separators", `style="font-family:'abc;/*:*/def'; color:red"`, false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, style, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', `<h1 class="page-title" ${style}>Aplikacje operacyjne</h1>`) })
+  })));
+  const mismatches = outcomes
+    .filter(({ shouldFail, result }) => errorIds(result).includes("page-h1") !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `CSS string mismatches: ${mismatches.join(", ")}`);
+});
+
+test("Plan 2 Task 1 fix round 5 exposes only the first direct summary of closed details", async () => {
+  const [, , , enRoute] = applicationsPair;
+  const languageLink = `<a href="${enRoute}" class="nav-lang">EN</a>`;
+  const cases = [
+    ["direct text after an empty first summary", `<details><summary></summary>EN</details>`, true],
+    ["comment then direct text after an empty first summary", `<details><summary></summary><!-- hidden branch -->EN</details>`, true],
+    ["direct text without a summary", `<details>EN</details>`, true],
+    ["text in a second direct summary", `<details><summary></summary><summary>EN</summary></details>`, true],
+    ["direct text in a nested closed disclosure", `<details><summary><details><summary></summary>EN</details></summary></details>`, true],
+    ["first-summary text and descendants", `<details><summary><span>E</span>N</summary><span>FR</span></details>`, false],
+    ["direct text in an open disclosure", `<details open><summary></summary>EN</details>`, false],
+    ["nested first-summary descendants", `<details><summary><details><summary><span>EN</span></summary>FR</details></summary>PL</details>`, false],
+    ["first summary before a hidden second summary", `<details><summary>EN</summary><summary>FR</summary></details>`, false],
+    ["hidden first summary", `<details><summary hidden>EN</summary></details>`, true],
+    ["aria-hidden first summary", `<details><summary aria-hidden="true">EN</summary></details>`, true],
+    ["template content in the first summary", `<details><summary><template>EN</template></summary></details>`, true]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, content, shouldFail]) => ({
+    label,
+    shouldFail,
+    result: await applicationPageMutation({ mutate: (html) => html.replace(languageLink, `<a href="${enRoute}" class="nav-lang">${content}</a>`) })
+  })));
+  const mismatches = outcomes
+    .filter(({ shouldFail, result }) => errorIds(result).includes("page-language") !== shouldFail)
+    .map(({ label }) => label);
+  assert.deepEqual(mismatches, [], `closed-details text mismatches: ${mismatches.join(", ")}`);
+});
+
+test("Plan 2 Task 1 fix round 5 preserves inactive wrappers and disclosure-open route checks", async () => {
+  const [, , , enRoute] = applicationsPair;
+  const languageLink = `<a href="${enRoute}" class="nav-lang">EN</a>`;
+  const inactiveCases = [
+    ["hidden language link", `<a href="${enRoute}" class="nav-lang" hidden>EN</a>`],
+    ["aria-hidden language link", `<a href="${enRoute}" class="nav-lang" aria-hidden="true">EN</a>`],
+    ["language link inside template", `<template>${languageLink}</template>`],
+    ["language link inside noscript", `<noscript>${languageLink}</noscript>`]
+  ];
+  const outcomes = await Promise.all(inactiveCases.map(async ([label, replacement]) => ({
+    label,
+    result: await applicationPageMutation({ mutate: (html) => html.replace(languageLink, replacement) })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-language"), label);
+  }
+
+  const valid = await applicationPageMutation({
+    mutate: (html) => html.replace(languageLink, `<a href="${enRoute}" class="nav-lang"><details><summary>EN</summary></details></a>`)
+  });
+  assert.equal(errorIds(valid).includes("page-language"), false, valid.errors.join("\n"));
+  assert.equal(errorIds(valid).includes("page-navigation"), false, valid.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 requires the exact localized application identity and opening lead", async () => {
+  const cases = [
+    ["wrong Polish H1", "pl", "application-h1", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title">Aplikacje</h1>')],
+    ["wrong English H1", "en", "application-h1", (html) => html.replace('<h1 class="page-title">Operational applications</h1>', '<h1 class="page-title">Applications</h1>')],
+    ["changed Polish lead", "pl", "application-lead", (html) => html.replace(applicationContract.pl.lead, "Buduję aplikacje dla firm.")],
+    ["hidden English lead with a template decoy", "en", "application-lead", (html) => html.replace(
+      `<p class="page-lead">${applicationContract.en.lead}</p>`,
+      `<p class="page-lead" hidden>${applicationContract.en.lead}</p><template><p class="page-lead">${applicationContract.en.lead}</p></template>`
+    )],
+    ["wrong page identity", "pl", "application-data-page", (html) => html.replace('data-page="applications"', 'data-page="services"')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await applicationPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 requires exactly five direct visible section markers in order", async () => {
+  const problemPattern = /<section class="applications-section application-problem" data-section="problem">[\s\S]*?<\/section>/;
+  const deliveryPattern = /<section class="applications-section applications-section--band application-delivery" data-section="delivery">[\s\S]*?<\/section>/;
+  const cases = [
+    ["missing marker", (html) => html.replace('data-section="problem"', 'data-purpose="problem"')],
+    ["hidden marker", (html) => html.replace('<section class="applications-section application-problem" data-section="problem">', '<section class="applications-section application-problem" data-section="problem" hidden>')],
+    ["duplicate marker", (html) => html.replace('<section class="applications-section application-problem" data-section="problem">', '<section data-section="problem"></section><section class="applications-section application-problem" data-section="problem">')],
+    ["template decoy", (html) => html.replace(problemPattern, (block) => `<template>${block}</template>`)],
+    ["wrong order", (html) => {
+      const problem = html.match(problemPattern)?.[0];
+      const delivery = html.match(deliveryPattern)?.[0];
+      assert.ok(problem && delivery);
+      return html.replace(problem, "__PROBLEM__").replace(delivery, problem).replace("__PROBLEM__", delivery);
+    }]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-sections"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 requires the real four-step delivery sequence", async () => {
+  const mutations = [
+    (html) => html.replace('data-step="data-model"', 'data-step="workflow"'),
+    (html) => html.replace("<h3>Model danych</h3>", "<h3>Architektura</h3>"),
+    (html) => html.replace('class="route-sequence"', 'class="delivery-list"')
+  ];
+  for (const mutate of mutations) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-delivery"), result.errors.join("\n"));
+  }
+});
+
+test("Plan 2 Task 2 accepts only one direct purpose-only Service schema", async () => {
+  const validSchema = applicationSchemaFixture("pl");
+  const forbiddenFieldSchema = validSchema.replace('"provider": {', '"offers": {},\n  "provider": {');
+  const wrongTypeSchema = validSchema.replace('"@type": "Service"', '"@type": "Person"');
+  const cases = [
+    ["forbidden field", (html) => html.replace(validSchema, forbiddenFieldSchema)],
+    ["wrong active type with hidden valid decoy", (html) => html.replace(validSchema, `${wrongTypeSchema}<template>${validSchema}</template>`)],
+    ["duplicate schema", (html) => html.replace(validSchema, `${validSchema}${validSchema}`)],
+    ["schema outside head", (html) => html.replace(validSchema, "").replace("</main>", `${validSchema}</main>`)]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-schema"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 binds every evidence row to approved paired surfaces and localized displays", async () => {
+  const missingIds = await applicationPageMutation({
+    mutate: (html) => html.replace(' data-fact-ids="portfolio.czympojade_pl portfolio.czympojade_pl.type"', "")
+  });
+  assert.ok(errorIds(missingIds).includes("application-evidence-ids"), missingIds.errors.join("\n"));
+
+  const missingPairedSurface = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    surfaces: ["aplikacje-operacyjne/index.html"]
+  });
+  const surfaceResult = await applicationPageMutation({ facts: [fact(), missingPairedSurface] });
+  assert.ok(errorIds(surfaceResult).includes("application-evidence-surface"), surfaceResult.errors.join("\n"));
+
+  const wrongDisplay = await applicationPageMutation({
+    mutate: (html) => html.replace(">czympojade.pl</h3>", ">Transport tool</h3>")
+  });
+  assert.ok(errorIds(wrongDisplay).includes("application-evidence-value"), wrongDisplay.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 requires identical ordered evidence IDs across PL and EN", async () => {
+  const result = await applicationPageMutation({
+    lang: "en",
+    mutate: (html) => html
+      .replace("portfolio.czympojade_pl portfolio.czympojade_pl.type", "__FIRST__")
+      .replace("portfolio.przypominamy_com portfolio.przypominamy_com.type", "portfolio.czympojade_pl portfolio.czympojade_pl.type")
+      .replace("__FIRST__", "portfolio.przypominamy_com portfolio.przypominamy_com.type")
+  });
+  assert.ok(errorIds(result).includes("application-evidence-parity"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 requires one localized primary mailto intent in contact", async () => {
+  for (const lang of ["pl", "en"]) {
+    const expected = applicationContract[lang].contactHref;
+    const result = await applicationPageMutation({
+      lang,
+      mutate: (html) => html
+        .replace(`href="${expected}"`, 'href="mailto:pawel@mamcarz.com?subject=General"')
+        .replace("</section>\n</main>", `<a href="${expected}" hidden>Decoy</a></section>\n</main>`)
+    });
+    assert.ok(errorIds(result).includes("application-contact"), `${lang}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 rejects generic software-house and AI-tell copy", async () => {
+  const cases = [
+    ["generic software house", "application-positioning", "Jesteśmy software house dla każdej branży."],
+    ["not just", "application-copy", "We build not just tools but seamless experiences."],
+    ["encoded em dash", "application-copy", "Proces &mdash; technologia."],
+    ["blocked client", "application-copy", "Polpharma"]
+  ];
+  for (const [label, expectedId, copy] of cases) {
+    const result = await applicationPageMutation({ body: `<p>${copy}</p>` });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 rejects visible review and retired fact meanings without annotations", async () => {
+  for (const status of ["review", "retired"]) {
+    const display = `${status} application claim`;
+    const unsafe = fact({
+      id: `application.${status}`,
+      value: display,
+      display_pl: display,
+      display_en: display,
+      surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"],
+      status
+    });
+    const result = await applicationPageMutation({ facts: [fact(), unsafe], body: `<p>${display}</p>` });
+    assert.ok(errorIds(result).includes("application-fact-status"), `${status}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner-approved literals", async () => {
+  const driftFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "registry-coordinated drift",
+    display_pl: "Transport Registry Drift",
+    display_en: "czympojade.pl",
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const cases = [
+    ["missing evidence row", {}, (html) => {
+      const row = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.czympojade_pl portfolio\.czympojade_pl\.type">[\s\S]*?<\/article>/)?.[0];
+      assert.ok(row);
+      return html.replace(row, "");
+    }],
+    ["duplicate evidence row", {}, (html) => {
+      const row = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.czympojade_pl portfolio\.czympojade_pl\.type">[\s\S]*?<\/article>/)?.[0];
+      assert.ok(row);
+      return html.replace(row, `${row}${row}`);
+    }],
+    ["reordered evidence rows", {}, (html) => {
+      const first = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.czympojade_pl portfolio\.czympojade_pl\.type">[\s\S]*?<\/article>/)?.[0];
+      const second = html.match(/<article class="evidence-row" data-fact-ids="portfolio\.przypominamy_com portfolio\.przypominamy_com\.type">[\s\S]*?<\/article>/)?.[0];
+      assert.ok(first && second);
+      return html.replace(`${first}\n        ${second}`, `${second}\n        ${first}`);
+    }],
+    ["reversed IDs within one row", {}, (html) => html.replace(
+      'data-fact-ids="portfolio.czympojade_pl portfolio.czympojade_pl.type"',
+      'data-fact-ids="portfolio.czympojade_pl.type portfolio.czympojade_pl"'
+    )],
+    ["appended evidence meaning", {}, (html) => html.replace(
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd>",
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania. Dodatkowy wynik.</dd>"
+    )],
+    ["appended evidence element", {}, (html) => html.replace(
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd>",
+      "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd><p>Dodatkowy element.</p>"
+    )],
+    ["registry-coordinated display drift", { facts: [fact(), driftFact] }, (html) => html.replace(
+      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      '<h3 class="evidence-row__title">Transport Registry Drift</h3>'
+    )]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, options, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ ...options, mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-evidence-contract"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts only its exact registered URL", async () => {
+  const linkTitle = (href) => `<h3 class="evidence-row__title"><a href="${href}">czympojade.pl</a></h3>`;
+  const unapproved = await applicationPageMutation({
+    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle("https://example.com/unapproved"))
+  });
+  assert.ok(errorIds(unapproved).includes("application-evidence-link"), unapproved.errors.join("\n"));
+
+  const approvedUrl = "https://example.com/approved-product";
+  const approvedFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    source_url: approvedUrl,
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const approved = await applicationPageMutation({
+    facts: [fact(), approvedFact],
+    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle(approvedUrl))
+  });
+  assert.deepEqual(approved.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 1 rejects unsupported claim categories and additions anywhere in main", async () => {
+  const cases = [
+    ["timing outside evidence", "<p>Uruchomienie w 14 dni.</p>", false],
+    ["price inside evidence", "<p>Cena od 10 000 PLN.</p>", true],
+    ["savings outside evidence", "<p>Oszczędności na poziomie 20%.</p>", false],
+    ["availability inside evidence", "<p>Dostępny od września.</p>", true],
+    ["team size outside evidence", "<p>Zespół 5 osób.</p>", false],
+    ["current status inside evidence", "<p>Produkt działa obecnie.</p>", true],
+    ["ownership outside evidence", "<p>To moje produkty.</p>", false],
+    ["neutral appended element", "<aside>Additional page-owned statement.</aside>", false]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, addition, insideEvidence]) => ({
+    label,
+    result: await applicationPageMutation({
+      mutate: insideEvidence
+        ? (html) => html.replace("</article>", `${addition}</article>`)
+        : (html) => html.replace('<section class="applications-section application-contact" data-section="contact">', `${addition}<section class="applications-section application-contact" data-section="contact">`)
+    })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-content"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 pins claim-safe body, footer and metadata content", async () => {
+  const cases = [
+    ["fabricated body copy", "application-shell-copy", (html) => html.replace('<footer class="site-footer">', '<p>Project price: 100 PLN.</p><footer class="site-footer">')],
+    ["fabricated footer copy", "application-shell-copy", (html) => html.replace("</footer>", "<p>Available now.</p></footer>")],
+    ["changed search description", "application-metadata", (html) => html.replace(
+      '<meta name="description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
+      '<meta name="description" content="Applications delivered in two weeks.">'
+    )],
+    ["extra offer metadata", "application-metadata", (html) => html.replace("</head>", '<meta name="price" content="10000 PLN">\n</head>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, expectedId, mutate]) => ({
+    label,
+    expectedId,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, expectedId, result } of outcomes) {
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 counts primary CTAs and route sequences across the whole page", async () => {
+  const cases = [
+    ["second primary CTA after main", "application-contact", (html) => html.replace('<footer class="site-footer">', '<a class="btn-primary" href="mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna">Duplicate</a><footer class="site-footer">')],
+    ["second route sequence after main", "application-delivery", (html) => html.replace('<footer class="site-footer">', '<div class="route-sequence"></div><footer class="site-footer">')]
+  ];
+  for (const [label, expectedId, mutate] of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 rejects inline style on every active page element", async () => {
+  const cases = [
+    (html) => html.replace('<footer class="site-footer">', '<footer class="site-footer" style="color: inherit">'),
+    (html) => html.replace('<article class="evidence-row"', '<article style="display: block" class="evidence-row"')
+  ];
+  for (const mutate of cases) {
+    const result = await applicationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("application-inline-style"), result.errors.join("\n"));
+  }
+});
+
+test("Plan 2 Task 2 fix round 1 requires the exact scoped mobile and desktop application navigation", async () => {
+  const toggle = /<button class="nav-toggle" id="nav-toggle"[\s\S]*?<\/button>/;
+  const cases = [
+    ["missing toggle", (html) => html.replace(toggle, "")],
+    ["toggle rescued from body", (html) => {
+      const control = html.match(toggle)?.[0];
+      assert.ok(control);
+      return html.replace(control, "").replace("</nav>", `</nav>${control}`);
+    }],
+    ["toggle rescued from template", (html) => {
+      const control = html.match(toggle)?.[0];
+      assert.ok(control);
+      return html.replace(control, "").replace("</nav>", `</nav><template>${control}</template>`);
+    }],
+    ["wrong toggle target", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="other-menu"')],
+    ["wrong overlay ID", (html) => html.replace('class="nav-overlay" id="nav-overlay"', 'class="nav-overlay" id="other-overlay"')],
+    ["wrong menu ID", (html) => html.replace('class="nav-list" id="nav-menu"', 'class="nav-list" id="other-menu"')],
+    ["non-details Advisory", (html) => html.replace('<details class="nav-group">', '<div class="nav-group">').replace("</details>", "</div>")],
+    ["wrong Advisory label", (html) => html.replace("<summary>Doradztwo</summary>", "<summary>Usługi</summary>")],
+    ["missing active state", (html) => html.replace('href="/aplikacje-operacyjne/" aria-current="page"', 'href="/aplikacje-operacyjne/"')],
+    ["wrong active label with hidden valid decoy", (html) => html
+      .replace('href="/aplikacje-operacyjne/" aria-current="page">Aplikacje</a>', 'href="/aplikacje-operacyjne/">Apps</a>')
+      .replace("</nav>", '</nav><a hidden href="/aplikacje-operacyjne/" aria-current="page">Aplikacje</a>')],
+    ["wrong localized primary label", (html) => html.replace('href="/lotnictwo/">Lotnictwo</a>', 'href="/lotnictwo/">Aviation</a>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({ label, result: await applicationPageMutation({ mutate }) })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-navigation"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 2 validates every document anchor against the immutable manifest", async () => {
+  const appendToDomain = (html, anchor) => html.replace("<dt>Procurement</dt>", `<dt>Procurement${anchor}</dt>`);
+  const cases = [
+    ["external wrapper", (html) => html.replace("<dt>Procurement</dt>", '<dt><a href="https://example.com/unapproved">Procurement</a></dt>')],
+    ["empty external anchor", (html) => appendToDomain(html, '<a href="https://example.com/unapproved"></a>')],
+    ["hidden external anchor", (html) => appendToDomain(html, '<a hidden href="https://example.com/unapproved"></a>')],
+    ["template external anchor", (html) => html.replace("</footer>", '<template><a href="https://example.com/unapproved">Hidden claim</a></template></footer>')],
+    ["noscript external anchor", (html) => html.replace("</footer>", '<noscript><a href="https://example.com/unapproved">Fallback claim</a></noscript></footer>')],
+    ["unlisted local anchor", (html) => appendToDomain(html, '<a href="/"></a>')],
+    ["unlisted mailto anchor", (html) => appendToDomain(html, '<a href="mailto:pawel@mamcarz.com"></a>')],
+    ["unlisted hash anchor", (html) => appendToDomain(html, '<a href="#main"></a>')],
+    ["javascript anchor", (html) => appendToDomain(html, '<a href="javascript:alert(1)"></a>')],
+    ["data anchor", (html) => appendToDomain(html, '<a href="data:text/html,claim"></a>')],
+    ["protocol-relative anchor", (html) => appendToDomain(html, '<a href="//example.com/unapproved"></a>')],
+    ["changed footer signature target", (html) => html.replace('class="footer-sign" href="/"', 'class="footer-sign" href="https://example.com/unapproved"')],
+    ["required footer signature moved into template", (html) => {
+      const sign = html.match(/<a class="footer-sign"[\s\S]*?<\/a>/)?.[0];
+      assert.ok(sign);
+      return html.replace(sign, `<template>${sign}</template>`);
+    }]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({ label, result: await applicationPageMutation({ mutate }) })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-anchor-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
+  const valid = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(valid.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 2 pins every semantic and accessibility attribute in the full document", async () => {
+  const cases = [
+    ["fabricated aria-label", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-label="Guaranteed savings">Procurement</dt>')],
+    ["fabricated aria-description", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-description="Available in 14 days">Procurement</dt>')],
+    ["fabricated aria-roledescription", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-roledescription="Owned product">Procurement</dt>')],
+    ["fabricated aria-valuetext", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-valuetext="20 percent savings">Procurement</dt>')],
+    ["fabricated title", (html) => html.replace("<dt>Procurement</dt>", '<dt title="Available now">Procurement</dt>')],
+    ["fabricated placeholder", (html) => html.replace("<dt>Procurement</dt>", '<dt placeholder="Team of five">Procurement</dt>')],
+    ["fabricated alt", (html) => html.replace('alt="" width="160"', 'alt="Guaranteed savings" width="160"')],
+    ["hidden descendant semantic value", (html) => html.replace("<dt>Procurement</dt>", '<dt>Procurement<span hidden aria-label="Available now"></span></dt>')],
+    ["template descendant semantic value", (html) => html.replace("<dt>Procurement</dt>", '<dt>Procurement<template><span title="Guaranteed savings"></span></template></dt>')],
+    ["noscript descendant semantic value", (html) => html.replace("<dt>Procurement</dt>", '<dt>Procurement<noscript><span aria-description="Team of five"></span></noscript></dt>')],
+    ["empty semantic attribute", (html) => html.replace("<dt>Procurement</dt>", '<dt title="">Procurement</dt>')],
+    ["encoded fabricated value", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-label="Savings &#50;0 percent">Procurement</dt>')],
+    ["case-drifted valid value", (html) => html.replace('aria-label="Nawigacja główna"', 'aria-label="nawigacja główna"')],
+    ["default-ignorable reference drift", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="nav-\u200bmenu"')],
+    ["uncontracted reference and hidden claim", (html) => html.replace("<dt>Procurement</dt>", '<dt aria-labelledby="claim">Procurement<template><span id="claim">Available now</span></template></dt>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({ label, result: await applicationPageMutation({ mutate }) })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-semantic-attributes"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const unicodeEquivalent = await applicationPageMutation({
+    mutate: (html) => html.replace('aria-label="Nawigacja główna"', 'aria-label="  Nawigacja   gło&#769;wna  "')
+  });
+  assert.deepEqual(unicodeEquivalent.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 2 preserves case across exact page literals while allowing semantic whitespace", async () => {
+  const cases = [
+    ["brand case drift", "application-evidence-contract", (html) => html.replaceAll("ProcuraCost", "procuracost")],
+    ["domain case drift", "application-content", (html) => html.replace("<dt>Procurement</dt>", "<dt>procurement</dt>")],
+    ["H1 case drift", "application-h1", (html) => html.replace('<h1 class="page-title">Aplikacje operacyjne</h1>', '<h1 class="page-title">aplikacje operacyjne</h1>')],
+    ["navigation case drift", "application-navigation", (html) => html.replace('href="/lotnictwo/">Lotnictwo</a>', 'href="/lotnictwo/">lotnictwo</a>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, expectedId, mutate]) => ({
+    label,
+    expectedId,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, expectedId, result } of outcomes) {
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const semanticWhitespace = await applicationPageMutation({
+    mutate: (html) => html
+      .replace("<dt>Procurement</dt>", "<dt> \n Procurement\u200b \t</dt>")
+      .replace(
+        'content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy."',
+        'content="  Projektowanie  aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.  "'
+      )
+  });
+  assert.deepEqual(semanticWhitespace.errors, []);
+
+  const coordinatedFact = fact({
+    id: "portfolio.procuracost",
+    value: "procuracost",
+    display_pl: "procuracost",
+    display_en: "procuracost",
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const coordinatedDrift = await applicationPageMutation({
+    facts: [fact(), coordinatedFact],
+    mutate: (html) => html.replaceAll("ProcuraCost", "procuracost")
+  });
+  assert.ok(errorIds(coordinatedDrift).includes("application-evidence-contract"), coordinatedDrift.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 fix round 3 exempts anchors only inside the three owned evidence rows", async () => {
+  const fakeRow = (href) => `<article class="evidence-row"><a href="${href}">Laundered link</a></article>`;
+  const cases = [
+    ["footer template external anchor", (html) => html.replace("</footer>", `<template>${fakeRow("https://example.com/unapproved")}</template></footer>`)],
+    ["footer noscript javascript anchor", (html) => html.replace("</footer>", `<noscript>${fakeRow("javascript:alert(1)")}</noscript></footer>`)],
+    ["footer hidden-container data anchor", (html) => html.replace("</footer>", `<div hidden>${fakeRow("data:text/html,claim")}</div></footer>`)]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-anchor-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const approvedUrl = "https://example.com/approved-product";
+  const approvedFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    source_url: approvedUrl,
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const approved = await applicationPageMutation({
+    facts: [fact(), approvedFact],
+    mutate: (html) => html.replace(
+      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
+    )
+  });
+  assert.deepEqual(approved.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 3 rejects every unmanifested behavior and visibility attribute", async () => {
+  const ledger = '<dl class="applications-ledger" aria-label="Obszary metody">';
+  const cases = [
+    ["role", (html) => html.replace("<dt>Procurement</dt>", '<dt role="button">Procurement</dt>')],
+    ["hidden owned copy", (html) => html.replace(ledger, '<dl class="applications-ledger" aria-label="Obszary metody" hidden>')],
+    ["inert owned copy", (html) => html.replace(ledger, '<dl class="applications-ledger" aria-label="Obszary metody" inert>')],
+    ["tabindex", (html) => html.replace("<dt>Procurement</dt>", '<dt tabindex="0">Procurement</dt>')],
+    ["contenteditable", (html) => html.replace("<dt>Procurement</dt>", '<dt contenteditable="true">Procurement</dt>')],
+    ["draggable", (html) => html.replace("<dt>Procurement</dt>", '<dt draggable="true">Procurement</dt>')],
+    ["spellcheck", (html) => html.replace("<dt>Procurement</dt>", '<dt spellcheck="false">Procurement</dt>')],
+    ["autofocus", (html) => html.replace("<dt>Procurement</dt>", '<dt autofocus>Procurement</dt>')],
+    ["disabled", (html) => html.replace("<dt>Procurement</dt>", '<dt disabled>Procurement</dt>')],
+    ["open disclosure", (html) => html.replace('<details class="nav-group">', '<details class="nav-group" open>')],
+    ["popover", (html) => html.replace("<dt>Procurement</dt>", '<dt popover="manual">Procurement</dt>')],
+    ["event handler", (html) => html.replace("<dt>Procurement</dt>", '<dt onclick="claim()">Procurement</dt>')],
+    ["inactive inline style", (html) => html.replace("</footer>", '<template><span style="display:none">Claim</span></template></footer>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-semantic-attributes"), `${label}: ${result.errors.join("\n")}`);
+  }
+  for (const label of ["hidden owned copy", "inert owned copy"]) {
+    const result = outcomes.find((outcome) => outcome.label === label)?.result;
+    assert.ok(errorIds(result).includes("application-content"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const unchanged = await applicationPageMutation();
+  assert.deepEqual(unchanged.errors, [], "the exact body, closed Advisory details and toggle attributes remain valid");
+});
+
+test("Plan 2 Task 2 fix round 3 compares state and reference tokens as undecoded raw values", async () => {
+  const cases = [
+    ["aria-hidden", (html) => html.replace('aria-hidden="true"', 'aria-hidden="tr&#117;e"')],
+    ["aria-current", (html) => html.replace('aria-current="page"', 'aria-current="pa&#103;e"')],
+    ["aria-expanded", (html) => html.replace('aria-expanded="false"', 'aria-expanded="fal&#115;e"')],
+    ["aria-controls", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="nav&#45;menu"')],
+    ["id", (html) => html.replace('class="nav-list" id="nav-menu"', 'class="nav-list" id="nav&#45;menu"')],
+    ["role token", (html) => html.replace("<dt>Procurement</dt>", '<dt role="but&#116;on">Procurement</dt>')],
+    ["tabindex token", (html) => html.replace('id="main" tabindex="-1"', 'id="main" tabindex="-&#49;"')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-semantic-attributes"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const unchanged = await applicationPageMutation();
+  assert.deepEqual(unchanged.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 3 compares metadata tokens raw and human fields semantically", async () => {
+  const cases = [
+    ["og:url default-ignorable entity", (html) => html.replace(
+      'content="https://mamcarz.com/aplikacje-operacyjne/"',
+      'content="https://mamcarz.com/aplikacje-operacyjne/&#8203;"'
+    )],
+    ["og:type entity", (html) => html.replace('content="website"', 'content="web&#115;ite"')],
+    ["robots whitespace", (html) => html.replace('content="index, follow"', 'content="index,  follow"')],
+    ["viewport entity", (html) => html.replace('content="width=device-width, initial-scale=1.0"', 'content="width=device-width, initial-scale=&#49;.0"')],
+    ["og:image default-ignorable entity", (html) => html.replace(
+      'content="https://mamcarz.com/assets/img/og.jpg"',
+      'content="https://mamcarz.com/assets/img/og.jpg&#8203;"'
+    )],
+    ["og:locale entity", (html) => html.replace('content="pl_PL"', 'content="pl&#95;PL"')],
+    ["hreflang whitespace", (html) => html.replace('rel="alternate" hreflang="pl"', 'rel="alternate" hreflang=" pl "')],
+    ["alternate rel whitespace", (html) => html.replace('rel="alternate" hreflang="pl"', 'rel="alternate " hreflang="pl"')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-metadata"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const humanEquivalent = await applicationPageMutation({
+    mutate: (html) => html
+      .replace(
+        "<title>Aplikacje operacyjne · Paweł Mamcarz</title>",
+        "<title>  Aplikacje   operacyjne · Pawe&#322; Mamcarz  </title>"
+      )
+      .replace(
+        'content="Aplikacje operacyjne · Paweł Mamcarz"',
+        'content="  Aplikacje   operacyjne · Pawe&#322; Mamcarz  "'
+      )
+      .replace(
+        '<meta name="description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
+        '<meta name="description" content="  Projektowanie  aplikacji operacyjnych wokół procesu, danych, odpowiedzialnos&#769;ci użytkowników i codziennej pracy.  ">'
+      )
+      .replace(
+        '<meta property="og:description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
+        '<meta property="og:description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialnos&#769;ci użytkowników i codziennej pracy.">'
+      )
+  });
+  assert.deepEqual(humanEquivalent.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 4 rejects every unapproved attribute on active and inactive elements", async () => {
+  const cases = [
+    ["root language", (html) => html.replace('<html lang="pl">', '<html lang="fr">')],
+    ["duplicate root language", (html) => html.replace('<html lang="pl">', '<html lang="pl" LANG="fr">')],
+    ["root direction", (html) => html.replace('<html lang="pl">', '<html lang="pl" dir="rtl">')],
+    ["input mode on content", (html) => html.replace("<dt>Procurement</dt>", '<dt inputmode="numeric">Procurement</dt>')],
+    ["arbitrary global data attribute", (html) => html.replace("<dt>Procurement</dt>", '<dt data-claim="unapproved">Procurement</dt>')],
+    ["attribute inside template", (html) => html.replace("</footer>", '<template><span lang="fr"></span></template></footer>')],
+    ["attribute inside noscript", (html) => html.replace("</footer>", '<noscript><span dir="rtl"></span></noscript></footer>')],
+    ["attribute inside hidden subtree", (html) => html.replace("</footer>", '<div hidden><span inputmode="numeric"></span></div></footer>')],
+    ["attribute inside inert subtree", (html) => html.replace("</footer>", '<div inert><span data-claim="unapproved"></span></div></footer>')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const approvedUrl = "https://example.com/approved-product";
+  const approvedFact = fact({
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    source_url: approvedUrl,
+    surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
+  });
+  const duplicateEvidenceHref = await applicationPageMutation({
+    facts: [fact(), approvedFact],
+    mutate: (html) => html.replace(
+      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      `<h3 class="evidence-row__title"><a href="${approvedUrl}" href="https://example.com/unapproved">czympojade.pl</a></h3>`
+    )
+  });
+  assert.ok(
+    errorIds(duplicateEvidenceHref).includes("application-document-manifest"),
+    `duplicate approved evidence href: ${duplicateEvidenceHref.errors.join("\n")}`
+  );
+});
+
+test("Plan 2 Task 2 fix round 4 rejects every extra document element including forms", async () => {
+  const cases = [
+    ["external form", '<form action="https://example.com/collect" method="post"></form>'],
+    ["form controls", '<form><input name="claim" value="100"><button type="submit">Send</button></form>'],
+    ["benign extra element", "<aside></aside>"],
+    ["inactive extra element", "<template><div></div></template>"],
+    ["nested inactive extra element", "<noscript><template><span></span></template></noscript>"]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, addition]) => ({
+    label,
+    result: await applicationPageMutation({
+      mutate: (html) => html.replace("</footer>", `${addition}</footer>`)
+    })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 4 rejects every unapproved executable style and resource element", async () => {
+  const cases = [
+    ["inline style", "<style>.claim{display:block}</style>"],
+    ["inline script", "<script>globalThis.claim=true</script>"],
+    ["external iframe", '<iframe src="https://example.com/embed"></iframe>'],
+    ["external image", '<img src="https://example.com/claim.png" alt="">'],
+    ["object", '<object data="https://example.com/claim"></object>'],
+    ["embed", '<embed src="https://example.com/claim">'],
+    ["picture source", '<picture><source srcset="https://example.com/claim.webp"><img src="https://example.com/claim.png" alt=""></picture>'],
+    ["video", '<video src="https://example.com/claim.mp4"></video>'],
+    ["audio", '<audio src="https://example.com/claim.mp3"></audio>'],
+    ["inactive script", "<template><script>globalThis.claim=true</script></template>"],
+    ["inactive style", "<noscript><style>.claim{display:block}</style></noscript>"]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, addition]) => ({
+    label,
+    result: await applicationPageMutation({
+      mutate: (html) => html.replace("</footer>", `${addition}</footer>`)
+    })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-manifest"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 4 owns every document root and metadata element without inactive decoys", async () => {
+  const moveTitleToBody = (html) => {
+    const title = html.match(/<title>[\s\S]*?<\/title>/)?.[0];
+    assert.ok(title);
+    return html.replace(title, "").replace('<body class="applications-page" data-page="applications">', `<body class="applications-page" data-page="applications">${title}`);
+  };
+  const cases = [
+    ["template meta claim", (html) => html.replace("</footer>", '<template><meta name="price" content="100 PLN"></template></footer>')],
+    ["template canonical competitor", (html) => html.replace("</footer>", '<template><link rel="canonical" href="https://example.com/claim"></template></footer>')],
+    ["direct base", (html) => html.replace("</head>", '<base href="https://example.com/"></head>')],
+    ["template base", (html) => html.replace("</footer>", '<template><base href="https://example.com/"></template></footer>')],
+    ["duplicate title", (html) => html.replace("</title>", "</title><title>Competing title</title>")],
+    ["title moved to body", moveTitleToBody],
+    ["duplicate head", (html) => html.replace("</head>", "</head><head></head>")],
+    ["duplicate body", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body></body><body class="applications-page" data-page="applications">')],
+    ["duplicate html", (html) => html.replace("</html>", "</html><html></html>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    const ids = errorIds(result);
+    assert.ok(ids.includes("application-document-manifest"), `${label} document: ${result.errors.join("\n")}`);
+    assert.ok(ids.includes("application-metadata"), `${label} metadata: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 5 owns the one legal HTML5 doctype and raw document boundaries", async () => {
+  const cases = [
+    ["missing doctype", (html) => html.replace("<!DOCTYPE html>\n", "")],
+    ["duplicate doctype", (html) => html.replace("<!DOCTYPE html>", "<!DOCTYPE html><!DOCTYPE html>")],
+    ["doctype after html", (html) => html.replace("<!DOCTYPE html>\n", "").replace("</html>", "</html><!DOCTYPE html>")],
+    ["doctype inside body", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body class="applications-page" data-page="applications"><!DOCTYPE html>')],
+    ["legacy public doctype", (html) => html.replace("<!DOCTYPE html>", '<!DOCTYPE html PUBLIC "-//EXAMPLE//DTD claim//EN">')]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const harmlessFormatting = await applicationPageMutation({
+    mutate: (html) => `\n<!-- before doctype -->\n${html.replace("<!DOCTYPE html>", "<!doctype html>").replace("<html lang=\"pl\">", '<!-- before html --><html lang="pl"><!-- before head -->').replace("</html>", "</html><!-- after html -->\n")}`
+  });
+  assert.deepEqual(harmlessFormatting.errors, []);
+});
+
+test("Plan 2 Task 2 fix round 5 inventories every non-whitespace document text node", async () => {
+  const cases = [
+    ["before doctype", (html) => `Available now${html}`],
+    ["between doctype and html", (html) => html.replace("<!DOCTYPE html>", "<!DOCTYPE html>Available now")],
+    ["direct head text", (html) => html.replace("<head>", "<head>Available now")],
+    ["between head and body", (html) => html.replace("</head>\n<body", "</head>Available now\n<body")],
+    ["direct body text", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body class="applications-page" data-page="applications">Available now')],
+    ["between body and html", (html) => html.replace("</body>\n</html>", "</body>Available now\n</html>")],
+    ["after html", (html) => html.replace("</html>", "</html>Available now")],
+    ["template text", (html) => html.replace("</footer>", "<template><p>Available now</p></template></footer>")],
+    ["noscript text", (html) => html.replace("</footer>", "<noscript><p>Available now</p></noscript></footer>")],
+    ["hidden text", (html) => html.replace("</footer>", "<div hidden>Available now</div></footer>")],
+    ["inert text", (html) => html.replace("</footer>", "<div inert>Available now</div></footer>")],
+    ["owned main made hidden", (html) => html.replace('<main id="main" tabindex="-1">', '<main id="main" tabindex="-1" hidden>')],
+    ["owned body made inert", (html) => html.replace('<body class="applications-page" data-page="applications">', '<body class="applications-page" data-page="applications" inert>')],
+    ["external script body", (html) => html.replace(" defer></script>", ">Available now</script>")],
+    ["raw inline script", (html) => html.replace("</footer>", "<script>Available now</script></footer>")],
+    ["raw style", (html) => html.replace("</footer>", "<style>Available now</style></footer>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-document-text"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HTML element", async () => {
+  const cases = [
+    ["span", (html) => html.replace("<span></span>", "<span/>")],
+    ["div", (html) => html.replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay"/>')],
+    ["anchor", (html) => html.replace('<a href="#main" class="skip-link">Przejdź do treści</a>', '<a href="#main" class="skip-link"/>')],
+    ["paragraph", (html) => html.replace('<p class="section-label">01 / Problem</p>', '<p class="section-label"/>')],
+    ["details", (html) => html.replace('<details class="nav-group">', '<details class="nav-group"/>')],
+    ["summary", (html) => html.replace("<summary>Doradztwo</summary>", "<summary/>")],
+    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>', '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer/>')],
+    ["style", (html) => html.replace("</footer>", "<style/></style></footer>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-html-self-closing"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const voidSyntax = await applicationPageMutation({
+    mutate: (html) => html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8"/>')
+  });
+  assert.deepEqual(voidSyntax.errors, []);
+
+  const malformedCases = [
+    ["attributes on a closing tag", (html) => html.replace("<span></span>", "<span></span claim>")],
+    ["stray closing tag", (html) => html.replace("</footer>", "</claim></footer>")],
+    ["stray opening tag", (html) => html.replace("</footer>", "<span></footer>")],
+    ["closing tag for a void element", (html) => html.replace('<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async">', '<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></img>')],
+    ["mismatched nesting", (html) => html.replace("</footer>", "<div><span></div></span></footer>")],
+    ["slash before stray opening-tag content", (html) => html.replace("<span></span>", "<span / claim></span>")]
+  ];
+  const malformedOutcomes = await Promise.all(malformedCases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of malformedOutcomes) {
+    assert.ok(errorIds(result).includes("page-html-syntax"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 parser precondition rejects spaced closing-token boundaries", async () => {
+  const cases = [
+    ["space after slash", (html) => html.replace("<span></span>", "<span></ span>")],
+    ["space before slash", (html) => html.replace("<span></span>", "<span>< /span>")],
+    ["raw script space after slash", (html) => html.replace("</script>", "</ script>")],
+    ["raw style space after slash", (html) => html.replace("</footer>", "<style></ style></footer>")]
+  ];
+  const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
+    label,
+    result: await applicationPageMutation({ mutate })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("page-html-syntax"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const legalCaseAndWhitespace = await applicationPageMutation({
+    mutate: (html) => html.replace("</script>", "</SCRIPT >")
+  });
+  assert.deepEqual(legalCaseAndWhitespace.errors, []);
+});
+
+test("Plan 2 Task 3 requires the exact aviation core identity before product creation", async () => {
+  const result = await genericAviationPageMutation({ lang: "pl" });
+  assert.ok(errorIds(result).includes("aviation-h1"), result.errors.join("\n"));
+  assert.ok(errorIds(result).includes("aviation-lead"), result.errors.join("\n"));
+  assert.ok(errorIds(result).includes("aviation-sections"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 3 accepts the complete mirrored aviation contract", async () => {
+  const result = await aviationPageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 3 pins section order, fact order, status date, image and CTA", async () => {
+  const cases = [
+    ["section order", (html) => html.replace('data-section="operations"', 'data-section="media"')],
+    ["fact order", (html) => html.replace('data-fact-id="aviation.ppl_h"', 'data-fact-id="aviation.ppl_a"')],
+    ["status date", (html) => html.replaceAll("2026-08-26", "2026-08-25")],
+    ["image", (html) => html.replace("/assets/img/portfolio/akrobacja.webp", "/assets/img/portfolio/other.webp")],
+    ["CTA", (html) => html.replace("mailto:pawel@mamcarz.com?subject=Projekt%20lotniczy", "mailto:pawel@mamcarz.com")]
+  ];
+  const expected = ["aviation-sections", "aviation-facts", "aviation-status-date", "aviation-image", "aviation-contact"];
+  for (const [index, [label, mutate]] of cases.entries()) {
+    const result = await aviationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expected[index]), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 rejects retired, inferred and externally linked venture copy", async () => {
+  const additions = [
+    "Warsaw" + "FlightSafety",
+    "Instructor available",
+    '<a href="https://akrobacja.com">akrobacja.com</a>'
+  ];
+  for (const addition of additions) {
+    const result = await aviationPageMutation({ mutate: (html) => html.replace("</main>", `<p>${addition}</p></main>`) });
+    const ids = errorIds(result);
+    assert.ok(ids.includes("aviation-forbidden-copy") || ids.includes("aviation-external-link"), result.errors.join("\n"));
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 pins immutable aviation records and every factual text surface", async () => {
+  const unannotated = await aviationPageMutation({
+    mutate: (html) => html.replace("</main>", "<p>TVP, Samos, Chios and ATAM.</p></main>")
+  });
+  assert.ok(errorIds(unannotated).includes("aviation-text-contract"), unannotated.errors.join("\n"));
+
+  const coordinated = await aviationPageMutation({
+    mutate: (html) => html.replace("fotograf prasowy agencji Forum", "fotograf TVP na Samos, Chios i ATAM"),
+    mutateFacts: (facts) => facts.map((record) => record.id === "aviation.forum_photographer"
+      ? { ...record, value: "TVP photographer at Samos, Chios and ATAM", display_pl: "fotograf TVP na Samos, Chios i ATAM" }
+      : record)
+  });
+  assert.ok(errorIds(coordinated).includes("aviation-fact-contract"), coordinated.errors.join("\n"));
+
+  const immutableFields = [
+    ["value", "coordinated registry value"],
+    ["source_type", "internal_evidence"],
+    ["source_label", "Coordinated provenance drift"],
+    ["surfaces", ["lotnictwo/index.html", "en/lotnictwo/index.html"]],
+    ["kind", "constant"],
+    ["as_of", "2026-08-25"]
+  ];
+  for (const [field, value] of immutableFields) {
+    const result = await aviationPageMutation({
+      mutateFacts: (facts) => facts.map((record) => record.id === "portfolio.akrobacja_com.current_status"
+        ? { ...record, [field]: value }
+        : record)
+    });
+    assert.ok(errorIds(result).includes("aviation-fact-contract"), `${field}: ${result.errors.join("\n")}`);
+  }
+
+  for (const factId of aviationFactRecords().map((record) => record.id)) {
+    const result = await aviationPageMutation({
+      mutateFacts: (facts) => facts.map((record) => record.id === factId
+        ? { ...record, source_label: `Mutable source for ${factId}` }
+        : record)
+    });
+    assert.ok(errorIds(result).includes("aviation-fact-contract"), `${factId}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 canonicalizes retired and prohibited claims across every document surface", async () => {
+  const additions = [
+    ["encoded retired brand", "<p>Warsaw&#70;lightSafety</p>"],
+    ["inline split credential", "<p>Certified instruc<span>tor</span> services.</p>"],
+    ["default-ignorable inline split", "<p>Certified Instruc<span>\u200B</span>TOR services.</p>"],
+    ["mixed-case whitespace retired brand", "<p>WARSAW\n FLIGHT&nbsp; SAFETY</p>"],
+    ["encoded comment credential", "<!-- Certified instruc&#x74;or services -->"],
+    ["inactive split credential", "<template><p>Commercial pi<span>lot</span> services</p></template>"],
+    ["encoded attribute credential", "<p data-note=\"Certified instruc&#116;or services\">Neutral</p>"],
+    ["unsupported status claim", "<p>Current school with prices and availability</p>"],
+    ["unsupported operator leadership", "<p>ATO operator certificate and market leader</p>"]
+  ];
+  for (const [label, addition] of additions) {
+    const result = await aviationPageMutation({ mutate: (html) => html.replace("</main>", `${addition}</main>`) });
+    assert.ok(errorIds(result).includes("aviation-forbidden-copy"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 owns every aviation resource and style surface", async () => {
+  const mutations = [
+    ["external image", (html) => html.replace("</footer>", '<img src="https://example.com/claim.png" alt=""></footer>')],
+    ["extra local image", (html) => html.replace("</footer>", '<img src="/assets/img/portfolio/akrobacja.jpg" alt=""></footer>')],
+    ["extra picture source", (html) => html.replace("</picture>", '<source srcset="https://example.com/claim.webp"></picture>')],
+    ["inline style element", (html) => html.replace("</footer>", "<style>.claim{background:linear-gradient(red,blue);box-shadow:0 0 1rem red}</style></footer>")],
+    ["inline style attribute", (html) => html.replace('class="page-title"', 'class="page-title" style="background:linear-gradient(red, blue)"')],
+    ["extra executable script", (html) => html.replace("</body>", "<script>globalThis.claim=true</script></body>")],
+    ["external iframe", (html) => html.replace("</footer>", '<iframe src="https://example.com/claim"></iframe></footer>')]
+  ];
+  for (const [label, mutate] of mutations) {
+    const result = await aviationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("aviation-resource-census"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 owns localized navigation and disclosure semantics", async () => {
+  const mutations = [
+    ["removed current route", (html) => html.replace(' href="/lotnictwo/" aria-current="page"', ' href="/lotnictwo/"')],
+    ["expanded mobile menu", (html) => html.replace('aria-expanded="false"', 'aria-expanded="true"')],
+    ["wrong toggle control", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="other-menu"')],
+    ["open advisory disclosure", (html) => html.replace('<details class="nav-group">', '<details class="nav-group" open>')],
+    ["wrong localized label", (html) => html.replace('aria-label="Nawigacja główna"', 'aria-label="Navigation"')]
+  ];
+  for (const [label, mutate] of mutations) {
+    const result = await aviationPageMutation({ mutate });
+    assert.ok(errorIds(result).includes("aviation-shell"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 3 fix round 1 inventories global section and conversion cardinality", async () => {
+  const nestedSection = await aviationPageMutation({
+    mutate: (html) => html.replace(
+      '<div class="section-shell aviation-sector__grid">',
+      '<div class="section-shell aviation-sector__grid"><section data-section="operations"></section>'
+    )
+  });
+  assert.ok(errorIds(nestedSection).includes("aviation-sections"), nestedSection.errors.join("\n"));
+
+  const extraMailto = await aviationPageMutation({
+    mutate: (html) => html.replace("</main>", '<a href="mailto:other@example.com">Other contact</a></main>')
+  });
+  assert.ok(errorIds(extraMailto).includes("aviation-contact"), extraMailto.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 requires the exact Knowledge identity and purpose", async () => {
+  const result = await knowledgePageMutation({
+    mutate: (html) => html
+      .replace('<h1 class="page-title">Wiedza</h1>', '<h1 class="page-title">Biblioteka</h1>')
+      .replace(`<p class="page-lead">${knowledgeContract.pl.purpose}</p>`, '<p class="page-lead">Regularnie publikowane materiały dla liderów.</p>')
+  });
+  const ids = errorIds(result);
+  assert.ok(ids.includes("knowledge-h1"), result.errors.join("\n"));
+  assert.ok(ids.includes("knowledge-purpose"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 accepts the complete bilingual Knowledge contract", async () => {
+  const result = await knowledgePageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 4 pins the immutable ordered resource manifests", async () => {
+  const cases = [
+    ["wrong href", "pl", (html) => html.replace('href="/procurement-2026/"', 'href="/en/procurement-2026/"')],
+    ["wrong title", "pl", (html) => html.replace('>Procurement Process 2026</a>', '>Procurement Trends 2026</a>')],
+    ["wrong type", "pl", (html) => html.replace('Model interaktywny', 'Raport')],
+    ["wrong language", "en", (html) => html.replace('data-meta="language">Polish', 'data-meta="language">English')],
+    ["wrong status", "en", (html) => html.replace('Polish-language resource', 'On-site resource')],
+    ["hidden item", "en", (html) => html.replace('<article class="knowledge-entry" data-resource>', '<article class="knowledge-entry" data-resource hidden>')],
+    ["extra item", "pl", (html) => html.replace('</section>', '<article class="knowledge-entry" data-resource><a href="/">Extra</a></article></section>')]
+  ];
+  for (const [label, lang, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes("knowledge-resources"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 binds the Polish-only EN resource disclosure and raw lang attribute", async () => {
+  const cases = [
+    ["missing disclosure", (html) => html.replace('Polish-language resource', 'On-site resource')],
+    ["missing lang", (html) => html.replace(' href="/procurement-2026/" lang="pl"', ' href="/procurement-2026/"')],
+    ["wrong lang", (html) => html.replace('lang="pl">Procurement Process 2026', 'lang="en">Procurement Process 2026')],
+    ["entity-obfuscated lang", (html) => html.replace('lang="pl">Procurement Process 2026', 'lang="p&#108;">Procurement Process 2026')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-polish-resource"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 rejects invented routes, dates and external resource URLs on every document surface", async () => {
+  const cases = [
+    ["fake EN route in comment", "en", (html) => html.replace('</main>', '<!-- /en/procurement-2026/ --></main>')],
+    ["invented visible date", "pl", (html) => html.replace('</main>', '<time datetime="2026-08-26">26.08.2026</time></main>')],
+    ["invented schema date", "en", (html) => html.replace('"inLanguage":"en"}', '"inLanguage":"en","datePublished":"2026-08-26"}')],
+    ["external anchor", "pl", (html) => html.replace('</main>', '<a href="https://example.com/report">Report</a></main>')],
+    ["external schema URL", "en", (html) => html.replace('"url":"https://mamcarz.com/en/wiedza/"', '"url":"https://example.com/report"')]
+  ];
+  for (const [label, lang, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes("knowledge-boundary")
+      || errorIds(result).includes("knowledge-route-boundary")
+      || errorIds(result).includes("knowledge-date-boundary")
+      || errorIds(result).includes("knowledge-schema"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 requires one direct resources section and one exact internal CTA", async () => {
+  const cases = [
+    ["nested resources marker", (html) => html.replace('<section class="knowledge-index" data-section="resources">', '<section class="knowledge-index" data-section="resources"><div data-section="resources"></div>'), "knowledge-sections"],
+    ["duplicate CTA", (html) => html.replace('</aside>', '<a href="/#contact">Przejdź do kontaktu</a></aside>'), "knowledge-contact"],
+    ["external CTA", (html) => html.replace('href="/#contact"', 'href="mailto:pawel@mamcarz.com"'), "knowledge-contact"]
+  ];
+  for (const [label, mutate, expected] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 pins a bounded CollectionPage to the visible page identity", async () => {
+  const cases = [
+    ["wrong schema language", (html) => html.replace('"inLanguage":"pl"}', '"inLanguage":"en"}')],
+    ["extra schema key", (html) => html.replace('"@type":"CollectionPage"', '"@type":"CollectionPage","author":{"@type":"Person"}')],
+    ["missing language", (html) => html.replace(',"inLanguage":"pl"', '')],
+    ["coordinated page identity drift", (html) => html.replaceAll(knowledgeContract.pl.purpose, 'Materiały o decyzjach zakupowych.')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes("knowledge-schema"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 rejects coordinated PL and EN resource drift", async () => {
+  const result = await knowledgePageMutation({
+    mutatePair: (html) => html.replaceAll('Procurement Process 2026', 'Procurement Futures 2026')
+  });
+  assert.ok(errorIds(result).includes("knowledge-schema") || errorIds(result).includes("knowledge-resources"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 rejects shell, metadata and inactive-content laundering", async () => {
+  const cases = [
+    ["wrong current nav", "pl", (html) => html.replace(' href="/wiedza/" aria-current="page"', ' href="/wiedza/"')],
+    ["hidden resource decoy", "en", (html) => html.replace('</main>', '<template><article data-resource><a href="/">Extra</a></article></template></main>')],
+    ["metadata canonical drift", "pl", (html) => html.replace('https://mamcarz.com/wiedza/', 'https://mamcarz.com/wiedza-old/')]
+  ];
+  for (const [label, lang, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang, mutate });
+    const ids = errorIds(result);
+    assert.ok(ids.includes("knowledge-shell") || ids.includes("knowledge-boundary") || ids.includes("knowledge-resources") || ids.includes("page-canonical"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 fix round 1 canonicalizes every URL surface before rejecting the fake English Procurement route", async () => {
+  const cases = [
+    ["percent encoded path", (html) => html.replace("</main>", '<template><a href="/en/%70rocurement-2026/">Hidden</a></template></main>')],
+    ["repeated percent encoding", (html) => html.replace("</main>", '<a ping="/en/%2570rocurement-2026/" href="/">Ping</a></main>')],
+    ["valid encoded path with invalid query escape", (html) => html.replace("</main>", '<img src="/en/%70rocurement-2026/?bad=%ZZ" alt=""></main>')],
+    ["case variant", (html) => html.replace("</main>", '<form action="/EN/Procurement-2026/"></form></main>')],
+    ["ASCII URL whitespace", (html) => html.replace("</main>", '<object data="&#9;/en/procurement-2026/&#10;"></object></main>')],
+    ["default ignorable path character", (html) => html.replace("</main>", '<iframe src="/en/procure&#x200B;ment-2026/"></iframe></main>')],
+    ["entity encoded path", (html) => html.replace("</main>", '<a href="&#47;en&#47;procurement-2026&#47;">Hidden</a></main>')],
+    ["split adjacent comments", (html) => html.replace("</main>", "<!-- /en/procurement- --><!-- 2026/ --></main>")],
+    ["split adjacent tags", (html) => html.replace("</main>", "<template>/en/procurement-</template><template>2026/</template></main>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-route-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const ordinarySeparatedText = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</main>", "<p>/en/procurement-</p><p>2026/ is not a route token.</p></main>")
+  });
+  assert.equal(errorIds(ordinarySeparatedText).includes("knowledge-route-boundary"), false, ordinarySeparatedText.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 1 pins the full Knowledge structure, resources and main control census", async () => {
+  const cases = [
+    ["extra sibling resource link", (html) => html.replace("</section>", '<a href="/wystapienia/">Duplicate resource</a></section>')],
+    ["external image", (html) => html.replace("</main>", '<img src="https://example.com/report.png" alt="Report"></main>')],
+    ["external ping", (html) => html.replace('href="/#contact"', 'href="/#contact" ping="https://example.com/collect"')],
+    ["new browsing context", (html) => html.replace('href="/#contact"', 'href="/#contact" target="_blank"')],
+    ["generic card class", (html) => html.replace('class="knowledge-entry" data-resource', 'class="generic-card" data-resource')],
+    ["wrong localized dt", (html) => html.replace("<dt>Typ</dt>", "<dt>Data</dt>")],
+    ["second unstyled button", (html) => html.replace("</main>", "<button>More</button></main>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes("knowledge-document-contract"), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 4 fix round 1 rejects date metadata and date-like factual text on every source surface", async () => {
+  const cases = [
+    ["visible dotted date", (html) => html.replace("</main>", "<p>Opublikowano: 26.08.2026</p></main>")],
+    ["date meta", (html) => html.replace("</head>", '<meta name="date" content="2026-08-26"></head>')],
+    ["ISO text", (html) => html.replace("</main>", "<p>Published 2026-08-26</p></main>")],
+    ["entity date", (html) => html.replace("</main>", "<!-- Updated 26&#46;08&#46;2026 --></main>")],
+    ["inline split date", (html) => html.replace("</main>", "<p>Published <span>26.</span><span>08.</span><span>2026</span></p></main>")],
+    ["schema date", (html) => html.replace('"inLanguage":"en"}', '"inLanguage":"en","datePublished":"2026-08-26"}')],
+    ["date attribute", (html) => html.replace("</main>", '<p data-published="2026-08-26">Archive</p></main>')],
+    ["inactive date", (html) => html.replace("</main>", "<template><p>Updated 2026/08/26</p></template></main>")],
+    ["approved-looking title in an unowned location", (html) => html.replace("</main>", "<p>Procurement Process 2026</p></main>")],
+    ["approved-looking title in a comment", (html) => html.replace("</main>", "<!-- Procurement Process 2026 --></main>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-date-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const approvedYears = await knowledgePageMutation();
+  assert.equal(errorIds(approvedYears).includes("knowledge-date-boundary"), false, approvedYears.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 2 owns URL-valued metadata, itemid and statically inactive split routes", async () => {
+  const cases = [
+    ["OG URL content", (html) => html.replace('property="og:url" content="https://mamcarz.com/en/wiedza/"', 'property="og:url" content="/en/%70rocurement-2026/"')],
+    ["itemid", (html) => html.replace("</footer>", '<span itemid="/EN/Procurement-2026/"></span></footer>')],
+    ["hidden percent split spans", (html) => html.replace("</footer>", '<div hidden><span>/en/%</span><span>70rocurement-2026/</span></div></footer>')],
+    ["whitespace-separated comments", (html) => html.replace("</footer>", "<!-- /en/procurement- --> \n <!-- 2026/ --></footer>")],
+    ["hidden default-ignorable split", (html) => html.replace("</footer>", '<div aria-hidden="true"><span>/en/procure&#x200B;</span><span>ment-2026/</span></div></footer>')],
+    ["noscript entity split", (html) => html.replace("</footer>", "<noscript><span>&#47;en&#47;procurement-</span><span>2026&#47;</span></noscript></footer>")],
+    ["invalid percent fails closed", (html) => html.replace("</footer>", '<span itemid="/en/%ZZprocurement-2026/"></span></footer>')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-url-property-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const allowedPolishRoute = await knowledgePageMutation();
+  assert.equal(errorIds(allowedPolishRoute).includes("knowledge-url-property-boundary"), false, allowedPolishRoute.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actionable controls", async () => {
+  const cases = [
+    ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
+    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png"', 'img data="/assets/img/signature.png"')],
+    ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
+    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></body>')],
+    ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
+    ["unapproved event handler", (html) => html.replace('class="footer-sign"', 'class="footer-sign" onfocus="location.href=\'/#contact\'"')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ mutate });
+    assert.ok(errorIds(result).includes("knowledge-full-document-contract"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const coordinated = await knowledgePageMutation({
+    mutatePair: (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/coordinated.jpg"')
+  });
+  assert.ok(errorIds(coordinated).includes("knowledge-full-document-contract"), coordinated.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 2 rejects temporal metadata, clock literals and every unowned four-digit year", async () => {
+  const cases = [
+    ["time metadata", (html) => html.replace("</head>", '<meta name="time" content="12:30"></head>')],
+    ["published-at comment", (html) => html.replace("</footer>", "<!-- published-at --></footer>")],
+    ["future year", (html) => html.replace("</footer>", "<p>2100</p></footer>")],
+    ["past year", (html) => html.replace("</footer>", "<template>1899</template></footer>")],
+    ["clock text", (html) => html.replace("</footer>", "<p>12:30</p></footer>")],
+    ["inline split clock", (html) => html.replace("</footer>", "<p><span>12:</span><span>30</span></p></footer>")],
+    ["schema temporal key", (html) => html.replace('"inLanguage":"en"}', '"inLanguage":"en","temporalCoverage":"unknown"}')],
+    ["time attribute", (html) => html.replace("</footer>", '<span data-time="unknown"></span></footer>')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-temporal-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const owned2026 = await knowledgePageMutation();
+  assert.equal(errorIds(owned2026).includes("knowledge-temporal-boundary"), false, owned2026.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 3 extracts embedded fake-route candidates only from inactive source", async () => {
+  const cases = [
+    ["attribute-style comment", (html) => html.replace("</footer>", "<!-- forbidden href=/en/%70rocurement-%32%30%32%36/ --></footer>")],
+    ["JSON-like repeated encoding", (html) => html.replace("</footer>", '<!-- {"href":"/en/%2570rocurement-%2532%2530%2532%2536/"} --></footer>')],
+    ["single-quoted inactive value", (html) => html.replace("</footer>", "<template>target='/en/%70rocurement-%32%30%32%36/'</template></footer>")],
+    ["whitespace-split comments", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement- --> \n <!-- %32%30%32%36/ --></footer>")],
+    ["fully encoded route with malformed query", (html) => html.replace("</footer>", "<!-- href=%2Fen%2F%70rocurement-%32%30%32%36%2F?bad=%ZZ --></footer>")],
+    ["default-ignorable quoted route", (html) => html.replace("</footer>", '<div hidden>{"url":"/en/procure&#x200B;ment-%32%30%32%36/"}</div></footer>')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-inactive-url-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const ordinaryVisibleSplit = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</footer>", "<p>href=/en/%70rocurement-</p><p>%32%30%32%36/</p></footer>")
+  });
+  assert.equal(errorIds(ordinaryVisibleSplit).includes("knowledge-inactive-url-boundary"), false, ordinaryVisibleSplit.errors.join("\n"));
+
+  const allowedPolishRoute = await knowledgePageMutation();
+  assert.equal(errorIds(allowedPolishRoute).includes("knowledge-inactive-url-boundary"), false, allowedPolishRoute.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 3 tokenizes temporal identifiers in comments and inactive source", async () => {
+  const cases = [
+    ["uploadDate JSON comment", (html) => html.replace("</footer>", '<!-- {"uploadDate":"unknown"} --></footer>')],
+    ["startTime JSON comment", (html) => html.replace("</footer>", '<!-- {"startTime":"unknown"} --></footer>')],
+    ["dateCreated attribute style", (html) => html.replace("</footer>", "<!-- dateCreated=unknown --></footer>")],
+    ["mixed-case entity token", (html) => html.replace("</footer>", "<!-- UpLoAd&#68;ate=unknown --></footer>")],
+    ["default-ignorable token", (html) => html.replace("</footer>", "<!-- start&#x200B;Time=unknown --></footer>")],
+    ["inline hidden token split", (html) => html.replace("</footer>", "<div hidden><span>upload</span><span>Date</span></div></footer>")],
+    ["inactive sibling token split", (html) => html.replace("</footer>", "<span hidden>start</span> \n <span hidden>Time</span></footer>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-temporal-identifier-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const innocentProse = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</footer>", "<!-- The candidate starts a timely discussion. --></footer>")
+  });
+  assert.equal(errorIds(innocentProse).includes("knowledge-temporal-identifier-boundary"), false, innocentProse.errors.join("\n"));
+
+  const owned2026 = await knowledgePageMutation();
+  assert.equal(errorIds(owned2026).includes("knowledge-temporal-identifier-boundary"), false, owned2026.errors.join("\n"));
+});
+
+test("Plan 2 Task 4 fix round 4 preserves inactive URL boundaries across browser whitespace and prose punctuation", async () => {
+  const cases = [
+    ["line-feed split", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement-\n%32%30%32%36/ --></footer>")],
+    ["tab split", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement-\t%32%30%32%36/ --></footer>")],
+    ["carriage-return split", (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement-\r%32%30%32%36/ --></footer>")],
+    ["colon-closing prose", (html) => html.replace("</footer>", "<!-- See /en/%70rocurement-%32%30%32%36/: --></footer>")],
+    ["exclamation-closing prose", (html) => html.replace("</footer>", "<!-- See /en/%70rocurement-%32%30%32%36/! --></footer>")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await knowledgePageMutation({ lang: "en", mutate });
+    assert.ok(errorIds(result).includes("knowledge-inactive-url-boundary"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const ordinarySpace = await knowledgePageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("</footer>", "<!-- href=/en/%70rocurement- %32%30%32%36/ --></footer>")
+  });
+  assert.equal(errorIds(ordinarySpace).includes("knowledge-inactive-url-boundary"), false, ordinarySpace.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 fix round 5 independently inventories executable, style and resource surfaces", async () => {
+  const additions = [
+    ["external image", '<img src="https://example.com/claim.png" alt="">'],
+    ["data image", '<img src="data:image/svg+xml,claim" alt="">'],
+    ["iframe", '<iframe src="https://example.com/claim"></iframe>'],
+    ["javascript iframe", '<iframe src="javascript:globalThis.claim=true"></iframe>'],
+    ["inline script", '<script>globalThis.claim = true</script>'],
+    ["protocol-relative script", '<script src="//example.com/claim.js"></script>'],
+    ["inline style", '<style>.claim{display:block}</style>'],
+    ["external form", '<form action="https://example.com/collect" method="post"></form>'],
+    ["object", '<object data="https://example.com/claim"></object>'],
+    ["embed", '<embed src="https://example.com/claim">'],
+    ["base", '<base href="https://example.com/claim/">'],
+    ["picture source", '<picture><source srcset="https://example.com/claim.webp"><img src="https://example.com/claim.png" alt=""></picture>'],
+    ["video", '<video src="https://example.com/claim.mp4"></video>'],
+    ["audio", '<audio src="https://example.com/claim.mp3"></audio>'],
+    ["inactive iframe", '<template><iframe src="https://example.com/claim"></iframe></template>'],
+    ["inactive script", '<noscript><script>globalThis.claim = true</script></noscript>']
+  ];
+  const outcomes = await Promise.all(additions.map(async ([label, addition]) => ({
+    label,
+    result: await applicationPageMutation({ mutate: (html) => html.replace("</footer>", `${addition}</footer>`) })
+  })));
+  for (const { label, result } of outcomes) {
+    assert.ok(errorIds(result).includes("application-resource-census"), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const styleAttribute = await applicationPageMutation({
+    mutate: (html) => html.replace("<dt>Procurement</dt>", '<dt style="display:block">Procurement</dt>')
+  });
+  assert.ok(errorIds(styleAttribute).includes("application-resource-census"), styleAttribute.errors.join("\n"));
+
+  const duplicateStylesheetHref = await applicationPageMutation({
+    mutate: (html) => html.replace(
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    )
+  });
+  assert.ok(errorIds(duplicateStylesheetHref).includes("application-resource-census"), duplicateStylesheetHref.errors.join("\n"));
+
+  const externalScriptBody = await applicationPageMutation({
+    mutate: (html) => html.replace(" defer></script>", " defer>globalThis.claim = true</script>")
+  });
+  assert.ok(errorIds(externalScriptBody).includes("application-resource-census"), externalScriptBody.errors.join("\n"));
+});
+
+test("Plan 2 Task 2 fix round 5 resource census survives coordinated PL EN digest drift", async () => {
+  const addition = '<iframe src="https://example.com/coordinated-claim"></iframe>';
+  const mutate = (html) => html.replace("</footer>", `${addition}</footer>`);
+  const root = await pageArchitectureFixture({
+    files: pagePairFiles(applicationsPair, {
+      pl: mutate(applicationPageFixture("pl")),
+      en: mutate(applicationPageFixture("en"))
+    })
+  });
+  const scriptsDirectory = resolve(root, "scripts");
+  const verifierPath = resolve(scriptsDirectory, "verify-site.mjs");
+  await mkdir(scriptsDirectory, { recursive: true });
+  const verifierSource = await readFile(modulePath, "utf8");
+  const manifestMessage = "`actual-manifest=${lang}:${actual.elementCount}:${actual.digest}; requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`";
+  assert.ok(verifierSource.includes(manifestMessage), "digest probe must instrument the manifest diagnostic");
+  const instrumentedSource = verifierSource;
+  const runFixtureVerifier = async (source) => {
+    await writeFile(verifierPath, source);
+    const runner = `const { runVerification } = await import(${JSON.stringify(new URL(`file://${verifierPath}`).href)});\nconst result = await runVerification({ root: ${JSON.stringify(root)}, scope: "pages", family: "applications" });\nif (result.errors.length) { console.error(result.errors.join("\\n")); process.exitCode = 1; }`;
+    try {
+      const result = await execFileAsync(process.execPath, ["--input-type=module", "--eval", runner], { cwd: root });
+      return { exitCode: 0, output: `${result.stdout}${result.stderr}` };
+    } catch (cause) {
+      return { exitCode: cause.code ?? 1, output: `${cause.stdout ?? ""}${cause.stderr ?? ""}` };
+    }
+  };
+  const probe = await runFixtureVerifier(instrumentedSource);
+  assert.notEqual(probe.exitCode, 0, `digest probe must observe drift:\n${probe.output}`);
+  const manifests = new Map([...probe.output.matchAll(/actual-manifest=(pl|en):(\d+):([a-f0-9]{64})/g)]
+    .map((match) => [match[1], { elementCount: match[2], digest: match[3] }]));
+  assert.deepEqual([...manifests.keys()].sort(), ["en", "pl"], probe.output);
+
+  let patchedSource = verifierSource;
+  for (const lang of ["pl", "en"]) {
+    const actual = manifests.get(lang);
+    const constant = new RegExp(`(${lang}: Object\\.freeze\\(\\{ elementCount: )\\d+(, digest: ")[a-f0-9]{64}(" \\}\\))`);
+    assert.match(patchedSource, constant, `${lang} manifest constant must be patchable`);
+    patchedSource = patchedSource.replace(constant, `$1${actual.elementCount}$2${actual.digest}$3`);
+  }
+  const result = await runFixtureVerifier(patchedSource);
+  assert.notEqual(result.exitCode, 0, "an independent census must fail after both digest constants are recomputed and patched");
+  assert.match(result.output, /ERROR application-resource-census /, result.output);
+  assert.doesNotMatch(result.output, /ERROR application-document-manifest /, result.output);
+});
+
+test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN product pair", async () => {
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 6 rejects identity, group, evidence, status, schema, resource and forbidden-claim drift", async () => {
+  const cases = [
+    ["legacy H1", "pl", "project-h1", (html) => html.replace('<h1 class="page-title">Projekty</h1>', '<h1 class="page-title">Case studies</h1>')],
+    ["claim-inflating lead", "en", "project-lead", (html) => html.replace('<p class="page-lead">A register of projects and products built from approved roles, scopes and facts.', '<p class="page-lead">A register of successful projects and products built from approved roles, scopes and facts.')],
+    ["duplicate group", "pl", "project-groups", (html) => html.replace('data-section="applications"', 'data-section="advisory"')],
+    ["reordered project identity", "en", "project-evidence", (html) => html.replace('data-project-id="zabka"', 'data-project-id="orlen"')],
+    ["swapped role fact", "pl", "project-evidence", (html) => html.replace('data-fact-id="project.orlen.role"', 'data-fact-id="project.orlen.platform_scope"')],
+    ["hidden Akrobacja status", "en", "project-evidence", (html) => html.replace('<span data-fact-id="portfolio.akrobacja_com.current_status">', '<span hidden data-fact-id="portfolio.akrobacja_com.current_status">')],
+    ["invented schema result", "pl", "project-schema", (html) => html.replace('"mainEntity":', '"result":"Success","mainEntity":')],
+    ["external project link", "en", "project-resource-census", (html) => html.replace('<h3 data-fact-id="portfolio.procuracost">ProcuraCost</h3>', '<h3 data-fact-id="portfolio.procuracost"><a href="https://example.com/claim">ProcuraCost</a></h3>')],
+    ["project image", "pl", "project-resource-census", (html) => html.replace('</main>', '<img src="/assets/img/claim.jpg" alt="ORLEN"></main>')],
+    ["entity-smuggled retired venture", "en", "project-claim-boundary", (html) => html.replace('</footer>', '<!-- WarsawFlight&#83;afety --></footer>')],
+    ["blocked client", "pl", "project-claim-boundary", (html) => html.replace('</footer>', '<template>Pol<span>pharma</span></template></footer>')],
+    ["review store count", "en", "project-claim-boundary", (html) => html.replace('</footer>', '<!-- 12,823 stores --></footer>')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await projectPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 6 accepts the exact bilingual Projects evidence register", async () => {
+  const result = await projectPageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 6 rejects coordinated page and mutable-registry claim drift", async () => {
+  const fabricated = "Successful CONNECT programme";
+  const result = await projectPageMutation({
+    lang: "en",
+    mutate: (html) => html.replace("Central sourcing platform for the ORLEN Group", fabricated),
+    mutateFacts: (facts) => facts.map((record) => record.id === "project.orlen.platform_scope"
+      ? { ...record, value: fabricated, display_pl: fabricated, display_en: fabricated }
+      : record)
+  });
+  assert.ok(errorIds(result).includes("project-registry-inventory"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 6 rejects reviewed facts promoted onto Projects and exact public-surface drift", async () => {
+  const promoted = await projectRegistryMutation({
+    mutateFacts: (facts) => facts.map((record) => record.id === "project.zabka.store_count"
+      ? { ...record, status: "approved", surfaces: [...record.surfaces, ...projectSurfaceFixture] }
+      : record)
+  });
+  assertProjectRegistryInventoryErrors(promoted, "promoted reviewed fact");
+
+  const surfaces = await projectRegistryMutation({
+    mutateSurfaces: (items) => {
+      const next = [...items];
+      const left = next.indexOf("case-studies/index.html");
+      const right = next.indexOf("en/case-studies/index.html");
+      [next[left], next[right]] = [next[right], next[left]];
+      return next;
+    }
+  });
+  assertProjectRegistryInventoryErrors(surfaces, "reordered project surfaces");
+});
+
+test("Plan 2 Task 6 rejects wholesale removal of all 31 facts and both Projects surfaces", async () => {
+  const results = await projectRegistryMutation({
+    mutateFacts: (facts) => facts.filter((record) => !projectFactIdFixture.has(record.id)),
+    mutateSurfaces: (surfaces) => surfaces.filter((surface) => !projectSurfaceFixture.has(surface))
+  });
+  assertProjectRegistryInventoryErrors(results, "wholesale Projects registry removal");
+});
+
+test("Plan 2 Task 7 accepts only the exact bilingual Speaking programme and PL-only Procurement parent", async () => {
+  const result = await speakingPageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 7 fix round 1 keeps each dark contact foreground independently legible", () => {
+  const rules = parseCssRules(foundationCss);
+  const property = (selector, name) => rules
+    .filter((rule) => rule.media.length === 0 && rule.selectors.includes(selector))
+    .reduce((value, rule) => rule.declarations.get(name) ?? value, undefined);
+  const luminance = (hex) => hex.slice(1).match(/.{2}/g)
+    .map((component) => Number.parseInt(component, 16) / 255)
+    .map((component) => component <= 0.04045 ? component / 12.92 : ((component + 0.055) / 1.055) ** 2.4)
+    .reduce((total, component, index) => total + (component * [0.2126, 0.7152, 0.0722][index]), 0);
+  const contrast = (foreground, background) => {
+    const values = [luminance(foreground), luminance(background)];
+    return (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
+  };
+  const contracts = [
+    ["Speaking heading", ".speaking-contact h2", "var(--white)", "#F7F9F8", "#193D49", 3],
+    ["Speaking body", ".speaking-contact p:not(.section-label)", "var(--white)", "#F7F9F8", "#193D49", 4.5],
+    ["Speaking label", ".speaking-contact .section-label", "var(--signal-light)", "#FF9B7D", "#193D49", 4.5],
+    ["Procurement heading", ".procurement-contact h2", "var(--white)", "#F7F9F8", "#0C252E", 3],
+    ["Procurement body", ".procurement-contact p:not(.section-label)", "var(--white)", "#F7F9F8", "#0C252E", 4.5],
+    ["Procurement label", ".procurement-contact .section-label", "var(--signal-light)", "#FF9B7D", "#0C252E", 4.5]
+  ];
+  for (const [label, selector, token, foreground, background, minimum] of contracts) {
+    assert.equal(property(selector, "color"), token, `${label} must own its foreground token`);
+    assert.ok(contrast(foreground, background) >= minimum, `${label} contrast must be at least ${minimum}:1`);
+  }
+});
+
+test("Plan 2 Task 7 rejects Speaking identity, programme, claims, controls, schema and resources drift", async () => {
+  const cases = [
+    ["legacy organization count", "pl", "speaking-claim-boundary", (html) => html.replace("</main>", "<!-- ponad 100 organizacji --></main>")],
+    ["entity-split language claim", "en", "speaking-claim-boundary", (html) => html.replace("</main>", "<template>Polish, Eng&#108;ish, German</template></main>")],
+    ["university collaboration", "pl", "speaking-claim-boundary", (html) => html.replace("</main>", "<!-- współpracuję z uczelniami --></main>")],
+    ["client claim", "en", "speaking-claim-boundary", (html) => html.replace("</main>", "<template>ORLEN client result</template></main>")],
+    ["default-ignorable count", "en", "speaking-claim-boundary", (html) => html.replace("</main>", "<!-- 1\u200B00+ organisations --></main>")],
+    ["duplicate group", "en", "speaking-groups", (html) => html.replace('data-section="formats"', 'data-section="topics"')],
+    ["duplicate topic", "pl", "speaking-programme", (html) => html.replace('data-topic="leadership"', 'data-topic="transformation"')],
+    ["reordered format", "en", "speaking-programme", (html) => html.replace('data-format="panel"', 'data-format="talk"')],
+    ["hidden audience", "pl", "speaking-programme", (html) => html.replace('data-audience="teams"', 'hidden data-audience="teams"')],
+    ["extra CTA", "en", "speaking-controls", (html) => html.replace("</main>", '<a class="btn-primary" href="/#contact">Contact</a></main>')],
+    ["external image", "pl", "speaking-resource-census", (html) => html.replace("</main>", '<img src="https://example.com/stage.jpg" alt="Stage"></main>')],
+    ["extra form", "pl", "speaking-resource-census", (html) => html.replace("</main>", '<form><button>Send</button></form></main>')],
+    ["inline style", "en", "speaking-resource-census", (html) => html.replace('<body class="speaking-page"', '<body style="color:red" class="speaking-page"')],
+    ["schema result", "pl", "speaking-schema", (html) => html.replace('"inLanguage":"pl"', '"inLanguage":"pl","result":"success"')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await speakingPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 7 rejects Speaking fact attachment and public-surface removal", async () => {
+  const factData = await readFacts();
+  const approved = factData.facts.find((record) => record.status === "approved");
+  const attached = await speakingPageMutation({
+    mutateFacts: (facts) => facts.map((record) => record.id === approved.id ? { ...record, surfaces: [...record.surfaces, "wystapienia/index.html"] } : record)
+  });
+  assert.ok(errorIds(attached).includes("speaking-registry-inventory"), attached.errors.join("\n"));
+
+  const coordinated = await speakingPageMutation({
+    mutate: (html) => html.replace("</main>", `<p data-fact-id="${approved.id}">${approved.display_pl}</p></main>`),
+    mutateFacts: (facts) => facts.map((record) => record.id === approved.id ? { ...record, surfaces: [...record.surfaces, "wystapienia/index.html"] } : record)
+  });
+  assert.ok(errorIds(coordinated).includes("speaking-registry-inventory"), coordinated.errors.join("\n"));
+  assert.ok(errorIds(coordinated).includes("speaking-fact-inventory"), coordinated.errors.join("\n"));
+
+  const removed = await speakingPageMutation({
+    mutateSurfaces: (surfaces) => surfaces.filter((surface) => !speakingSurfaceFixture.has(surface))
+  });
+  assert.ok(errorIds(removed).includes("speaking-registry-inventory"), removed.errors.join("\n"));
+});
+
+const procurementBeyondInterview = Object.freeze({
+  href: "https://www.youtube.com/watch?v=5KYUdTLlvvg",
+  title: "Procurement&Beyond, odcinek 8. Nawet najlepsze narzędzie nie uratuje złego wdrożenia.",
+  summaryPl: "W rozmowie mówię o profesjonalizacji zakupów, odejściu od sztywnych procedur i roli wewnętrznego lidera wdrożenia. Pokazuję też Czym pojadę, kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania. Rozmowę zamyka pytanie, jak łączyć warsztat kupca z automatyzacją i analizą danych.",
+  summaryEn: "In the conversation I discuss the professionalisation of procurement, moving beyond rigid procedures, and the role of an internal implementation leader. I also present Czym pojadę, a fleet TCO calculator using the Bielik model to analyse ownership costs. The final theme is how to combine procurement judgement with automation and data analysis."
+});
+
+test("Owner-approved Procurement&Beyond interview is an exact bilingual YouTube resource", async () => {
+  const factData = await readFacts();
+  const titleFact = factData.facts.find((fact) => fact.id === "speaking.procurement_beyond.title");
+  const summaryFact = factData.facts.find((fact) => fact.id === "speaking.procurement_beyond.summary");
+  assert.deepEqual(titleFact, {
+    id: "speaking.procurement_beyond.title",
+    value: procurementBeyondInterview.title,
+    display_pl: procurementBeyondInterview.title,
+    display_en: procurementBeyondInterview.title,
+    kind: "constant",
+    as_of: null,
+    source_type: "public_source",
+    source_label: "Official YouTube oEmbed metadata inspected 2026-08-27",
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["wystapienia/index.html", "en/wystapienia/index.html"],
+    status: "approved"
+  });
+  assert.deepEqual(summaryFact, {
+    id: "speaking.procurement_beyond.summary",
+    value: procurementBeyondInterview.summaryEn,
+    display_pl: procurementBeyondInterview.summaryPl,
+    display_en: procurementBeyondInterview.summaryEn,
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: "Owner-provided interview summary, 2026-08-27",
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["wystapienia/index.html", "en/wystapienia/index.html"],
+    status: "approved"
+  });
+
+  for (const [lang, html, summary, sectionLabel, cta] of [
+    ["pl", speakingProductHtml.pl, procurementBeyondInterview.summaryPl, "04 / Wywiad", "Obejrzyj na YouTube"],
+    ["en", speakingProductHtml.en, procurementBeyondInterview.summaryEn, "04 / Interview", "Watch on YouTube · Polish audio"]
+  ]) {
+    assert.equal((html.match(/data-section="interview"/g) ?? []).length, 1, `${lang}: one interview section`);
+    assert.equal((html.match(/https:\/\/www\.youtube\.com\/watch\?v=5KYUdTLlvvg/g) ?? []).length, 1, `${lang}: one canonical YouTube target`);
+    assert.ok(html.includes(`<p class="section-label">${sectionLabel}</p>`), `${lang}: exact section label`);
+    assert.ok(html.includes(`data-fact-id="speaking.procurement_beyond.title" lang="pl">${procurementBeyondInterview.title.replace("&", "&amp;<wbr>")}</h3>`), `${lang}: official title remains Polish, marked as such and has one mobile-safe break opportunity`);
+    assert.ok(html.includes(`data-fact-id="speaking.procurement_beyond.summary">${summary}</p>`), `${lang}: owner-supplied summary`);
+    assert.ok(html.includes(`target="_blank" rel="noopener noreferrer"`), `${lang}: safe external navigation`);
+    assert.ok(html.includes(`<span class="speaking-recording__cta">${cta}</span>`), `${lang}: localized CTA`);
+    assert.ok(html.includes(`<p class="section-label">05 / ${lang === "pl" ? "Kontakt" : "Contact"}</p>`), `${lang}: contact follows interview`);
+    assert.doesNotMatch(html, /<iframe\b|i\.ytimg\.com/i, `${lang}: no tracking embed or remote thumbnail`);
+    assert.ok(html.includes('srcset="/assets/img/speaking/procurement-beyond-episode-8-960.webp 960w, /assets/img/speaking/procurement-beyond-episode-8-1510.webp 1510w"'), `${lang}: exact local responsive visual`);
+    assert.ok(html.includes('src="/assets/img/speaking/procurement-beyond-episode-8-1510.jpg"'), `${lang}: local fallback visual`);
+    assert.ok(html.includes(lang === "pl"
+      ? "Infografika do odcinka. Skrót tematów rozmowy; pełny kontekst i założenia modelu znajdują się w nagraniu."
+      : "Episode infographic. It summarises the conversation topics; the recording provides the full context and model assumptions."), `${lang}: editorial boundary for the supplied infographic`);
+  }
+
+  const assetDigests = {
+    "assets/img/speaking/procurement-beyond-episode-8.png": "45c3ee0563eccb5e608676bd38c7f332306cab2a1d514f2d8378a4113876acb0",
+    "assets/img/speaking/procurement-beyond-episode-8-960.webp": "1e22ac63694c35c45e81cd6c08df94888be7305dd692712c60acd64722562c2d",
+    "assets/img/speaking/procurement-beyond-episode-8-1510.webp": "d8b9aab406022259457f4ddef4993fa4ac71a649d2cf17dd96ad13778e83516d",
+    "assets/img/speaking/procurement-beyond-episode-8-1510.jpg": "5fdb16001b801c537c30015a248b3efc5a5fc525dbf49db1941d6ead3e91676c"
+  };
+  for (const [path, digest] of Object.entries(assetDigests)) {
+    assert.equal(createHash("sha256").update(await readFile(resolve(path))).digest("hex"), digest, `${path}: approved supplied asset or optimized derivative`);
+  }
+});
+
+test("Speaking verifier rejects Procurement&Beyond interview identity, link, structure and registry drift", async () => {
+  const cases = [
+    ["changed URL", "pl", "speaking-interview", (html) => html.replace(procurementBeyondInterview.href, "https://www.youtube.com/watch?v=other")],
+    ["changed title", "en", "speaking-interview", (html) => html.replace("Nawet najlepsze narzędzie nie uratuje złego wdrożenia.", "A translated marketing title")],
+    ["changed summary", "pl", "speaking-interview", (html) => html.replace(procurementBeyondInterview.summaryPl, `${procurementBeyondInterview.summaryPl} Gwarantowane rezultaty.`)],
+    ["missing noopener", "en", "speaking-interview", (html) => html.replace('rel="noopener noreferrer"', 'rel="noreferrer"')],
+    ["hidden section", "pl", "speaking-interview", (html) => html.replace('class="speaking-group speaking-recording"', 'hidden class="speaking-group speaking-recording"')],
+    ["duplicate interview", "en", "speaking-groups", (html) => html.replace('</main>', '<section data-section="interview"></section></main>')]
+  ];
+  for (const [label, lang, expectedId, mutate] of cases) {
+    const result = await speakingPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+
+  const factData = await readFacts();
+  const changedRegistry = await speakingPageMutation({
+    mutateFacts: (facts) => facts.map((fact) => fact.id === "speaking.procurement_beyond.summary"
+      ? { ...fact, source_label: "Unverified summary" }
+      : fact)
+  });
+  assert.ok(factData.facts.some((fact) => fact.id === "speaking.procurement_beyond.summary"));
+  assert.ok(errorIds(changedRegistry).includes("speaking-registry-inventory"), changedRegistry.errors.join("\n"));
+});
+
+test("Owner correction updates Czym pojadę from timetable wording to the fleet TCO product", async () => {
+  const factData = await readFacts();
+  const name = factData.facts.find((fact) => fact.id === "portfolio.czympojade_pl");
+  const type = factData.facts.find((fact) => fact.id === "portfolio.czympojade_pl.type");
+  const sourceLabel = "Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27";
+  assert.deepEqual(name, {
+    id: "portfolio.czympojade_pl",
+    value: "czympojade.pl fleet TCO calculator",
+    display_pl: "czympojade.pl",
+    display_en: "czympojade.pl",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: sourceLabel,
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
+    status: "approved"
+  });
+  assert.deepEqual(type, {
+    id: "portfolio.czympojade_pl.type",
+    value: "fleet TCO calculator using the Bielik model for ownership-cost analysis",
+    display_pl: "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
+    display_en: "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: sourceLabel,
+    source_url: procurementBeyondInterview.href,
+    surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
+    status: "approved",
+    surface_rules: {
+      "llms-full.txt": { approved_any: ["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."] }
+    }
+  });
+
+  const surfaces = await Promise.all([
+    "index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html",
+    "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"
+  ].map(async (path) => [path, await readFile(resolve(path), "utf8")]));
+  const joined = surfaces.map(([, content]) => content).join("\n");
+  assert.doesNotMatch(joined, /połączeniami i rozkładami|connections and timetables|transport app/i);
+  for (const [path, content] of surfaces.filter(([path]) => path.endsWith(".html"))) {
+    const expected = path.startsWith("en/")
+      ? "Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
+      : "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.";
+    assert.ok(content.includes(expected), `${path}: corrected product meaning`);
+  }
+  assert.ok(surfaces.find(([path]) => path === "llms-full.txt")[1].includes("czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."));
+});
+
+test("Plan 2 Task 7 rejects Procurement route, hreflang and iframe inventory drift", async () => {
+  const cases = [
+    ["fake EN route", "procurement-route-boundary", (html) => html.replace("</body>", "<!-- /en/procurement%2D2026/ --></body>")],
+    ["split fake EN route", "procurement-route-boundary", (html) => html.replace("</body>", "<!-- /en/procure --><template>ment-2026/</template></body>")],
+    ["EN hreflang", "procurement-hreflang", (html) => html.replace('<link rel="alternate" hreflang="x-default"', '<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/procurement-2026/">\n<link rel="alternate" hreflang="x-default"')],
+    ["language-link hreflang", "procurement-language-link", (html) => html.replace('href="/en/wiedza/" class="nav-lang"', 'href="/en/wiedza/" hreflang="en" class="nav-lang"')],
+    ["changed iframe title", "procurement-iframes", (html) => html.replace('title="SAP Ariba Module Mapping"', 'title="Ariba mapping"')],
+    ["reordered iframe", "procurement-iframes", (html) => html.replace('/diagrams/diagram1_universal.html', '/diagrams/diagram2_ariba.html')],
+    ["missing iframe", "procurement-iframes", (html) => html.replace(/<iframe class="procurement-frame procurement-frame--maturity"[^>]*><\/iframe>/, '')],
+    ["extra iframe", "procurement-resource-census", (html) => html.replace("</main>", '<iframe src="/diagrams/infographic.html" title="Extra"></iframe></main>')],
+    ["inline style", "procurement-resource-census", (html) => html.replace('<section class="procurement-artifacts"', '<section style="display:block" class="procurement-artifacts"')]
+  ];
+  for (const [label, expectedId, mutateProcurement] of cases) {
+    const result = await speakingPageMutation({ mutateProcurement });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 2 accepts a complete mirrored application contract", async () => {
+  const root = await pageArchitectureFixture({ files: pagePairFiles(applicationsPair) });
+  const result = await runVerification({ root, scope: "pages", family: "applications" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 5 accepts the exact six-page advisory dossier contract", async () => {
+  const result = await servicePageMutation();
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 2 Task 5 rejects section, evidence, CTA, resource, schema and hidden-claim drift", async () => {
+  const cases = [
+    ["section order", "transformation", "pl", "service-sections", (html) => html.replace('data-section="problem"', 'data-section="scope"')],
+    ["duplicate section", "transformation", "en", "service-sections", (html) => html.replace('</main>', '<section data-section="contact"><h2>Contact</h2></section></main>')],
+    ["evidence order", "transformation", "en", "service-evidence", (html) => html.replace("career.pzu.organization", "career.pwc.organization")],
+    ["duplicate evidence", "ariba", "pl", "service-evidence", (html) => html.replace('data-fact-id="hero.implementations"', 'data-fact-id="project.kghm.role"')],
+    ["second conversion", "ariba", "pl", "service-controls", (html) => html.replace("</main>", '<a class="btn-primary" href="mailto:fake@example.com">Drugi kontakt</a></main>')],
+    ["external image", "ariba", "en", "service-resource-census", (html) => html.replace("</main>", '<img src="https://example.com/fake.jpg" alt="KGHM"></main>')],
+    ["inline style", "publicProcurement", "pl", "service-resource-census", (html) => html.replace("<h1", '<h1 style="display:block"')],
+    ["schema offer", "publicProcurement", "en", "service-schema", (html) => html.replace('"provider":{', '"offers":{},"provider":{')],
+    ["schema rating", "ariba", "pl", "service-schema", (html) => html.replace('"provider":{', '"aggregateRating":{},"provider":{')],
+    ["schema area served", "transformation", "en", "service-schema", (html) => html.replace('"provider":{', '"areaServed":"CEE","provider":{')],
+    ["raw shell state", "publicProcurement", "pl", "service-shell", (html) => html.replace('aria-expanded="false"', 'aria-expanded="true"')],
+    ["entity hidden unsupported client", "transformation", "pl", "service-claim-boundary", (html) => html.replace("</footer>", '<template>P&#111;lpharma</template></footer>')],
+    ["inline-split hidden unsupported client", "transformation", "en", "service-claim-boundary", (html) => html.replace("</footer>", '<template>Pol<span>pharma</span></template></footer>')],
+    ["comment old annual portfolio", "transformation", "en", "service-claim-boundary", (html) => html.replace("</footer>", '<!-- PLN 500M per year --></footer>')]
+  ];
+  for (const [label, key, lang, expectedId, mutate] of cases) {
+    const result = await servicePageMutation({ key, lang, mutate });
+    assert.ok(errorIds(result).includes(expectedId), `${label}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 5 rejects coordinated page and mutable-registry fact drift", async () => {
+  const approved = "PZU S.A.";
+  const fabricated = "Invented Client S.A.";
+  const result = await servicePageMutation({
+    key: "transformation",
+    lang: "pl",
+    mutate: (html) => html.replace(approved, fabricated),
+    mutateFacts: (facts) => facts.map((record) => record.id === "career.pzu.organization"
+      ? { ...record, value: fabricated, display_pl: fabricated, display_en: fabricated }
+      : record)
+  });
+  assert.ok(errorIds(result).includes("service-fact-contract"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 5 fix round 1 rejects an unrelated fact authorized for a service surface in every relevant scope", async () => {
+  const results = await serviceRegistryMutation({
+    mutateFacts: (facts) => facts.map((record) => record.id === "brand.promise"
+      ? { ...record, surfaces: [...record.surfaces, "uslugi/transformacja-zakupow/index.html"] }
+      : record)
+  });
+  assertServiceRegistryInventoryErrors(results, "unrelated service authorization");
+});
+
+test("Plan 2 Task 5 fix round 1 rejects a new approved fact authorized for a service pair in every relevant scope", async () => {
+  const results = await serviceRegistryMutation({
+    mutateFacts: (facts) => [...facts, {
+      id: "client.fabricated",
+      value: "Fabricated Client",
+      display_pl: "Fabricated Client",
+      display_en: "Fabricated Client",
+      kind: "constant",
+      as_of: null,
+      source_type: "owner_verified",
+      source_label: "Mutation fixture only",
+      source_url: null,
+      surfaces: ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html"],
+      status: "approved"
+    }]
+  });
+  assertServiceRegistryInventoryErrors(results, "fabricated approved service fact");
+});
+
+test("Plan 2 Task 5 fix round 1 owns the exact ordered public service-surface inventory in every relevant scope", async () => {
+  const plTransformation = "uslugi/transformacja-zakupow/index.html";
+  const enTransformation = "en/uslugi/transformacja-zakupow/index.html";
+  const mutations = [
+    ["missing", (surfaces) => surfaces.filter((surface) => surface !== plTransformation)],
+    ["extra typo", (surfaces) => [...surfaces, "uslugi/transformacja-zakupow/index.htm"]],
+    ["duplicate", (surfaces) => [...surfaces, plTransformation]],
+    ["reordered", (surfaces) => {
+      const next = [...surfaces];
+      const plIndex = next.indexOf(plTransformation);
+      const enIndex = next.indexOf(enTransformation);
+      [next[plIndex], next[enIndex]] = [next[enIndex], next[plIndex]];
+      return next;
+    }]
+  ];
+  for (const [label, mutateSurfaces] of mutations) {
+    const results = await serviceRegistryMutation({ mutateSurfaces });
+    assertServiceRegistryInventoryErrors(results, label);
+  }
+});
+
+test("Plan 2 Task 5 fix round 2 rejects wholesale removal of the immutable service registry in every relevant scope", async () => {
+  const results = await serviceRegistryMutation({
+    mutateFacts: (facts) => facts.filter((record) => !serviceFactIdFixture.has(record.id)),
+    mutateSurfaces: (surfaces) => surfaces.filter((surface) => !serviceSurfaceFixture.has(surface))
+  });
+  assertServiceRegistryInventoryErrors(results, "wholesale service registry removal");
+});
+
+test("readFacts reads fixtures without starting CLI verification", async () => {
+  const root = await fixture();
+  const data = await readFacts({ root });
+  assert.equal(data.facts[0].id, "brand.promise");
+  assert.equal(data.blocked_claims[0].id, "client.polpharma");
+});
+
+test("module import has no CLI output or nonzero exit side effect", async () => {
+  const { stdout, stderr } = await execFileAsync(process.execPath, ["--input-type=module", "--eval", `import(${JSON.stringify(new URL("./verify-site.mjs", import.meta.url).href)})`]);
+  assert.equal(stdout, "");
+  assert.equal(stderr, "");
+});
+
+test("facts scope rejects invalid record types and enums", async () => {
+  const root = await fixture({
+    facts: [fact({ id: "", value: {}, kind: "claim", as_of: "not-a-date", source_type: "owner_provided_cv", source_label: "", source_url: "ftp://invalid", surfaces: [], status: "published" })]
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.deepEqual(new Set(errorIds(result)), new Set(["fact-id", "fact-value", "fact-kind", "fact-as-of", "fact-source-type", "fact-source-label", "fact-source-url", "fact-surfaces", "fact-status"]));
+});
+
+test("facts scope accepts a finite numeric FactRecord value", async () => {
+  const root = await fixture({ facts: [fact({ value: 42 })] });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(!errorIds(result).includes("fact-value"));
+});
+
+test("registry keeps responsibility facts atomic and Polish-English meanings aligned", async () => {
+  const { facts } = await readFacts();
+  const byId = new Map(facts.map((record) => [record.id, record]));
+  const expectedResponsibilities = {
+    "career.apsolut.responsibility": ["Rozwijam działalność w regionie CEE.", "I develop the business in the CEE region."],
+    "career.sap.responsibility": ["Rozwijałem rynek SAP Ariba w Polsce i regionie CEE.", "I developed the SAP Ariba market in Poland and the CEE region."],
+    "career.pzu.responsibility": ["Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model."],
+    "career.pwc.responsibility": ["Pracowałem z metodyką CAPP (Complete & Agile Procurement).", "I worked with the CAPP (Complete & Agile Procurement) methodology."],
+    "career.pkp_plk.responsibility": ["Negocjowałem umowę ramową z SAP AG dla grupy PKP.", "I negotiated an SAP AG framework agreement for the PKP Group."],
+    "career.pkp_intercity.responsibility": ["Prowadziłem wdrożenie Revenue Management System (JDA/RPO).", "I led the Revenue Management System (JDA/RPO) implementation."],
+    "career.orlen_connect.responsibility": ["Kierowałem wdrożeniem centralnej platformy sourcingowej CONNECT.", "I led the implementation of the central CONNECT sourcing platform."],
+    "career.orlen_general.responsibility": ["Odpowiadałem za wdrożenie SAP SRM.", "I was responsible for the SAP SRM implementation."],
+    "career.tp.responsibility": ["Koordynowałem krytyczne zmiany w programie wdrożenia Oracle EBS dla centrum SSC w Lublinie.", "I coordinated critical changes in the Oracle EBS implementation programme for the shared-services centre in Lublin."],
+    "career.millennium.responsibility": ["Prowadziłem centralizację zakupów IT.", "I led the centralisation of IT procurement."],
+    "career.elektrim.responsibility": ["Analizowałem rynki CEE w Wiedniu.", "I analysed CEE markets in Vienna."]
+  };
+
+  const responsibilityFacts = facts.filter((record) => record.id.startsWith("career.") && record.id.endsWith(".responsibility"));
+  assert.equal(responsibilityFacts.length, Object.keys(expectedResponsibilities).length);
+  for (const [id, [displayPl, displayEn]] of Object.entries(expectedResponsibilities)) {
+    const record = byId.get(id);
+    assert.ok(record, `${id} must exist`);
+    assert.equal(record.display_pl, displayPl, `${id} must keep one conservative Polish responsibility`);
+    assert.equal(record.display_en, displayEn, `${id} must be an exact English semantic mirror`);
+    assert.equal((record.display_pl.match(/[.!?]/g) ?? []).length, 1, `${id} PL must be one sentence`);
+    assert.equal((record.display_en.match(/[.!?]/g) ?? []).length, 1, `${id} EN must be one sentence`);
+  }
+
+  assert.deepEqual(
+    [byId.get("project.kghm.role")?.display_pl, byId.get("project.kghm.role")?.display_en],
+    ["Realizacja wdrożenia i integracji", "Implementation and integration delivery"]
+  );
+  assert.deepEqual(
+    [byId.get("project.kghm.scope")?.display_pl, byId.get("project.kghm.scope")?.display_en],
+    ["Sourcing i obsługa pracowników zewnętrznych", "Sourcing and external workforce management"]
+  );
+
+  const zabkaRecords = ["project.zabka.role", "project.zabka.implementation", "project.zabka.proof"].map((id) => byId.get(id));
+  assert.ok(zabkaRecords.every(Boolean));
+  assert.equal(new Set(zabkaRecords.map((record) => record.value)).size, 3, "Żabka role, functional scope and module proof must be independent facts");
+  assert.deepEqual(
+    zabkaRecords.map((record) => [record.display_pl, record.display_en]),
+    [
+      ["Realizacja wdrożenia SAP Ariba", "Delivery of the SAP Ariba implementation"],
+      ["Zakupy, ryzyko dostawców i sourcing", "Procurement, supplier risk and sourcing"],
+      ["SAP Ariba Buying, Supplier Risk i sourcing", "SAP Ariba Buying, Supplier Risk and sourcing"]
+    ]
+  );
+});
+
+test("facts scope rejects duplicate facts, malformed blocked records, and fact collisions", async () => {
+  const root = await fixture({
+    facts: [fact(), fact()],
+    blocked_claims: [blockedClaim({ id: "brand.promise", pattern: "" }), blockedClaim(), blockedClaim()]
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  const ids = errorIds(result);
+  assert.ok(ids.includes("fact-duplicate-id"));
+  assert.ok(ids.includes("blocked-pattern"));
+  assert.ok(ids.includes("blocked-id-collision"));
+  assert.ok(ids.includes("blocked-duplicate-id"));
+  assert.ok(ids.includes("blocked-duplicate-pattern"));
+});
+
+test("facts scope requires the canonical Polpharma block", async () => {
+  const root = await fixture({ blocked_claims: [] });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(errorIds(result).includes("blocked-canonical-polpharma"));
+});
+
+test("facts scope treats an unnegated Polpharma mention as a blocked client claim", async () => {
+  const root = await fixture({ extraFiles: { "llms.txt": "Clients: Polpharma", "llms-full.txt": "", "worker/index.js": "" } });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.polpharma llms.txt:")));
+});
+
+test("facts scope rejects a standalone negated Polpharma mention", async () => {
+  const root = await fixture({ extraFiles: { "llms.txt": "Polpharma is not a client.", "llms-full.txt": "", "worker/index.js": "" } });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.polpharma llms.txt:")));
+});
+
+test("facts scope rejects a later Polpharma client claim after a negation", async () => {
+  const root = await fixture({ extraFiles: { "llms.txt": "Polpharma is not a client. Worked for: Polpharma.", "llms-full.txt": "", "worker/index.js": "" } });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.polpharma llms.txt:")));
+});
+
+test("facts scope enforces every blocked pattern, not only Polpharma", async () => {
+  const root = await fixture({
+    blocked_claims: [blockedClaim(), blockedClaim({ id: "client.acme", pattern: "Acme", forbidden_contexts: ["clients"], reason: "Acme is blocked for this fixture" })],
+    extraFiles: { "llms.txt": "Worked for: Acme", "llms-full.txt": "", "worker/index.js": "" }
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(result.errors.some((error) => error.startsWith("ERROR blocked-client.acme llms.txt:")));
+});
+
+test("Plan 1 broad review requires the complete public claim-surface inventory", async () => {
+  const root = await fixture({
+    public_claim_surfaces: publicClaimSurfaceFixture.filter((surface) => surface !== "assets/js/main.js")
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(errorIds(result).includes("public-surface-inventory"));
+});
+
+test("Plan 1 broad review enforces an additional registry-declared public surface", async () => {
+  const display = "review claim on a registry extension";
+  const root = await fixture({
+    public_claim_surfaces: [...publicClaimSurfaceFixture, "press-kit.txt"],
+    facts: [fact(), fact({
+      id: "claim.review.registry_extension",
+      value: display,
+      display_pl: display,
+      display_en: display,
+      source_type: "internal_evidence",
+      source_label: "Unapproved registry-extension fixture",
+      surfaces: ["index.html"],
+      status: "review"
+    })],
+    extraFiles: { "press-kit.txt": display }
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status press-kit.txt:")),
+    result.errors.join("\n")
+  );
+});
+
+for (const status of ["review", "retired"]) {
+  for (const surface of publicClaimSurfaceFixture) {
+    test(`Plan 1 broad review rejects ${status} publication on ${surface}`, async () => {
+      const display = `${status} claim on ${surface}`;
+      const statusFact = fact({
+        id: `claim.${status}.${surface.replaceAll(/[^a-z0-9]+/gi, "_")}`,
+        value: display,
+        display_pl: display,
+        display_en: display,
+        source_type: "internal_evidence",
+        source_label: `Unapproved ${status} fixture`,
+        surfaces: ["index.html"],
+        status
+      });
+      const root = await fixture({
+        facts: [fact(), statusFact],
+        ...publicSurfaceOptions(surface, display)
+      });
+      const result = await runVerification({ root, scope: "facts" });
+      assert.ok(
+        result.errors.some((entry) => entry.startsWith(`ERROR fact-surface-status ${surface}:`)),
+        result.errors.join("\n")
+      );
+    });
+  }
+}
+
+const highRiskSemanticDrifts = [
+  {
+    id: "hero.implementations",
+    surface: "llms.txt",
+    approved: "20+ SAP Ariba implementations",
+    drift: "20+ SAP Ariba implementations, SAP Fieldglass and SAP S/4HANA"
+  },
+  {
+    id: "hero.implementations",
+    surface: "llms-full.txt",
+    approved: "20+ SAP Ariba implementations",
+    drift: "20+ SAP Ariba/Fieldglass/S/4HANA implementations"
+  },
+  {
+    id: "hero.implementations",
+    surface: "worker/index.js",
+    approved: "20+ wdrożeń SAP Ariba",
+    drift: "20+ wdrożeń SAP Ariba, SAP Fieldglass i SAP S/4HANA"
+  },
+  {
+    id: "hero.project_value_eur",
+    surface: "llms-full.txt",
+    approved: "Total value of delivered projects: EUR 500M.",
+    drift: "Total value of delivered projects: EUR 500M+."
+  },
+  {
+    id: "hero.project_value_eur",
+    surface: "worker/index.js",
+    approved: "Łączna wartość zrealizowanych projektów: 500 mln EUR.",
+    drift: "Łączna wartość zrealizowanych projektów: ponad 500 mln EUR."
+  }
+];
+
+for (const { id, surface, approved, drift } of highRiskSemanticDrifts) {
+  test(`Plan 1 broad review rejects semantic drift for ${id} on ${surface}`, async () => {
+    const controlled = fact({
+      id,
+      value: approved,
+      display_pl: approved,
+      display_en: approved,
+      surfaces: [surface],
+      surface_rules: {
+        [surface]: {
+          approved_any: [approved],
+          forbidden: [drift]
+        }
+      }
+    });
+    const root = await fixture({
+      facts: [fact(), controlled],
+      ...publicSurfaceOptions(surface, `${approved}\n${drift}`)
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith(`ERROR fact-surface-forbidden ${surface}:`)),
+      result.errors.join("\n")
+    );
+  });
+}
+
+test("Plan 1 broad review accepts an exact approved surface claim without drift", async () => {
+  const surface = "llms.txt";
+  const approved = "20+ SAP Ariba implementations";
+  const controlled = fact({
+    id: "hero.implementations",
+    value: approved,
+    display_pl: approved,
+    display_en: approved,
+    surfaces: [surface],
+    surface_rules: {
+      [surface]: {
+        approved_any: [approved],
+        forbidden: ["20+ SAP Ariba, SAP Fieldglass and SAP S/4HANA implementations"]
+      }
+    }
+  });
+  const root = await fixture({ facts: [fact(), controlled], llms: approved });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(!errorIds(result).some((id) => id.startsWith("fact-surface-")), result.errors.join("\n"));
+});
+
+test("fact surface line matching ignores the controlled discovery fact-id prefix", async () => {
+  const surface = "llms.txt";
+  const approved = "20+ SAP Ariba implementations.";
+  const controlled = fact({
+    id: "hero.implementations",
+    value: approved,
+    display_pl: approved,
+    display_en: approved,
+    surfaces: [surface],
+    surface_rules: {
+      [surface]: {
+        approved_any: [approved],
+        match_mode: "line",
+        controlled_any: ["20+ SAP Ariba implementations"]
+      }
+    }
+  });
+  const root = await fixture({ facts: [fact(), controlled], llms: `- [hero.implementations] ${approved}` });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(!errorIds(result).some((id) => id.startsWith("fact-surface-")), result.errors.join("\n"));
+});
+
+const productionRegistryBoundaryBypasses = [
+  {
+    label: "an Ariba count extended to Fieldglass and S/4HANA",
+    surface: "llms.txt",
+    options: {
+      llms: [
+        "25+ years of procurement experience.",
+        "20+ SAP Ariba implementations followed by SAP Fieldglass and SAP S/4HANA implementations."
+      ].join("\n")
+    },
+    expectedId: "fact-surface-unapproved-unit"
+  },
+  {
+    label: "an experience count extended with unapproved domain meaning",
+    surface: "llms.txt",
+    options: {
+      llms: [
+        "25+ years of procurement experience in strategic sourcing, SAP Ariba, and digital transformation.",
+        "20+ SAP Ariba implementations."
+      ].join("\n")
+    },
+    expectedId: "fact-surface-unapproved-unit"
+  },
+  {
+    label: "a second unsupported EUR 500M assertion",
+    surface: "llms-full.txt",
+    options: {
+      llmsFull: productionFactSurfaceControls.llmsFull.replace(
+        "Total value of delivered projects: EUR 500M.",
+        "Total value of delivered projects: EUR 500M. This means at least EUR 500M."
+      )
+    },
+    expectedId: "fact-surface-unapproved-unit"
+  },
+  {
+    label: "an independently phrased annual PLN portfolio",
+    surface: "llms.txt",
+    options: {
+      llms: `${productionFactSurfaceControls.llms}\nAnnual procurement portfolio was PLN 500 million per year.`
+    },
+    expectedId: "fact-surface-status"
+  }
+];
+
+for (const { label, surface, options, expectedId } of productionRegistryBoundaryBypasses) {
+  test(`Plan 1 broad review round 2 production registry rejects ${label}`, async () => {
+    const root = await productionRegistryFixture(options);
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith(`ERROR ${expectedId} ${surface}:`)),
+      result.errors.join("\n")
+    );
+  });
+}
+
+test("Plan 1 broad review round 2 production registry accepts exact controlled lines with surrounding prose", async () => {
+  const root = await productionRegistryFixture();
+  const result = await runVerification({ root, scope: "facts" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 1 broad review round 2 decodes a retired claim in a quoted JS literal", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\n${String.raw`const formerName = "WarsawFlight\u0053afety";`}`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status assets/js/main.js:")),
+    result.errors.join("\n")
+  );
+});
+
+test("Plan 1 broad review round 2 decodes a review claim in a static JS template literal", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\nconst responseSla = \`Paweł usually replies within a d\\u0061y\`;`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status assets/js/main.js:")),
+    result.errors.join("\n")
+  );
+});
+
+test("Plan 1 broad review round 2 keeps unrelated escaped JS literals safe", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\n${String.raw`const safeName = "WarsawFlight\u0052afety";`} const safeTemplate = \`reply within two days\`;`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("Plan 1 broad review round 2 facts scan fails closed on malformed JS", async () => {
+  const root = await productionRegistryFixture({
+    js: `${validBrowserScript}\nconst broken = "unterminated;`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(
+    result.errors.some((entry) => entry.startsWith("ERROR fact-surface-js-lexical assets/js/main.js:")),
+    result.errors.join("\n")
+  );
+});
+
+const defaultIgnorableQuantitativeSeparators = [
+  ["U+200B zero-width space", "\u200B"],
+  ["U+2060 word joiner", "\u2060"],
+  ["U+FEFF zero-width no-break space", "\uFEFF"]
+];
+
+for (const [label, separator] of defaultIgnorableQuantitativeSeparators) {
+  test(`Plan 1 broad review round 3 rejects an unsupported EUR assertion split by ${label}`, async () => {
+    const root = await productionRegistryFixture({
+      llmsFull: productionFactSurfaceControls.llmsFull.replace(
+        "Neutral context after the controlled claims.",
+        `This means at least EUR 500${separator}M.\nNeutral context after the controlled claims.`
+      )
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith("ERROR fact-surface-unapproved-unit llms-full.txt:")),
+      result.errors.join("\n")
+    );
+  });
+}
+
+const defaultIgnorableRetiredNameSeparators = [
+  ["U+200B zero-width space", "\u200B"],
+  ["U+200C zero-width non-joiner", "\u200C"]
+];
+
+for (const [label, separator] of defaultIgnorableRetiredNameSeparators) {
+  test(`Plan 1 broad review round 3 rejects a retired JS literal split by ${label}`, async () => {
+    const root = await productionRegistryFixture({
+      js: `${validBrowserScript}\nconst formerName = "WarsawFlight${separator}Safety";`
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(
+      result.errors.some((entry) => entry.startsWith("ERROR fact-surface-status assets/js/main.js:")),
+      result.errors.join("\n")
+    );
+  });
+}
+
+test("Plan 1 broad review round 3 permits default-ignorable characters in unrelated public copy", async () => {
+  const root = await productionRegistryFixture({
+    llmsFull: productionFactSurfaceControls.llmsFull.replace("Neutral context before", "Neutral\u200B context before"),
+    js: `${validBrowserScript}\nconst safeName = "WarsawFlight\u200BSafely";`
+  });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.deepEqual(result.errors, []);
+});
+
+test("missing fixture files report standardized file-read errors", async () => {
+  const root = await fixture();
+  const missingRoot = resolve(root, "missing");
+  const foundation = await runVerification({ root: missingRoot, scope: "foundation" });
+  const home = await runVerification({ root: missingRoot, scope: "home" });
+  const facts = await runVerification({ root: missingRoot, scope: "facts" });
+  assert.ok(foundation.errors.some((error) => error.startsWith("ERROR file-read assets/css/style.css:")));
+  assert.ok(home.errors.some((error) => error.startsWith("ERROR file-read index.html:")));
+  assert.ok(facts.errors.some((error) => error.startsWith("ERROR facts-json content/site-facts.json:")));
+  assert.ok(facts.errors.some((error) => error.startsWith("ERROR file-read worker/index.js:")));
+});
+
+const navigationMutations = {
+  pl: {
+    missingRoute: (html) => html.replace('href="/lotnictwo/"', 'href="/usunieta-trasa/"').concat('<!-- <a href="/lotnictwo/">Lotnictwo</a> --><a href="/lotnictwo/">poza nawigacją</a>'),
+    outOfOrder: (html) => html
+      .replace('<li><a href="/aplikacje-operacyjne/">Aplikacje operacyjne</a></li>', "__OPERATIONS__")
+      .replace('<li><a href="/lotnictwo/">Lotnictwo</a></li>', '<li><a href="/aplikacje-operacyjne/">Aplikacje operacyjne</a></li>')
+      .replace("__OPERATIONS__", '<li><a href="/lotnictwo/">Lotnictwo</a></li>'),
+    wrongLanguage: (html) => html.replace('<a href="/en/" class="nav-lang">', '<a href="/" class="nav-lang">')
+  },
+  en: {
+    missingRoute: (html) => html.replace('href="/en/lotnictwo/"', 'href="/en/removed-route/"').concat('<!-- <a href="/en/lotnictwo/">Aviation</a> --><a href="/en/lotnictwo/">outside navigation</a>'),
+    outOfOrder: (html) => html
+      .replace('<li><a href="/en/aplikacje-operacyjne/">Operational applications</a></li>', "__OPERATIONS__")
+      .replace('<li><a href="/en/lotnictwo/">Aviation</a></li>', '<li><a href="/en/aplikacje-operacyjne/">Operational applications</a></li>')
+      .replace("__OPERATIONS__", '<li><a href="/en/lotnictwo/">Aviation</a></li>'),
+    wrongLanguage: (html) => html.replace('<a href="/" class="nav-lang">', '<a href="/en/" class="nav-lang">')
+  }
+};
+
+for (const lang of ["pl", "en"]) {
+  test(`foundation catches a missing ${lang} route only inside the actual navigation`, async () => {
+    const html = navigationMutations[lang].missingRoute(homepageFixture(lang, lang === "pl" ? "Marka" : "Brand"));
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-route"));
+  });
+
+  test(`foundation catches an out-of-order ${lang} navigation route`, async () => {
+    const html = navigationMutations[lang].outOfOrder(homepageFixture(lang, lang === "pl" ? "Marka" : "Brand"));
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-route"));
+  });
+
+  test(`foundation catches a duplicate ${lang} navigation id outside comments`, async () => {
+    const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand").concat('<div id="nav-menu"></div><!-- <div id="nav-toggle"></div> -->');
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-id"));
+    assert.equal(result.errors.filter((entry) => entry.includes("nav-toggle")).length, 0);
+  });
+
+  test(`foundation catches the wrong paired-language homepage on ${lang}`, async () => {
+    const html = navigationMutations[lang].wrongLanguage(homepageFixture(lang, lang === "pl" ? "Marka" : "Brand"));
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("nav-language"));
+  });
+
+  test(`foundation requires maxlength 2000 on the ${lang} homepage chat input`, async () => {
+    const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand").replace(' maxlength="2000"', "");
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("chat-maxlength"));
+  });
+
+  test(`foundation keeps a usable no-JS email link on the ${lang} homepage`, async () => {
+    const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand").replace('href="mailto:pawel@mamcarz.com"', 'href="#"');
+    const root = await fixture({ [`${lang}Html`]: html, css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("contact-link"));
+  });
+}
+
+test("foundation requires the advisory group to use native details markup", async () => {
+  const html = homepageFixture("pl", "Marka")
+    .replace('<details class="nav-group">', '<div class="nav-group">')
+    .replace("</details>", "</div>");
+  const root = await fixture({ plHtml: html, css: foundationCss });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("nav-advisory"));
+});
+
+test("foundation requires the exact localized advisory submenu", async () => {
+  const html = homepageFixture("en", "Brand")
+    .replace('href="/en/uslugi/doradztwo-zamowienia-publiczne/"', 'href="/en/uslugi/other/"')
+    .replace("Public procurement", "Other advisory");
+  const root = await fixture({ enHtml: html, css: foundationCss });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("nav-advisory"));
+});
+
+test("foundation requires each defensive initializer and invocation", async () => {
+  for (const initializer of ["initNavigation", "initBackToTop", "initChat"]) {
+    const js = validBrowserScript.replaceAll(initializer, `removed${initializer}`);
+    const root = await fixture({ css: foundationCss, js });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-initializer"), initializer);
+  }
+});
+
+test("foundation requires the navigation guard before the only JS marker", async () => {
+  const marker = 'document.documentElement.classList.add("js");';
+  const js = `${marker}\n${validBrowserScript.replace(marker, "")}\n// ${marker}`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-navigation-marker"));
+});
+
+test("Plan 3 Task 8 requires a pseudonymous chat ID, limiter header and localized fallbacks", async (t) => {
+  const validRoot = await fixture({ css: foundationCss, js: validBrowserScript });
+  const valid = await runVerification({ root: validRoot, scope: "foundation" });
+  assert.deepEqual(valid.errors.filter((entry) => entry.startsWith("ERROR js-chat-client")), []);
+  assert.equal(errorIds(valid).includes("js-chat-header"), false);
+  assert.equal(errorIds(valid).includes("js-chat-fallbacks"), false);
+
+  const cases = [
+    ["missing helper", "js-chat-client-id", (js) => js.replaceAll("getChatClientId", "removedChatClientId")],
+    ["missing random UUID", "js-chat-client-id", (js) => js.replaceAll("crypto.randomUUID", "crypto.removedUUID")],
+    ["missing local storage write", "js-chat-client-id", (js) => js.replace("localStorage.setItem", "localStorage.removedSetItem")],
+    ["missing limiter header", "js-chat-header", (js) => js.replace("X-Chat-Client", "X-Removed-Client")],
+    ["missing 413 fallback", "js-chat-fallbacks", (js) => js.replace("413:", "412:")],
+    ["missing 429 fallback", "js-chat-fallbacks", (js) => js.replace("429:", "428:")],
+    ["missing 500 fallback", "js-chat-fallbacks", (js) => js.replace("500:", "501:")]
+  ];
+  for (const [label, expected, mutate] of cases) await t.test(label, async () => {
+    const root = await fixture({ css: foundationCss, js: mutate(validBrowserScript) });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+  });
+});
+
+function notFoundContractFixture() {
+  return `<!doctype html><html lang="pl"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 · Strona nie istnieje | mamcarz.com</title>
+    <meta name="description" content="Pod tym adresem nie ma strony.">
+    <meta name="robots" content="noindex, follow">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <style>[data-lang="en"]{display:none}html[lang="en"] [data-lang="pl"]{display:none}html[lang="en"] [data-lang="en"]{display:revert}</style>
+    <script>(function(){var english=location.pathname.indexOf("/en/")===0;if(!english)return;document.documentElement.lang="en";document.title="404 · Page not found | mamcarz.com";var meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute("content","There is no page at this address.");})();</script>
+  </head><body>
+    <nav class="site-nav" aria-label="Nawigacja / Navigation"><a href="/" class="nav-logo">PM · Mamcarz.com</a></nav>
+    <main id="main"><h1><span data-lang="pl">Tej strony nie ma</span><span data-lang="en">This page does not exist</span></h1>
+      <p data-lang="pl">Pod tym adresem nie ma strony.</p><p data-lang="en">There is no page at this address.</p>
+      <a href="/" data-lang="pl">Strona główna</a><a href="/#contact" data-lang="pl">Kontakt</a>
+      <a href="/en/" data-lang="en">Home</a><a href="/en/#contact" data-lang="en">Contact</a>
+    </main><footer class="site-footer">mamcarz.com</footer>
+    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+  </body></html>`;
+}
+
+test("Plan 3 Task 5 requires one no-JS-safe bilingual 404 document", async (t) => {
+  const validRoot = await fixture({ notFoundHtml: notFoundContractFixture(), css: foundationCss });
+  const valid = await runVerification({ root: validRoot, scope: "foundation" });
+  assert.deepEqual(valid.errors.filter((entry) => entry.startsWith("ERROR not-found-")), []);
+
+  const cases = [
+    ["second h1", "not-found-h1", (html) => html.replace("</main>", "<h1>Duplicate</h1></main>")],
+    ["second main", "not-found-main", (html) => html.replace("</footer>", "<main></main></footer>")],
+    ["indexable error", "not-found-robots", (html) => html.replace("noindex, follow", "index, follow")],
+    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260825-flightplan-3", "stale")],
+    ["missing English contact", "not-found-links", (html) => html.replace('href="/en/#contact"', 'href="/en/"')],
+    ["duplicate id", "not-found-ids", (html) => html.replace("</main>", '<span id="main"></span></main>')],
+    ["English default", "not-found-default", (html) => html.replace('<html lang="pl">', '<html lang="en">')],
+    ["DOM creation in locale script", "not-found-script", (html) => html.replace("})();</script>", 'document.createElement("p");})();</script>')],
+    ["invented radar copy", "not-found-copy", (html) => html.replace("Pod tym adresem nie ma strony.", "Poza zasięgiem radaru.")],
+    ["canonical error URL", "not-found-metadata", (html) => html.replace("</head>", '<link rel="canonical" href="https://mamcarz.com/404"></head>')]
+  ];
+  for (const [label, expected, mutate] of cases) await t.test(label, async () => {
+    const root = await fixture({ notFoundHtml: mutate(notFoundContractFixture()), css: foundationCss });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+  });
+});
+
+test("foundation protects every existing mobile legacy navigation fallback branch", async () => {
+  const visibleLinks = foundationCss.replace(
+    /(@media \(max-width: 759px\) \{[\s\S]*?\.nav-list,\s*\.nav-links \{[\s\S]*?)display: block;/,
+    "$1display: none;"
+  );
+  const mutations = [
+    ["containing nav relative", foundationCss.replace(
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) {\n    position: relative;",
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) {\n    position: absolute;"
+    )],
+    ["legacy list static", foundationCss.replace(
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) .nav-links {\n    position: static;",
+      "html:not(.js):not(.js-reveal) body > nav:not(.breadcrumb) .nav-links {\n    position: absolute;"
+    )],
+    ["legacy list visible", visibleLinks],
+    ["legacy toggle hidden", foundationCss.replace(".nav-hamburger { display: none; }", ".nav-hamburger { display: inline-flex; }")]
+  ];
+  for (const [label, css] of mutations) {
+    assert.notEqual(css, foundationCss, label);
+    const root = await fixture({ css });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("css-legacy-nav-fallback"), label);
+  }
+});
+
+test("foundation rejects unsafe innerHTML assignment in the browser script", async () => {
+  const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\nmessage.innerHTML = data.reply;` });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 foundation rejects alternate HTML injection sinks in chat rendering", async () => {
+  const mutations = [
+    ["outerHTML assignment", "message.outerHTML = text;"],
+    ["compound innerHTML assignment", "message.innerHTML += text;"],
+    ["insertAdjacentHTML call", 'message.insertAdjacentHTML("beforeend", text);']
+  ];
+  const acceptedUnsafeSinks = [];
+  for (const [label, unsafeSink] of mutations) {
+    const js = validBrowserScript.replace("message.textContent = text;", `message.textContent = text;\n    ${unsafeSink}`);
+    assert.notEqual(js, validBrowserScript, label);
+    const root = await fixture({ css: foundationCss, js });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) acceptedUnsafeSinks.push(label);
+  }
+  assert.deepEqual(acceptedUnsafeSinks, [], `validator accepted unsafe sinks: ${acceptedUnsafeSinks.join(", ")}`);
+});
+
+test("Task 7 review rejects bracket and optional-call HTML injection sinks", async () => {
+  const mutations = [
+    ["computed innerHTML assignment", 'node["innerHTML"] = payload;'],
+    ["computed outerHTML compound assignment", "node['outerHTML'] += payload;"],
+    ["optional insertAdjacentHTML call", 'node.insertAdjacentHTML?.("beforeend", payload);'],
+    ["computed insertAdjacentHTML call", 'node["insertAdjacentHTML"]("beforeend", payload);']
+  ];
+  const acceptedUnsafeSinks = [];
+  for (const [label, unsafeSink] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${unsafeSink}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) acceptedUnsafeSinks.push(label);
+  }
+  assert.deepEqual(acceptedUnsafeSinks, [], `validator accepted unsafe sinks: ${acceptedUnsafeSinks.join(", ")}`);
+});
+
+test("Task 7 review ignores HTML sink spellings in comments and literal text", async () => {
+  const controls = [
+    ["double-quoted string", 'const task7Text = "node.innerHTML = payload";'],
+    ["single-quoted string", "const task7Text = 'node.insertAdjacentHTML(';"],
+    ["template raw text", "const task7Text = `node.innerHTML = payload; node.insertAdjacentHTML(`;"],
+    ["line comment", "// node.innerHTML = payload"],
+    ["block comment", "/* node.insertAdjacentHTML(\"beforeend\", payload) */"]
+  ];
+  const rejectedSafeControls = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejectedSafeControls.push(label);
+  }
+  assert.deepEqual(rejectedSafeControls, [], `validator rejected inert sink text: ${rejectedSafeControls.join(", ")}`);
+});
+
+test("Task 7 review probe catches escaped and optional computed HTML sinks", async () => {
+  const probes = [
+    ["hex-escaped computed property", 'node["inner\\x48TML"] ??= payload;'],
+    ["optional computed property separated by a comment", 'node?.[/* bounded gap */"outerHTML"] ||= payload;'],
+    ["static template computed method", 'node[`insertAdjacentHTML`]?.("beforeend", payload);']
+  ];
+  const missed = [];
+  for (const [label, probe] of probes) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${probe}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) missed.push(label);
+  }
+  assert.deepEqual(missed, [], `validator missed bypass probes: ${missed.join(", ")}`);
+});
+
+test("Task 7 review probe permits regex, dynamic-template raw text and inert key arrays", async () => {
+  const probes = [
+    ["regular expression", String.raw`const sinkPattern = /\.innerHTML\s*=|insertAdjacentHTML\(/;`],
+    ["dynamic template raw text", "const label = `node.innerHTML = ${safeValue}; node.insertAdjacentHTML(`;"],
+    ["inert key array", 'const sinkNames = ["innerHTML", "outerHTML", "insertAdjacentHTML"];']
+  ];
+  const rejected = [];
+  for (const [label, probe] of probes) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${probe}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator rejected safe probes: ${rejected.join(", ")}`);
+});
+
+test("Task 7 review fails closed on unterminated JavaScript lexical states", async () => {
+  const mutations = [
+    ["string", 'const broken = "unterminated'],
+    ["block comment", "/* unterminated"],
+    ["template", "const broken = `unterminated"]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 2 rejects Unicode-escaped HTML sink IdentifierNames", async () => {
+  const mutations = [
+    ["escaped middle character", String.raw`node.inn\u0065rHTML = payload;`],
+    ["escaped leading character", String.raw`node.\u0069nnerHTML = payload;`],
+    ["code-point escaped middle character", String.raw`node.out\u{0065}rHTML ||= payload;`]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator accepted escaped sink IdentifierNames: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 2 fails closed on malformed Unicode IdentifierName escapes", async () => {
+  const mutations = [
+    ["out-of-range code point", String.raw`node.inn\u{110000}rHTML = payload;`],
+    ["malformed fixed-width escape", String.raw`node.\u00G0innerHTML = payload;`]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 2 recognizes regex statements after control heads and blocks", async () => {
+  const controls = [
+    ["if control head", "if (safe) /.innerHTML=/.test(value);"],
+    ["while control head", String.raw`while (false) /.insertAdjacentHTML\(/.test(value);`],
+    ["standalone block", "{} /.innerHTML=/.test(value);"]
+  ];
+  const rejected = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator rejected regex statements: ${rejected.join(", ")}`);
+});
+
+test("Task 7 round 2 distinguishes division from regex without masking a later sink", async () => {
+  const safeControls = [
+    "const ratio = total / divisor;",
+    "const prior = total / node.innerHTML;"
+  ];
+  for (const control of safeControls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), control);
+  }
+  const unsafeRoot = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\nconst ratio = total / divisor; node.innerHTML = payload;`
+  });
+  const unsafeResult = await runVerification({ root: unsafeRoot, scope: "foundation" });
+  assert.ok(errorIds(unsafeResult).includes("js-inner-html"));
+});
+
+test("Task 7 round 2 rejects prefix and postfix HTML sink updates", async () => {
+  const mutations = [
+    ["prefix increment", "++node.innerHTML;"],
+    ["prefix decrement", "--node.outerHTML;"],
+    ["postfix increment", "node.innerHTML++;"],
+    ["postfix decrement", "node.outerHTML--;" ]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator accepted sink updates: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 2 probe catches a code-point escaped HTML method", async () => {
+  const root = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\n${String.raw`node.insertAdj\u{61}centHTML("beforeend", payload);`}`
+  });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 2 probe permits regex statements after for and a control block", async () => {
+  const controls = [
+    ["for control head", "for (; false;) /.innerHTML=/.test(value);"],
+    ["completed control block", String.raw`if (safe) {} /.outerHTML\+=/.test(value);`]
+  ];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 2 probe catches a real sink after a control block", async () => {
+  const root = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\nif (safe) {} node.innerHTML = payload;`
+  });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 3 rejects sinks in function, arrow, class and object division operands", async () => {
+  const mutations = [
+    ["function expression", "const result = function () {} / (node.innerHTML = payload) / divisor;"],
+    ["arrow-function expression", "const result = (() => {}) / (node.innerHTML = payload) / divisor;"],
+    ["class expression", "const result = class {} / (node.innerHTML = payload) / divisor;"],
+    ["object literal", "const result = ({}) / (node.innerHTML = payload) / divisor;"]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator masked division-operand sinks after: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 3 permits regex statements after declarations and statement blocks", async () => {
+  const controls = [
+    ["function declaration", "function declared() {} /.innerHTML=/.test(value);"],
+    ["class declaration", "class Declared {} /.innerHTML=/.test(value);"],
+    ["if block", "if (safe) {} /.innerHTML=/.test(value);"],
+    ["for block", "for (; false;) {} /.innerHTML=/.test(value);"],
+    ["standalone block", "{} /.innerHTML=/.test(value);"]
+  ];
+  const rejected = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator rejected declaration/block regex statements: ${rejected.join(", ")}`);
+});
+
+test("Task 7 round 3 rejects prefix updates through call-member chains", async () => {
+  const mutations = [
+    ["call-chain increment", "++getNode().innerHTML;"],
+    ["call-chain decrement", "--getNode().outerHTML;"]
+  ];
+  const accepted = [];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (!errorIds(result).includes("js-inner-html")) accepted.push(label);
+  }
+  assert.deepEqual(accepted, [], `validator accepted prefix call-chain updates: ${accepted.join(", ")}`);
+});
+
+test("Task 7 round 3 keeps postfix ASI reads safe across line comments and block comments", async () => {
+  const controls = [
+    ["plain newline", "counter++\nnode.innerHTML;"],
+    ["line comment", "counter++ // completed update\nnode.innerHTML;"],
+    ["multiline block comment", "counter-- /* completed\nupdate */ node.outerHTML;"]
+  ];
+  const rejected = [];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    if (errorIds(result).includes("js-inner-html")) rejected.push(label);
+  }
+  assert.deepEqual(rejected, [], `validator treated postfix ASI reads as prefix sinks: ${rejected.join(", ")}`);
+});
+
+test("Task 7 round 3 keeps the current browser script sink-clean", async () => {
+  const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
+  const root = await fixture({ css: foundationCss, js: browserScript });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(!errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 3 probe catches arrow and nested-object division sinks", async () => {
+  const mutations = [
+    ["async arrow expression", "const result = (async () => {}) / (node.outerHTML = payload) / divisor;"],
+    ["object with method", "const result = ({ method() {} }) / (node.innerHTML = payload) / divisor;"]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 3 probe permits regex after function and class declarations with nested bodies", async () => {
+  const controls = [
+    ["function declaration", "function declared(value = {}) {} /.innerHTML=/.test(value);"],
+    ["class declaration", "class Declared { method() {} } /.outerHTML=/.test(value);"]
+  ];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 3 probe distinguishes ASI reads and sinks across comments and line separators", async () => {
+  const safeRoot = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\ncounter++ /* completed\nupdate */ getNode().innerHTML;`
+  });
+  const safeResult = await runVerification({ root: safeRoot, scope: "foundation" });
+  assert.ok(!errorIds(safeResult).includes("js-inner-html"));
+
+  const prefixRoot = await fixture({ css: foundationCss, js: `${validBrowserScript}\ncounter\n++getNode().innerHTML;` });
+  const prefixResult = await runVerification({ root: prefixRoot, scope: "foundation" });
+  assert.ok(errorIds(prefixResult).includes("js-inner-html"));
+
+  const separatorRoot = await fixture({
+    css: foundationCss,
+    js: `${validBrowserScript}\n// completed comment\u2028node.innerHTML = payload;`
+  });
+  const separatorResult = await runVerification({ root: separatorRoot, scope: "foundation" });
+  assert.ok(errorIds(separatorResult).includes("js-inner-html"));
+});
+
+test("Task 7 round 3 probe catches optional methods and nested member-call prefix chains", async () => {
+  const mutations = [
+    ["optional HTML method", 'getRegistry().current?.insertAdjacentHTML?.("beforeend", payload);'],
+    ["nested call/member prefix", "++getRegistry().current.getNode().innerHTML;"]
+  ];
+  for (const [label, mutation] of mutations) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+const task7Round4FunctionExpressionSinks = [
+  ["generator function expression", "const result = function* () {} / (node.innerHTML = payload) / divisor;"],
+  ["named async-generator function expression", "const result = async function* generated() {} / (node.outerHTML = payload) / divisor;"]
+];
+
+for (const [label, mutation] of task7Round4FunctionExpressionSinks) {
+  test(`Task 7 round 4 rejects ${label} division sinks`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"));
+  });
+}
+
+const task7Round4FunctionDeclarationRegexControls = [
+  ["normal function declaration with a multiline header", "function /* header */ declared(\n  value = {}\n) {} /.innerHTML=/.test(value);"],
+  ["async function declaration", "async /* header */ function declaredAsync() {} /.outerHTML=/.test(value);"],
+  ["generator function declaration", "function* declaredGenerator() {} /.innerHTML=/.test(value);"],
+  ["async-generator function declaration", "async function* declaredAsyncGenerator() {} /.outerHTML=/.test(value);"]
+];
+
+for (const [label, control] of task7Round4FunctionDeclarationRegexControls) {
+  test(`Task 7 round 4 permits regex after ${label}`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"));
+  });
+}
+
+const task7Round4ClassExpressionSinks = [
+  ["named class expression with extends", "const result = class Extended extends Base {} / (node.innerHTML = payload) / divisor;"],
+  ["anonymous class expression with extends", "const result = class extends Base {} / (node.outerHTML = payload) / divisor;"],
+  ["class expression with a call in its extends expression", "const result = class Extended extends mixin(Base) {} / (node.innerHTML = payload) / divisor;"]
+];
+
+for (const [label, mutation] of task7Round4ClassExpressionSinks) {
+  test(`Task 7 round 4 rejects ${label} division sinks`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${mutation}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-inner-html"));
+  });
+}
+
+const task7Round4ClassDeclarationRegexControls = [
+  ["class declaration with extends", "class Extended extends Base {} /.innerHTML=/.test(value);"],
+  ["class declaration with a call in its extends expression", "class ExtendedFactory extends mixin(Base) {} /.outerHTML=/.test(value);"],
+  ["class declaration with a multiline commented header", "class /* header */ ExtendedCommented\n  extends /* parent */ Base\n{} /.innerHTML=/.test(value);"]
+];
+
+for (const [label, control] of task7Round4ClassDeclarationRegexControls) {
+  test(`Task 7 round 4 permits regex after ${label}`, async () => {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"));
+  });
+}
+
+test("Task 7 round 4 preserves declaration contexts after ASI line separators", async () => {
+  const controls = [
+    ["async function after multiline comment ASI", "completedValue /* statement\ncomplete */ async function declaredAfterAsi() {} /.innerHTML=/.test(value);"],
+    ["class after plain ASI", "completedValue\nclass DeclaredAfterAsi extends Base {} /.outerHTML=/.test(value);"]
+  ];
+  for (const [label, control] of controls) {
+    const root = await fixture({ css: foundationCss, js: `${validBrowserScript}\n${control}` });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(!errorIds(result).includes("js-inner-html"), label);
+  }
+});
+
+test("Task 7 round 4 probe catches an async-generator expression division sink", async () => {
+  const js = `${validBrowserScript}\nconst result = async function* /* generator */ generated(value = {}) { yield value; } / (getNode().outerHTML ||= payload) / divisor;`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 4 probe catches a class-expression extends division sink", async () => {
+  const js = `${validBrowserScript}\nconst result = class /* expression */ extends registry.getBase() { method() {} } / (getNode().innerHTML = payload) / divisor;`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 round 4 probe permits regex after multiline commented declarations", async () => {
+  const js = `${validBrowserScript}
+async /* function header */ function* declaredGenerator(
+  value = {}
+) /* function body */ { if (value) {} }
+/.innerHTML\\s*=/.test(text);
+class /* class header */ DeclaredExtended
+  extends /* heritage */ createBase(
+    Base
+  )
+{ method() {} }
+/.outerHTML\\s*=/.test(text);`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(!errorIds(result).includes("js-inner-html"));
+});
+
+test("Task 7 navigation clears an open mobile menu when entering desktop width", async () => {
+  const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
+  const listeners = { document: {}, toggle: {}, overlay: {}, window: {} };
+  const on = (target, type, callback) => {
+    (listeners[target][type] ??= []).push(callback);
+  };
+  const dispatch = (target, type, event = {}) => {
+    for (const callback of listeners[target][type] ?? []) callback(event);
+  };
+  const makeClassList = () => {
+    const classes = new Set();
+    return {
+      add: (...names) => names.forEach((name) => classes.add(name)),
+      remove: (...names) => names.forEach((name) => classes.delete(name)),
+      contains: (name) => classes.has(name),
+      toggle(name, force) {
+        const enabled = force === undefined ? !classes.has(name) : Boolean(force);
+        if (enabled) classes.add(name);
+        else classes.delete(name);
+        return enabled;
+      }
+    };
+  };
+  const attributes = new Map([["aria-expanded", "false"]]);
+  const toggle = {
+    classList: makeClassList(),
+    addEventListener: (type, callback) => on("toggle", type, callback),
+    setAttribute: (name, value) => attributes.set(name, value),
+    getAttribute: (name) => attributes.get(name),
+    focus() {}
+  };
+  const menu = {
+    classList: makeClassList(),
+    addEventListener() {},
+    querySelectorAll: () => []
+  };
+  const overlay = {
+    classList: makeClassList(),
+    addEventListener: (type, callback) => on("overlay", type, callback)
+  };
+  const document = {
+    documentElement: { classList: makeClassList(), lang: "pl" },
+    querySelectorAll: () => [],
+    querySelector: () => null,
+    getElementById(id) {
+      return { "nav-toggle": toggle, "nav-menu": menu, "nav-overlay": overlay }[id] ?? null;
+    },
+    addEventListener: (type, callback) => on("document", type, callback)
+  };
+  const window = {
+    innerWidth: 390,
+    location: { pathname: "/" },
+    scrollY: 0,
+    addEventListener: (type, callback) => on("window", type, callback),
+    scrollTo() {}
+  };
+
+  runInNewContext(browserScript, {
+    document,
+    window,
+    requestAnimationFrame: (callback) => callback(),
+    setTimeout() {}
+  });
+
+  dispatch("toggle", "click");
+  assert.equal(menu.classList.contains("is-open"), true, "precondition: mobile menu opened");
+  assert.equal(toggle.getAttribute("aria-expanded"), "true", "precondition: toggle exposes open state");
+  assert.equal(overlay.classList.contains("is-open"), true, "precondition: overlay opened");
+
+  window.innerWidth = 1280;
+  dispatch("window", "resize");
+  assert.equal(menu.classList.contains("is-open"), false, "desktop layout must clear the mobile menu state");
+  assert.equal(toggle.getAttribute("aria-expanded"), "false", "desktop layout must reset aria-expanded");
+  assert.equal(overlay.classList.contains("is-open"), false, "desktop layout must clear the overlay state");
+
+  window.innerWidth = 390;
+  dispatch("window", "resize");
+  assert.equal(menu.classList.contains("is-open"), false, "returning to mobile must not reopen the menu");
+});
+
+test("Plan 1 broad review back-to-top click respects the runtime motion preference", async () => {
+  const browserScript = await readFile(resolve("assets/js/main.js"), "utf8");
+  for (const [reduced, expectedBehavior] of [[true, "auto"], [false, "smooth"]]) {
+    let clickHandler = null;
+    const scrollCalls = [];
+    const backToTop = {
+      classList: { toggle() {} },
+      addEventListener(type, callback) {
+        if (type === "click") clickHandler = callback;
+      }
+    };
+    const document = {
+      documentElement: { classList: { add() {} }, lang: "pl" },
+      querySelectorAll: () => [],
+      querySelector: () => null,
+      getElementById: (id) => id === "backToTop" ? backToTop : null,
+      addEventListener() {}
+    };
+    const window = {
+      innerWidth: 1280,
+      location: { pathname: "/" },
+      scrollY: 0,
+      addEventListener() {},
+      matchMedia(query) {
+        assert.equal(query, "(prefers-reduced-motion: reduce)");
+        return { matches: reduced };
+      },
+      scrollTo(options) {
+        scrollCalls.push(options);
+      }
+    };
+
+    runInNewContext(browserScript, {
+      document,
+      window,
+      requestAnimationFrame: (callback) => callback(),
+      setTimeout() {}
+    });
+
+    assert.equal(typeof clickHandler, "function", "back-to-top click path must be registered");
+    clickHandler();
+    assert.equal(scrollCalls.length, 1, "one click must issue one scroll");
+    assert.equal(scrollCalls[0].top, 0);
+    assert.equal(scrollCalls[0].behavior, expectedBehavior, `reduced=${reduced}`);
+  }
+});
+
+test("foundation requires text-only chat messages and a DOM-built fallback email link", async () => {
+  const js = validBrowserScript
+    .replace("message.textContent = text;", "message.innerText = text;")
+    .replace('fallbackLink.href = "mailto:pawel@mamcarz.com";', 'fallbackLink.href = "#";');
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-chat-dom"));
+});
+
+test("foundation keeps the exact chat Worker URL", async () => {
+  const js = validBrowserScript.replace("https://mamcarz-chat-api.pawel-767.workers.dev", "https://example.invalid");
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-chat-api"));
+});
+
+test("foundation rejects restored reveal or timeline animation behavior", async () => {
+  const js = `${validBrowserScript}\ndocument.querySelectorAll(".reveal");\ndocument.querySelectorAll(".timeline-item");`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("js-animation"));
+});
+
+test("foundation requires null guards even when the missing guard survives in a comment", async () => {
+  const mutations = [
+    ['if (!toggle || !menu) return;', "// if (!toggle || !menu) return;"],
+    ['if (!backToTop) return;', "// if (!backToTop) return;"],
+    ['if (!chatMessages || !chatInput || !chatSendButton) return;', "// if (!chatMessages || !chatInput || !chatSendButton) return;"]
+  ];
+  for (const [guard, comment] of mutations) {
+    const js = validBrowserScript.replace(guard, "").concat("\n", comment);
+    const root = await fixture({ css: foundationCss, js });
+    const result = await runVerification({ root, scope: "foundation" });
+    assert.ok(errorIds(result).includes("js-guard"), guard);
+  }
+});
+
+test("foundation rejects a required selector that survives only in a comment", async () => {
+  const css = `${foundationCss.replaceAll(".status-tag", ".removed-status-tag")}\n/* .status-tag { display: block; } */`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation distinguishes an exact selector from plural and prefixed selectors", async () => {
+  const css = foundationCss
+    .replaceAll(".service-card {", ".service-card-detail {")
+    .replaceAll(".service-card:hover", ".service-card-detail:hover");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation rejects an empty required declaration block", async () => {
+  const css = foundationCss.replace(/\.breadcrumb \{[\s\S]*?\n\}/, ".breadcrumb {}");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation requires responsive contracts inside the intended media scope", async () => {
+  const css = `${foundationCss.replace("@media (max-width: 759px) {", "@media (max-width: 758px) {")}\n/* @media (max-width: 759px) { .js .nav-list { display: none; } .js .nav-toggle { display: inline-flex; } .js .nav-list.is-open { display: block; } } */`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-responsive"));
+});
+
+test("foundation does not accept responsive declarations hidden in a nested media scope", async () => {
+  const css = `${foundationCss.replace("@media (max-width: 759px) {", "@media (max-width: 758px) {")}
+@media (max-width: 1179px) { @media (max-width: 759px) { .js .nav-list { display: none; } .js .nav-toggle { display: inline-flex; } .js .nav-list.is-open { display: block; } } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-responsive"));
+});
+
+test("foundation parser ignores structural characters inside quoted strings", async () => {
+  const css = `${foundationCss}\n.string-probe::before { content: "{;:}"; }`;
+  const result = await verifyFixtureCss(css);
+  assert.deepEqual(errorIds(result), ["task10-css-reviewed-artifact"]);
+});
+
+test("foundation validates every display font face as a complete tuple", async () => {
+  const css = foundationCss.replace(
+    "src: url('/assets/fonts/barlow-semi-condensed-latin-700-normal.woff2') format('woff2');",
+    "src: url('/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2') format('woff2');"
+  );
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("display-font"));
+});
+
+test("foundation rejects a later body font shorthand that resets the document contract", async () => {
+  const css = foundationCss.replace(
+    /(?:body,\s*)?button, input, textarea, select \{\s*font: inherit;\s*\}/,
+    "body, button, input, textarea, select { font: inherit; }"
+  );
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation rejects body typography resets inside responsive media", async () => {
+  const css = `${foundationCss}\n@media (max-width: 1179px) { body { font-family: serif; line-height: normal; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation treats an uppercase HTML body selector as the same typography target", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { BODY { font: 16px serif; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation parses mixed-case media at-rules before auditing body typography", async () => {
+  const css = `${foundationCss}\n@MeDiA (max-width: 759px) { BODY { font: inherit; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation finds the body type when it is the selector subject", async () => {
+  for (const selector of ["body", "html body", "html > body", "html + body", "html ~ body", "html || body", "body.some-class", "BODY:hover", "b\\6f dy"]) {
+    const css = `${foundationCss}\n${selector} { font: inherit; }`;
+    const result = await verifyFixtureCss(css);
+    assert.ok(errorIds(result).includes("css-body-contract"), selector);
+  }
+});
+
+test("foundation preserves escaped CSS selector atoms before subject decoding", async () => {
+  const cases = [
+    ["escaped child combinator", ".foo\\>body"],
+    ["escaped adjacent-sibling combinator", ".foo\\+body"],
+    ["escaped general-sibling combinator", ".foo\\~body"],
+    ["escaped column combinator", ".foo\\|\\|body"],
+    ["escaped whitespace", ".foo\\ body"],
+    ["hex escape with whitespace terminator", ".foo\\3E body"],
+    ["escaped newline", ".foo\\\nbody"]
+  ];
+  const outcomes = [];
+  for (const [label, selector] of cases) {
+    const css = foundationCss.concat("\n", selector, " { font-size: 10px; }");
+    const result = await verifyFixtureCss(css);
+    outcomes.push([label, errorIds(result).includes("css-body-contract")]);
+  }
+  assert.deepEqual(outcomes, [
+    ["escaped child combinator", false],
+    ["escaped adjacent-sibling combinator", false],
+    ["escaped general-sibling combinator", false],
+    ["escaped column combinator", false],
+    ["escaped whitespace", false],
+    ["hex escape with whitespace terminator", false],
+    ["escaped newline", false]
+  ]);
+});
+
+test("foundation allows body ancestors, siblings, pseudo-elements, attributes and classes", async () => {
+  for (const selector of [
+    "body .probe",
+    "body > .probe",
+    "body + .probe",
+    ".shell body .probe",
+    "body::before",
+    "body::after",
+    '[data-target="body"]',
+    ".body"
+  ]) {
+    const css = `${foundationCss}\n${selector} { font-size: 10px; }`;
+    const result = await verifyFixtureCss(css);
+    assert.ok(!errorIds(result).includes("css-body-contract"), selector);
+  }
+});
+
+test("foundation rejects functional body selector subjects", async () => {
+  for (const selector of [":is(body)", ":where(body.some-class)"]) {
+    const css = `${foundationCss}\n${selector} { font-weight: 900; }`;
+    const result = await verifyFixtureCss(css);
+    assert.ok(errorIds(result).includes("css-body-contract"), selector);
+  }
+});
+
+test("foundation rejects a protected override when any selector-list branch targets body", async () => {
+  const css = `${foundationCss}\n[data-list="safe,body"], body .safe, html body { line-height: 1; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation parser splits selector lists only at top-level commas", () => {
+  const rules = parseCssRules('[data-list="one,two"], :is(.one, .two), body::before { color: red; }');
+  assert.deepEqual(rules[0].selectors, ['[data-list="one,two"]', ":is(.one, .two)", "body::before"]);
+});
+
+test("foundation rejects responsive body font-size overrides", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { body { font-size: 10px; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation cannot hide an active gradient between quoted comment markers", async () => {
+  const css = `${foundationCss}\n.comment-probe { --open: "/*"; background: linear-gradient(#fff, #000); --close: "*/"; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation rejects important italic values regardless of case and spacing", async () => {
+  const css = `${foundationCss}\n.italic-probe { FONT-STYLE : ItAlIc ! IMPORTANT; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation preserves quoted comment markers as valid declaration content", async () => {
+  const css = `${foundationCss}\n.comment-content::before { --open-marker: "/*"; content: "prefix \\\" /* literal */ suffix"; color: red; }`;
+  const result = await verifyFixtureCss(css);
+  assert.deepEqual(errorIds(result), ["task10-css-reviewed-artifact"]);
+});
+
+test("foundation reports an unterminated real CSS comment", async () => {
+  const css = `${foundationCss}\n/* unterminated verifier probe`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(result.errors.some((entry) => entry.startsWith("ERROR css-syntax assets/css/style.css:")), result.errors.join("\n"));
+});
+
+test("foundation does not confuse body text in an attribute selector with the body type", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { [data-target="body"] { font: inherit; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(!errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation allows safe responsive body overflow wrapping", async () => {
+  const css = `${foundationCss}\n@media (max-width: 759px) { body { overflow-wrap: anywhere; } }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(!errorIds(result).includes("css-body-contract"));
+});
+
+test("foundation rejects case-obfuscated banned gradient functions", async () => {
+  const css = `${foundationCss}\n.case-probe { background: Linear-Gradient(#fff, #000); }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation rejects CSS-escaped banned gradient functions", async () => {
+  const css = `${foundationCss}\n.escape-probe { background: l\\69near-gradient(#fff, #000); }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-banned"));
+});
+
+test("foundation does not treat a gradient name inside a quoted value as an active function", async () => {
+  const css = `${foundationCss}\n.string-probe::before { content: "Linear-Gradient(; l\\69near-gradient("; }`;
+  const result = await verifyFixtureCss(css);
+  assert.ok(!errorIds(result).includes("css-banned"));
+});
+
+test("foundation requires the back-to-top dual-contrast focus treatment", async () => {
+  const css = foundationCss
+    .replace(/(\.back-to-top \{[\s\S]*?)border: 3px solid var\(--signal-dark\);/, "$1border: 1px solid var(--signal-dark);")
+    .replaceAll(".back-to-top:focus-visible", ".back-to-top.removed-focus");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-focus"));
+});
+
+test("foundation keeps the inactive back-to-top control out of keyboard focus order", async () => {
+  const result = await verifyFixtureCss(foundationCss);
+  assert.equal(
+    errorIds(result).includes("css-back-to-top-visibility"),
+    false,
+    result.errors.filter((entry) => entry.includes("css-back-to-top-visibility")).join("\n")
+  );
+});
+
+test("foundation rejects a focusable back-to-top visibility regression", async () => {
+  const css = foundationCss
+    .replace("visibility: hidden;", "visibility: visible;")
+    .replace(/(\.back-to-top\.visible \{[\s\S]*?)visibility: visible;/, "$1visibility: hidden;");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-back-to-top-visibility"));
+});
+
+test("foundation parser preserves quoted and functional semicolons before later properties", () => {
+  const rules = parseCssRules('.probe { content: "alpha;{beta}:gamma"; --payload: fn(alpha; { beta }); color: red; min-height: 44px; }');
+  assert.equal(rules.length, 1);
+  assert.equal(rules[0].declarations.get("content"), '"alpha;{beta}:gamma"');
+  assert.equal(rules[0].declarations.get("--payload"), "fn(alpha; { beta })");
+  assert.equal(rules[0].declarations.get("color"), "red");
+  assert.equal(rules[0].declarations.get("min-height"), "44px");
+});
+
+test("foundation rejects low-contrast derivative tokens and component surfaces", async () => {
+  const css = foundationCss
+    .replace(/--signal-dark:\s*#[0-9A-Fa-f]{6}/, "--signal-dark: #D94B2B")
+    .replace(/--ink-secondary:\s*#[0-9A-Fa-f]{6}/, "--ink-secondary: #52707A");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-contrast"));
+});
+
+test("foundation rejects the core signal behind normal white control text", async () => {
+  const css = foundationCss.replace(
+    /(\.chat-send \{[\s\S]*?background: )var\(--signal-dark\)/,
+    "$1var(--signal)"
+  );
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-contrast"));
+});
+
+test("foundation requires explicit focus contrast on dark and signal surfaces", async () => {
+  const css = foundationCss
+    .replaceAll("#about :focus-visible", "#about .removed-focus")
+    .replaceAll(".home-cta :focus-visible", ".home-cta .removed-focus");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-focus"));
+});
+
+test("foundation requires a tokenized bridge for the inline diagram border", async () => {
+  const css = foundationCss.replaceAll(".diag-frame", ".removed-diag-frame");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-interface"));
+});
+
+test("foundation requires 44 by 44 targets outside mobile media queries", async () => {
+  const css = foundationCss.replace(/(\.breadcrumb a \{[\s\S]*?)\s*min-width: 44px;/, "$1");
+  const result = await verifyFixtureCss(css);
+  assert.ok(errorIds(result).includes("css-target"));
+});
+
+test("home scope honors the requested language", async () => {
+  const review = fact({ id: "review.only-pl", value: "review", display_pl: "PL review", display_en: "EN review", source_type: "internal_evidence", source_label: "Expected internal evidence; not inspected", status: "review", surfaces: ["index.html", "en/index.html"] });
+  const root = await fixture({ facts: [fact(), review], pl: "Marka PL review", en: "Brand" });
+  const pl = await runVerification({ root, scope: "home", lang: "pl" });
+  const en = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(pl).includes("fact-review.only-pl"));
+  assert.ok(!errorIds(en).includes("fact-review.only-pl"));
+});
+
+test("home scope rejects a visible em dash encoded as an HTML entity", async () => {
+  const root = await fixture({ plHtml: homepageFixture("pl", "Marka &mdash; treść") });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-forbidden-copy"));
+});
+
+test("home scope does not accept a required section marker inside a script", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<script>const fake = \'<section id="clients"></section>\';</script>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-section-order"));
+});
+
+test("home scope rejects a fact-bearing item with a missing annotation", async () => {
+  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item">Acme</div></section>');
+  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-annotation"));
+});
+
+test("home scope rejects an unknown fact id annotation", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.unknown">Unknown Client</div></section>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-unknown"));
+});
+
+for (const status of ["review", "retired"]) {
+  test(`home scope rejects a ${status} fact id annotation`, async () => {
+    const client = fact({ id: `client.${status}`, value: status, display_pl: status, display_en: status, status });
+    const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', `<section id="clients"><div class="client-item" data-fact-id="client.${status}">${status}</div></section>`);
+    const root = await fixture({ facts: [fact(), client], plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-fact-status"));
+  });
+}
+
+for (const [lang, retiredName] of [
+  ["en", "WarsawFlightSafety"],
+  ["en", "(wArSaWfLiGhTsAfEtY)"],
+  ["pl", "WARSAWFLIGHTSAFETY"]
+]) {
+  test(`home review hardening rejects visible retired aviation name on current ${lang} homepage: ${retiredName}`, async () => {
+    const root = await currentHomepageMutationFixture(lang, (html) => html.replace("</main>", `<p>${retiredName}</p></main>`));
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+  });
+}
+
+test("home review hardening ignores retired aviation name outside visible homepage copy", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    "</main>",
+    '<p data-fixture-path="/WarsawFlightSafety/">Fixture path</p><!-- WarsawFlightSafety --><script>const fixturePath = "/WarsawFlightSafety/";</script></main>'
+  ));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+});
+
+test("home review hardening keeps reasonable boundaries around the retired aviation name", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", "<p>WarsawFlightSafetyArchive fixture token</p></main>"));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+});
+
+test("home review hardening rejects the visible retired aviation name split by inline markup", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", "<p>WarsawFlight<span>Safety</span></p></main>"));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+});
+
+for (const lang of ["pl", "en"]) {
+  test(`home visibility hardening rejects the retired aviation name joined by an inline anchor on ${lang}`, async () => {
+    const root = await currentHomepageMutationFixture(lang, (html) => html.replace("</main>", '<p>WarsawFlight<a href="#contact">Safety</a></p></main>'));
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+  });
+}
+
+test("home visibility hardening does not join the retired aviation name across block boundaries", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", "<p>WarsawFlight</p><p>Safety</p></main>"));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+});
+
+for (const [hiddenKind, retiredCopy] of [
+  ["hidden", '<p hidden>WarsawFlightSafety</p>'],
+  ["aria-hidden", '<p aria-hidden="true">WarsawFlightSafety</p>']
+]) {
+  test(`home visibility hardening ignores retired aviation copy hidden with ${hiddenKind}`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${retiredCopy}</main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+  });
+}
+
+for (const [rawTextElement, rawText] of [
+  ["script", '<script>const marker = "<!--";</script>'],
+  ["style", '<style>.marker::before { content: "<!--"; }</style>']
+]) {
+  test(`home parser hardening keeps visible retired copy after valid ${rawTextElement} raw text`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${rawText}<p>WarsawFlightSafety</p></main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+    assert.ok(!errorIds(result).includes("home-html-syntax"));
+  });
+}
+
+for (const [suppressedElement, suppressedCopy] of [
+  ["script", '<script>const formerName = "WarsawFlightSafety";</script>'],
+  ["style", '<style>.former-name::before { content: "WarsawFlightSafety"; }</style>'],
+  ["template", "<template><p>WarsawFlightSafety</p></template>"]
+]) {
+  test(`home parser hardening ignores valid retired copy inside ${suppressedElement}`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${suppressedCopy}</main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(!errorIds(result).includes("home-retired-aviation-name"));
+    assert.ok(!errorIds(result).includes("home-html-syntax"));
+  });
+}
+
+for (const [malformedState, malformedHtml] of [
+  ["unterminated comment", "<!--><p>WarsawFlightSafety</p>"],
+  ["unterminated opening tag", '<p title="broken'],
+  ["unterminated raw-text element", '<script>const marker = "x";'],
+  ["unclosed element", "<p>Visible copy"],
+  ["mismatched closing tag", "<p>Visible copy</div>"]
+]) {
+  test(`home parser hardening fails closed on ${malformedState}`, async () => {
+    const root = await currentHomepageMutationFixture("en", (html) => html.replace("</main>", `${malformedHtml}</main>`));
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(errorIds(result).includes("home-html-syntax"));
+  });
+}
+
+test("home scope rejects an approved fact annotation with the wrong localized value", async () => {
+  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Wrong client</div></section>');
+  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-value"));
+});
+
+test("home scope rejects an approved fact followed by an invented assertion in the same annotated leaf", async () => {
+  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Acme. Niepotwierdzony lider rynku.</div></section>');
+  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-value"));
+});
+
+test("home scope rejects an unannotated injected About aviation fact", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"><li>Niepotwierdzone uprawnienie lotnicze</li>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-annotation"));
+});
+
+for (const [element, injected] of [
+  ["paragraph", '<p class="about-fact">Niepotwierdzona informacja</p>'],
+  ["span", "<span>Niepotwierdzona informacja</span>"]
+]) {
+  test(`home scope rejects an unsupported About ${element}`, async () => {
+    const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', `${injected}<ul class="about-facts">`);
+    const root = await fixture({ plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-about-structure"));
+  });
+}
+
+test("home scope requires exact controlled About narrative copy", async () => {
+  const html = homepageFixture("pl", "Marka").replace(controlledAboutCopy.pl.narratives[0][1], "Niepotwierdzona narracja.");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope requires the exact controlled About section label", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<p class="section-label">O mnie</p>', '<p class="section-label">Profil</p>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope requires stable About narrative IDs", async () => {
+  const html = homepageFixture("pl", "Marka").replace(' data-about-copy="decision-before-tool"', "");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope requires exactly one About aviation facts list", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"></ul><ul class="about-facts">');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects a missing About aviation fact item", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', "");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects reordered About aviation fact items", async () => {
+  const valid = homepageFixture("pl", "Marka");
+  const first = '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>';
+  const second = '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>';
+  const html = valid.replace(`${first}\n        ${second}`, `${second}\n        ${first}`);
+  assert.notEqual(html, valid);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects an extra annotated About aviation fact item", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"><li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects an unsupported sibling paragraph anywhere in About", async () => {
+  const about = `<section id="about">${controlledAboutFixture("pl")}<p>Niepotwierdzona informacja</p></section>`;
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "about", about);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope rejects a seventh annotated About fact in a sibling list", async () => {
+  const duplicate = '<ul class="about-facts"><li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li></ul>';
+  const about = `<section id="about">${controlledAboutFixture("pl")}${duplicate}</section>`;
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "about", about);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+test("home scope fails closed when English About control markers are absent", async () => {
+  const uncontrolledAbout = controlledAboutFixture("en")
+    .replaceAll(/ data-about-copy="[^"]+"/g, "")
+    .replace(' class="about-facts"', "");
+  const about = `<section id="about">${uncontrolledAbout}</section>`;
+  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "about", about);
+  const root = await fixture({ enHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-about-structure"));
+});
+
+const unannotatedHomeClaims = [
+  ["resume", '<p class="timeline-role">Unregistered role</p>'],
+  ["portfolio", '<div class="pcard__title">Unregistered project</div>'],
+  ["clients", '<div class="client-item">Unregistered client</div>'],
+  ["cases", "<dl><div><dt>Zakres</dt><dd>Unregistered project scope</dd></div></dl>"]
+];
+
+for (const [sectionId, claim] of unannotatedHomeClaims) {
+  test(`home scope rejects an unannotated injected ${sectionId} claim`, async () => {
+    const html = homepageFixture("pl", "Marka").replace(`<section id="${sectionId}"></section>`, `<section id="${sectionId}">${claim}</section>`);
+    const root = await fixture({ plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-fact-annotation"));
+  });
+}
+
+test("home scope rejects an unmatched Process article closing tag", async () => {
+  const process = '<section id="process"><article class="route-sequence__step"></article><article class="route-sequence__step"></article><article class="route-sequence__step"></article></article><article class="route-sequence__step"></article></section>';
+  const html = homepageFixture("pl", "Marka").replace(/<section id="process">[\s\S]*?<\/section>/, process);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-process-structure"));
+});
+
+test("home scope rejects a duplicate public-procurement possible-result row", async () => {
+  const skills = '<section id="skills"><article data-service="public-procurement"><h3><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></h3><dl><div><dt>Możliwy wynik</dt><dd>One</dd></div><div><dt>Możliwy wynik</dt><dd>Two</dd></div></dl></article></section>';
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope accepts the localized English public-procurement Skills structure", async () => {
+  const skills = `<section id="skills">${publicProcurementSkillsFixture("en")}</section>`;
+  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
+  const root = await fixture({ enHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(!errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects mixed-language public-procurement ledger labels", async () => {
+  const article = publicProcurementSkillsFixture("pl", { labels: ["Problem", "Działanie", "Możliwy wynik", "Possible outcome"] });
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects an extra unknown public-procurement ledger label", async () => {
+  const article = publicProcurementSkillsFixture("pl", { labels: ["Problem", "Działanie", "Możliwy wynik", "Ryzyko"] });
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects reordered public-procurement ledger labels", async () => {
+  const article = publicProcurementSkillsFixture("pl", { labels: ["Działanie", "Problem", "Możliwy wynik"] });
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects a missing public-procurement service item", async () => {
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", '<section id="skills"></section>');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects a public-procurement service item without its marker", async () => {
+  const html = homepageFixture("pl", "Marka").replace(' data-service="public-procurement"', "");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects an unknown English public-procurement href", async () => {
+  const skills = `<section id="skills">${publicProcurementSkillsFixture("en", { href: "/en/uslugi/typo/" })}</section>`;
+  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
+  const root = await fixture({ enHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope rejects a duplicate public-procurement service marker on another route", async () => {
+  const skills = `<section id="skills">${publicProcurementSkillsFixture("pl")}<article data-service="public-procurement"><a href="/uslugi/typo/">Other</a></article></section>`;
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+for (const [variant, options] of [
+  ["Polish path", { href: "/uslugi/doradztwo-zamowienia-publiczne/" }],
+  ["Polish outcome label", { outcome: "Możliwy wynik" }]
+]) {
+  test(`home scope rejects the ${variant} on the English homepage`, async () => {
+    const skills = `<section id="skills">${publicProcurementSkillsFixture("en", options)}</section>`;
+    const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
+    const root = await fixture({ enHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(errorIds(result).includes("home-skills-structure"));
+  });
+}
+
+test("home scope rejects the generic skill-card pattern", async () => {
+  const skills = '<section id="skills"><article class="skill-card"><h3>Generic area</h3></article></section>';
+  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+for (const surface of ["navigation", "footer"]) {
+  test(`home scope requires the Polish Projekty label in the ${surface}`, async () => {
+    const valid = homepageFixture("pl", "Marka");
+    const html = surface === "navigation"
+      ? valid.replace('<a href="/case-studies/">Projekty</a>', '<a href="/case-studies/">Case studies</a>')
+      : valid.replace('<a href="/case-studies/">Projekty</a>', '<a href="/case-studies/">Case studies</a>');
+    const root = await fixture({ plHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-pl-ia"));
+  });
+}
+
+for (const surface of ["navigation", "footer"]) {
+  test(`home scope requires the English Projects label in the ${surface}`, async () => {
+    const valid = homepageFixture("en", "Brand");
+    const html = surface === "navigation"
+      ? valid.replace('<a href="/en/case-studies/">Projects</a>', '<a href="/en/case-studies/">Case studies</a>')
+      : valid.replace('<a href="/en/case-studies/">Projects</a>', '<a href="/en/case-studies/">Case studies</a>');
+    const root = await fixture({ enHtml: html });
+    const result = await runVerification({ root, scope: "home", lang: "en" });
+    assert.ok(errorIds(result).includes("home-en-ia"));
+  });
+}
+
+test("facts scope rejects an undated or stale akrobacja.com current status", async () => {
+  const currentStatus = fact({
+    id: "portfolio.akrobacja_com.current_status",
+    value: "current aviation venture",
+    display_pl: "Aktualna marka działalności lotniczej",
+    display_en: "Current aviation venture",
+    kind: "constant",
+    as_of: null,
+    source_label: "Owner correction, 2026-08-25",
+    surfaces: ["index.html", "en/index.html"]
+  });
+  const root = await fixture({ facts: [fact(), currentStatus] });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(errorIds(result).includes("fact-current-contract"));
+});
+
+test("facts scope requires the 2026-08-26 owner correction on retired WarsawFlightSafety wording", async () => {
+  const retired = fact({
+    id: "aviation.warsaw_flight_safety",
+    value: "retired wording",
+    display_pl: "Właściciel WarsawFlightSafety",
+    display_en: "Owner of WarsawFlightSafety",
+    source_label: "Owner correction, 2026-08-25",
+    status: "retired"
+  });
+  const root = await fixture({ facts: [fact(), retired] });
+  const result = await runVerification({ root, scope: "facts" });
+  assert.ok(errorIds(result).includes("fact-current-contract"));
+});
+
+const heroes = [
+  ["hero.experience_years", "25+", "25+", "25+", "25+"],
+  ["hero.implementations", "20+", "20+", "20+", "20+"],
+  ["hero.project_value_eur", "500M EUR", "EUR 500M", "500M <span>EUR</span>", "500M <span>EUR</span>"],
+  ["hero.managed_spend_pln", "50 mld PLN", "PLN 50bn", "50 mld <span>PLN</span>", "50B <span>PLN</span>"]
+];
+
+for (const [id, display_pl, display_en, pl, en] of heroes) {
+  for (const [lang, page] of [["pl", pl], ["en", en]]) {
+    test(`home scope independently catches ${id} on ${lang} with split markup`, async () => {
+      const review = fact({
+        id,
+        value: display_pl,
+        display_pl,
+        display_en,
+        kind: "constant",
+        as_of: null,
+        source_type: "internal_evidence",
+        source_label: "Flight Plan candidate display; semantic owner gate pending",
+        status: "review",
+        aliases: lang === "pl" ? { pl: [], en: ["500M EUR", "50B PLN"] } : { pl: ["500M EUR", "50 mld PLN"], en: ["500M EUR", "50B PLN"] }
+      });
+      const html = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand")
+        .replace('<section id="contact"><a', `<section id="contact"><p>${page}</p><a`);
+      const root = await fixture({ facts: [fact(), review], [`${lang}Html`]: html });
+      const result = await runVerification({ root, scope: "home", lang });
+      assert.deepEqual(errorIds(result).filter((errorId) => errorId.startsWith("fact-")), [`fact-${id}`]);
+    });
+  }
+}
+
+test("home parity rejects an extra English section marker", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace(
+    '<section data-section="trust"></section>',
+    '<section data-section="trust"></section><section data-section="trust"></section>'
+  );
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-parity-sections"));
+});
+
+test("home scope rejects the same duplicate section marker on both languages", async () => {
+  const duplicateTrust = (html) => html.replace(
+    '<section data-section="trust"></section>',
+    '<section data-section="trust"></section><section data-section="trust"></section>'
+  );
+  const root = await fixture({ plHtml: duplicateTrust(homepageFixture("pl", "Marka")), enHtml: duplicateTrust(homepageFixture("en", "Brand")) });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-section-order"));
+});
+
+const factSequenceMutations = {
+  missing: (html) => html.replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', ""),
+  extra: (html) => html.replace('<section id="contact">', '<section id="contact"><span data-fact-id="brand.promise">Brand</span>'),
+  reordered: (html) => html
+    .replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', "__PPL_H__")
+    .replace('<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>', '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>')
+    .replace("__PPL_H__", '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>'),
+  different: (html) => html.replace(
+    '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>',
+    '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>'
+  )
+};
+
+for (const [mutation, mutate] of Object.entries(factSequenceMutations)) {
+  test(`home parity rejects a ${mutation} English fact ID sequence`, async () => {
+    const root = await fixture({ enHtml: mutate(homepageFixture("en", "Brand")) });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-parity-facts"));
+  });
+}
+
+test("home parity rejects reordered Process step identities", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace("01 / Diagnosis", "02 / Diagnosis");
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-parity-process"));
+});
+
+test("home parity rejects a changed evidence-row sequence", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace('data-domain="applications"', 'data-domain="aviation"');
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-parity-evidence-rows"));
+});
+
+for (const [inventory, first, second, errorId] of [
+  ["portfolio", '<a class="pcard" href="https://alpha.example"><div class="pcard__title" data-fact-id="portfolio.alpha">Alpha</div></a>', '<a class="pcard" href="https://beta.example"><div class="pcard__title" data-fact-id="portfolio.beta">Beta</div></a>', "home-parity-portfolio"],
+  ["clients", '<div class="client-item" data-fact-id="client.alpha">Alpha Client</div>', '<div class="client-item" data-fact-id="client.beta">Beta Client</div>', "home-parity-clients"]
+]) {
+  test(`home parity rejects reordered ${inventory} items`, async () => {
+    const valid = parityInventoryFixture("en");
+    const enHtml = valid.replace(first, "__FIRST__").replace(second, first).replace("__FIRST__", second);
+    assert.notEqual(enHtml, valid);
+    const inventoryFacts = [
+      fact(),
+      fact({ id: "portfolio.alpha", value: "Alpha", display_pl: "Alpha", display_en: "Alpha" }),
+      fact({ id: "portfolio.beta", value: "Beta", display_pl: "Beta", display_en: "Beta" }),
+      fact({ id: "client.alpha", value: "Alpha Client", display_pl: "Alpha Client", display_en: "Alpha Client" }),
+      fact({ id: "client.beta", value: "Beta Client", display_pl: "Beta Client", display_en: "Beta Client" })
+    ];
+    const root = await fixture({ facts: inventoryFacts, plHtml: parityInventoryFixture("pl"), enHtml });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes(errorId));
+  });
+}
+
+for (const [variant, enHref] of [
+  ["Polish route", "/lotnictwo/"],
+  ["invented translation", "/en/aviation/"]
+]) {
+  test(`home parity rejects a ${variant} on an English direct link`, async () => {
+    const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/lotnictwo/">Lotnictwo</a></section>');
+    const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', `<section id="portfolio"><a href="${enHref}">Aviation</a></section>`);
+    const root = await fixture({ plHtml, enHtml });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-parity-links"));
+  });
+}
+
+test("home parity permits only the labelled Polish-only Procurement 2026 route", async () => {
+  const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a class="pcard" href="/procurement-2026/"><div class="pcard__link">Otwórz projekt</div></a></section>');
+  const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', '<section id="portfolio"><a class="pcard" href="/procurement-2026/" lang="pl"><div class="pcard__link">Open project in Polish</div></a></section>');
+  const root = await fixture({ plHtml, enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-parity-links"));
+  assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
+});
+
+test("home review hardening rejects a generic label on the current English Procurement 2026 anchor", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("Open project in Polish", "Open project"));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+});
+
+for (const [location, mutate] of [
+  ["an attribute", (html) => html
+    .replace("Open project in Polish", "Open project")
+    .replace('href="/procurement-2026/" lang="pl"', 'href="/procurement-2026/" lang="pl" aria-label="Open project in Polish"')],
+  ["a comment", (html) => html.replace("Open project in Polish", "Open project<!-- Open project in Polish -->")],
+  ["another element in the target anchor", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<p>Open project in Polish</p><div class="pcard__link">Open project</div>'
+  )],
+  ["a sibling outside the target anchor", (html) => html
+    .replace("Open project in Polish", "Open project")
+    .replace('<a href="/procurement-2026/"', '<p>Open project in Polish</p><a href="/procurement-2026/"')],
+  ["another anchor", (html) => html
+    .replace("Open project in Polish", "Open project")
+    .replace('<div class="pcard__link">Open project</div>', '<div class="pcard__link">Open project in Polish</div>')]
+]) {
+  test(`home review hardening does not accept the Polish disclosure from ${location}`, async () => {
+    const root = await currentHomepageMutationFixture("en", mutate);
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  });
+}
+
+for (const [hiddenKind, mutate] of [
+  ["hidden target anchor", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a href="/procurement-2026/" lang="pl" hidden class="pcard">'
+  )],
+  ["aria-hidden target anchor", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a href="/procurement-2026/" lang="pl" aria-hidden="true" class="pcard">'
+  )],
+  ["hidden label wrapper", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link" hidden>Open project in Polish</div>'
+  )],
+  ["aria-hidden label wrapper", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link" aria-hidden="true">Open project in Polish</div>'
+  )],
+  ["hidden inline label", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link"><span hidden>Open project in Polish</span></div>'
+  )],
+  ["aria-hidden inline label", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div class="pcard__link"><span aria-hidden="true">Open project in Polish</span></div>'
+  )],
+  ["hidden ancestor", (html) => html.replace('<div class="portfolio-cards">', '<div class="portfolio-cards" hidden>')]
+]) {
+  test(`home visibility hardening rejects the Polish-only disclosure with a ${hiddenKind}`, async () => {
+    const root = await currentHomepageMutationFixture("en", mutate);
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  });
+}
+
+test("home visibility hardening does not treat aria-hidden false or data-hidden as hidden", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a href="/procurement-2026/" lang="pl" aria-hidden="false" data-hidden="fixture" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
+});
+
+test("home visibility hardening resists a hidden decoy inside the visible retired aviation name", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    "</main>",
+    '<p>WarsawFlight<span hidden>archived</span><a href="#contact">Safety</a></p></main>'
+  ));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+});
+
+test("home visibility hardening resists an aria-hidden disclosure decoy beside a generic label", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<div class="pcard__link">Open project in Polish</div>',
+    '<div aria-hidden=" TRUE "><div class="pcard__link">Open project in Polish</div></div><div class="pcard__link">Open project</div>'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+});
+
+test("home parser hardening reads Procurement href only from the real anchor attribute", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a title=\'href="/procurement-2026/"\' href="/en/procurement-2026/" lang="pl" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  assert.ok(errorIds(result).includes("home-parity-links"));
+});
+
+test("home parser hardening preserves a valid Procurement href after a quoted greater-than sign", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a title="Decision > tool" href="/procurement-2026/" lang="pl" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
+  assert.ok(!errorIds(result).includes("home-parity-links"));
+  assert.ok(!errorIds(result).includes("home-html-syntax"));
+});
+
+test("home parser hardening resists comment and anchor decoys inside raw script text", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    "</main>",
+    `<script>const decoy = '<a href="/en/procurement-2026/"> <!--';</script><p>WarsawFlight<strong>Safety</strong></p></main>`
+  ));
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-retired-aviation-name"));
+  assert.ok(!errorIds(result).includes("home-html-syntax"));
+});
+
+test("home parser hardening resists fake routes in multiple quoted attributes", async () => {
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace(
+    '<a href="/procurement-2026/" lang="pl" class="pcard">',
+    '<a title="Decision > href=\'/procurement-2026/\'" data-route=\'href="/procurement-2026/"\' href="/en/procurement-2026/" lang="pl" class="pcard">'
+  ));
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(errorIds(result).includes("home-en-pl-only-link"));
+  assert.ok(errorIds(result).includes("home-parity-links"));
+  assert.ok(!errorIds(result).includes("home-html-syntax"));
+});
+
+test("home parity preserves the local skip-link target", async () => {
+  const plHtml = `<a href="#main">Przejdź do treści</a>${homepageFixture("pl", "Marka")}`;
+  const enHtml = `<a href="#main">Skip to main content</a>${homepageFixture("en", "Brand")}`;
+  const root = await fixture({ plHtml, enHtml });
+  const result = await runVerification({ root, scope: "home" });
+  assert.ok(!errorIds(result).includes("home-parity-links"));
+});
+
+for (const [variant, anchor] of [
+  ["fake English route", '<a href="/en/procurement-2026/">Procurement Process 2026</a>'],
+  ["missing language disclosure", '<a href="/procurement-2026/">Procurement Process 2026</a>']
+]) {
+  test(`home parity rejects the Procurement 2026 ${variant}`, async () => {
+    const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/procurement-2026/">Procurement Process 2026</a></section>');
+    const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', `<section id="portfolio">${anchor}</section>`);
+    const root = await fixture({ plHtml, enHtml });
+    const result = await runVerification({ root, scope: "home" });
+    assert.ok(errorIds(result).includes(variant === "fake English route" ? "home-parity-links" : "home-en-pl-only-link"));
+  });
+}
+
+test("home scope requires the fixed English hero thesis and lead", async () => {
+  const enHtml = homepageFixture("en", "Procurement that works.").replace(
+    "</h1>",
+    '</h1><p class="hero-lead">I combine systems and delivery.</p>'
+  );
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-en-contract"));
+});
+
+test("home scope requires the exact English Insights navigation label", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace('href="/en/wiedza/">Insights', 'href="/en/wiedza/">Knowledge');
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-en-contract"));
+});
+
+test("home scope requires every English Skills evidence row to use the exact ledger labels", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace("<dt>Action</dt>", "<dt>Approach</dt>");
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-skills-structure"));
+});
+
+test("home scope requires the exact ordered English contact intents", async () => {
+  const enHtml = homepageFixture("en", "Brand").replace("subject=Operational%20application", "subject=Applications");
+  const root = await fixture({ enHtml });
+  const result = await runVerification({ root, scope: "home", lang: "en" });
+  assert.ok(errorIds(result).includes("home-contact-intents"));
+});
+
+async function task7HomeMutation(lang, mutate) {
+  const valid = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
+  const mutated = mutate(valid);
+  assert.notEqual(mutated, valid, `Task 7 ${lang} mutation must change the fixture`);
+  const root = await fixture({ [`${lang}Html`]: mutated });
+  return runVerification({ root, scope: "home", lang });
+}
+
+const task7HomeMutations = [
+  ["missing main landmark", "home-main", (html) => html.replace('<main id="main">', '<div id="main">').replace("</main>", "</div>")],
+  ["missing skip link", "home-skip-link", (html) => html.replace('class="skip-link"', 'class="removed-skip-link"')],
+  ["initially expanded mobile navigation", "home-nav-toggle", (html) => html.replace('aria-expanded="false"', 'aria-expanded="true"')],
+  ["unlinked mobile navigation control", "home-nav-toggle", (html) => html.replace('aria-controls="nav-menu"', 'aria-controls="other-menu"')],
+  ["wrong chat input limit", "home-chat-maxlength", (html) => html.replace('maxlength="2000"', 'maxlength="1999"')],
+  ["missing hero image width", "home-hero-image", (html) => html.replace(' width="960"', "")],
+  ["missing hero image height", "home-hero-image", (html) => html.replace(' height="1280"', "")],
+  ["missing high-priority hero fetch", "home-hero-image", (html) => html.replace(' fetchpriority="high"', "")],
+  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260825-flightplan-3', 'style.css?v=stale')],
+  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260825-flightplan-3', 'main.js?v=stale')],
+  ["inline presentation style", "home-inline-style", (html) => html.replace('<section id="hero">', '<section id="hero" style="display:block">')]
+];
+
+for (const lang of ["pl", "en"]) {
+  for (const [mutation, expectedError, mutate] of task7HomeMutations) {
+    test(`Task 7 home baseline rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+const task7Round3ExactResourceMutations = [
+  ["alternate stylesheet rel", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+  )],
+  ["stylesheet title attribute", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" title="decoy">'
+  )],
+  ["stylesheet integrity attribute", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" integrity="sha256-decoy">'
+  )],
+  ["stylesheet data decoy", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" data-decoy="true">'
+  )],
+  ["deferred async browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer async>'
+  )],
+  ["typed browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer type="text/javascript">'
+  )],
+  ["browser script integrity attribute", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer integrity="sha256-decoy">'
+  )],
+  ["browser script data decoy", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer data-decoy="true">'
+  )],
+  ["disabled latin font preload", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin disabled>'
+  )],
+  ["latin-ext font preload title attribute", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin title="decoy">'
+  )],
+  ["font preload integrity attribute", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin integrity="sha256-decoy">'
+  )],
+  ["font preload data decoy", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin data-decoy="true">'
+  )]
+];
+
+const task7Round4ScriptTopologyMutations = [
+  ["extra text/ecmascript inline script", (html) => html.replace(
+    "</body>",
+    '<script type="text/ecmascript">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra application/ecmascript inline script", (html) => html.replace(
+    "</body>",
+    '<script type="application/ecmascript">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra application/x-javascript inline script", (html) => html.replace(
+    "</body>",
+    '<script type="application/x-javascript">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra text/javascript1.5 inline script", (html) => html.replace(
+    "</body>",
+    '<script type="text/javascript1.5">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra text/livescript external script", (html) => html.replace(
+    "</body>",
+    '<script type="text/livescript" src="/assets/js/legacy.js"></script></body>'
+  )],
+  ["extra inline module script", (html) => html.replace(
+    "</body>",
+    '<script type="module">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra external module script", (html) => html.replace(
+    "</body>",
+    '<script type="module" src="/assets/js/module.js"></script></body>'
+  )],
+  ["extra untyped inline script", (html) => html.replace(
+    "</body>",
+    '<script>window.reviewExtra = true;</script></body>'
+  )],
+  ["extra unknown-MIME inline script", (html) => html.replace(
+    "</body>",
+    '<script type="application/x-review-decoy">window.reviewExtra = true;</script></body>'
+  )],
+  ["extra unknown-MIME external script", (html) => html.replace(
+    "</body>",
+    '<script type="application/x-review-decoy" src="/assets/js/decoy.js"></script></body>'
+  )],
+  ["external JSON-LD decoy script", (html) => html.replace(
+    "</body>",
+    '<script type="application/ld+json" src="/assets/js/structured-data-decoy.js"></script></body>'
+  )],
+  ["inert template script decoy", (html) => html.replace(
+    "</body>",
+    '<template><script type="application/json">{"decoy":true}</script></template></body>'
+  )]
+];
+
+for (const lang of ["pl", "en"]) {
+  test(`Task 7 round 4 script topology accepts exactly one JSON-LD graph and one main script on ${lang}`, async () => {
+    const root = await fixture({ [`${lang}Html`]: homepageFixture(lang, lang === "pl" ? "Marka" : "Brand") });
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(!errorIds(result).includes("home-cache-version"));
+  });
+  for (const [mutation, mutate] of task7Round4ScriptTopologyMutations) {
+    test(`Task 7 round 4 script topology rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes("home-cache-version"));
+    });
+  }
+}
+
+test("Task 7 round 4 probe rejects an extra obscure text/jscript script", async () => {
+  const result = await task7HomeMutation("pl", (html) => html.replace(
+    "</body>",
+    '<script type="text/jscript">window.obscureReviewExtra = true;</script></body>'
+  ));
+  assert.ok(errorIds(result).includes("home-cache-version"));
+});
+
+for (const lang of ["pl", "en"]) {
+  test(`Task 7 round 3 exact resources accepts current controlled tags on ${lang}`, async () => {
+    const root = await fixture({ [`${lang}Html`]: homepageFixture(lang, lang === "pl" ? "Marka" : "Brand") });
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(!errorIds(result).includes("home-cache-version"));
+    assert.ok(!errorIds(result).includes("home-font-preload"));
+  });
+  for (const [mutation, expectedError, mutate] of task7Round3ExactResourceMutations) {
+    test(`Task 7 round 3 exact resources rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+const task7Round2ActiveResourceMutations = [
+  ["stylesheet with inactive media", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" media="not all">'
+  )],
+  ["disabled stylesheet", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" disabled>'
+  )],
+  ["latin font preload with inactive media", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin media="not all">'
+  )],
+  ["latin-ext font preload with inactive media", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin media="not all">'
+  )],
+  ["nomodule browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer nomodule>'
+  )],
+  ["stylesheet inside noscript", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></noscript>'
+  )],
+  ["latin font preload inside noscript", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></noscript>'
+  )],
+  ["latin-ext font preload inside noscript", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></noscript>'
+  )],
+  ["browser script inside noscript", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
+    '<noscript><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></noscript>'
+  )],
+  ["stylesheet inside template", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></template>'
+  )],
+  ["latin font preload inside template", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></template>'
+  )],
+  ["latin-ext font preload inside template", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>',
+    '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></template>'
+  )],
+  ["browser script inside template", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
+    '<template><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></template>'
+  )],
+  ["stylesheet inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></div>'
+  )],
+  ["font preload inside hidden ancestor", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<div hidden><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></div>'
+  )],
+  ["browser script inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
+    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></div>'
+  )]
+];
+
+for (const lang of ["pl", "en"]) {
+  for (const [mutation, expectedError, mutate] of task7Round2ActiveResourceMutations) {
+    test(`Task 7 round 2 active resources rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+const task7ReviewHomeSemanticMutations = [
+  ["hidden main landmark", "home-main", (html) => html.replace('<main id="main">', '<main id="main" hidden>')],
+  ["aria-hidden main landmark", "home-main", (html) => html.replace('<main id="main">', '<main id="main" aria-hidden="true">')],
+  ["main landmark inside a hidden ancestor", "home-main", (html) => html
+    .replace('<main id="main">', '<div hidden><main id="main">')
+    .replace('</main><footer>', '</main></div><footer>')],
+  ["hidden hero section", "home-hero-image", (html) => html.replace('<section id="hero">', '<section id="hero" hidden>')],
+  ["aria-hidden hero section", "home-hero-image", (html) => html.replace('<section id="hero">', '<section id="hero" aria-hidden="true">')],
+  ["hero section inside an aria-hidden ancestor", "home-hero-image", (html) => html
+    .replace('<section id="hero">', '<div aria-hidden="true"><section id="hero">')
+    .replace('</section>\n    <section data-section="trust">', '</section></div>\n    <section data-section="trust">')],
+  ["hidden chat input", "home-chat-maxlength", (html) => html.replace('<input id="chat-input"', '<input hidden id="chat-input"')],
+  ["aria-hidden chat input", "home-chat-maxlength", (html) => html.replace('<input id="chat-input"', '<input aria-hidden="true" id="chat-input"')],
+  ["chat input inside a hidden ancestor", "home-chat-maxlength", (html) => html.replace(
+    '<input id="chat-input" maxlength="2000">',
+    '<div hidden><input id="chat-input" maxlength="2000"></div>'
+  )],
+  ["stylesheet changed to a style preload", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260825-flightplan-3">'
+  )],
+  ["hidden stylesheet", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" hidden>'
+  )],
+  ["stylesheet attributes on a meta decoy", "home-cache-version", (html) => html.replace(
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+  )],
+  ["additional active stylesheet", "home-cache-version", (html) => html.replace(
+    "</head>",
+    '<link rel="stylesheet" href="/assets/css/extra.css">\n  </head>'
+  )],
+  ["non-executable JSON browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" type="application/json" defer>'
+  )],
+  ["browser script without defer", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3">'
+  )],
+  ["hidden browser script", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer hidden>'
+  )],
+  ["browser-script attributes on a meta decoy", "home-cache-version", (html) => html.replace(
+    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
+    '<meta src="/assets/js/main.js?v=20260825-flightplan-3" defer>'
+  )],
+  ["additional executable browser script", "home-cache-version", (html) => html.replace(
+    "</body>",
+    '<script src="/assets/js/extra.js" defer></script></body>'
+  )],
+  ["Playfair substituted for the latin Barlow preload", "home-font-preload", (html) => html.replace(
+    '/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2',
+    '/assets/fonts/playfair-latin.woff2'
+  )],
+  ["DM Sans substituted for the latin-ext Barlow preload", "home-font-preload", (html) => html.replace(
+    '/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2',
+    '/assets/fonts/dmsans-latext.woff2'
+  )],
+  ["third font preload", "home-font-preload", (html) => html.replace(
+    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
+    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+  )],
+  ["font preload with the wrong rel", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="prefetch" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload with an additional rel token", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload stylesheet" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload with the wrong destination", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="script" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload with the wrong MIME type", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/ttf" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )],
+  ["font preload without crossorigin", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2">'
+  )],
+  ["font preload with credentialed crossorigin", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin="use-credentials">'
+  )],
+  ["hidden font preload", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin hidden>'
+  )],
+  ["font-preload attributes on a meta decoy", "home-font-preload", (html) => html.replace(
+    '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
+    '<meta rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>'
+  )]
+];
+
+for (const lang of ["pl", "en"]) {
+  for (const [mutation, expectedError, mutate] of task7ReviewHomeSemanticMutations) {
+    test(`Task 7 review home semantics rejects ${mutation} on ${lang}`, async () => {
+      const result = await task7HomeMutation(lang, mutate);
+      assert.ok(errorIds(result).includes(expectedError));
+    });
+  }
+}
+
+function deterministicBudgetNoise(length) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let state = 0x51f15e;
+  let value = "";
+  for (let index = 0; index < length; index += 1) {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    value += alphabet[state % alphabet.length];
+  }
+  return value;
+}
+
+test("Task 7 foundation rejects CSS above the compressed budget", async () => {
+  const css = `${foundationCss}\n/* ${deterministicBudgetNoise(200_000)} */`;
+  const root = await fixture({ css });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-css-gzip"));
+});
+
+test("Task 7 foundation rejects browser JavaScript above the compressed budget", async () => {
+  const js = `${validBrowserScript}\nconst task7BudgetNoise = "${deterministicBudgetNoise(80_000)}";`;
+  const root = await fixture({ css: foundationCss, js });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-js-gzip"));
+});
+
+test("Task 7 foundation rejects a hero image above the byte budget", async () => {
+  const root = await fixture({ css: foundationCss, heroImage: Buffer.alloc(220_001) });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-hero-image"));
+});
+
+test("Task 7 foundation fails closed when the budgeted hero image is missing", async () => {
+  const root = await fixture({ css: foundationCss, heroImage: null });
+  const result = await runVerification({ root, scope: "foundation" });
+  assert.ok(errorIds(result).includes("budget-hero-image"));
+});
+
+test("Plan 2 Task 8 accepts the exact five-artifact family without a deferred contract", async () => {
+  const result = await artifactFamilyMutation();
+  assert.deepEqual(result.errors, [], result.errors.join("\n"));
+  assert.deepEqual(result.deferred, []);
+
+  const sixthArtifact = await artifactFamilyMutation({
+    overrides: { "diagrams/unplanned.html": artifactProductHtml["diagrams/infographic.html"] }
+  });
+  assert.ok(errorIds(sixthArtifact).includes("artifact-manifest"), sixthArtifact.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 independently enforces the shared artifact shell, resources, safety and claims", async () => {
+  const cases = [
+    ["artifact identity", "artifact-manifest", "diagrams/diagram1_universal.html", (html) => html.replace('data-artifact="process"', 'data-artifact="process-map"')],
+    ["toolbar destination", "artifact-toolbar", "diagrams/diagram1_universal.html", (html) => html.replace('href="/en/wiedza/" target="_top"', 'href="/" target="_top"')],
+    ["visual token", "artifact-style", "diagrams/diagram1_universal.html", (html) => html.replace('--artifact-signal: #D94B2B;', '--artifact-signal: #D94B2C;')],
+    ["external resource", "artifact-resource", "diagrams/diagram1_universal.html", (html) => html.replace('</style>', '@import url("https://example.com/font.css");</style>')],
+    ["inline style", "artifact-safety", "diagrams/diagram1_universal.html", (html) => html.replace('<main class="artifact-shell">', '<main class="artifact-shell" style="display:block">')],
+    ["unsafe DOM sink", "artifact-safety", "diagrams/diagram1_universal.html", (html) => html.replace('  </script>\n</body>', '    panel.innerHTML = "unsafe";\n  </script>\n</body>')],
+    ["encoded inactive claim", "artifact-claims", "diagrams/diagram1_universal.html", (html) => html.replace('</body>', '<!-- Reality&#x20;2026 --></body>')],
+    ["common disclaimer drift", "artifact-disclaimer", "diagrams/diagram1_universal.html", (html) => html.replace('This is a conceptual procurement operating model. Capability descriptions and scores are illustrative target-state assumptions, not claims about current product availability, legal compliance or a measured organisation.', 'This model is illustrative.')],
+    ["extra element", "artifact-census", "diagrams/diagram1_universal.html", (html) => html.replace('</main>', '<div>Unowned element</div></main>')]
+  ];
+  for (const [label, expected, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 protects the process record order, geometry mapping and keyboard contract", async () => {
+  const cases = [
+    ["record id", "process-records", (html) => html.replace('data-record-id="s1" data-record-kind="Strategic sequence"', 'data-record-id="s1x" data-record-kind="Strategic sequence"')],
+    ["geometry mapping", "process-geometry", (html) => html.replace('class="process-geometry" data-record-id="ai-orch"', 'class="process-geometry" data-record-id="srm"')],
+    ["panel linkage", "process-controls", (html) => html.replace('aria-controls="process-detail" aria-pressed="true"', 'aria-pressed="true"')],
+    ["Space key", "process-interaction", (html) => html.replace('event.key !== " "', 'event.key !== "Spacebar"')],
+    ["markup-shaped description", "process-records", (html) => html.replace('Demand, budget assumptions, timing and decision ownership.', 'Demand, budget assumptions, timing and decision ownership. &lt;img src=x onerror=alert(1)&gt;')]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: "diagrams/diagram1_universal.html", mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 1 owns distinct pointer hits for open paths and filled lens circles", async () => {
+  const processPath = "diagrams/diagram1_universal.html";
+  const circleHitRule = "    circle.process-geometry { pointer-events: visiblePainted; }\n";
+  const withoutCircleHitRule = artifactProductHtml[processPath].replace(circleHitRule, "");
+  const missingCircleHit = await artifactFamilyMutation({
+    overrides: { [processPath]: withoutCircleHitRule }
+  });
+  assert.ok(errorIds(missingCircleHit).includes("process-pointer-hit"), `missing painted-circle hit rule:\n${missingCircleHit.errors.join("\n")}`);
+
+  const cases = [
+    ["open paths made fill-sensitive", (html) => html.replace("pointer-events: stroke;", "pointer-events: visiblePainted;")],
+    ["filled lens loses its centre hit", (html) => html.replace('r="18" fill="#193D49"', 'r="18" fill="none"')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: processPath, mutate });
+    assert.ok(errorIds(result).includes("process-pointer-hit"), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 rejects every pointer cascade override while retaining label pass-through", async () => {
+  const processPath = "diagrams/diagram1_universal.html";
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    ["all geometry hits disabled", (html) => html.replace("</style>", "    .process-map svg { pointer-events:none; }\n  </style>")],
+    ["open paths made fill-sensitive", (html) => html.replace("</style>", "    .process-map path.process-geometry { pointer-events:all!important; }\n  </style>")],
+    ["filled-circle centre hits removed", (html) => html.replace("</style>", "    .process-map circle.process-geometry { pointer-events:stroke!important; }\n  </style>")],
+    ["browser-valid escaped pointer override", (html) => html.replace("</style>", "    .process-map path.process-geometry { p\\6f inter-events:a\\6c l!important; }\n  </style>")],
+    ["important required declaration", (html) => html.replace("pointer-events: stroke;", "pointer-events: stroke !important;")],
+    ["map labels intercept pointer input", (html) => html.replace("pointer-events: none;", "pointer-events: auto;")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: processPath, mutate, overrides });
+    assert.ok(errorIds(result).includes("process-pointer-hit"), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 owns the scenario heading and honest baseline-derived score label independently", async () => {
+  const path = "diagrams/diagram3_maturity.html";
+  const overrides = round2ArtifactOverrides();
+  const result = await artifactFamilyMutation({
+    path,
+    overrides,
+    mutate: (html) => html.replace(
+      '<dt>Illustrative baseline score</dt><dd id="baseline-score">38%</dd>',
+      '<dt>Scenario score</dt><dd id="baseline-score">38%</dd>'
+    )
+  });
+  assert.ok(errorIds(result).includes("maturity-output"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 2 joins browser-visible copy around HTML comments before claim checks", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    ["retired aviation name", (html) => html.replace("A workshop view", "Warsaw<!--split-->FlightSafety workshop view")],
+    ["blocked client", (html) => html.replace("A workshop view", "Pol<!--split-->pharma workshop view")],
+    ["legacy framing", (html) => html.replace("A workshop view", "Reality<!--split--> 2026 workshop view")]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes("artifact-claims"), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 owns claim-safe leads, SAP workshop questions and generic percentages", async () => {
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    [
+      "invented 50 percent result",
+      "artifact-claims",
+      "diagrams/diagram2_ariba.html",
+      (html) => html.replace('<p class="artifact-lead">A static vocabulary for discussing a landscape. Each placement is a workshop hypothesis', '<p class="artifact-lead">A static vocabulary for discussing a landscape. SAP Ariba reduces procurement cost by 50%. Each placement is a workshop hypothesis')
+    ],
+    [
+      "lead drift",
+      "artifact-copy",
+      "diagrams/diagram1_universal.html",
+      (html) => html.replace('<p class="artifact-lead">A workshop view of strategic and operational steps with five scenario lenses. Select a labelled record to inspect its decision boundary.</p>', '<p class="artifact-lead">A workshop view of strategic and operational steps with five scenario lenses. Select a record to inspect the model.</p>')
+    ],
+    [
+      "workshop question drift",
+      "ariba-map-copy",
+      "diagrams/diagram2_ariba.html",
+      (html) => html.replace("which planning inputs and ownership rules belong in the landscape?", "which inputs belong in the landscape?")
+    ]
+  ];
+  for (const [label, expected, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 rejects dynamic external scripts and stylesheet-hidden required content", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const overrides = round2ArtifactOverrides();
+  const cases = [
+    [
+      "dynamic external script",
+      "artifact-resource",
+      (html) => html.replace("  </script>\n</body>", '    const remoteScript = document.createElement("script");\n    remoteScript.src = "https://example.com/payload.js";\n    document.head.append(remoteScript);\n  </script>\n</body>')
+    ],
+    [
+      "CSS-hidden disclaimer",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-disclaimer { display: none !important; }\n  </style>")
+    ],
+    [
+      "CSS-hidden toolbar",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-toolbar { visibility: hidden; }\n  </style>")
+    ],
+    [
+      "CSS-hidden content",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-shell { opacity: 0; }\n  </style>")
+    ],
+    [
+      "browser-valid escaped hidden disclaimer",
+      "artifact-visibility",
+      (html) => html.replace("</style>", "    .artifact-disclaimer { d\\69 splay: n\\6f ne!important; }\n  </style>")
+    ]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 3 rejects a pointer override nested in supports", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", "@supports(display:grid){.process-map svg{pointer-events:none!important}}</style>")
+  });
+  assert.ok(errorIds(result).includes("process-pointer-hit"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects a hidden disclaimer nested in supports", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", "@supports(display:grid){.artifact-disclaimer{display:none!important}}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-visibility"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 fails closed on a malformed conditional CSS rule", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", "@supports(display:grid){.artifact-disclaimer{display:none!important}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-style"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 accepts current artifacts and reviewed visible formatting", async () => {
+  const current = await artifactFamilyMutation();
+  assert.deepEqual(current.errors, [], current.errors.join("\n"));
+
+  const legitimate = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace(
+      "</style>",
+      "@supports(display:grid){.artifact-disclaimer{display:block;opacity:1}}</style>"
+    )
+  });
+  assert.deepEqual(legitimate.errors, [], legitimate.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects custom-property display indirection", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", ".artifact-disclaimer{--hide:none;display:var(--hide)!important}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-visibility"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects calculated zero opacity", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("</style>", ".artifact-disclaimer{opacity:calc(0)!important}</style>")
+  });
+  assert.ok(errorIds(result).includes("artifact-visibility"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 rejects template-literal and bracket-spelled dynamic external scripts", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const payload = [
+    "    const remote = document.createElement(`script`);",
+    "    remote[`src`] = `https://example.com/payload.js`;",
+    "    document.head.append(remote);"
+  ].join("\n");
+  const result = await artifactFamilyMutation({
+    path,
+    mutate: (html) => html.replace("  </script>\n</body>", `${payload}\n  </script>\n</body>`)
+  });
+  assert.ok(errorIds(result).includes("artifact-resource"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 4 rejects unreviewed grouping at-rules instead of flattening them", async () => {
+  const cases = [
+    ["layer pointer", "@layer review{.process-map svg{pointer-events:none!important}}"],
+    ["layer visibility", "@layer review{.artifact-disclaimer{display:none!important}}"],
+    ["container visibility", "@container review (min-width:1px){.artifact-disclaimer{display:none!important}}"],
+    ["scope pointer", "@scope (.process-map){svg{pointer-events:none!important}}"],
+    ["escaped layer pointer", "@l\\61 yer review{.process-map svg{pointer-events:none!important}}"],
+    ["escaped layer visibility", "@l\\61 yer review{.artifact-disclaimer{display:none!important}}"]
+  ];
+  const actual = [];
+  for (const [label, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    actual.push([label, errorIds(result).includes("artifact-style")]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 rejects native nested selector blocks", async () => {
+  const cases = [
+    ["native nesting pointer", ".process-map{svg{pointer-events:none!important}}"],
+    ["native nesting visibility", ".artifact-shell{.artifact-disclaimer{display:none!important}}"]
+  ];
+  const actual = [];
+  for (const [label, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    actual.push([label, errorIds(result).includes("artifact-style")]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 decodes and recursively inspects escaped conditional at-rules", async () => {
+  const cases = [
+    ["escaped media pointer", "process-pointer-hit", "@m\\65 dia(max-width:9999px){.process-map svg{pointer-events:none!important}}"],
+    ["escaped supports pointer", "process-pointer-hit", "@s\\75 pports(display:grid){.process-map svg{pointer-events:none!important}}"],
+    ["escaped supports visibility", "artifact-visibility", "@s\\75 pports(display:grid){.artifact-disclaimer{display:none!important}}"]
+  ];
+  const actual = [];
+  for (const [label, expected, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    actual.push([label, errorIds(result).includes(expected)]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 accepts safe nested media and supports formatting", async () => {
+  const cases = [
+    ["nested media and supports", "@media(min-width:1px){@supports(display:grid){.artifact-disclaimer{display:block;opacity:1}}}"],
+    ["escaped safe supports", "@s\\75 pports(display:grid){.artifact-disclaimer{display:block;opacity:1}}"]
+  ];
+  for (const [label, css] of cases) {
+    const result = await artifactFamilyMutation({
+      path: "diagrams/diagram1_universal.html",
+      mutate: (html) => html.replace("</style>", `${css}</style>`)
+    });
+    assert.deepEqual(result.errors, [], `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 4 independently owns the exact per-path inline-script hashes", () => {
+  for (const path of artifactPaths) {
+    assert.deepEqual(
+      testOwnedArtifactInlineScriptHashes(artifactProductHtml[path]),
+      approvedArtifactInlineScriptHashes[path],
+      `${path} independent inline-script manifest`
+    );
+  }
+});
+
+test("Plan 2 Task 8 fix round 4 rejects computed dynamic resource assembly through the script manifest", async () => {
+  const payload = [
+    "    const remote = document[`create`+`Element`](`scr`+`ipt`);",
+    "    remote[`s`+`rc`] = `https:`+`/`+`/example.com/payload.js`;",
+    "    document.head.append(remote);"
+  ].join("\n");
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram1_universal.html",
+    mutate: (html) => html.replace("  </script>\n</body>", `${payload}\n  </script>\n</body>`)
+  });
+  assert.ok(errorIds(result).includes("artifact-resource"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 4 rejects missing extra and changed inline scripts", async () => {
+  const cases = [
+    ["missing approved process script", "diagrams/diagram1_universal.html", (html) => html.replace(/\n  <script>[\s\S]*?<\/script>/, "")],
+    ["extra script on a script-free artifact", "diagrams/diagram2_ariba.html", (html) => html.replace("</body>", "<script>globalThis.extraArtifactCode = true;</script></body>")],
+    ["changed approved maturity script", "diagrams/diagram3_maturity.html", (html) => html.replace("  <script>\n", "  <script>\n    // changed artifact code\n")]
+  ];
+  const actual = [];
+  for (const [label, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate });
+    actual.push([label, errorIds(result).includes("artifact-resource")]);
+  }
+  assert.deepEqual(actual, cases.map(([label]) => [label, true]));
+});
+
+test("Plan 2 Task 8 fix round 4 test-owned hashes kill coordinated product and verifier script drift", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const approvedHash = approvedArtifactInlineScriptHashes[path][0];
+  const coordinatedProductMutation = artifactProductHtml[path].replace("  <script>\n", "  <script>\n    // coordinated artifact code drift\n");
+  const mutatedHashes = testOwnedArtifactInlineScriptHashes(coordinatedProductMutation);
+  const mutatedHash = mutatedHashes[0];
+  const verifierSource = await readFile(modulePath, "utf8");
+  const coordinatedVerifierMutation = verifierSource.replace(approvedHash, mutatedHash);
+  assert.notEqual(coordinatedProductMutation, artifactProductHtml[path], "script product mutation must apply");
+  assert.notEqual(mutatedHash, approvedHash, "script source mutation must change the SHA-256 digest");
+  assert.notEqual(coordinatedVerifierMutation, verifierSource, "script verifier mutation must apply");
+  assert.notDeepEqual(mutatedHashes, approvedArtifactInlineScriptHashes[path], "test-owned manifest must kill coordinated product and verifier drift");
+});
+
+test("Plan 2 Task 8 fix round 3 independently owns the complete static semantic-copy manifest", async () => {
+  for (const [path, expected] of Object.entries(approvedArtifactSemanticCopy)) {
+    assert.deepEqual(testOwnedArtifactSemanticCopy(path, artifactProductHtml[path]), expected, `${path} independent semantic copy`);
+  }
+
+  const path = "diagrams/infographic.html";
+  const coordinatedProductMutation = artifactProductHtml[path].replace("Scenario lenses to validate", "Scenario dimensions to validate");
+  const verifierSource = await readFile(modulePath, "utf8");
+  const coordinatedVerifierMutation = verifierSource.replaceAll("Scenario lenses to validate", "Scenario dimensions to validate");
+  assert.notEqual(coordinatedProductMutation, artifactProductHtml[path], "caption product mutation must apply");
+  assert.notEqual(coordinatedVerifierMutation, verifierSource, "caption verifier mutation must apply");
+  assert.notDeepEqual(testOwnedArtifactSemanticCopy(path, coordinatedProductMutation), approvedArtifactSemanticCopy[path], "test-owned manifest must kill coordinated product and verifier drift");
+});
+
+test("Plan 2 Task 8 fix round 3 requires the exact per-path h1 in the semantic manifest", async () => {
+  const path = "diagrams/diagram1_universal.html";
+  const result = await artifactFamilyMutation({
+    path,
+    mutate: (html) => html.replace("<h1>Procurement process reference model</h1>", "<h1>SAP Ariba guarantees lower procurement costs</h1>")
+  });
+  assert.ok(errorIds(result).includes("artifact-heading"), result.errors.join("\n"));
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 owns remaining non-model section headings", async () => {
+  const result = await artifactFamilyMutation({
+    path: "diagrams/diagram2_ariba.html",
+    mutate: (html) => html.replace("<h2>Strategic sequence</h2>", "<h2>Strategic workflow</h2>")
+  });
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 owns semantic figure and table captions", async () => {
+  const mutated = artifactProductHtml["diagrams/infographic.html"].replace(
+    "<caption>Scenario lenses to validate</caption>",
+    "<caption>Scenario dimensions to validate</caption>"
+  );
+  const result = await artifactFamilyMutation({ overrides: {
+    "diagrams/infographic.html": mutated,
+    "infographic_procurement_2026_EN.html": mutated
+  } });
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 3 owns ordinary intro and boundary prose", async () => {
+  const mutated = artifactProductHtml["diagrams/infographic.html"].replace(
+    "The sequence names seven handoffs. It does not prescribe a system, automation level or control design.",
+    "The sequence lists seven handoffs. It does not prescribe a system, automation level or control design."
+  );
+  const result = await artifactFamilyMutation({ overrides: {
+    "diagrams/infographic.html": mutated,
+    "infographic_procurement_2026_EN.html": mutated
+  } });
+  assert.ok(errorIds(result).includes("artifact-copy-manifest"), result.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 2 requires one exact owned local favicon in every artifact", async () => {
+  const overrides = round2ArtifactOverrides();
+  const accepted = await artifactFamilyMutation({ overrides });
+  assert.deepEqual(accepted.errors, [], accepted.errors.join("\n"));
+
+  const path = "diagrams/diagram1_universal.html";
+  const cases = [
+    ["missing link", (html) => html.replace(`  ${artifactFaviconLink}\n`, "")],
+    ["duplicate link", (html) => html.replace(artifactFaviconLink, `${artifactFaviconLink}\n  ${artifactFaviconLink}`)],
+    ["wrong local href", (html) => html.replace('href="/favicon.svg"', 'href="/favicon.ico"')],
+    ["external href", (html) => html.replace('href="/favicon.svg"', 'href="https://example.com/favicon.svg"')],
+    ["wrong declaration", (html) => html.replace('type="image/svg+xml"', 'type="image/png"')]
+  ];
+  for (const [label, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate, overrides });
+    assert.ok(errorIds(result).includes("artifact-favicon"), `${label}:\n${result.errors.join("\n")}`);
+  }
+
+  const missingFile = await artifactFamilyMutation({ overrides, includeFavicon: false });
+  assert.ok(errorIds(missingFile).includes("artifact-favicon"), missingFile.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 fix round 2 owns the recursive public artifact manifest and reports malformed files safely", async () => {
+  const overrides = round2ArtifactOverrides();
+  for (const path of ["unplanned.html", "extras/nested/unplanned.html"]) {
+    const result = await artifactFamilyMutation({
+      overrides: { ...overrides, [path]: round2ArtifactHtml("diagrams/infographic.html", artifactProductHtml["diagrams/infographic.html"]) }
+    });
+    assert.ok(errorIds(result).includes("artifact-manifest"), `${path}:\n${result.errors.join("\n")}`);
+  }
+
+  let missing;
+  try {
+    missing = await artifactFamilyMutation({ overrides, omit: ["diagrams/diagram1_universal.html"] });
+  } catch (cause) {
+    assert.fail(`missing artifact must aggregate structured errors, not throw ${cause?.name}: ${cause?.message}`);
+  }
+  assert.ok(errorIds(missing).includes("artifact-file"), missing.errors.join("\n"));
+
+  let malformed;
+  try {
+    malformed = await artifactFamilyMutation({
+      overrides: {
+        ...overrides,
+        "diagrams/diagram1_universal.html": `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Malformed artifact</title>${artifactFaviconLink}<style>:root { --artifact-bg: #102831; --artifact-panel: #193D49; --artifact-paper: #E9EDEF; --artifact-line: #8E9CA1; --artifact-signal: #D94B2B; }</style></head></html>`
+      }
+    });
+  } catch (cause) {
+    assert.fail(`malformed artifact must aggregate structured errors, not throw ${cause?.name}: ${cause?.message}`);
+  }
+  assert.ok(errorIds(malformed).includes("artifact-document"), malformed.errors.join("\n"));
+});
+
+test("Plan 2 Task 8 protects the static SAP workshop map and its bounded vocabulary", async () => {
+  const cases = [
+    ["marker", "ariba-map-model", (html) => html.replace('data-marker="1" data-record-id="s1"', 'data-marker="01" data-record-id="s1"')],
+    ["process title", "ariba-map-model", (html) => html.replace('<h3>Procurement Planning</h3>', '<h3>Predictive Procurement Planning</h3>')],
+    ["unverified product", "ariba-map-taxonomy", (html) => html.replace('</ul>', '<li data-product-name="Joule AI (RFx)">Joule AI (RFx)</li></ul>')],
+    ["fake interaction", "ariba-map-static", (html) => html.replace('<article class="model-cell"', '<article class="model-cell" tabindex="0"')],
+    ["old partner status", "artifact-claims", (html) => html.replace('</main>', '<p>SAP Gold Partner</p></main>')]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: "diagrams/diagram2_ariba.html", mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 fix round 2 independently owns the exact typed SAP workshop taxonomy", async () => {
+  const approvedTaxonomy = [
+    ["product-name", "SAP S/4HANA"],
+    ["model-label", "Organisation-specific data"],
+    ["model-label", "External market inputs"],
+    ["model-label", "Organisation-specific data"],
+    ["product-name", "SAP Ariba Strategic Sourcing Suite"],
+    ["product-name", "SAP Ariba Sourcing"],
+    ["product-name", "SAP Ariba Supplier Lifecycle and Performance"],
+    ["product-name", "SAP Ariba Supplier Risk"],
+    ["product-name", "SAP Ariba Contracts"],
+    ["model-label", "Implementation-specific controls"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["feature-label", "guided buying"],
+    ["feature-label", "catalogues"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["feature-label", "approval workflows"],
+    ["feature-label", "budget checks"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["product-name", "SAP Business Network for Procurement"],
+    ["product-name", "SAP Business Network for Procurement"],
+    ["feature-label", "network-based collaboration"],
+    ["model-label", "Integration decision"],
+    ["product-name", "SAP Ariba Buying and Invoicing"],
+    ["feature-label", "invoice management"],
+    ["model-label", "Implementation-specific controls"],
+    ["model-label", "Organisation-specific data"],
+    ["product-name", "SAP Ariba Supplier Risk"],
+    ["model-label", "External market inputs"],
+    ["model-label", "Organisation-specific data"],
+    ["model-label", "Implementation-specific controls"],
+    ["product-name", "SAP S/4HANA"],
+    ["model-label", "Organisation-specific data"],
+    ["product-name", "SAP Ariba Supplier Lifecycle and Performance"],
+    ["product-name", "SAP Business Network for Procurement"]
+  ];
+  const extractTaxonomy = (html) => [...html.matchAll(/<li class="model-vocabulary__item" data-(product-name|feature-label|model-label)="([^"]+)">([^<]+)<\/li>/g)]
+    .map(([, kind, value, text]) => {
+      assert.equal(text, value, `${kind} item must publish its typed value verbatim`);
+      return [kind, value];
+    });
+  const product = artifactProductHtml["diagrams/diagram2_ariba.html"];
+  assert.deepEqual(extractTaxonomy(product), approvedTaxonomy);
+
+  const coordinatedProductMutation = product.replaceAll("SAP Ariba Sourcing", "SAP Imaginary Procurement");
+  const coordinatedVerifierMutation = (await readFile(modulePath, "utf8")).replaceAll("SAP Ariba Sourcing", "SAP Imaginary Procurement");
+  assert.match(coordinatedVerifierMutation, /SAP Imaginary Procurement/);
+  assert.notDeepEqual(extractTaxonomy(coordinatedProductMutation), approvedTaxonomy, "the test-owned taxonomy must kill coordinated product and verifier drift");
+});
+
+test("Plan 2 Task 8 protects the maturity model inventory, native controls, guards and formulas", async () => {
+  const cases = [
+    ["initial value", "maturity-model", (html) => html.replace('data-dimension="ai" data-baseline="1" data-target="4"', 'data-dimension="ai" data-baseline="2" data-target="4"')],
+    ["radio range", "maturity-controls", (html) => html.replace('name="ai-baseline" value="5"', 'name="ai-baseline" value="6"')],
+    ["native control type", "maturity-controls", (html) => html.replace('type="radio" name="ai-baseline" value="1"', 'type="checkbox" name="ai-baseline" value="1"')],
+    ["stable tie order", "maturity-formulas", (html) => html.replace('b.gap - a.gap || a.order - b.order', 'b.gap - a.gap || b.order - a.order')],
+    ["dimension allowlist", "maturity-guards", (html) => html.replace('allowedIds.has(id)', 'id.length > 0')]
+  ];
+  for (const [label, expected, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path: "diagrams/diagram3_maturity.html", mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 8 maturity calculator derives the approved illustrative initial outputs", () => {
+  const html = artifactProductHtml["diagrams/diagram3_maturity.html"];
+  const script = /<script>([\s\S]*?)<\/script>/.exec(html)?.[1];
+  assert.ok(script, "maturity artifact must expose one inline behavior script");
+  const sandbox = {};
+  runInNewContext(script, sandbox);
+  const input = [
+    { id: "ai", label: "AI & Orchestration", baseline: 1, target: 4 },
+    { id: "risk", label: "Risk & Resilience", baseline: 1, target: 4 },
+    { id: "esg", label: "ESG / Sustainability", baseline: 1, target: 3 },
+    { id: "data", label: "Data & Analytics", baseline: 2, target: 4 },
+    { id: "srm", label: "Supplier Relationship Management", baseline: 2, target: 4 },
+    { id: "strat", label: "Strategic Procurement", baseline: 3, target: 5 },
+    { id: "oper", label: "Operational Procurement", baseline: 3, target: 5 },
+    { id: "integ", label: "Platform Integration", baseline: 2, target: 5 }
+  ];
+  const actual = JSON.parse(JSON.stringify(sandbox.procurementMaturityModel.calculateScenario(input)));
+  assert.deepEqual(actual, {
+    baselineAverage: "1.9",
+    targetAverage: "4.3",
+    totalGap: 19,
+    maximumGap: 3,
+    baselineScore: 38,
+    largestGaps: [
+      { id: "ai", label: "AI & Orchestration", gap: 3 },
+      { id: "risk", label: "Risk & Resilience", gap: 3 },
+      { id: "integ", label: "Platform Integration", gap: 3 },
+      { id: "esg", label: "ESG / Sustainability", gap: 2 }
+    ]
+  });
+});
+
+test("Plan 2 Task 8 fix round 2 executes maturity formulas over edited, boundary and guarded scenarios", () => {
+  const html = artifactProductHtml["diagrams/diagram3_maturity.html"];
+  const scriptFrom = (source) => {
+    const script = /<script>([\s\S]*?)<\/script>/.exec(source)?.[1];
+    assert.ok(script, "maturity artifact must expose one inline behavior script");
+    const sandbox = {};
+    runInNewContext(script, sandbox);
+    return sandbox.procurementMaturityModel.calculateScenario;
+  };
+  const dimensions = [
+    ["ai", "AI & Orchestration"],
+    ["risk", "Risk & Resilience"],
+    ["esg", "ESG / Sustainability"],
+    ["data", "Data & Analytics"],
+    ["srm", "Supplier Relationship Management"],
+    ["strat", "Strategic Procurement"],
+    ["oper", "Operational Procurement"],
+    ["integ", "Platform Integration"]
+  ];
+  const input = (baselines, targets) => dimensions.map(([id, label], index) => ({
+    id,
+    label,
+    baseline: baselines[index],
+    target: targets[index]
+  }));
+  const plain = (value) => JSON.parse(JSON.stringify(value));
+  const calculate = scriptFrom(html);
+  const cases = [
+    {
+      label: "upper target boundary",
+      input: input(Array(8).fill(1), Array(8).fill(5)),
+      expected: {
+        baselineAverage: "1.0", targetAverage: "5.0", totalGap: 32, maximumGap: 4, baselineScore: 20,
+        largestGaps: dimensions.slice(0, 4).map(([id, label]) => ({ id, label, gap: 4 }))
+      }
+    },
+    {
+      label: "target below baseline",
+      input: input([5, 4, 3, 2, 1, 5, 4, 3], [1, 2, 3, 4, 5, 1, 2, 3]),
+      expected: {
+        baselineAverage: "3.4", targetAverage: "2.6", totalGap: -6, maximumGap: 4, baselineScore: 68,
+        largestGaps: [
+          { id: "srm", label: "Supplier Relationship Management", gap: 4 },
+          { id: "data", label: "Data & Analytics", gap: 2 },
+          { id: "esg", label: "ESG / Sustainability", gap: 0 },
+          { id: "integ", label: "Platform Integration", gap: 0 }
+        ]
+      }
+    },
+    {
+      label: "stable non-initial ties",
+      input: input(Array(8).fill(2), [3, 3, 3, 3, 1, 1, 2, 2]),
+      expected: {
+        baselineAverage: "2.0", targetAverage: "2.3", totalGap: 2, maximumGap: 1, baselineScore: 40,
+        largestGaps: dimensions.slice(0, 4).map(([id, label]) => ({ id, label, gap: 1 }))
+      }
+    }
+  ];
+  for (const scenario of cases) {
+    assert.deepEqual(plain(calculate(scenario.input)), scenario.expected, scenario.label);
+  }
+
+  const valid = cases[2].input;
+  const invalidCases = [
+    valid.slice(0, -1),
+    [valid[1], valid[0], ...valid.slice(2)],
+    valid.map((dimension, index) => index === 0 ? { ...dimension, baseline: 0 } : dimension),
+    valid.map((dimension, index) => index === 0 ? { ...dimension, target: 6 } : dimension),
+    valid.map((dimension, index) => index === 0 ? { ...dimension, target: 1.5 } : dimension)
+  ];
+  for (const invalid of invalidCases) assert.throws(() => calculate(invalid), /Invalid (?:scenario|dimension)/);
+
+  const conditionalCorruption = html.replace(
+    "targetAverage: (targetTotal / dimensions.length).toFixed(1),",
+    "targetAverage: ((targetTotal === 34 ? targetTotal : baselineTotal) / dimensions.length).toFixed(1),"
+  );
+  assert.notEqual(conditionalCorruption, html, "conditional target-average mutation must apply");
+  const calculateMutant = scriptFrom(conditionalCorruption);
+  const initial = input([1, 1, 1, 2, 2, 3, 3, 2], [4, 4, 3, 4, 4, 5, 5, 5]);
+  assert.equal(calculateMutant(initial).targetAverage, "4.3", "confirmed mutant preserves the initial result");
+  assert.notDeepEqual(plain(calculateMutant(cases[2].input)), cases[2].expected, "non-initial runtime vector must kill the confirmed conditional corruption");
+});
+
+test("Plan 2 Task 8 requires exact infographic byte parity, process order and non-claim notes", async () => {
+  const cases = [
+    ["byte parity", "infographic-parity", "infographic_procurement_2026_EN.html", (html) => html.replace('People and decision rights remain explicit.', 'People and decision rights stay explicit.')],
+    ["stage order", "infographic-model", "diagrams/infographic.html", (html) => html.replace('data-stage="needs">Needs Definition', 'data-stage="needs">Supplier Selection')],
+    ["note contract", "infographic-model", "diagrams/infographic.html", (html) => html.replace('Legal applicability and evidence requirements require separate validation.', 'Legal controls are automatic.')],
+    ["extra active content", "artifact-census", "diagrams/infographic.html", (html) => html.replace('</body>', '<script>globalThis.extra = true;</script></body>')]
+  ];
+  for (const [label, expected, path, mutate] of cases) {
+    const result = await artifactFamilyMutation({ path, mutate });
+    assert.ok(errorIds(result).includes(expected), `${label}:\n${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 9 accepts the independent exact 19-page Flight Plan shell contract", async () => {
+  const root = await task9SiteShellRoot();
+  const result = await runVerification({ root, scope: "pages", family: "all" });
+  const shellErrors = result.errors.filter((entry) => entry.startsWith("ERROR site-shell-"));
+  assert.deepEqual(shellErrors, [], shellErrors.join("\n"));
+});
+
+test("Plan 2 Task 9 independently freezes all protected content outside the allowed shell surfaces", () => {
+  assert.deepEqual(
+    Object.keys(task9ProtectedContentHashes),
+    task9SiteShellEntries.map(({ path }) => path),
+    "the protected-content census must own the exact ordered 19-page manifest"
+  );
+  for (const entry of task9SiteShellEntries) {
+    const original = task9ProtectedContent(task9SiteShellProductHtml[entry.path]);
+    const canonical = task9ProtectedContent(task9CanonicalHtml(entry));
+    assert.equal(canonical, original, `${entry.path}: canonical shell replacement changed protected bytes`);
+    assert.equal(
+      createHash("sha256").update(original).digest("hex"),
+      task9ProtectedContentHashes[entry.path],
+      `${entry.path}: protected head/content/schema/section bytes drifted from Task 8 base`
+    );
+  }
+});
+
+test("Plan 2 Task 9 rejects required nav language footer asset and coordinated shell mutations", async (t) => {
+  const plHome = task9CanonicalHtml(task9SiteShellEntries[0]);
+  const enHome = task9CanonicalHtml(task9SiteShellEntries[1]);
+  const enApplicationsPath = "en/aplikacje-operacyjne/index.html";
+  const plTransformationPath = "uslugi/transformacja-zakupow/index.html";
+  const procurementPath = "procurement-2026/index.html";
+  const cases = [
+    ["reordered direct navigation", task9Mutate("index.html", (html) => html.replace(
+      '<li><a href="/aplikacje-operacyjne/">Aplikacje</a></li><li><a href="/lotnictwo/">Lotnictwo</a></li>',
+      '<li><a href="/lotnictwo/">Lotnictwo</a></li><li><a href="/aplikacje-operacyjne/">Aplikacje</a></li>'
+    ))],
+    ["renamed Insights", task9Mutate("en/index.html", (html) => html.replaceAll(">Insights<", ">Knowledge<"))],
+    ["restored Operational applications", task9Mutate(enApplicationsPath, (html) => html.replace(">Applications<", ">Operational applications<"))],
+    ["changed advisory route", task9Mutate(plTransformationPath, (html) => html.replace('href="/uslugi/wdrozenie-sap-ariba/"', 'href="/uslugi/wdrozenie-ariba/"'))],
+    ["hidden current link", task9Mutate(plTransformationPath, (html) => html.replace('aria-current="page"', 'aria-current="page" hidden'))],
+    ["current moved to wrong route", task9Mutate(plTransformationPath, (html) => html
+      .replace('href="/uslugi/transformacja-zakupow/" aria-current="page"', 'href="/uslugi/transformacja-zakupow/"')
+      .replace('href="/lotnictwo/"', 'href="/lotnictwo/" aria-current="page"'))],
+    ["second language link", task9Mutate(enApplicationsPath, (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/" class="nav-lang">PL</a>',
+      '<a href="/aplikacje-operacyjne/" class="nav-lang">PL</a><a href="/" class="nav-lang">PL</a>'
+    ))],
+    ["subpage language link to homepage", task9Mutate(enApplicationsPath, (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/" class="nav-lang">PL</a>',
+      '<a href="/" class="nav-lang">PL</a>'
+    ))],
+    ["fake English Procurement route", task9Mutate(procurementPath, (html) => html.replace(
+      '<a href="/en/wiedza/" class="nav-lang">EN</a>',
+      '<a href="/en/procurement-2026/" class="nav-lang">EN</a>'
+    ))],
+    ["legacy navHamburger", task9Mutate("index.html", (html) => html.replace('id="nav-toggle"', 'id="navHamburger"'))],
+    ["footer year altered", task9Mutate("index.html", (html) => html.replace("© 2026 Paweł", "© 1993–2026 Paweł"))],
+    ["footer link removed", task9Mutate("index.html", (html) => html.replace('<li><a href="/wiedza/">Wiedza</a></li>', ""))],
+    ["footer link added", task9Mutate("index.html", (html) => html.replace('</ul></footer>', '<li><a href="/extra/">Extra</a></li></ul></footer>'))],
+    ["footer links reordered", task9Mutate("index.html", (html) => html.replace(
+      '<li><a href="/lotnictwo/">Lotnictwo</a></li><li><a href="/case-studies/">Projekty</a></li>',
+      '<li><a href="/case-studies/">Projekty</a></li><li><a href="/lotnictwo/">Lotnictwo</a></li>'
+    ))],
+    ["external footer link", task9Mutate("index.html", (html) => html.replace('href="/wiedza/">Wiedza</a></li><li><a href="/#contact"', 'href="https://example.com/">Wiedza</a></li><li><a href="/#contact"'))],
+    ["signature asset swapped", task9Mutate("index.html", (html) => html.replace("/assets/img/signature.png", "/assets/img/og.jpg"))],
+    ["signature dimensions removed", task9Mutate("index.html", (html) => html.replace(' width="160" height="50"', ""))],
+    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260825-flightplan-3", "style.css?v=20260825-flightplan-1"))],
+    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260825-flightplan-3", "main.js?v=20260825-flightplan-1"))],
+    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></head>'))],
+    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></body>'))],
+    ["wrapper inside direct navigation text anchor", task9Mutate("index.html", (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
+      '<a href="/aplikacje-operacyjne/"><span>Aplikacje</span></a>'
+    ))],
+    ["wrapper inside footer text anchor", task9Mutate("index.html", (html) => html.replace(
+      '<li><a href="/">Strona główna</a></li>',
+      '<li><a href="/"><span>Strona główna</span></a></li>'
+    ))],
+    ["wrapper inside language text anchor", task9Mutate(enApplicationsPath, (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/" class="nav-lang">PL</a>',
+      '<a href="/aplikacje-operacyjne/" class="nav-lang"><span>PL</span></a>'
+    ))],
+    ["nested image inside navigation text anchor", task9Mutate("index.html", (html) => html.replace(
+      '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
+      '<a href="/aplikacje-operacyjne/">Aplikacje<img src="/assets/img/signature.png" alt=""></a>'
+    ))],
+    ["footer signature owner changed to span", task9Mutate("index.html", (html) => html
+      .replace('<a class="footer-sign" href="/" aria-label="Paweł Mamcarz, strona główna">', '<span class="footer-sign" href="/" aria-label="Paweł Mamcarz, strona główna">')
+      .replace('</a><div class="footer-copy">', '</span><div class="footer-copy">'))],
+    ["wrapper around logo suffix", task9Mutate("index.html", (html) => html.replace(
+      '<b>PM</b> · Mamcarz.com</a>',
+      '<b>PM</b><span> · Mamcarz.com</span></a>'
+    ))],
+    ["wrapper inside logo mark", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<b><span>PM</span></b>'))],
+    ["logo mark changed from b to span", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<span>PM</span>'))],
+    ["wrapper inside disclosure summary", task9Mutate("index.html", (html) => html.replace('<summary>Doradztwo</summary>', '<summary><span>Doradztwo</span></summary>'))],
+    ["wrapper inside footer owner", task9Mutate("index.html", (html) => html.replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '<span>© 2026 Paweł Mamcarz · mamcarz.com</span></div>'))],
+    ["wrapper inside back-to-top", task9Mutate("index.html", (html) => html.replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę"><span>↑</span></button>'))],
+    ["nested element inside toggle span", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span><i></i></span><span></span><span></span></button>'))],
+    ["non-span direct child inside toggle", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span></span><span></span><span></span><i></i></button>'))],
+    ["nested element inside overlay", task9Mutate("index.html", (html) => html.replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay"><span></span></div>'))],
+    ["second image inside footer signature owner", task9Mutate("index.html", (html) => html.replace('</a><div class="footer-copy">', '<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">'))],
+    ["literal text inside footer signature owner", task9Mutate("index.html", (html) => html.replace('</a><div class="footer-copy">', 'signature</a><div class="footer-copy">'))],
+    ["non-list child inside primary list", task9Mutate("index.html", (html) => html.replace('<ul class="nav-list" id="nav-menu">', '<ul class="nav-list" id="nav-menu"><div></div>'))],
+    ["non-list child inside advisory submenu", task9Mutate("index.html", (html) => html.replace('<ul class="nav-submenu">', '<ul class="nav-submenu"><div></div>'))],
+    ["non-list child inside footer list", task9Mutate("index.html", (html) => html.replace('<ul class="footer-links">', '<ul class="footer-links"><div></div>'))],
+    ["coordinated PL EN wrong shell", {
+      "index.html": plHome.replace(">Aplikacje<", ">Aplikacje operacyjne<"),
+      "en/index.html": enHome.replace(">Applications<", ">Operational applications<")
+    }]
+  ];
+  for (const [label, overrides] of cases) await t.test(label, async () => {
+      const root = await task9SiteShellRoot(overrides);
+      const result = await runVerification({ root, scope: "pages", family: "all" });
+      assert.ok(
+        result.errors.some((entry) => entry.startsWith("ERROR site-shell-")),
+        `${label}: expected a dedicated site-shell error, got\n${result.errors.join("\n")}`
+      );
+    });
+});
+
+test("Plan 2 Task 9 permits formatting whitespace and comments in exact shell topology", async () => {
+  const overrides = task9Mutate("index.html", (html) => html
+    .replace('<b>PM</b> · Mamcarz.com</a>', '\n<!-- logo --><b>PM</b><!-- suffix --> · Mamcarz.com\n</a>')
+    .replace('<summary>Doradztwo</summary>', '<summary><!-- group -->Doradztwo</summary>')
+    .replace('<a href="/aplikacje-operacyjne/">Aplikacje</a>', '<a href="/aplikacje-operacyjne/">\n<!-- label -->Aplikacje\n</a>')
+    .replace('<a href="/en/" class="nav-lang">EN</a>', '<a href="/en/" class="nav-lang">\n<!-- language -->EN\n</a>')
+    .replace('<span></span><span></span><span></span></button>', '<span>\n<!-- bar --></span><span></span><span></span></button>')
+    .replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay">\n<!-- overlay -->\n</div>')
+    .replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę">\n<!-- back -->↑\n</button>')
+    .replace('<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
+    .replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '\n<!-- owner -->© 2026 Paweł Mamcarz · mamcarz.com\n</div>')
+    .replace('<ul class="footer-links">', '<ul class="footer-links">\n<!-- links -->'));
+  const root = await task9SiteShellRoot(overrides);
+  const result = await runVerification({ root, scope: "pages", family: "all" });
+  const shellErrors = result.errors.filter((entry) => entry.startsWith("ERROR site-shell-"));
+  assert.deepEqual(shellErrors, [], shellErrors.join("\n"));
+});
+
+test("Plan 2 Task 9 requires the repository's current 19 pages to use the exact shell", async () => {
+  const root = await task9SiteShellRoot({}, { canonical: false });
+  const result = await runVerification({ root, scope: "pages", family: "all" });
+  const shellErrors = result.errors.filter((entry) => entry.startsWith("ERROR site-shell-"));
+  assert.deepEqual(shellErrors, [], shellErrors.join("\n"));
+});
+
+test("Plan 2 Task 10 rejects the unsupported legacy llms-full clauses independently of the mutable registry", async () => {
+  const current = await runVerification({ scope: "facts" });
+  assert.equal(
+    errorIds(current).includes("fact-llms-full-unsupported"),
+    false,
+    current.errors.filter((entry) => entry.includes("fact-llms-full-unsupported")).join("\n")
+  );
+
+  const clauses = [
+    "CEE's largest insurer",
+    "spend analytics, category strategies, TOM, IT platform selection",
+    "currently Cloudflare, React, and custom web projects"
+  ];
+  for (const clause of clauses) {
+    const root = await productionRegistryFixture({
+      llmsFull: `${productionFactSurfaceControls.llmsFull}\n${clause}`
+    });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(errorIds(result).includes("fact-llms-full-unsupported"), `${clause}: ${result.errors.join("\n")}`);
+  }
+});
+
+test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index", async () => {
+  const text = await readFile(resolve("llms-full.txt"), "utf8");
+  const requiredLines = [
+    "# Paweł Mamcarz: approved public fact index",
+    "- [hero.experience_years] 25+ years of procurement experience.",
+    "- [career.apsolut.title] Associate Partner, CEE Region",
+    "- [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.",
+    "- [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
+  ];
+  for (const line of requiredLines) {
+    assert.equal(text.split(/\r?\n/).filter((candidate) => candidate === line).length, 1, line);
+  }
+  assert.equal(
+    createHash("sha256").update(text).digest("hex"),
+    "2fbaf0a295f937d2a2c8a2686af8ab97e0827d1a7e2775b1d782bde965d5928e",
+    "llms-full.txt must retain the exact approved fact index without regenerated biography"
+  );
+});
+
+test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
+  assert.equal(
+    createHash("sha256").update(foundationCss).digest("hex"),
+    "8450b5b5dd7477afdf15f0ba08b5fdeda175843e31af27ad5df485eaca0d5c9f",
+    "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
+  );
+});
+
+test("Plan 2 Task 10 fix round 3 accepts the untouched reviewed CSS artifact", async () => {
+  const result = await verifyFixtureCss(foundationCss);
+  assert.equal(
+    errorIds(result).includes("task10-css-reviewed-artifact"),
+    false,
+    result.errors.filter((entry) => entry.includes("task10-css-reviewed-artifact")).join("\n")
+  );
+});
+
+test("Plan 2 Task 10 fix round 3 rejects every reviewed unsafe CSS mutant by artifact digest", async (t) => {
+  const append = (suffix) => (css) => `${css}\n${suffix}`;
+  const mutations = [
+    ["original footer reservation", (css) => css.replace(
+      "padding-inline-end: calc(var(--page-gutter) + 64px);",
+      "padding-inline-end: calc(var(--page-gutter) + 48px);"
+    )],
+    ["original missing mobile reset", (css) => css.replace(
+      "padding-inline-end: var(--page-gutter);",
+      "padding-inline-end: calc(var(--page-gutter) + 64px);"
+    )],
+    ["original fixed-control width", (css) => css.replace(
+      /(\.back-to-top \{[\s\S]*?)width: 48px;/,
+      "$1width: 56px;"
+    )],
+    ["original logo semantic selector", (css) => css.replace('.nav-logo[aria-current="page"]', ".nav-logo.active")],
+    ["original direct-route semantic selector", (css) => css.replace('.nav-list a[aria-current="page"]', ".nav-list a.active")],
+    ["original legacy-route semantic selector", (css) => css.replace('.nav-links a[aria-current="page"]', ".nav-links a.active")],
+    ["original open-service competing summary", (css) => css.replace(
+      '.nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary',
+      '.nav-group:has(.nav-submenu a[aria-current="page"]) > summary'
+    )],
+    ["round 1 later horizontal media override", append('@media (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 higher-specificity current-route override", append(`nav .nav-logo[aria-current="page"],
+nav .nav-list a[aria-current="page"],
+nav .nav-links a[aria-current="page"],
+nav .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary { color: var(--panel); }`)],
+    ["round 1 equal-specificity footer override", append('@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 overlapping max-width footer override", append('@media (max-width: 1000px) { .site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 selector-list footer override", append('@media (min-width: 760px) { .unrelated, footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 1 important footer override", append('@media (min-width: 760px) { footer { padding-inline-end: var(--page-gutter) !important; } }')],
+    ["round 1 duplicate-block important footer override", append('@media (min-width: 760px) { .site-footer { padding-inline-end: var(--page-gutter) !important; padding-inline-end: calc(var(--page-gutter) + 64px); } }')],
+    ["round 1 mobile footer override", append('@media (max-width: 759px) { footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); } }')],
+    ["round 1 equal-specificity logo override", append('[class~="nav-logo"][aria-current="page"] { color: var(--panel); }')],
+    ["round 1 selector-list current-route override", append('.unrelated, nav .nav-list a[aria-current="page"] { color: var(--panel); }')],
+    ["round 1 important current-route override", append('a[aria-current="page"] { color: var(--panel) !important; }')],
+    ["round 1 duplicate-block important current-route override", append('.nav-logo[aria-current="page"] { color: var(--panel) !important; color: var(--signal-dark); }')],
+    ["round 1 earlier higher-specificity current-route override", (css) => `nav .nav-logo[aria-current="page"] { color: var(--panel); }\n${css}`],
+    ["round 2 negated horizontal media override", append('@media not (max-width: 759px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 unsupported media disjunction", append('@media (max-width: 759px) or (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 current-route interval override", append(`@media (min-width: 760px) and (max-width: 1279px) {
+  .nav-logo[aria-current="page"], .nav-list a[aria-current="page"], .nav-links a[aria-current="page"],
+  .nav-group:not([open]):has(.nav-submenu a[aria-current="page"]) > summary { color: var(--panel); }
+}`)],
+    ["round 2 real main-adjacent footer topology", append('@media (min-width: 760px) { body > main + footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 unsupported negated footer pseudo", append('@media (min-width: 760px) { footer.site-footer:not(:nth-child(3)) { padding-inline-end: var(--page-gutter); } }')],
+    ["round 2 inherited navigation signal token", append('.site-nav { --signal-dark: var(--panel); }')],
+    ["round 2 inherited navigation panel token", append('.nav-group { --panel: var(--signal-dark); }')],
+    ["round 2 inherited footer gutter token", append('@media (min-width: 760px) { footer.site-footer { --page-gutter: 0px; } }')],
+    ["round 2 layered footer override", append('@layer task10-review { @media (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter) !important; } } }')],
+    ["round 2 supports footer override", append('@supports (selector(:has(*))) { @media (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } } }')],
+    ["round 2 container footer override", append('@container shell (min-width: 760px) { footer.site-footer { padding-inline-end: var(--page-gutter); } }')],
+    ["round 3 exact 1279px gap", append('@media (width: 1279px) { footer.site-footer { padding-inline-end: var(--page-gutter) !important; } }')],
+    ["round 3 exact 1600px gap", append('@media (width: 1600px) { .nav-logo[aria-current="page"] { color: var(--panel) !important; } }')],
+    ["round 3 media-feature state", append('@media (hover: hover) and (pointer: fine) { .nav-logo[aria-current="page"]:hover { color: var(--panel) !important; } }')],
+    ["round 3 scoped service-page topology", append('@scope (.service-page) { .nav-submenu a[aria-current="page"] { color: var(--panel) !important; } }')],
+    ["round 3 registered inherited gutter", append('@property --page-gutter { syntax: "<length>"; inherits: false; initial-value: 0px; }')],
+    ["round 3 real service-page ancestor", append('.service-page .nav-submenu a[aria-current="page"] { color: var(--panel) !important; }')],
+    ["round 3 focus interaction state", append('.nav-logo[aria-current="page"]:focus-visible { color: var(--panel) !important; }')]
+  ];
+  for (const [label, mutate] of mutations) await t.test(label, async () => {
+    const css = mutate(foundationCss);
+    assert.notEqual(css, foundationCss, `${label}: mutation must change the reviewed CSS bytes`);
+    const result = await verifyFixtureCss(css);
+    assert.ok(
+      errorIds(result).includes("task10-css-reviewed-artifact"),
+      `${label}: expected the reviewed-artifact diagnostic, got\n${result.errors.join("\n")}`
+    );
+  });
+});
+
+test("Plan 2 Task 10 fix round 3 conservatively rejects formerly safe CSS additions", async (t) => {
+  const cases = [
+    ["round 1 unrelated selectors", `${foundationCss}\n@media (min-width: 760px) { .other-footer { padding-inline-end: 0; } }\n.utility-nav a[aria-current="page"] { color: var(--panel); }`],
+    ["round 2 correct declaration under negated media", `${foundationCss}\n@media not (max-width: 759px) { footer.site-footer { padding-inline-end: calc(var(--page-gutter) + 64px); } }`],
+    ["round 2 unrelated unsupported media", `${foundationCss}\n@media (max-width: 759px) or (min-width: 760px) { .unrelated-card { padding-inline-end: 0; } }`],
+    ["round 2 impossible first-child footer", `${foundationCss}\n@media (min-width: 760px) { footer.site-footer:first-child { padding-inline-end: var(--page-gutter); } }`],
+    ["round 2 unrelated unsupported pseudo", `${foundationCss}\n.unrelated-card:not(:nth-child(3)) { padding-inline-end: 0; }`],
+    ["round 2 unrelated protected-token spellings", `${foundationCss}\n.unrelated-card { --signal-dark: var(--panel); --panel: #000; --page-gutter: 0px; }`],
+    ["round 2 unrelated grouping content", `${foundationCss}\n@layer task10-unrelated { .unrelated-card { padding-inline-end: 0; } }`],
+    ["round 3 mutually exclusive supports", `${foundationCss}\n@supports (display: grid) { @supports not (display: grid) { footer.site-footer { padding-inline-end: 0; } } }`],
+    ["round 3 mutually exclusive media", `${foundationCss}\n@media (hover: hover) and (hover: none) { footer.site-footer { padding-inline-end: 0; } }`],
+    ["round 3 harmless reviewed-CSS comment", `${foundationCss}\n/* requires renewed Task 10 visual review */`]
+  ];
+  for (const [label, css] of cases) await t.test(label, async () => {
+    assert.notEqual(css, foundationCss, `${label}: addition must change the reviewed CSS bytes`);
+    const result = await verifyFixtureCss(css);
+    assert.ok(
+      errorIds(result).includes("task10-css-reviewed-artifact"),
+      `${label}: every CSS byte change must require explicit baseline refresh\n${result.errors.join("\n")}`
+    );
+  });
+});
+
+test("Plan 2 Task 10 fix round 3 keeps CSS approval independent from llms-full corrections", async () => {
+  const llmsFull = await readFile(resolve("llms-full.txt"), "utf8");
+  const root = await productionRegistryFixture({
+    css: foundationCss,
+    llmsFull: `${llmsFull}\nCEE's largest insurer`
+  });
+  const [foundationResult, factsResult] = await Promise.all([
+    runVerification({ root, scope: "foundation" }),
+    runVerification({ root, scope: "facts" })
+  ]);
+  assert.equal(errorIds(foundationResult).includes("task10-css-reviewed-artifact"), false, foundationResult.errors.join("\n"));
+  assert.ok(errorIds(factsResult).includes("fact-llms-full-unsupported"), factsResult.errors.join("\n"));
+});
+
+const plan3ExpectedPublicPages = Object.freeze([
+  { file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: ["Person", "WebSite"] },
+  { file: "en/index.html", route: "/en/", lang: "en", pair: "/", schema: ["Person", "WebSite"] },
+  { file: "uslugi/transformacja-zakupow/index.html", route: "/uslugi/transformacja-zakupow/", lang: "pl", pair: "/en/uslugi/transformacja-zakupow/", schema: ["Service"] },
+  { file: "en/uslugi/transformacja-zakupow/index.html", route: "/en/uslugi/transformacja-zakupow/", lang: "en", pair: "/uslugi/transformacja-zakupow/", schema: ["Service"] },
+  { file: "uslugi/wdrozenie-sap-ariba/index.html", route: "/uslugi/wdrozenie-sap-ariba/", lang: "pl", pair: "/en/uslugi/wdrozenie-sap-ariba/", schema: ["Service"] },
+  { file: "en/uslugi/wdrozenie-sap-ariba/index.html", route: "/en/uslugi/wdrozenie-sap-ariba/", lang: "en", pair: "/uslugi/wdrozenie-sap-ariba/", schema: ["Service"] },
+  { file: "uslugi/doradztwo-zamowienia-publiczne/index.html", route: "/uslugi/doradztwo-zamowienia-publiczne/", lang: "pl", pair: "/en/uslugi/doradztwo-zamowienia-publiczne/", schema: ["Service"] },
+  { file: "en/uslugi/doradztwo-zamowienia-publiczne/index.html", route: "/en/uslugi/doradztwo-zamowienia-publiczne/", lang: "en", pair: "/uslugi/doradztwo-zamowienia-publiczne/", schema: ["Service"] },
+  { file: "aplikacje-operacyjne/index.html", route: "/aplikacje-operacyjne/", lang: "pl", pair: "/en/aplikacje-operacyjne/", schema: ["Service"] },
+  { file: "en/aplikacje-operacyjne/index.html", route: "/en/aplikacje-operacyjne/", lang: "en", pair: "/aplikacje-operacyjne/", schema: ["Service"] },
+  { file: "lotnictwo/index.html", route: "/lotnictwo/", lang: "pl", pair: "/en/lotnictwo/", schema: ["Service"] },
+  { file: "en/lotnictwo/index.html", route: "/en/lotnictwo/", lang: "en", pair: "/lotnictwo/", schema: ["Service"] },
+  { file: "case-studies/index.html", route: "/case-studies/", lang: "pl", pair: "/en/case-studies/", schema: ["CollectionPage", "ItemList"] },
+  { file: "en/case-studies/index.html", route: "/en/case-studies/", lang: "en", pair: "/case-studies/", schema: ["CollectionPage", "ItemList"] },
+  { file: "wiedza/index.html", route: "/wiedza/", lang: "pl", pair: "/en/wiedza/", schema: ["CollectionPage"] },
+  { file: "en/wiedza/index.html", route: "/en/wiedza/", lang: "en", pair: "/wiedza/", schema: ["CollectionPage"] },
+  { file: "wystapienia/index.html", route: "/wystapienia/", lang: "pl", pair: "/en/wystapienia/", schema: ["CollectionPage"] },
+  { file: "en/wystapienia/index.html", route: "/en/wystapienia/", lang: "en", pair: "/wystapienia/", schema: ["CollectionPage"] },
+  { file: "procurement-2026/index.html", route: "/procurement-2026/", lang: "pl", pair: null, schema: ["Article"] },
+  { file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/diagram3_maturity.html", route: "/diagrams/diagram3_maturity.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/infographic.html", route: "/diagrams/infographic.html", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: ["CreativeWork"] }
+]);
+
+const plan3ProductPageHtml = Object.freeze(Object.fromEntries(await Promise.all(
+  plan3ExpectedPublicPages.map(async ({ file }) => [file, await readFile(resolve(file), "utf8")])
+)));
+const plan3ProductFactData = JSON.parse(await readFile(resolve("content/site-facts.json"), "utf8"));
+const plan3ProductLlms = await readFile(resolve("llms.txt"), "utf8");
+const plan3ProductLlmsFull = await readFile(resolve("llms-full.txt"), "utf8");
+
+async function plan3ProductMetadataRoot(files = {}) {
+  return plan3Root({
+    factData: plan3ProductFactData,
+    files: { ...plan3ProductPageHtml, ...files }
+  });
+}
+
+const plan3ShellFiles = new Set(plan3ExpectedPublicPages.slice(0, 19).map(({ file }) => file));
+
+function plan3Fact(overrides = {}) {
+  return {
+    id: "fixture.claim",
+    value: "Verified claim",
+    display_pl: "Verified claim",
+    display_en: "Verified claim",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: "Owner decision, 2026-08-27",
+    source_url: null,
+    surfaces: ["index.html"],
+    status: "approved",
+    ...overrides
+  };
+}
+
+function plan3Hreflang(entry) {
+  if (entry.pair === null) {
+    return [entry.lang, "x-default"].map((lang) => `<link rel="alternate" hreflang="${lang}" href="https://mamcarz.com${entry.route}">`).join("\n");
+  }
+  const pl = entry.lang === "pl" ? entry.route : entry.pair;
+  const en = entry.lang === "en" ? entry.route : entry.pair;
+  return [
+    `<link rel="alternate" hreflang="pl" href="https://mamcarz.com${pl}">`,
+    `<link rel="alternate" hreflang="en" href="https://mamcarz.com${en}">`,
+    `<link rel="alternate" hreflang="x-default" href="https://mamcarz.com${pl}">`
+  ].join("\n");
+}
+
+function plan3Schema(entry, shape = "graph") {
+  if (entry.file === "index.html" || entry.file === "en/index.html") {
+    return JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebSite", "@id": "https://mamcarz.com/#website", url: "https://mamcarz.com/", name: "Paweł Mamcarz" },
+        { "@type": "Person", "@id": "https://mamcarz.com/#person", name: "Paweł Mamcarz", url: "https://mamcarz.com/" }
+      ]
+    });
+  }
+  const canonical = `https://mamcarz.com${entry.route}`;
+  const type = entry.schema[0];
+  let node;
+  if (type === "Service") {
+    node = { "@type": type, name: "Fixture page", url: canonical, description: "Fixture description", provider: { "@id": "https://mamcarz.com/#person" } };
+  } else if (type === "CollectionPage" && entry.schema.includes("ItemList")) {
+    node = { "@type": type, name: "Fixture page", url: canonical, description: "Fixture description", inLanguage: entry.lang, mainEntity: { "@type": "ItemList", itemListElement: [] } };
+  } else if (type === "CollectionPage") {
+    node = { "@type": type, name: "Fixture page", url: canonical, description: "Fixture description", inLanguage: entry.lang };
+  } else if (type === "Article") {
+    node = { "@type": type, headline: "Fixture page", url: canonical, description: "Fixture description", inLanguage: entry.lang, author: { "@id": "https://mamcarz.com/#person" } };
+  } else {
+    node = { "@type": type, name: "Fixture page", url: canonical, description: "Fixture description", inLanguage: entry.lang };
+  }
+  if (shape === "array") return JSON.stringify([{ "@context": "https://schema.org", ...node }]);
+  if (shape === "object") return JSON.stringify({ "@context": "https://schema.org", ...node });
+  return JSON.stringify({ "@context": "https://schema.org", "@graph": [node] });
+}
+
+function plan3Page(entry, { body, head = "", schema = plan3Schema(entry), hreflang = plan3Hreflang(entry), assets = null } = {}) {
+  const shellAssets = assets ?? (plan3ShellFiles.has(entry.file)
+    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">\n<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>'
+    : "");
+  const content = body ?? (entry.file === "index.html" ? '<p data-fact-id="fixture.claim">Verified claim</p>' : "Page copy");
+  const locale = entry.lang === "pl" ? "pl_PL" : "en_US";
+  const ogType = entry.schema.includes("Article") ? "article" : "website";
+  const alternateLocale = entry.pair === null ? "" : `<meta property="og:locale:alternate" content="${entry.lang === "pl" ? "en_US" : "pl_PL"}">`;
+  return `<!doctype html><html lang="${entry.lang}"><head>
+<title>Fixture page</title>
+<meta name="description" content="Fixture description">
+<link rel="canonical" href="https://mamcarz.com${entry.route}">
+${hreflang}
+<meta property="og:title" content="Fixture page">
+<meta property="og:description" content="Fixture description">
+<meta property="og:type" content="${ogType}">
+<meta property="og:url" content="https://mamcarz.com${entry.route}">
+<meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg">
+<meta property="og:locale" content="${locale}">
+${alternateLocale}
+<script type="application/ld+json">${schema}</script>
+${head}
+${shellAssets}
+</head><body><main><h1>Fixture page</h1>${content}</main></body></html>`;
+}
+
+function plan3RealPresentationBody() {
+  return `<p data-fact-id="fixture.claim">Verified claim</p>
+    <section class="service-section" data-section="problem"><div class="section-shell"><p class="section-label">01 / Problem</p><h2>Problem</h2></div></section>
+    <section class="applications-section" data-section="delivery"><div class="section-shell"><div class="route-sequence"><article class="route-sequence__step" data-step="discovery"><p class="section-index">01 / Discovery</p><h3>Discovery</h3></article></div></div></section>
+    <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">DOSSIER / ADVISORY 01</p><h2>Service</h2></div></header>
+    <section class="applications-section application-evidence" data-section="evidence"><div class="section-shell"><div class="applications-evidence-list"><article class="evidence-row"><p class="evidence-row__context">Product / 01</p><h3>Product</h3></article></div></div></section>
+    <header class="page-hero aviation-hero"><div class="page-hero-content"><p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 01</p><h2>Aviation</h2></div></header>
+    <section class="knowledge-index" data-section="resources"><article class="knowledge-entry" data-resource><span class="knowledge-entry__number" aria-hidden="true">01</span><h2>Resource</h2></article></section>
+    <nav class="projects-index"><a href="#project"><span>01</span>Advisory</a></nav>
+    <section class="aviation-sector" data-section="operations"><div class="section-shell"><div class="aviation-sector__index"><span>01</span><strong>OPS</strong></div></div></section>
+    <section class="service-section" data-section="method"><div class="section-shell"><div class="service-method"><article data-method-step="1"><span>01</span><h3>Method</h3></article></div></div></section>
+    <section class="speaking-group speaking-topics" data-section="topics"><div class="speaking-agenda"><article data-topic="one"><span>01</span><h3>Topic</h3></article></div></section>
+    <section class="procurement-artifacts"><article class="procurement-artifact" data-artifact="1"><header><span>01</span><h2>Artifact</h2></header></article></section>
+    <span aria-hidden="true">11</span><p>404</p>`;
+}
+
+function plan3Sitemap() {
+  const blocks = plan3ExpectedPublicPages.map((entry, index) => {
+    const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
+    const lastmod = index < 19 ? "2026-08-27" : "2026-08-26";
+    return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
+  });
+  return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
+}
+
+async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"], factData = null, agents = "same instructions\n", claude = "same instructions\n", redirects = "# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.\n# No path redirects are currently defined.\n", headers = null, sitemap = plan3Sitemap(), llms = null } = {}) {
+  const root = await mkdtemp(resolve(tmpdir(), "verify-site-plan3-"));
+  const pageFiles = Object.fromEntries(plan3ExpectedPublicPages.map((entry) => [entry.file, plan3Page(entry)]));
+  const completeHeaders = headers ?? `/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+/assets/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+`;
+  const llmsRoutes = llms ?? plan3ExpectedPublicPages.map(({ route }) => `https://mamcarz.com${route}`).join("\n");
+  const registry = factData ?? { version: 1, public_claim_surfaces: publicClaimSurfaces, facts, blocked_claims: [blockedClaim()] };
+  const allFiles = {
+    ...pageFiles,
+    "content/site-facts.json": JSON.stringify(registry),
+    "sitemap.xml": sitemap,
+    "llms.txt": llmsRoutes,
+    "llms-full.txt": "",
+    "worker/index.js": "",
+    "assets/js/main.js": validBrowserScript,
+    "assets/css/style.css": foundationCss,
+    "assets/img/IMG_3284-480.webp": Buffer.from("fixture"),
+    "404.html": "<!doctype html><html lang=pl><main><h1>404</h1></main></html>",
+    "AGENTS.md": agents,
+    "CLAUDE.md": claude,
+    "_redirects": redirects,
+    "_headers": completeHeaders,
+    ...files
+  };
+  await Promise.all(Object.entries(allFiles).map(async ([path, value]) => {
+    const target = resolve(root, path);
+    await mkdir(resolve(target, ".."), { recursive: true });
+    await writeFile(target, value);
+  }));
+  return root;
+}
+
+test("Plan 3 Task 1 accepts the exact independent 24-route metadata manifest", async () => {
+  assert.equal(plan3ExpectedPublicPages.length, 24);
+  assert.deepEqual(PUBLIC_PAGES, plan3ExpectedPublicPages);
+  const root = await plan3Root();
+  const result = await runVerification({ root, scope: "metadata" });
+  const presentation = result.errors.filter((item) => item.startsWith("ERROR presentation-index-manifest "));
+  assert.equal(presentation.length, 19, "synthetic route fixtures must not impersonate the 19 reviewed presentation-index files");
+  assert.deepEqual(result.errors.filter((item) => !item.startsWith("ERROR presentation-index-manifest ")), []);
+});
+
+test("Plan 3 Task 1 fails closed on missing fake and duplicate route metadata", async (t) => {
+  await t.test("missing manifest file", async () => {
+    const root = await plan3Root();
+    await rm(resolve(root, "diagrams/diagram2_ariba.html"));
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-file"), result.errors.join("\n"));
+  });
+  await t.test("fake canonical", async () => {
+    const entry = plan3ExpectedPublicPages[0];
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry).replace("https://mamcarz.com/\"", "https://mamcarz.com/projekty/\"") } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-canonical"), result.errors.join("\n"));
+  });
+  await t.test("duplicate canonical", async () => {
+    const entry = plan3ExpectedPublicPages[0];
+    const duplicate = '<link rel="canonical" href="https://mamcarz.com/">';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry).replace("</head>", `${duplicate}</head>`) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-canonical"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 enforces paired PL-only and EN-only hreflang topologies", async (t) => {
+  const cases = [
+    ["paired page", plan3ExpectedPublicPages[0], (entry) => plan3Hreflang(entry).replace('hreflang="en"', 'hreflang="de"')],
+    ["PL-only page", plan3ExpectedPublicPages[18], (entry) => `${plan3Hreflang(entry)}<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/procurement-2026/">`],
+    ["EN-only page", plan3ExpectedPublicPages[19], (entry) => plan3Hreflang(entry).replace('hreflang="en"', 'hreflang="pl"')]
+  ];
+  for (const [label, entry, mutate] of cases) await t.test(label, async () => {
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { hreflang: mutate(entry) }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-hreflang"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 parses JSON-LD objects arrays graphs and reports malformed block indexes", async (t) => {
+  for (const shape of ["object", "array", "graph"]) await t.test(`legal ${shape}`, async () => {
+    const entry = plan3ExpectedPublicPages[2];
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { schema: plan3Schema(entry, shape) }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-schema"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("jsonld-parse"), false, result.errors.join("\n"));
+  });
+  await t.test("malformed second block", async () => {
+    const entry = plan3ExpectedPublicPages[2];
+    const head = '<script type="application/ld+json">{"@type":</script>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(result.errors.some((item) => item.includes(`jsonld-parse ${entry.file}: block 2:`)), result.errors.join("\n"));
+  });
+  await t.test("inactive template schema cannot satisfy the route", async () => {
+    const entry = plan3ExpectedPublicPages[2];
+    const inactive = plan3Page(entry)
+      .replace('<script type="application/ld+json">', '<template><script type="application/ld+json">')
+      .replace("</script>", "</script></template>");
+    const root = await plan3Root({ files: { [entry.file]: inactive } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-schema"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 3 rejects speculative structured-data claims and disconnected home identities", async (t) => {
+  const home = plan3ExpectedPublicPages[0];
+  const service = plan3ExpectedPublicPages[2];
+  const article = plan3ExpectedPublicPages[18];
+  const helper = plan3ExpectedPublicPages[19];
+
+  const cases = [
+    [
+      "home affiliation",
+      home,
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          { "@type": "WebSite", "@id": "https://mamcarz.com/#website", url: "https://mamcarz.com/", name: "Paweł Mamcarz" },
+          { "@type": "Person", "@id": "https://mamcarz.com/#person", name: "Paweł Mamcarz", url: "https://mamcarz.com/", worksFor: { "@type": "Organization", name: "Unverified organisation" } }
+        ]
+      }
+    ],
+    [
+      "disconnected home identity",
+      home,
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          { "@type": "WebSite", "@id": "https://mamcarz.com/#wrong", url: "https://mamcarz.com/", name: "Paweł Mamcarz" },
+          { "@type": "Person", "@id": "https://mamcarz.com/#person", name: "Paweł Mamcarz", url: "https://mamcarz.com/" }
+        ]
+      }
+    ],
+    [
+      "service offer",
+      service,
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name: "Fixture page",
+        url: `https://mamcarz.com${service.route}`,
+        description: "Fixture description",
+        provider: { "@id": "https://mamcarz.com/#person" },
+        offers: { "@type": "Offer" }
+      }
+    ],
+    [
+      "article invented publication date",
+      article,
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: "Fixture page",
+        url: `https://mamcarz.com${article.route}`,
+        description: "Fixture description",
+        inLanguage: "pl",
+        author: { "@id": "https://mamcarz.com/#person" },
+        datePublished: "2026-08-27"
+      }
+    ],
+    [
+      "helper audience",
+      helper,
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        name: "Fixture page",
+        url: `https://mamcarz.com${helper.route}`,
+        description: "Fixture description",
+        inLanguage: "en",
+        audience: { "@type": "Audience" }
+      }
+    ]
+  ];
+
+  for (const [label, entry, schema] of cases) await t.test(label, async () => {
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { schema: JSON.stringify(schema) }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-schema"), `${label}\n${result.errors.join("\n")}`);
+  });
+});
+
+test("Plan 3 Task 3 requires structured data to match the route identity", async (t) => {
+  const service = plan3ExpectedPublicPages[2];
+  const cases = [
+    ["wrong localized name", "Different service", `https://mamcarz.com${service.route}`, "Fixture description", { "@id": "https://mamcarz.com/#person" }],
+    ["wrong canonical URL", "Fixture page", "https://mamcarz.com/wrong/", "Fixture description", { "@id": "https://mamcarz.com/#person" }],
+    ["wrong description", "Fixture page", `https://mamcarz.com${service.route}`, "Unsupported description", { "@id": "https://mamcarz.com/#person" }],
+    ["inline provider identity", "Fixture page", `https://mamcarz.com${service.route}`, "Fixture description", { "@type": "Person", name: "Paweł Mamcarz" }]
+  ];
+  for (const [label, name, url, description, provider] of cases) await t.test(label, async () => {
+    const schema = { "@context": "https://schema.org", "@type": "Service", name, url, description, provider };
+    const root = await plan3Root({ files: { [service.file]: plan3Page(service, { schema: JSON.stringify(schema) }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-schema"), `${label}\n${result.errors.join("\n")}`);
+  });
+});
+
+test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and secret material", async (t) => {
+  const cases = [
+    ["duplicate ids", [plan3Fact(), plan3Fact()], "fact-duplicate-id"],
+    ["duplicate surfaces", [plan3Fact({ surfaces: ["index.html", "index.html"] })], "fact-duplicate-surface"],
+    ["unsupported enum", [plan3Fact({ status: "published" })], "fact-status"],
+    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-08-28" })], "fact-as-of-future"],
+    ["malformed date", [plan3Fact({ kind: "dated", as_of: "2026-02-30" })], "fact-as-of"],
+    ["public source without HTTPS", [plan3Fact({ source_type: "public_source", source_url: "http://example.com/source" })], "fact-source-url"],
+    ["secret-like nested key", [plan3Fact({ evidence: { api_token: "do-not-publish" } })], "fact-secret-key"],
+    ["private path material", [plan3Fact({ source_label: "/Users/person/private/cv.pdf" })], "fact-private-material"]
+  ];
+  for (const [label, facts, expected] of cases) await t.test(label, async () => {
+    const root = await plan3Root({ facts });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
+  });
+  await t.test("closed public-source candidates may remain without a URL", async () => {
+    const candidate = plan3Fact({
+      status: "review",
+      surfaces: [],
+      source_type: "public_source",
+      source_url: null,
+      source_label: "Expected primary source; not inspected"
+    });
+    const root = await plan3Root({ facts: [candidate] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-source-url"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 binds singular and plural fact attributes to approved exact surfaces and displays", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const cases = [
+    ["unknown singular", [plan3Fact()], '<p data-fact-id="missing.fact">Unknown</p>', "fact-attribute-unknown"],
+    ["unknown plural token", [plan3Fact()], '<p data-fact-ids="fixture.claim missing.fact">Verified claim</p>', "fact-attribute-unknown"],
+    ["not approved", [plan3Fact({ status: "review" })], '<p data-fact-id="fixture.claim">Verified claim</p>', "fact-attribute-status"],
+    ["wrong surface", [plan3Fact({ surfaces: ["en/index.html"] })], '<p data-fact-id="fixture.claim">Verified claim</p>', "fact-attribute-surface"],
+    ["missing approved display", [plan3Fact()], '<p data-fact-id="fixture.claim">Different copy</p>', "fact-display-missing"],
+    ["known review display without annotation", [plan3Fact(), plan3Fact({ id: "fixture.review", value: "Retired venture", display_pl: "Retired venture", display_en: "Retired venture", status: "review" })], '<p data-fact-id="fixture.claim">Verified claim</p><p>Retired venture</p>', "fact-known-nonapproved"]
+  ];
+  for (const [label, facts, body, expected] of cases) await t.test(label, async () => {
+    const root = await plan3Root({ facts, files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 requires approved enclosing fact IDs for visible numbers with only exact presentation exemptions", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("unreviewed section shapes remain factual while literal 404 stays exempt", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Diagnosis</p></article></div></div></section>
+      <section class="service-section" data-section="strategy"><div class="section-shell"><p class="section-label">02 / Strategy</p></div></section>
+      <span class="knowledge-entry__number" aria-hidden="true">11</span><span>404</span>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 2, result.errors.join("\n"));
+    assert.ok(findings.some((item) => item.endsWith("numeric tokens: 01")), findings.join("\n"));
+    assert.ok(findings.some((item) => item.endsWith("numeric tokens: 02")), findings.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
+  });
+  await t.test("unapproved date", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Established in 2001</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-visible-number"), result.errors.join("\n"));
+  });
+  await t.test("approved enclosed date", async () => {
+    const dateFact = plan3Fact({ id: "fixture.year", value: "2001", display_pl: "2001", display_en: "2001" });
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p data-fact-id="fixture.year">2001</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), dateFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 scans rejected copy only when browser-visible", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("hidden script style and comment", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><!-- innovative --><style>.x::after{content:"— comprehensive"}</style><script>const copy="not just"</script>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-rejected"), false, result.errors.join("\n"));
+  });
+  for (const copy of ["Decyzja — system", "nie tylko", "not just", "kompleksowy", "comprehensive", "innowacyjny", "innovative"]) {
+    await t.test(`visible ${copy}`, async () => {
+      const body = `<p data-fact-id="fixture.claim">Verified claim</p><p>${copy}</p>`;
+      const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+      const result = await runVerification({ root, scope: "metadata" });
+      assert.ok(errorIds(result).includes("copy-rejected"), result.errors.join("\n"));
+    });
+  }
+});
+
+test("Plan 3 Task 1 requires dated sourced enclosing facts for dynamic claims", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const dynamicFact = plan3Fact({
+    id: "fixture.dynamic",
+    value: "Currently active",
+    display_pl: "Currently active",
+    display_en: "Currently active",
+    kind: "dated",
+    as_of: "2026-08-27",
+    source_type: "public_source",
+    source_label: "Direct owner page checked 2026-08-27",
+    source_url: "https://example.com/current"
+  });
+  const body = '<p data-fact-id="fixture.claim">Verified claim</p><p data-fact-id="fixture.dynamic">Currently active</p>';
+  await t.test("approved dated source", async () => {
+    const root = await plan3Root({ facts: [plan3Fact(), dynamicFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("missing date", async () => {
+    const root = await plan3Root({ facts: [plan3Fact(), { ...dynamicFact, kind: "constant", as_of: null }], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("dated owner verification is a valid first-party source", async () => {
+    const root = await plan3Root({ facts: [plan3Fact(), { ...dynamicFact, source_type: "owner_verified", source_url: null }], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("public-source claim without a source URL", async () => {
+    const root = await plan3Root({ facts: [plan3Fact(), { ...dynamicFact, source_url: null }], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("unrelated sibling fact does not satisfy", async () => {
+    const sibling = '<p data-fact-id="fixture.claim">Verified claim</p><p data-fact-id="fixture.dynamic">Different copy</p><p>Currently active</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), dynamicFact], files: { [entry.file]: plan3Page(entry, { body: sibling }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 derives discovery coverage from the independent canonical route set", async (t) => {
+  const root = await plan3Root();
+  const valid = await runVerification({ root, scope: "discovery" });
+  assert.deepEqual(valid.errors, []);
+  await t.test("missing LLM route and fake sitemap route", async () => {
+    const missing = "https://mamcarz.com/lotnictwo/";
+    const llms = plan3ExpectedPublicPages.map(({ route }) => `https://mamcarz.com${route}`).filter((url) => url !== missing).join("\n");
+    const sitemap = plan3Sitemap().replace("</urlset>", '<url><loc>https://mamcarz.com/projekty/</loc></url></urlset>');
+    const changedRoot = await plan3Root({ llms, sitemap });
+    const result = await runVerification({ root: changedRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-llms-routes"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("discovery-sitemap-routes"), result.errors.join("\n"));
+  });
+  await t.test("sitemap comments cannot replace a real route", async () => {
+    const original = plan3Sitemap();
+    const block = original.match(/<url><loc>https:\/\/mamcarz\.com\/infographic_procurement_2026_EN\.html<\/loc>[\s\S]*?<\/url>/)?.[0];
+    assert.ok(block);
+    const changedRoot = await plan3Root({ sitemap: original.replace(block, `<!--${block}-->`) });
+    const result = await runVerification({ root: changedRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-sitemap-routes"), result.errors.join("\n"));
+  });
+  await t.test("sitemap pins one exact content-change date per route", async () => {
+    const cases = [
+      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-25</lastmod>")],
+      ["future date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-28</lastmod>")],
+      ["missing date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "")],
+      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-27</lastmod><lastmod>2026-08-27</lastmod>")]
+    ];
+    for (const [label, sitemap] of cases) {
+      const changedRoot = await plan3Root({ sitemap });
+      const result = await runVerification({ root: changedRoot, scope: "discovery" });
+      assert.ok(errorIds(result).includes("discovery-sitemap-lastmod"), `${label}: ${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("sitemap omits speculative editorial cadence", async () => {
+    const sitemap = plan3Sitemap().replace("</url>", "<changefreq>monthly</changefreq><priority>1.0</priority></url>");
+    const changedRoot = await plan3Root({ sitemap });
+    const result = await runVerification({ root: changedRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-sitemap-editorial"), result.errors.join("\n"));
+  });
+  await t.test("LLM navigation lists every canonical URL exactly once", async () => {
+    const urls = plan3ExpectedPublicPages.map(({ route }) => `https://mamcarz.com${route}`).join("\n");
+    const duplicateRoot = await plan3Root({ llms: `${urls}\nhttps://mamcarz.com/` });
+    const result = await runVerification({ root: duplicateRoot, scope: "discovery" });
+    assert.ok(errorIds(result).includes("discovery-llms-routes"), result.errors.join("\n"));
+  });
+  await t.test("LLM discovery files accept only registry-derived fact lines and the reviewed navigation shell", async () => {
+    const validRoot = await plan3Root({
+      factData: plan3ProductFactData,
+      files: {
+        ...plan3ProductPageHtml,
+        "llms.txt": plan3ProductLlms,
+        "llms-full.txt": plan3ProductLlmsFull
+      }
+    });
+    const valid = await runVerification({ root: validRoot, scope: "discovery" });
+    assert.equal(errorIds(valid).includes("discovery-llms-contract"), false, valid.errors.join("\n"));
+    assert.equal(errorIds(valid).includes("discovery-llms-full-contract"), false, valid.errors.join("\n"));
+
+    const cases = [
+      [
+        "navigation narrative",
+        "llms.txt",
+        plan3ProductLlms.replace(
+          "This file is a navigation index.",
+          "This file presents a leading procurement profile."
+        ),
+        "discovery-llms-contract"
+      ],
+      [
+        "changed approved short fact",
+        "llms.txt",
+        plan3ProductLlms.replace("25+ years of procurement experience.", "30+ years of procurement experience."),
+        "discovery-llms-contract"
+      ],
+      [
+        "unknown full fact",
+        "llms-full.txt",
+        `${plan3ProductLlmsFull.trimEnd()}\n- [client.unknown] Unknown client\n`,
+        "discovery-llms-full-contract"
+      ],
+      [
+        "free-form full biography",
+        "llms-full.txt",
+        plan3ProductLlmsFull.replace("## Roles", "A generated biography claim.\n\n## Roles"),
+        "discovery-llms-full-contract"
+      ]
+    ];
+    for (const [label, path, text, expected] of cases) {
+      const changedRoot = await plan3Root({
+        factData: plan3ProductFactData,
+        files: {
+          ...plan3ProductPageHtml,
+          "llms.txt": path === "llms.txt" ? text : plan3ProductLlms,
+          "llms-full.txt": path === "llms-full.txt" ? text : plan3ProductLlmsFull
+        }
+      });
+      const result = await runVerification({ root: changedRoot, scope: "discovery" });
+      assert.ok(errorIds(result).includes(expected), `${label}: ${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("discovery scope does not duplicate the Worker fact-surface gate", async () => {
+    const workerFact = plan3Fact({ id: "fixture.worker", value: "Worker truth", display_pl: "Worker truth", display_en: "Worker truth", surfaces: ["worker/index.js"] });
+    const indexEntry = plan3ExpectedPublicPages[0];
+    const commentRoot = await plan3Root({
+      facts: [workerFact],
+      files: { "worker/index.js": "// Worker truth", [indexEntry.file]: plan3Page(indexEntry, { body: "Page copy" }) }
+    });
+    const commentResult = await runVerification({ root: commentRoot, scope: "discovery" });
+    assert.equal(errorIds(commentResult).includes("fact-display-missing"), false, commentResult.errors.join("\n"));
+
+    const literalRoot = await plan3Root({
+      facts: [workerFact],
+      files: { "worker/index.js": 'const verified = "Worker truth";', [indexEntry.file]: plan3Page(indexEntry, { body: "Page copy" }) }
+    });
+    const literalResult = await runVerification({ root: literalRoot, scope: "discovery" });
+    assert.equal(errorIds(literalResult).includes("fact-display-missing"), false, literalResult.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 checks instruction bytes redirect and cache/security contracts only in all", async (t) => {
+  const validRoot = await plan3Root();
+  const valid = await runVerification({ root: validRoot, scope: "all" });
+  assert.equal(errorIds(valid).includes("infrastructure-redirect"), false, valid.errors.join("\n"));
+
+  const cases = [
+    ["instruction mismatch", { claude: "different instructions\n" }, "instructions-sync"],
+    ["unsupported domain-level redirect", { redirects: "https://www.mamcarz.com/* https://mamcarz.com/:splat 301\n" }, "infrastructure-redirect"],
+    ["unreviewed path redirect", { redirects: "/old-path /new-path 301\n" }, "infrastructure-redirect"],
+    ["missing security header", { headers: "/*\n  X-Frame-Options: SAMEORIGIN\n" }, "infrastructure-headers"],
+    ["unsafe changed security value", { headers: `/*
+  X-Content-Type-Options: sniff
+  X-Frame-Options: ALLOWALL
+  Referrer-Policy: unsafe-url
+  Permissions-Policy: *
+/assets/fonts/*
+  Cache-Control: private, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: private, max-age=31536000, immutable
+/*.jpg
+  Cache-Control: private, max-age=31536000, immutable
+/*.png
+  Cache-Control: private, max-age=31536000, immutable
+/*.webp
+  Cache-Control: private, max-age=31536000, immutable
+/assets/css/*
+  Cache-Control: private, max-age=0, must-revalidate
+/assets/js/*
+  Cache-Control: private, max-age=0, must-revalidate
+` }, "infrastructure-headers"]
+  ];
+  for (const [label, options, expected] of cases) await t.test(label, async () => {
+    const root = await plan3Root(options);
+    const metadata = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(metadata).includes(expected), false, metadata.errors.join("\n"));
+    const all = await runVerification({ root, scope: "all" });
+    assert.ok(errorIds(all).includes(expected), all.errors.join("\n"));
+  });
+  await t.test("a safe duplicate cannot hide an unsafe security header", async () => {
+    const root = await plan3Root();
+    const path = resolve(root, "_headers");
+    const current = await readFile(path, "utf8");
+    await writeFile(path, current.replace("  X-Frame-Options: SAMEORIGIN", "  X-Frame-Options: ALLOWALL\n  X-Frame-Options: SAMEORIGIN"));
+    const result = await runVerification({ root, scope: "all" });
+    assert.ok(errorIds(result).includes("infrastructure-headers"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 rejects unsupported scopes without running unrelated validators", async () => {
+  const root = await plan3Root();
+  const result = await runVerification({ root, scope: "not-a-scope" });
+  assert.deepEqual(errorIds(result), ["cli-scope"]);
+});
+
+test("Plan 3 Task 1 CLI rejects unsupported and separated arguments before verification", async () => {
+  const cases = [
+    ["separated scope", ["--scope", "home"]],
+    ["separated language", ["--lang", "pl"]],
+    ["unknown option", ["--unexpected"]]
+  ];
+  for (const [label, args] of cases) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [modulePath, ...args]),
+      (cause) => {
+        assert.equal(cause.stdout, "", `${label} must not print success`);
+        const errors = cause.stderr.trim().split("\n").filter((line) => line.startsWith("ERROR "));
+        assert.equal(errors.length, 1, `${label} must stop before verification`);
+        assert.match(errors[0], /^ERROR cli-argument scripts\/verify-site\.mjs:/, label);
+        return true;
+      }
+    );
+  }
+});
+
+test("Plan 3 Task 2 formats the complete owner fact decision report as exact TSV", async () => {
+  const verifier = await import("./verify-site.mjs");
+  assert.equal(typeof verifier.formatFactDecisionReport, "function");
+  const factData = await readFacts();
+  const report = verifier.formatFactDecisionReport(factData);
+  const lines = report.split("\n");
+  assert.equal(lines[0], "id\tstatus\tkind\tdisplay_pl\tdisplay_en\tsource_type\tsource_label\tas_of\tsurfaces");
+  assert.equal(lines.length, factData.facts.length + 1, "one ordered row per registry fact plus the header");
+  assert.deepEqual(
+    lines.slice(1).map((line) => line.split("\t").length),
+    Array(factData.facts.length).fill(9),
+    "every row has the exact nine owner-decision columns"
+  );
+  assert.ok(lines.some((line) => line.startsWith("portfolio.czympojade_pl.type\tapproved\tconstant\t")));
+  assert.ok(lines.some((line) => line.startsWith("aviation.warsaw_flight_safety\tretired\tconstant\t")));
+});
+
+test("Plan 3 Task 2 CLI prints only the facts report and rejects malformed report options", async () => {
+  const factData = await readFacts();
+  const { stdout, stderr } = await execFileAsync(process.execPath, [modulePath, "--report=facts"]);
+  assert.equal(stderr, "");
+  assert.equal(stdout.trim().split("\n").length, factData.facts.length + 1);
+  assert.match(stdout, /^id\tstatus\tkind\tdisplay_pl\tdisplay_en\tsource_type\tsource_label\tas_of\tsurfaces\n/u);
+  assert.doesNotMatch(stdout, /OK site verification/u);
+
+  for (const [label, args] of [
+    ["unsupported report", ["--report=other"]],
+    ["bare report", ["--report"]],
+    ["duplicate report", ["--report=facts", "--report=facts"]],
+    ["mixed verification mode", ["--report=facts", "--scope=home"]]
+  ]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [modulePath, ...args]),
+      (cause) => {
+        assert.equal(cause.stdout, "", `${label}: no partial report`);
+        assert.match(cause.stderr, /^ERROR cli-(?:argument|report) scripts\/verify-site\.mjs:/u, label);
+        return true;
+      }
+    );
+  }
+});
+
+test("Plan 3 Task 2 closes every unresolved fact and removes it from all public surfaces", async () => {
+  const factData = await readFacts();
+  const expectedClosedIds = [
+    "career.orlen_general.annual_portfolio",
+    "portfolio.organisations_count",
+    "project.zabka.store_count",
+    "project.zabka.market_position",
+    "project.kghm.market_position",
+    "aviation.warsaw_flight_safety",
+    "chat.response_sla",
+    "aviation.current_helicopter_flying",
+    "availability.current"
+  ];
+  const closedFacts = factData.facts.filter((fact) => fact.status !== "approved");
+  assert.deepEqual(closedFacts.map((fact) => fact.id), expectedClosedIds, "the owner decision report has one exact closed set");
+  for (const fact of closedFacts) {
+    assert.deepEqual(fact.surfaces, [], `${fact.id}: review or retired facts have no publication surface`);
+  }
+
+  const publicCorpus = (await Promise.all(factData.public_claim_surfaces.map((path) => readFile(resolve(path), "utf8")))).join("\n");
+  const candidates = closedFacts.flatMap((fact) => [
+    fact.value,
+    fact.display_pl,
+    fact.display_en,
+    ...Object.values(fact.aliases ?? {}).flat(),
+    ...(fact.forbidden_variants ?? [])
+  ]);
+  for (const candidate of candidates) {
+    assert.equal(publicCorpus.toLocaleLowerCase("pl-PL").includes(String(candidate).toLocaleLowerCase("pl-PL")), false, `closed wording is not published: ${candidate}`);
+  }
+});
+
+test("Plan 3 Task 7 limits the Worker to five approved navigation facts while discovery retains audited product facts", async () => {
+  const factData = await readFacts();
+  const type = factData.facts.find((fact) => fact.id === "portfolio.czympojade_pl.type");
+  assert.equal(type.surfaces.includes("worker/index.js"), false, "the product meaning is deliberately excluded from the navigation Worker");
+
+  const workerFactIds = factData.facts
+    .filter((fact) => fact.status === "approved" && fact.surfaces.includes("worker/index.js"))
+    .map((fact) => fact.id);
+  assert.deepEqual(workerFactIds, [
+    "brand.promise",
+    "core.advisory",
+    "core.applications",
+    "core.aviation",
+    "contact.email"
+  ]);
+
+  const worker = await readFile(resolve("worker/index.js"), "utf8");
+  assert.match(worker, /import factRegistry from "\.\.\/content\/site-facts\.json" with \{ type: "json" \}/u);
+  assert.doesNotMatch(worker, /czympojade\.pl: Kalkulator TCO/u);
+  assert.doesNotMatch(worker, /Negocjowałem umowę ramową/u);
+  assert.doesNotMatch(worker, /100\+\s*mln\s*PLN/iu, "an unregistered scale claim must not survive in the Worker prompt");
+  assert.doesNotMatch(worker, /Kim jest Paweł:|\nKariera:|\nKlienci:/u, "the former static CV prompt must not survive");
+
+  const llmsFull = await readFile(resolve("llms-full.txt"), "utf8");
+  const exactDiscoveryLine = `- [portfolio.czympojade_pl.type] czympojade.pl: ${type.display_en}`;
+  assert.equal(llmsFull.split(/\r?\n/u).filter((line) => line === exactDiscoveryLine).length, 1, "discovery copy publishes the exact registered display once");
+  assert.equal((llmsFull.match(/^- \[portfolio\.czympojade_pl(?:\.type)?\] /gmu) ?? []).length, 2, "discovery copy has one independently owned line for the name and one for its type");
+});
+
+test("Plan 3 Task 7 verifier rejects Worker fact-surface expansion and the former CV prompt", async (t) => {
+  const factData = await readFacts();
+  const worker = await readFile(resolve("worker/index.js"), "utf8");
+  const baselineRoot = await plan3Root({ factData, files: { "worker/index.js": worker } });
+  const baseline = await runVerification({ root: baselineRoot, scope: "facts" });
+  assert.equal(errorIds(baseline).includes("worker-fact-inventory"), false, baseline.errors.join("\n"));
+  assert.equal(errorIds(baseline).includes("worker-fact-source"), false, baseline.errors.join("\n"));
+
+  await t.test("extra client surface", async () => {
+    const changedFacts = structuredClone(factData);
+    changedFacts.facts.find((fact) => fact.id === "client.orlen").surfaces.push("worker/index.js");
+    const root = await plan3Root({ factData: changedFacts, files: { "worker/index.js": worker } });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(errorIds(result).includes("worker-fact-inventory"), result.errors.join("\n"));
+  });
+
+  await t.test("static CV source", async () => {
+    const changedWorker = worker.replace(
+      'import factRegistry from "../content/site-facts.json" with { type: "json" };',
+      'const factRegistry = { facts: [] };\nconst retiredPrompt = "Kim jest Paweł:";'
+    );
+    const root = await plan3Root({ factData, files: { "worker/index.js": changedWorker } });
+    const result = await runVerification({ root, scope: "facts" });
+    assert.ok(errorIds(result).includes("worker-fact-source"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 2 leaves the verified episode number owned only by the official interview title", async () => {
+  for (const [lang, html] of Object.entries(speakingProductHtml)) {
+    assert.ok(html.includes('<span class="speaking-recording__source">YOUTUBE / PROCUREMENT&amp;BEYOND</span>'), `${lang}: neutral source label`);
+    assert.equal((html.match(/\b(?:odcinek|episode)\s+8\b/giu) ?? []).length, 1, `${lang}: episode number appears only in the verified title`);
+  }
+});
+
+test("Plan 3 Task 1 fix round 1 gives closed facts empty surfaces without weakening approved surface validation", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const pageWithoutFactCopy = plan3Page(entry, { body: "Page copy" });
+  await t.test("approved facts still require at least one surface", async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ surfaces: [] })], files: { [entry.file]: pageWithoutFactCopy } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-surfaces"), result.errors.join("\n"));
+  });
+  for (const status of ["review", "retired"]) await t.test(`${status} facts may be closed with no public surfaces`, async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ status, surfaces: [] })], files: { [entry.file]: pageWithoutFactCopy } });
+    for (const scope of ["metadata", "facts"]) {
+      const result = await runVerification({ root, scope });
+      assert.equal(errorIds(result).includes("fact-surfaces"), false, `${scope}: ${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("closed facts still reject non-string and duplicate surfaces", async () => {
+    const roots = await Promise.all([
+      plan3Root({ facts: [plan3Fact({ status: "review", surfaces: [42] })], files: { [entry.file]: pageWithoutFactCopy } }),
+      plan3Root({ facts: [plan3Fact({ status: "retired", surfaces: ["index.html", "index.html"] })], files: { [entry.file]: pageWithoutFactCopy } })
+    ]);
+    const results = await Promise.all(roots.map((root) => runVerification({ root, scope: "metadata" })));
+    assert.ok(errorIds(results[0]).includes("fact-surfaces"), results[0].errors.join("\n"));
+    assert.ok(errorIds(results[1]).includes("fact-duplicate-surface"), results[1].errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 joins inline public claims without crossing block boundaries", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  const cases = [
+    ["blocked inline split", "<p>Pol<span>pharma</span></p>", "blocked-client.polpharma"],
+    ["known inline split", "<p>Warsaw<span>FlightSafety</span></p>", "fact-known-nonapproved"],
+    ["comment entity and case split", "<p>pOl<!-- join --><span>ph&#97;rma</span></p>", "blocked-client.polpharma"]
+  ];
+  for (const [label, copy, expected] of cases) await t.test(label, async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copy}`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
+  });
+  await t.test("separate blocks do not invent a joined claim", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p>Pol</p><p>pharma</p><p>Warsaw</p><p>FlightSafety</p>
+      <div>Pol<p>block boundary</p>pharma</div>
+      <div>Warsaw<section>block boundary</section>FlightSafety</div>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("blocked-client.polpharma"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-known-nonapproved"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 counts structural metadata and landmarks outside inert templates", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("hidden head duplicates remain structural duplicates", async () => {
+    const head = `<title hidden>Hidden duplicate</title>
+      <link rel="canonical" href="https://mamcarz.com/wrong/" hidden>
+      <meta aria-hidden="true" name="description" content="Hidden duplicate">`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const expected of ["metadata-title", "metadata-canonical", "metadata-description"]) {
+      assert.ok(errorIds(result).includes(expected), `${expected}\n${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("hidden and aria-hidden main and h1 remain structural duplicates", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <main hidden><h1>Hidden duplicate</h1></main>
+      <main aria-hidden="true"><h1 aria-hidden="true">ARIA duplicate</h1></main>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("template decoys stay semantically inert", async () => {
+    const head = `<template><title>Template title</title><link rel="canonical" href="https://mamcarz.com/wrong/"><meta name="description" content="Template description"></template>`;
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p><template><main><h1>Template heading</h1></main></template>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head, body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const id of ["metadata-title", "metadata-canonical", "metadata-description", "metadata-main", "metadata-h1"]) {
+      assert.equal(errorIds(result).includes(id), false, `${id}\n${result.errors.join("\n")}`);
+    }
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 parses every real JSON-LD script once in DOM order", async (t) => {
+  const entry = plan3ExpectedPublicPages[2];
+  const variants = [
+    ["object with spaced single-quoted type", "object", "type = 'application/ld+json'"],
+    ["array with uppercase type", "array", "TYPE=\"APPLICATION/LD+JSON\""],
+    ["graph with padded mixed-case type", "graph", "TyPe = \" Application/LD+JSON \""]
+  ];
+  for (const [label, shape, attribute] of variants) await t.test(label, async () => {
+    const page = plan3Page(entry, { schema: plan3Schema(entry, shape) })
+      .replace('type="application/ld+json"', attribute);
+    const root = await plan3Root({ files: { [entry.file]: page } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("jsonld-parse"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-schema"), false, result.errors.join("\n"));
+  });
+  await t.test("malformed normalized first block is named and cannot satisfy schema", async () => {
+    const page = plan3Page(entry, { schema: '{"@type":' })
+      .replace('type="application/ld+json"', "TyPe = ' Application/LD+JSON '");
+    const root = await plan3Root({ files: { [entry.file]: page } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const parseErrors = result.errors.filter((item) => item.startsWith(`ERROR jsonld-parse ${entry.file}:`));
+    assert.equal(parseErrors.length, 1, result.errors.join("\n"));
+    assert.match(parseErrors[0], /block 1:/);
+    assert.ok(errorIds(result).includes("metadata-schema"), result.errors.join("\n"));
+  });
+  await t.test("template scripts do not change one-based real block indexes", async () => {
+    const head = `<template><script type="application/ld+json">{"@type":"Service"}</script></template>
+      <script type = "Application/LD+JSON">{"@type":</script>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const parseErrors = result.errors.filter((item) => item.startsWith(`ERROR jsonld-parse ${entry.file}:`));
+    assert.equal(parseErrors.length, 1, result.errors.join("\n"));
+    assert.match(parseErrors[0], /block 2:/);
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 treats closed disclosures as public copy but excludes inert content", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  await t.test("closed details emits every relevant public-copy finding", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p><details><summary>More</summary>
+      <p>innovative Currently active in 2026 Warsaw<span>FlightSafety</span></p></details>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const id of ["copy-rejected", "fact-visible-number", "fact-dynamic-claim", "fact-known-nonapproved"]) {
+      assert.ok(errorIds(result).includes(id), `${id}\n${result.errors.join("\n")}`);
+    }
+  });
+  await t.test("script style comment template noscript and inert copy stays excluded", async () => {
+    const unsafe = "innovative Currently active in 2026 Polpharma WarsawFlightSafety";
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p><!-- ${unsafe} -->
+      <script>${unsafe}</script><style>${unsafe}</style><template><p>${unsafe}</p></template>
+      <noscript><p>${unsafe}</p></noscript><div inert>${unsafe}</div>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    for (const id of ["copy-rejected", "fact-visible-number", "fact-dynamic-claim", "fact-known-nonapproved", "blocked-client.polpharma"]) {
+      assert.equal(errorIds(result).includes(id), false, `${id}\n${result.errors.join("\n")}`);
+    }
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 binds dynamic claims to their exact localized fact display", async (t) => {
+  const plEntry = plan3ExpectedPublicPages[0];
+  const enEntry = plan3ExpectedPublicPages[1];
+  const dynamic = plan3Fact({
+    id: "fixture.dynamic",
+    value: "Currently active",
+    display_pl: "Obecnie aktywny",
+    display_en: "Currently active",
+    kind: "dated",
+    as_of: "2026-08-27",
+    source_type: "public_source",
+    source_label: "Direct public source checked 2026-08-27",
+    source_url: "https://example.com/current",
+    surfaces: ["index.html", "en/index.html"]
+  });
+  await t.test("a broad marker authorizes only its exact descendant display", async () => {
+    const body = '<div data-fact-id="fixture.dynamic"><p>Obecnie aktywny</p></div>';
+    const root = await plan3Root({ facts: [{ ...dynamic, surfaces: ["index.html"] }], files: { [plEntry.file]: plan3Page(plEntry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+  });
+  await t.test("a second dynamic assertion cannot borrow the first exact display", async () => {
+    const body = '<p data-fact-id="fixture.dynamic">Obecnie aktywny. Wiodący dostawca.</p>';
+    const root = await plan3Root({ facts: [{ ...dynamic, surfaces: ["index.html"] }], files: { [plEntry.file]: plan3Page(plEntry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("exact localized displays may contain harmless inline markup", async () => {
+    const root = await plan3Root({
+      facts: [dynamic],
+      files: {
+        [plEntry.file]: plan3Page(plEntry, { body: '<p data-fact-id="fixture.dynamic">Obecnie <span>aktywny</span></p>' }),
+        [enEntry.file]: plan3Page(enEntry, { body: '<p data-fact-id="fixture.dynamic">Currently <span>active</span></p>' })
+      }
+    });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+  });
+  await t.test("a multi-fact copy authorizes only the exact included dynamic display", async () => {
+    const stable = plan3Fact({ surfaces: ["en/index.html"] });
+    const body = '<p data-fact-ids="fixture.claim fixture.dynamic">Verified claim. Currently <span>active</span></p>';
+    const root = await plan3Root({
+      facts: [stable, { ...dynamic, surfaces: ["en/index.html"] }],
+      files: {
+        [plEntry.file]: plan3Page(plEntry, { body: "Page copy" }),
+        [enEntry.file]: plan3Page(enEntry, { body })
+      }
+    });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 rejects every malformed or repeated CLI option before verification", async (t) => {
+  const cases = [
+    ["duplicate scope", ["--scope=metadata", "--scope=seo"], "cli-scope"],
+    ["duplicate language", ["--scope=home", "--lang=pl", "--lang=en"], "cli-lang"],
+    ["duplicate family", ["--scope=pages", "--family=home", "--family=home"], "cli-family"],
+    ["empty scope", ["--scope="], "cli-scope"],
+    ["empty language", ["--scope=metadata", "--lang="], "cli-lang"],
+    ["empty family", ["--scope=pages", "--family="], "cli-family"],
+    ["scope with multiple equals", ["--scope=metadata=garbage"], "cli-scope"],
+    ["language with multiple equals", ["--scope=home", "--lang=pl=garbage"], "cli-lang"],
+    ["family with multiple equals", ["--scope=pages", "--family=home=garbage"], "cli-family"],
+    ["separated scope", ["--scope", "home"], "cli-argument"],
+    ["unknown positional argument", ["unexpected"], "cli-argument"]
+  ];
+  for (const [label, args, id] of cases) await t.test(label, async () => {
+    await assert.rejects(execFileAsync(process.execPath, [modulePath, ...args]), (cause) => {
+      assert.equal(cause.stdout, "", `${label} must not print success`);
+      const errors = cause.stderr.trim().split("\n").filter((line) => line.startsWith("ERROR "));
+      assert.equal(errors.length, 1, `${label} must stop before running validators\n${cause.stderr}`);
+      assert.match(errors[0], new RegExp(`^ERROR ${id} scripts/verify-site\\.mjs:`), label);
+      return true;
+    });
+  });
+  await t.test("one normalized option of each kind remains valid", async () => {
+    const result = await execFileAsync(process.execPath, [modulePath, "--scope=home", "--lang=pl", "--family=all"]);
+    assert.match(result.stdout, /OK site verification \(home\)/);
+    assert.equal(result.stderr, "");
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element location", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("identical claims in different elements have distinct stable locations", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Year 2026 and 500 units in 2026</p><p>Year 2026 and 500 units in 2026</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 2026, 500, 2026`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[3] has unowned numeric tokens: 2026, 500, 2026`
+    ]);
+  });
+  await t.test("inline numeric fragments produce one finding for their owning element", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Built in <span>2026</span> across <strong>4</strong> countries</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 2026, 4`
+    ]);
+  });
+  await t.test("unreviewed presentation shapes remain factual while literal 404 stays exempt", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">DOSSIER / ADVISORY 01</p></div></header>
+      <section class="service-section" data-section="diagnosis"><div class="section-shell"><p class="section-label">01 / Diagnosis</p></div></section>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Stage</p></article></div></div></section>
+      <span class="knowledge-entry__number" aria-hidden="true">11</span><p>404</p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 3, result.errors.join("\n"));
+    assert.ok(findings.every((item) => item.endsWith("unowned numeric tokens: 01")), findings.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
+  });
+  await t.test("codes dates decimals ranges models and quantities remain factual", async () => {
+    const copies = ["A-01/data", "2026-08-27", "3.5", "10–20", "S/4HANA", "60 people"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copies.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, copies.length, findings.join("\n"));
+    for (const copy of copies) assert.ok(findings.some((item) => item.endsWith(`unowned numeric tokens: ${copy.includes(" ") ? "60" : copy}`)), `${copy}\n${findings.join("\n")}`);
+  });
+});
+
+test("Plan 3 Task 1 fix round 1 derives exactly nine bilingual pairs from the public manifest", async () => {
+  const verifier = await import("./verify-site.mjs");
+  const expected = [
+    ["index.html", "en/index.html", "/", "/en/"],
+    ["uslugi/transformacja-zakupow/index.html", "en/uslugi/transformacja-zakupow/index.html", "/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/"],
+    ["uslugi/wdrozenie-sap-ariba/index.html", "en/uslugi/wdrozenie-sap-ariba/index.html", "/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/"],
+    ["uslugi/doradztwo-zamowienia-publiczne/index.html", "en/uslugi/doradztwo-zamowienia-publiczne/index.html", "/uslugi/doradztwo-zamowienia-publiczne/", "/en/uslugi/doradztwo-zamowienia-publiczne/"],
+    ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/"],
+    ["lotnictwo/index.html", "en/lotnictwo/index.html", "/lotnictwo/", "/en/lotnictwo/"],
+    ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/"],
+    ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/"],
+    ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/"]
+  ];
+  assert.deepEqual(verifier.PUBLIC_PAGE_PAIRS, expected);
+  assert.equal(expected.some((pair) => pair.flat().some((value) => value.includes("procurement-2026") || value.includes("diagram"))), false);
+});
+
+test("Plan 3 Task 1 fix round 1 rejects normalized secret keys and private relative paths", async (t) => {
+  for (const key of ["accessToken", "clientSecret", "apiKey", "private-key", "access.token"]) await t.test(`secret key ${key}`, async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ evidence: { [key]: "not-public" } })] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-secret-key"), result.errors.join("\n"));
+  });
+  await t.test("parent traversal into a private relative path is rejected", async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ source_label: "../../private/cv.pdf" })] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-private-material"), result.errors.join("\n"));
+  });
+  await t.test("ordinary public keys and relative public routes remain allowed", async () => {
+    const root = await plan3Root({ facts: [plan3Fact({
+      evidence: {
+        publicTokenization: "documented",
+        clientSecretariat: "public team",
+        documentationPath: "../../public/cv.pdf",
+        assetPath: "../assets/img/photo.webp",
+        route: "../case-studies/"
+      }
+    })] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-secret-key"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-private-material"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 2 matches complete dynamic claim families with Unicode boundaries", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const inflections = [
+    "największy", "największa", "największe", "największego", "największej", "największemu", "największym", "największych", "największą", "najwięksi", "największymi",
+    "wiodący", "wiodąca", "wiodące", "wiodącego", "wiodącej", "wiodącemu", "wiodącym", "wiodących", "wiodącą", "wiodącymi",
+    "aktywny", "aktywna", "aktywne", "aktywnego", "aktywnej", "aktywnemu", "aktywnym", "aktywnych", "aktywną", "aktywni", "aktywnymi", "aktywnie",
+    "aktualny", "aktualna", "aktualne", "aktualnego", "aktualnej", "aktualnemu", "aktualnym", "aktualnych", "aktualną", "aktualni", "aktualnymi", "aktualnie",
+    "obecny", "obecna", "obecne", "obecnego", "obecnej", "obecnemu", "obecnym", "obecnych", "obecną", "obecni", "obecnymi", "obecnie"
+  ];
+  await t.test("Polish cases genders plurals and adverbs are all dynamic", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${inflections.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    for (const copy of inflections) {
+      assert.ok(findings.some((item) => item.endsWith(`: ${copy}`)), `${copy}\n${findings.join("\n")}`);
+    }
+  });
+  await t.test("English categories and dated status phrases stay dynamic", async () => {
+    const copies = ["#1", "largest", "leading", "active", "currently", "current status", "current-status", "As of 2026", "Stan na 2026", "Według stanu na 2026", "czerwiec 2026", "June 2026"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copies.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    for (const copy of copies) assert.ok(findings.some((item) => item.endsWith(`: ${copy}`)), `${copy}\n${findings.join("\n")}`);
+  });
+  await t.test("lexical prefixes outside the intended families remain safe", async () => {
+    const safe = ["największości", "przewiodący", "aktywność", "proaktywny", "nieaktywny", "aktualizacja", "aktualność", "nieaktualny", "obecność", "nieobecny"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${safe.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("the exact inflected reviewer display in a constant fact remains unauthorized", async () => {
+    const fact = plan3Fact({
+      id: "fixture.constant-current",
+      value: "Największa marka działalności lotniczej",
+      display_pl: "Największą marką działalności lotniczej",
+      display_en: "Largest aviation venture",
+      kind: "constant",
+      surfaces: [entry.file]
+    });
+    const body = '<p data-fact-id="fixture.constant-current">Największą marką działalności lotniczej</p>';
+    const root = await plan3Root({ facts: [fact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 2 assigns inline sibling copy to semantic owners", async (t) => {
+  const plEntry = plan3ExpectedPublicPages[0];
+  const enEntry = plan3ExpectedPublicPages[1];
+  const statusFact = plan3Fact({
+    id: "fixture.current-status",
+    value: "akrobacja.com is the current aviation venture",
+    display_pl: "Aktualna marka działalności lotniczej",
+    display_en: "Current aviation venture",
+    kind: "dated",
+    as_of: "2026-08-26",
+    source_type: "public_source",
+    source_label: "Owner status checked 2026-08-26",
+    source_url: "https://example.com/status",
+    surfaces: [plEntry.file, enEntry.file]
+  });
+  await t.test("PL and EN status siblings keep their own numeric and dynamic copy", async () => {
+    const root = await plan3Root({
+      facts: [statusFact],
+      files: {
+        [plEntry.file]: plan3Page(plEntry, { body: '<div class="aviation-status-line"><time data-fact-id="fixture.current-status">Aktualna marka działalności lotniczej</time><span>Stan na 2026-08-26</span></div>' }),
+        [enEntry.file]: plan3Page(enEntry, { body: '<div class="aviation-status-line"><time data-fact-id="fixture.current-status">Current aviation venture</time><span>As of 2026-08-26</span></div>' })
+      }
+    });
+    const result = await runVerification({ root, scope: "metadata" });
+    const dynamic = result.errors.filter((item) => item.startsWith("ERROR fact-dynamic-claim "));
+    assert.ok(dynamic.some((item) => item.endsWith(": Stan na 2026")), dynamic.join("\n"));
+    assert.ok(dynamic.some((item) => item.endsWith(": As of 2026")), dynamic.join("\n"));
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number "));
+    assert.equal(numeric.some((item) => /lotniczej2026|venture2026/.test(item)), false, numeric.join("\n"));
+  });
+  await t.test("independent navigation and scale siblings never form composite numeric tokens", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <div><span>01</span><strong>OPS</strong></div>
+      <nav><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></nav>
+      <div>${[1, 2, 3, 4, 5].map((value) => `<label><input type="radio" value="${value}">${value}</label>`).join("")}</div>`;
+    const root = await plan3Root({ files: { [plEntry.file]: plan3Page(plEntry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const numeric = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${plEntry.file}:`));
+    assert.equal(numeric.some((item) => /01OPS|0102030405|12345/.test(item)), false, numeric.join("\n"));
+    for (const value of [1, 2, 3, 4, 5]) assert.ok(numeric.some((item) => item.endsWith(`unowned numeric tokens: ${value}`)), numeric.join("\n"));
+  });
+  await t.test("inline sibling concatenation follows actual whitespace and block boundaries", async () => {
+    const bodies = [
+      '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol<span>pharma</span></p>',
+      '<p data-fact-id="fixture.claim">Verified claim</p><p><span>Pol</span><span>pharma</span></p>',
+      '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol <span>pharma</span></p><p>Pol</p><p>pharma</p>'
+    ];
+    const roots = await Promise.all(bodies.map((body) => plan3Root({ files: { [plEntry.file]: plan3Page(plEntry, { body }) } })));
+    const [direct, adjacent, separated] = await Promise.all(roots.map((root) => runVerification({ root, scope: "metadata" })));
+    assert.ok(errorIds(direct).includes("blocked-client.polpharma"), direct.errors.join("\n"));
+    assert.ok(errorIds(adjacent).includes("blocked-client.polpharma"), adjacent.errors.join("\n"));
+    assert.equal(errorIds(separated).includes("blocked-client.polpharma"), false, separated.errors.join("\n"));
+  });
+  await t.test("real SEO output contains no sibling-concatenation artifacts and keeps approved dated status owned", async () => {
+    const result = await runVerification({ root: resolve("."), scope: "seo" });
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number "));
+    for (const artifact of ["01OPS", "01Doradztwo", "12345", "lotniczej2026", "venture2026"]) {
+      assert.equal(numeric.some((item) => item.includes(artifact)), false, `${artifact}\n${numeric.join("\n")}`);
+    }
+    const dynamic = result.errors.filter((item) => item.startsWith("ERROR fact-dynamic-claim "));
+    assert.equal(dynamic.some((item) => item.startsWith("ERROR fact-dynamic-claim lotnictwo/index.html:")), false, dynamic.join("\n"));
+    assert.equal(dynamic.some((item) => item.startsWith("ERROR fact-dynamic-claim en/lotnictwo/index.html:")), false, dynamic.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 2 requires the sole structural landmarks to be public", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const cases = [
+    ["hidden main", "<main>", "<main hidden>", "metadata-main"],
+    ["aria-hidden main", "<main>", '<main aria-hidden="true">', "metadata-main"],
+    ["hidden h1", "<h1>", "<h1 hidden>", "metadata-h1"],
+    ["aria-hidden h1", "<h1>", '<h1 aria-hidden="true">', "metadata-h1"],
+    ["main below hidden ancestor", "<body><main>", "<body><div hidden><main>", "metadata-main", "</main></body>", "</main></div></body>"],
+    ["h1 below aria-hidden ancestor", "<main><h1>", '<main><div aria-hidden="true"><h1>', "metadata-h1", "</h1>", "</h1></div>"]
+  ];
+  for (const [label, before, after, id, closeBefore, closeAfter] of cases) await t.test(label, async () => {
+    let html = plan3Page(entry).replace(before, after);
+    if (closeBefore) html = html.replace(closeBefore, closeAfter);
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes(id), result.errors.join("\n"));
+  });
+  await t.test("one visible plus one hidden landmark still fails structural cardinality", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><main hidden><h1 hidden>Duplicate</h1></main>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("template landmark decoys remain inert", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><template><main><h1>Decoy</h1></main></template>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 separates public scan text from semantic claim owners", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const currentFact = plan3Fact({
+    id: "fixture.current-venture",
+    value: "akrobacja.com is the current aviation venture",
+    display_pl: "Aktualna marka działalności lotniczej",
+    display_en: "Current aviation venture",
+    kind: "dated",
+    as_of: "2026-08-26",
+    source_type: "public_source",
+    source_label: "Owner status checked 2026-08-26",
+    source_url: "https://example.com/status",
+    surfaces: [entry.file]
+  });
+  await t.test("adjacent inline siblings cannot hide a blocked entity", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>Pol</span><span>pharma</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma"), result.errors.join("\n"));
+  });
+  await t.test("adjacent inline siblings cannot hide rejected copy", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>not</span><span> just</span><span> software</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("copy-rejected"), result.errors.join("\n"));
+  });
+  await t.test("a wrapper-only inline fact exposes its complete localized display", async () => {
+    const body = '<p data-fact-id="fixture.current-venture"><span>Aktualna marka</span><span> działalności lotniczej</span></p>';
+    const root = await plan3Root({ facts: [currentFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("an exact display in a broad marker cannot authorize an unrelated sibling claim", async () => {
+    const body = `<div data-fact-id="fixture.current-venture">
+      <p><span>Aktualna marka</span><span> działalności lotniczej</span></p>
+      <p>Aktualna oferta doradcza</p>
+    </div>`;
+    const root = await plan3Root({ facts: [currentFact], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    const dynamic = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(dynamic.length, 1, dynamic.join("\n"));
+    assert.match(dynamic[0], /p\[2\].*: Aktualna$/);
+  });
+  await t.test("numeric navigation siblings remain separate semantic owners", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <nav><span>01</span><span>OPS</span></nav>
+      <div><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const numeric = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(numeric.some((item) => /01OPS|12345/.test(item)), false, numeric.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 fails closed on public-copy HTML entity smuggling", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  await t.test("decimal and hexadecimal numeric references rejoin prohibited names", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p>Pol&#173;pharma</p><p>Pol&#xADpharma</p><p>Pol&#x200B;pharma</p>
+      <p>Warsaw&#8203;FlightSafety</p><p>Warsaw&#8203FlightSafety</p>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("fact-known-nonapproved"), result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("supported default-ignorable named references rejoin prohibited names", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol&shy;pharma</p><p>Warsaw&ZeroWidthSpace;FlightSafety</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("fact-known-nonapproved"), result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("ordinary ampersand and nonbreaking-space references remain supported", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>R&amp;D&nbsp;team</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("an unresolved long named reference emits one actionable diagnostic", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Public&CounterClockwiseContourIntegral;copy</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR copy-entity-unsupported ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /html\[1\]>body\[1\]>main\[1\]>p\[2\].*&CounterClockwiseContourIntegral;/);
+  });
+  await t.test("decoded ignorable references do not cross true block boundaries", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p>Pol&shy;</p><p>pharma</p><p>Warsaw&ZeroWidthSpace;</p><p>FlightSafety</p>`;
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("blocked-client.polpharma"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-known-nonapproved"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 applies complete English dynamics with Unicode token boundaries", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("active current and currently remain true dynamic claims", async () => {
+    const copies = ["active", "currently", "current", "Current aviation venture"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${copies.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(findings.length, copies.length, findings.join("\n"));
+    for (const token of ["active", "currently", "current", "Current"]) {
+      assert.ok(findings.some((item) => item.endsWith(`: ${token}`)), `${token}\n${findings.join("\n")}`);
+    }
+  });
+  await t.test("letters marks numbers connectors and immediate negation prevent false matches", async () => {
+    const safe = ["Active24", "_active", "active_count", "Xactive", "activeX", "a\u0301active", "active\u0301", "not active", "not-active", "nieaktywny", "nie aktywny"];
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>${safe.map((copy) => `<p>${copy}</p>`).join("")}`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("Current aviation venture requires a dated sourced fact", async () => {
+    const current = plan3Fact({
+      id: "fixture.current",
+      value: "Current aviation venture",
+      display_pl: "Current aviation venture",
+      display_en: "Current aviation venture",
+      surfaces: [entry.file]
+    });
+    const body = '<p data-fact-id="fixture.current">Current aviation venture</p>';
+    const root = await plan3Root({ facts: [current], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-dynamic-claim"), result.errors.join("\n"));
+  });
+  await t.test("a dated sourced Current aviation venture display is authorized", async () => {
+    const current = plan3Fact({
+      id: "fixture.current",
+      value: "Current aviation venture",
+      display_pl: "Current aviation venture",
+      display_en: "Current aviation venture",
+      kind: "dated",
+      as_of: "2026-08-26",
+      source_type: "public_source",
+      source_label: "Owner status checked 2026-08-26",
+      source_url: "https://example.com/status",
+      surfaces: [entry.file]
+    });
+    const body = '<p data-fact-id="fixture.current">Current aviation venture</p>';
+    const root = await plan3Root({ facts: [current], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 3 requires landmarks inside the actual public body tree", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("a sole main in head is rejected", async () => {
+    const html = plan3Page(entry)
+      .replace("</head><body><main>", "<main></main></head><body><div>")
+      .replace("</main></body>", "</div></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+  });
+  await t.test("a sole h1 in head is rejected", async () => {
+    const html = plan3Page(entry).replace(
+      "</head><body><main><h1>Fixture page</h1>",
+      "<h1>Fixture page</h1></head><body><main>"
+    );
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("landmarks outside body at the document root are rejected", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main><h1>Fixture page</h1>", "<body><div>")
+      .replace("</main></body></html>", "</div></body><main><h1>Fixture page</h1></main></html>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("the ordinary visible body landmarks remain accepted", async () => {
+    const root = await plan3Root();
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+  await t.test("head decoys plus body landmarks still fail exact cardinality", async () => {
+    const head = "<main><h1>Head decoy</h1></main>";
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("template landmark decoys stay outside structural counts", async () => {
+    const head = "<template><main><h1>Template decoy</h1></main></template>";
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { head }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+  await t.test("noscript landmarks cannot satisfy the public body contract", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main>", "<body><noscript><main>")
+      .replace("</main></body>", "</main></noscript></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 fails closed on semicolonless public-copy entities", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const known = plan3Fact({
+    id: "aviation.retired-name",
+    value: "WarsawFlightSafety",
+    display_pl: "WarsawFlightSafety",
+    display_en: "WarsawFlightSafety",
+    status: "retired",
+    surfaces: []
+  });
+  await t.test("semicolonless shy cannot hide blocked and known names", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Pol&shypharma</p><p>Warsaw&shyFlightSafety</p>';
+    const root = await plan3Root({ facts: [plan3Fact(), known], files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("blocked-client.polpharma") || errorIds(result).includes("copy-entity-unsupported"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("fact-known-nonapproved") || errorIds(result).includes("copy-entity-unsupported"), result.errors.join("\n"));
+  });
+  await t.test("an unknown semicolonless entity-like reference is named fail-closed", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Public&MadeUpEntitycopy</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR copy-entity-unsupported ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[2\].*&MadeUpEntitycopy/);
+  });
+  await t.test("ordinary ampersands and supported references remain safe", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>R&amp;D, R&ampD, AT&T, A & B, X&nbsp;Y, X&nbspY, Z&#173;Z, Z&#xADZ</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+  await t.test("private attributes do not become public entity surfaces", async () => {
+    const body = '<p data-private-note="&MadeUpEntity" data-fact-id="fixture.claim">Verified claim</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("copy-entity-unsupported"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 evaluates dynamic negation in the public lexical stream", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("English negation split across inline siblings suppresses active", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>not </span><span>active</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("Polish negation split across inline siblings suppresses aktywny", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p><span>nie </span><span>aktywny</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-dynamic-claim"), false, result.errors.join("\n"));
+  });
+  await t.test("true active and current split across inline siblings remain actionable", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p><span>act</span><span>ive</span></p>
+      <p><span>cur</span><span>rent</span></p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(findings.length, 2, result.errors.join("\n"));
+    assert.ok(findings.some((item) => /p\[2\].*: active$/.test(item)), findings.join("\n"));
+    assert.ok(findings.some((item) => /p\[3\].*: current$/.test(item)), findings.join("\n"));
+  });
+  await t.test("a block-separated negation cannot suppress the next block claim", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>not</p><p>active</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-dynamic-claim ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[3\].*: active$/);
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 requires semantic evidence for presentation indexes", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("bare model sibling numbers are facts rather than presentation indexes", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Model <span>01</span><span>02</span></p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[2\].*01, 02$/);
+  });
+  await t.test("a model-number class cannot grant the presentation exemption", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p class="model-number">01 / Model</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /p\[2\].*01$/);
+  });
+  await t.test("model prose shaped like a section label remains factual", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><p>Model / 01</p>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("fact-visible-number"), result.errors.join("\n"));
+  });
+  await t.test("former heuristic structures cannot impersonate reviewed presentation occurrences", async () => {
+    const body = plan3RealPresentationBody();
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 10, result.errors.join("\n"));
+    assert.ok(findings.every((item) => item.endsWith("unowned numeric tokens: 01")), findings.join("\n"));
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 maps normalized occurrences to source nodes in one pass", async (t) => {
+  const pl = plan3ExpectedPublicPages[0];
+  const en = plan3ExpectedPublicPages[1];
+  await t.test("a nested year marker after direct-text whitespace owns the exact 2026 occurrence", async () => {
+    const year = plan3Fact({ id: "fixture.year", value: 2026, display_pl: "2026", display_en: "2026", surfaces: [pl.file] });
+    const body = '<p>Probe: <span data-fact-id="fixture.year">2026</span></p>';
+    const root = await plan3Root({ facts: [year], files: { [pl.file]: plan3Page(pl, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("entities multiple spaces and nested inline display map to the exact fact marker", async () => {
+    const year = plan3Fact({ id: "fixture.year", value: 2026, display_pl: "Rok 2026", display_en: "Year 2026", surfaces: [pl.file] });
+    const body = '<p>Probe:</p><strong data-fact-id="fixture.year"><span>Rok</span>&nbsp;   <em>2026</em></strong>';
+    const root = await plan3Root({ facts: [year], files: { [pl.file]: plan3Page(pl, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("Unicode normalization length changes preserve PL and EN source ownership", async () => {
+    const year = plan3Fact({
+      id: "fixture.year",
+      value: 2026,
+      display_pl: "Å 2026",
+      display_en: "Year 2026",
+      surfaces: [pl.file, en.file]
+    });
+    const plBody = '<p data-fact-id="fixture.year"><span>A</span>\u030A&nbsp; <em>2026</em></p>';
+    const enBody = '<p data-fact-id="fixture.year"><span>Year</span>   <em>2026</em></p>';
+    const root = await plan3Root({ facts: [year], files: {
+      [pl.file]: plan3Page(pl, { body: plBody }),
+      [en.file]: plan3Page(en, { body: enBody })
+    } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-display-missing"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-visible-number"), false, result.errors.join("\n"));
+  });
+  await t.test("an unrelated sibling occurrence remains unowned at its own stable path", async () => {
+    const year = plan3Fact({ id: "fixture.year", value: 2026, display_pl: "2026", display_en: "2026", surfaces: [pl.file] });
+    const body = '<p data-fact-id="fixture.year">2026</p><p><span>2026</span></p>';
+    const root = await plan3Root({ facts: [year], files: { [pl.file]: plan3Page(pl, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${pl.file}:`));
+    assert.equal(findings.length, 1, result.errors.join("\n"));
+    assert.match(findings[0], /html\[1\]>body\[1\]>main\[1\]>p\[2\]>span\[1\].*: 2026$/);
+  });
+});
+
+test("Plan 3 Task 1 fix round 4 separates public copy from rendered landmark visibility", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const wrapped = (tag, attributes = "") => plan3Page(entry)
+    .replace("<body><main>", `<body><${tag}${attributes}><main>`)
+    .replace("</main></body>", `</main></${tag}></body>`);
+  await t.test("closed details cannot contain the sole rendered main or h1", async () => {
+    const root = await plan3Root({ files: { [entry.file]: wrapped("details") } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("a sole h1 in closed details cannot satisfy a visible main", async () => {
+    const html = plan3Page(entry).replace(
+      "<body><main><h1>Fixture page</h1>",
+      "<body><main><details><h1>Fixture page</h1></details>"
+    );
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("a non-open dialog cannot contain the sole rendered main or h1", async () => {
+    const root = await plan3Root({ files: { [entry.file]: wrapped("dialog") } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("open details and dialog landmarks remain valid", async () => {
+    for (const html of [wrapped("details", " open"), wrapped("dialog", " open")]) {
+      const root = await plan3Root({ files: { [entry.file]: html } });
+      const result = await runVerification({ root, scope: "metadata" });
+      assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+      assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+    }
+  });
+  await t.test("closed details copy remains public to rejected-copy scans", async () => {
+    const body = '<p data-fact-id="fixture.claim">Verified claim</p><details><p>not just software</p></details>';
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("copy-rejected"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 5 binds presentation exemptions to exact numeric occurrences", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("real research and material quantities remain numeric facts at stable paths", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p class="knowledge-kicker">RESEARCH INDEX / 02 ENTRIES</p>
+      <p class="knowledge-kicker">RESEARCH INDEX / 03 ENTRIES</p>
+      <p class="procurement-kicker">ARTIFACT DOSSIER / 04 MATERIAŁY</p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 02`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[3] has unowned numeric tokens: 03`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[4] has unowned numeric tokens: 04`
+    ]);
+  });
+  await t.test("suggestive classes and attributes cannot exempt quantities or model numbers", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p class="section-index">Model 01</p>
+      <article data-artifact="model"><p>Quantity 03 units</p></article>
+      <nav class="projects-index"><p>Model 02</p></nav>
+      <article data-method-step="1"><span>01</span></article>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 01`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>article[1]>p[1] has unowned numeric tokens: 03`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>nav[1]>p[1] has unowned numeric tokens: 02`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>article[2]>span[1] has unowned numeric tokens: 01`
+    ]);
+  });
+  await t.test("an unreviewed section prefix cannot exempt either numeric occurrence", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Model quantity 01</p></article></div></div></section>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>article[1]>p[1] has unowned numeric tokens: 01, 01`
+    ]);
+  });
+  await t.test("the unchanged reviewed product consumes every presentation occurrence", async () => {
+    const root = await plan3ProductMetadataRoot();
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("presentation-index-manifest"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 5 rejects inert landmarks without changing structural counts", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  await t.test("an inert ancestor makes the sole main and h1 non-rendered", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main>", "<body><div inert><main>")
+      .replace("</main></body>", "</main></div></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("inert on the landmark itself is non-rendered", async () => {
+    const html = plan3Page(entry)
+      .replace("<body><main>", "<body><main inert>")
+      .replace("<h1>Fixture page</h1>", "<h1 inert>Fixture page</h1>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+  await t.test("an inert non-landmark sibling does not hide visible body landmarks", async () => {
+    const html = plan3Page(entry).replace("<body><main>", "<body><div inert><p>Inactive copy</p></div><main>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+  await t.test("inert landmark duplicates still violate exact structural cardinality", async () => {
+    const html = plan3Page(entry).replace("</main></body>", "</main><div inert><main><h1>Duplicate</h1></main></div></body>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+    assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 6 closes presentation-index class spoofing", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+
+  await t.test("visible knowledge and standalone section classes do not authorize numbers", async () => {
+    const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+      <p><span class="knowledge-entry__number">02</span> units sold</p>
+      <p class="section-index">01 / Model</p>`;
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.deepEqual(findings, [
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[2] has unowned numeric tokens: 02`,
+      `ERROR fact-visible-number ${entry.file}: html[1]>body[1]>main[1]>p[3] has unowned numeric tokens: 01`
+    ]);
+  });
+
+  const presentationSpoofs = [
+    ["section label", '<p class="section-label">01 / Model</p>'],
+    ["service dossier", '<p class="service-dossier-code">DOSSIER / ADVISORY 01</p>'],
+    ["application evidence", '<p class="evidence-row__context">Product / 01</p>'],
+    ["aviation call sign", '<p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 01</p>'],
+    ["projects index", '<div class="projects-index"><a><span>01</span>Advisory</a></div>'],
+    ["aviation sector", '<div class="aviation-sector__index"><span>01</span><strong>OPS</strong></div>'],
+    ["service method", '<div class="service-method"><article data-method-step="1"><span>01</span><h3>Method</h3></article></div>'],
+    ["speaking topic", '<div class="speaking-agenda"><article data-topic="one"><span>01</span><h3>Topic</h3></article></div>'],
+    ["procurement artifact", '<article class="procurement-artifact" data-artifact="1"><header><span>01</span><h2>Artifact</h2></header></article>']
+  ];
+  for (const [label, markup] of presentationSpoofs) {
+    await t.test(`${label} needs its complete real DOM relation`, async () => {
+      const body = `<p data-fact-id="fixture.claim">Verified claim</p>${markup}`;
+      const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+      const result = await runVerification({ root, scope: "metadata" });
+      const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+      assert.equal(findings.length, 1, result.errors.join("\n"));
+      assert.match(findings[0], /has unowned numeric tokens: 01$/);
+    });
+  }
+
+  await t.test("the complete former heuristic inventory cannot recreate reviewed identities", async () => {
+    const body = plan3RealPresentationBody();
+    const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+    const result = await runVerification({ root, scope: "metadata" });
+    const findings = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`));
+    assert.equal(findings.length, 10, result.errors.join("\n"));
+    assert.ok(findings.every((item) => item.endsWith("unowned numeric tokens: 01")), findings.join("\n"));
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    assert.equal(findings.some((item) => item.includes("404")), false, findings.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 6 treats static popovers as non-rendered landmarks", async (t) => {
+  const entry = plan3ExpectedPublicPages[0];
+  const wrapped = (attributes) => plan3Page(entry)
+    .replace("<body><main>", `<body><div ${attributes}><main>`)
+    .replace("</main></body>", "</main></div></body>");
+
+  for (const [label, html] of [
+    ["empty popover ancestor", wrapped("popover")],
+    ["manual popover ancestor", wrapped('popover="manual"')],
+    ["nested popover ancestor", plan3Page(entry)
+      .replace("<body><main>", '<body><section><div popover="manual"><main>')
+      .replace("</main></body>", "</main></div></section></body>")],
+    ["popover on each landmark", plan3Page(entry)
+      .replace("<body><main>", "<body><main popover>")
+      .replace("<h1>Fixture page</h1>", '<h1 popover="manual">Fixture page</h1>')]
+  ]) {
+    await t.test(`${label} cannot satisfy rendered main or h1`, async () => {
+      const root = await plan3Root({ files: { [entry.file]: html } });
+      const result = await runVerification({ root, scope: "metadata" });
+      assert.ok(errorIds(result).includes("metadata-main"), result.errors.join("\n"));
+      assert.ok(errorIds(result).includes("metadata-h1"), result.errors.join("\n"));
+    });
+  }
+
+  await t.test("a popover sibling does not hide visible body landmarks", async () => {
+    const html = plan3Page(entry).replace("<body><main>", "<body><aside popover><p>Closed</p></aside><main>");
+    const root = await plan3Root({ files: { [entry.file]: html } });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("metadata-main"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("metadata-h1"), false, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", async () => {
+  const verifier = await import("./verify-site.mjs");
+  const entries = verifier.PRESENTATION_INDEX_OCCURRENCES;
+  assert.ok(Array.isArray(entries), "the verifier must export the reviewed occurrence manifest");
+  assert.equal(entries.length, 153, "every reviewed presentation index in the 24 public pages is inventoried");
+
+  const canonical = JSON.stringify([...entries].sort((left, right) => [
+    left.file,
+    left.sourcePath,
+    left.ownerPath,
+    left.token,
+    String(left.occurrence)
+  ].join("\0").localeCompare([
+    right.file,
+    right.sourcePath,
+    right.ownerPath,
+    right.token,
+    String(right.occurrence)
+  ].join("\0"))));
+  assert.equal(
+    createHash("sha256").update(canonical).digest("hex"),
+    "881a57835cc5508552711e26a582b835327689ce1619f3722240e88c9116880f",
+    "presentation markup changes require an explicit inventory audit and baseline refresh"
+  );
+});
+
+test("Plan 3 Task 1 fix round 7 validates manifest identities independently", async () => {
+  const verifier = await import("./verify-site.mjs");
+  assert.equal(typeof verifier.validatePresentationIndexOccurrences, "function");
+  const duplicate = structuredClone(verifier.PRESENTATION_INDEX_OCCURRENCES[0]);
+  const duplicateDiagnostics = verifier.validatePresentationIndexOccurrences([
+    ...verifier.PRESENTATION_INDEX_OCCURRENCES,
+    duplicate
+  ]);
+  assert.equal(duplicateDiagnostics.length, 1, duplicateDiagnostics.join("\n"));
+  assert.match(duplicateDiagnostics[0], /duplicate.*identity/iu);
+
+  const foreignFile = { ...duplicate, file: "fictional/index.html" };
+  const foreignDiagnostics = verifier.validatePresentationIndexOccurrences([foreignFile]);
+  assert.equal(foreignDiagnostics.length, 1, foreignDiagnostics.join("\n"));
+  assert.match(foreignDiagnostics[0], /PUBLIC_PAGES/u);
+});
+
+test("Plan 3 Task 1 fix round 7 consumes the unchanged real inventory exactly once", async () => {
+  const root = await plan3ProductMetadataRoot();
+  const result = await runVerification({ root, scope: "metadata" });
+  assert.equal(errorIds(result).includes("presentation-index-manifest"), false, result.errors.join("\n"));
+  const factualIndexes = result.errors.filter((item) => /^ERROR fact-visible-number .+ has unowned numeric tokens: (?:02|03|04|10)$/u.test(item));
+  assert.deepEqual(factualIndexes, []);
+});
+
+test("Plan 3 Task 1 fix round 7 rejects every reviewed identity mutation", async (t) => {
+  const original = plan3ProductPageHtml["index.html"];
+  const exact = '<p class="section-index">01 / Diagnoza</p>';
+  assert.equal(original.split(exact).length, 2, "the reviewed source occurs exactly once");
+  const mutations = [
+    ["source path", original.replace(exact, `<div>${exact}</div>`), true],
+    ["token", original.replace(exact, '<p class="section-index">02 / Diagnoza</p>'), true],
+    ["owner text", original.replace(exact, '<p class="section-index">01 / Model</p>'), true],
+    ["container signature", original.replace(exact, '<p class="section-index" data-review-spoof>01 / Diagnoza</p>'), true],
+    ["duplicate token in the same owner", original.replace(exact, '<p class="section-index">01 / Diagnoza 01</p>'), true],
+    ["missing reviewed index", original.replace(exact, ""), false]
+  ];
+  for (const [label, html, expectsNumeric] of mutations) await t.test(label, async () => {
+    const root = await plan3ProductMetadataRoot({ "index.html": html });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number index.html:")
+      && /numeric tokens: 0[12](?:, 01)?$/u.test(item));
+    assert.equal(numeric.length > 0, expectsNumeric, `${label}\n${result.errors.join("\n")}`);
+  });
+});
+
+test("Plan 3 Task 1 fix round 7 rejects reordered and duplicated aviation children", async (t) => {
+  const original = plan3ProductPageHtml["lotnictwo/index.html"];
+  const exact = '<div class="aviation-sector__index"><span>01</span><strong>OPS</strong></div>';
+  assert.equal(original.split(exact).length, 2, "the reviewed aviation index occurs exactly once");
+  for (const [label, replacement, minimumNumeric] of [
+    ["reordered children", '<div class="aviation-sector__index"><strong>OPS</strong><span>01</span></div>', 1],
+    ["duplicate token", '<div class="aviation-sector__index"><span>01</span><span>01</span><strong>OPS</strong></div>', 1]
+  ]) await t.test(label, async () => {
+    const root = await plan3ProductMetadataRoot({ "lotnictwo/index.html": original.replace(exact, replacement) });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number lotnictwo/index.html:")
+      && /numeric tokens: 01(?:, 01)?$/u.test(item));
+    assert.ok(numeric.length >= minimumNumeric, result.errors.join("\n"));
+  });
+});
+
+test("Plan 3 Task 1 fix round 7 rejects the reviewer foreign-article and seven-branch spoof", async () => {
+  const entry = plan3ExpectedPublicPages[0];
+  const body = `<p data-fact-id="fixture.claim">Verified claim</p>
+    <article data-foreign-wrapper>
+      <section class="service-section" data-section="problem"><div class="section-shell"><p class="section-label">01 / Problem</p></div></section>
+      <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Diagnosis</p></article></div></div></section>
+      <section class="applications-section application-evidence" data-section="evidence"><div class="section-shell"><div class="applications-evidence-list"><article class="evidence-row"><p class="evidence-row__context">Product / 01</p></article></div></div></section>
+      <section class="service-section" data-section="method"><div class="section-shell"><div class="service-method"><article data-method-step="1"><span>01</span></article></div></div></section>
+      <section class="speaking-group speaking-topics" data-section="topics"><div class="speaking-agenda"><article data-topic="spoof"><span>01</span></article></div></section>
+      <section class="procurement-artifacts"><article class="procurement-artifact" data-artifact="1"><header><span>01</span></header></article></section>
+    </article>
+    <section class="aviation-sector" data-section="operations"><div><div class="aviation-sector__index"><strong>MODEL</strong><span>01</span><span>01</span></div></div></section>`;
+  const root = await plan3Root({ files: { [entry.file]: plan3Page(entry, { body }) } });
+  const result = await runVerification({ root, scope: "metadata" });
+  assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
+  const numeric = result.errors.filter((item) => item.startsWith(`ERROR fact-visible-number ${entry.file}:`)
+    && /numeric tokens: 01(?:, 01)?$/u.test(item));
+  assert.equal(numeric.length, 8, result.errors.join("\n"));
+});
+
+test("Plan 3 Task 1 package scripts expose exact deterministic validator commands", async () => {
+  const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
+  assert.equal(pkg.scripts["verify:metadata"], "node scripts/verify-site.mjs --scope=metadata");
+  assert.equal(pkg.scripts["verify:discovery"], "node scripts/verify-site.mjs --scope=discovery");
+  assert.equal(pkg.scripts["verify:seo"], "node scripts/verify-site.mjs --scope=seo");
+  assert.equal(pkg.scripts["verify:site"], "node scripts/verify-site.mjs --scope=all");
+  assert.equal(pkg.scripts["test:worker"], "node --test worker/index.test.mjs");
+});

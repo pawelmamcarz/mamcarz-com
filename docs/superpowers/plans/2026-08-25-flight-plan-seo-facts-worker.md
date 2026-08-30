@@ -60,7 +60,7 @@
 - `diagrams/diagram3_maturity.html`, `diagrams/infographic.html`
 - `infographic_procurement_2026_EN.html`
 - `404.html`, `sitemap.xml`, `llms.txt`, `llms-full.txt`
-- `_headers`, `_redirects` - zmienić tylko wtedy, gdy jawny test kontraktu nie przechodzi.
+- `_headers` zmienić tylko wtedy, gdy jawny test kontraktu nie przechodzi. `_redirects` ma pozostać bez aktywnych reguł Pages; hostname `www` na apex wymaga osobnej reguły Cloudflare i osobnego odczytu stanu.
 
 ### Modify: Worker and shared browser client
 
@@ -202,11 +202,14 @@ Superlatives and dynamic-status terms are not blindly rejected. If `#1`, `najwi�
 
 - [ ] **Step 4: Add instruction and infrastructure checks**
 
-Read `AGENTS.md` and `CLAUDE.md` as bytes and require equality. Check `_redirects` contains the exact permanent redirect:
+Read `AGENTS.md` and `CLAUDE.md` as bytes and require equality. Check `_redirects` contains no active rule and exactly documents the external hostname boundary:
 
 ```text
-https://www.mamcarz.com/* https://mamcarz.com/:splat 301
+# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.
+# No path redirects are currently defined.
 ```
+
+Cloudflare Pages does not support domain-level redirects in `_redirects`. Treat the account-level `www` to apex Bulk Redirect and its path/query preservation as a separate release readback, never as evidence produced by this repository check.
 
 Check `_headers` retains `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, immutable font/image caching and revalidation for CSS/JS. Do not add a CSP in this stream: current helper pages contain inline scripts/styles, so an untested CSP would break them.
 
@@ -500,7 +503,7 @@ Expected exit code: `0`.
 
 - [ ] **Step 4: Verify headers and redirects without speculative hardening**
 
-Run the validator checks from Task 1. Keep `_headers` and `_redirects` unchanged when they pass. Do not add CSP until inline scripts/styles on helper pages have been removed or nonce/hash behavior has a separate tested design.
+Run the validator checks from Task 1. Keep `_headers` unchanged when it passes. Keep `_redirects` comment-only; the earlier absolute-source rule was rejected by Wrangler because Pages does not support domain-level redirects there. Do not add CSP until inline scripts/styles on helper pages have been removed or nonce/hash behavior has a separate tested design.
 
 - [ ] **Step 5: Run and close the complete static-site gate**
 
@@ -523,7 +526,7 @@ git diff --cached --name-only
 git commit -m "fix: complete static site consistency gates"
 ```
 
-If `_headers` or `_redirects` have no diff, Git ignores them. The staged list must not contain `.superpowers/` or unrelated user work.
+If `_headers` has no diff, Git ignores it. `_redirects` must carry the reviewed comment-only correction. The staged list must not contain `.superpowers/` or unrelated user work.
 
 ---
 
@@ -896,7 +899,7 @@ Resolve every product-surface match or map it to approved, dated evidence. `exam
 
 - [ ] **Step 7: Request code review before completion**
 
-Use `superpowers:requesting-code-review` on the complete diff. Fix Priority 0 and Priority 1 findings; rerun `npm run check` and the dry bundle after every Worker/config correction.
+Use `superpowers:requesting-code-review` on the complete diff. Fix Priority 0 and Priority 1 findings; rerun `npm run verify:site`, `npm run test:worker` and the dry bundle after every Worker/config correction.
 
 ---
 

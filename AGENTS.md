@@ -1,74 +1,92 @@
-# AGENTS.md
+# Zasady pracy w repozytorium
 
-Guidance for coding agents working in this repository. Same content as `CLAUDE.md` — kept in sync for tools that look for `AGENTS.md`.
+`AGENTS.md` i `CLAUDE.md` są kopiami verbatim. Każdą zmianę trzeba wprowadzić do obu plików i potwierdzić `cmp -s AGENTS.md CLAUDE.md`.
 
 ## Projekt
-Osobista strona profesjonalna Pawła Mamcarza — konsultant procurement / SAP Ariba w regionie CEE.
-Statyczny HTML (bez frameworka), dwie wersje językowe: PL (root) i EN (`en/`).
 
-Każda zmiana w tym pliku musi trafić też do `CLAUDE.md` (oba pliki trzymane verbatim w synchronie).
+mamcarz.com to osobista strona profesjonalna Pawła Mamcarza. Trzy równorzędne obszary działalności to:
 
-## Hosting & Deploy
-- **Cloudflare Pages** (NIE Vercel). Projekt: `mamcarz-com`.
-- Strona: `wrangler pages deploy . --project-name mamcarz-com --branch main --commit-dirty=true`
-  - lub `./deploy.sh` (najpierw `git push`, potem deploy do Pages) — uwaga: `deploy.sh` jest w `.gitignore` (lokalny, nie w repo); świeży klon używa komendy `wrangler pages deploy` bezpośrednio.
-- Worker czatowy w `worker/` deployuje się osobno: `cd worker && wrangler deploy` (osobny `wrangler.toml`, binding `AI` = Workers AI).
-- CF Pages config: `_headers` (security headers + cache-control), `_redirects` (apex redirect z `www`).
-- Lokalny preview: `wrangler pages dev .` (lub dowolny statyczny serwer, np. `npx serve`). Worker lokalnie: `cd worker && wrangler dev`.
+1. doradztwo i transformacja zakupów,
+2. aplikacje operacyjne,
+3. lotnictwo.
 
-## Struktura
+Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska jest w root, a angielska pod `en/`. Jedynym opcjonalnym krokiem offline jest optymalizacja obrazów przez `npm run optimize:images` (wymaga `sharp`).
+
+## Hosting i wydanie
+
+- Hosting: Cloudflare Pages, projekt `mamcarz-com` (nie Vercel).
+- Podgląd: `wrangler pages dev .` albo dowolny statyczny serwer.
+- Wydanie strony: `wrangler pages deploy . --project-name mamcarz-com --branch main --commit-dirty=true`.
+- Lokalny `./deploy.sh` najpierw wykonuje push, potem deploy; jest w `.gitignore` i może nie istnieć w świeżym klonie.
+- Worker czatu w `worker/` jest osobnym wdrożeniem: `cd worker && wrangler deploy`.
+- Push, merge, deploy Pages i deploy Workera są osobnymi bramkami. Nie wykonuj żadnej z nich bez odpowiedniego zatwierdzenia.
+- `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i obecnie nie zawiera aktywnych reguł. Redirect `www` na apex jest konfiguracją Cloudflare Bulk Redirect poza repozytorium; przed wydaniem trzeba osobno odczytać jego stan i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
+
+## Struktura i manifest tras
+
+- `index.html`, `en/index.html` — strony główne.
+- `uslugi/*/index.html`, `en/uslugi/*/index.html` — trzy usługi doradcze.
+- `aplikacje-operacyjne/`, `en/aplikacje-operacyjne/` — aplikacje operacyjne.
+- `lotnictwo/`, `en/lotnictwo/` — działalność lotnicza.
+- `case-studies/`, `wiedza/`, `wystapienia/` oraz ich odpowiedniki `en/` — projekty, wiedza i wystąpienia.
+- `procurement-2026/`, `diagrams/`, `infographic_procurement_2026_EN.html` — samodzielne materiały pomocnicze; nie podlegają automatycznie regule par PL/EN.
+- `assets/css/style.css` — wspólny arkusz; `assets/js/main.js` — nawigacja, chat i drobne interakcje; `assets/img/` i `assets/fonts/` — zasoby.
+- `content/site-facts.json` — rejestr zatwierdzonych faktów i powierzchni publikacji.
+- `scripts/verify-site.mjs` — manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 24 publicznych dokumentów.
+- `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, `404.html` — powierzchnie discovery i błędów.
+
+`PUBLIC_PAGES` w `scripts/verify-site.mjs` jest normatywnym manifestem tras. Przy dodaniu lub usunięciu strony aktualizuj razem manifest, sitemapę, odpowiednią parę językową i kontrolowane indeksy llms.
+
+## Reguła dwujęzyczna
+
+Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej samej strukturze. Slugi pozostają polskie także pod `en/`, np. `en/uslugi/wdrozenie-sap-ariba/`. Zachowuj równoważność znaczenia, kolejności sekcji, nawigacji, CTA, faktów i metadanych; tłumaczenie nie musi być dosłowne.
+
+## System wizualny i UI
+
+- Kierunek: „Flight Plan” — redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
+- Fonty: Barlow Semi Condensed dla nagłówków, DM Sans dla tekstu, DM Mono dla etykiet i danych.
+- Główne tokeny w `:root`: `--runway-ink`, `--signal`, `--signal-dark`, `--sky-band`, `--ink-secondary`, `--line`, `--line-strong`.
+- Wspólna wersja zasobów w publicznych dokumentach: `20260825-flightplan-3`.
+- Nie przywracaj Playfair Display, generycznych kart, przypadkowych gradientów, dekoracyjnych wykresów ani narracji udającej fakty.
+- Zachowuj semantyczny HTML, jeden `main`, jeden `h1`, widoczny focus, działanie bez JavaScriptu i obsługę `prefers-reduced-motion`.
+- `404.html` jest jednym dokumentem PL/EN: PL działa domyślnie bez JS, ma `noindex`, nie ma canonicala, a wczesny skrypt może zmienić wyłącznie `lang`, `title` i istniejący opis.
+
+## Fakty i ton
+
+- Publikuj wyłącznie fakty oznaczone `status: approved` w `content/site-facts.json`, na wskazanych tam powierzchniach i dokładnie w zatwierdzonej formie. Wpisy `review` i `retired` nie są zgodą na publikację.
+- Nie dopisuj ról, wyników, liczb, klientów, statusów bieżących ani opisów przedsięwzięć na podstawie domysłu. Nowy fakt wymaga źródła lub potwierdzenia właściciela, decyzji w rejestrze i testu.
+- Polpharma nie jest klientem i nie może pojawić się jako klient ani w trust barze.
+- Zatwierdzona statystyka to 25+ lat doświadczenia w zakupach.
+- Dawna nazwa WarsawFlightSafety jest wycofana. Według potwierdzenia właściciela z 2026-08-26 aktualną marką przedsięwzięcia lotniczego jest `akrobacja.com`; nie przedstawiaj ich jako dwóch bieżących przedsięwzięć.
+- Ton jest premium, rzeczowy i spokojny. Unikaj superlatywów bez dowodu, obietnic SLA, nachalnego języka, myślników używanych mechanicznie i stylistycznych „AI tells”.
+- Przy zmianie faktów audytuj wszystkie powierzchnie z rejestru, w tym `worker/index.js`, `assets/js/main.js`, `llms.txt` i `llms-full.txt`. Worker nie jest „pełnym CV”; jego prompt ma używać tylko zatwierdzonego, potrzebnego zakresu.
+- Worker używa modelu `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Frontend wywołuje `https://mamcarz-chat-api.pawel-767.workers.dev`; zmianę nazwy lub URL trzeba zsynchronizować i przetestować po obu stronach.
+
+## SEO i metadata
+
+- Każdy dokument z `PUBLIC_PAGES` ma dokładnie jeden canonical, komplet właściwych `hreflang`, Open Graph i minimalny Schema.org zgodny z manifestem. Nie wzbogacaj schema o niepotwierdzone stanowiska, firmy, wyniki lub profile.
+- `404.html` jest celowym wyjątkiem: `noindex`, bez canonicala i bez wpisu w sitemapie.
+- `sitemap.xml` musi odpowiadać dokładnie `PUBLIC_PAGES`; daty `lastmod` mają odzwierciedlać rzeczywistą zmianę treści, nie sam deploy.
+- `llms.txt` jest kontrolowanym indeksem nawigacyjnym, a `llms-full.txt` indeksem faktów generowanym z zatwierdzonych wpisów. Nie dopisuj swobodnej biografii.
+
+## Weryfikacja
+
+Uruchamiaj testy proporcjonalnie do zmiany, a przed uznaniem całości za gotową:
+
+```sh
+npm run verify:home
+npm run verify:pages -- --family=all
+npm run verify:metadata
+npm run verify:discovery
+npm run verify:seo
+npm run verify:foundation
+npm run verify:facts
+npm run verify:site
+npm run test:verify-site
+npm run test:worker
+node --check assets/js/main.js
+node --check worker/index.js
+cmp -s AGENTS.md CLAUDE.md
 ```
-index.html              # PL (strona główna)
-en/index.html           # EN (strona główna)
-uslugi/*/index.html     # PL podstrony usługowe (3)
-en/uslugi/*/index.html  # EN podstrony usługowe (mirror)
-case-studies/, en/case-studies/
-wystapienia/, en/wystapienia/
-assets/css/style.css    # Jeden arkusz dla całej strony
-assets/js/main.js       # JS (chat widget + drobne interakcje)
-assets/img/             # Zoptymalizowane obrazy (webp/jpg, multi-resolution)
-worker/index.js         # Cloudflare Worker — chat API (Workers AI, Llama 3.3 70B)
-scripts/optimize-images.js  # node scripts/optimize-images.js — generuje warianty 480/960/1920 webp+jpg
-404.html, sitemap.xml, robots.txt, llms.txt, llms-full.txt
-procurement-2026/, diagrams/, infographic_procurement_2026_EN.html  # strony pomocnicze/landing — NIE objęte bilingual rule
-```
 
-Brak frameworka, brak buildu — pliki HTML serwowane bezpośrednio. Jedyny krok offline to opcjonalna optymalizacja obrazów (`npm run optimize:images`, wymaga `sharp`).
-
-## Bilingual rule (KRYTYCZNE)
-Każda zmiana treściowa musi trafić do **obu wersji** — PL (`index.html`, `uslugi/*/`, `case-studies/`, `wystapienia/`) i EN (`en/...` z tą samą strukturą katalogów). Slug katalogów pozostaje polski również w EN (np. `en/uslugi/wdrozenie-sap-ariba/`).
-
-## Konwencje CSS/UI
-- Zmienne kolorów w `:root` w `assets/css/style.css` (jasny schemat, `color-scheme: light`) — `--bg`, `--bg2`, `--bg3`, `--paper`, `--night`, `--gold`, `--gold-light`, `--accent`, `--text`, `--text-secondary`, `--muted`, `--border`, `--border-strong`. Nie dodawać nowej warstwy override na końcu pliku — jeden arkusz, edytować w miejscu.
-- Fonty: Playfair Display (nagłówki), DM Sans (body), DM Mono (mono/etykiety) — self-hosted WOFF2 w `assets/fonts/` przez `@font-face` (bez Google Fonts).
-- Sekcje HTML oznaczone komentarzami `<!-- SEKCJA -->`.
-- Grid skills: 3 kolumny, ostatnia karta rozciąga się na pełną szerokość jeśli jest samotna.
-
-## Sekcje strony głównej (kolejność — utrzymać)
-1. Hero (liczby: 25+ lat, 20+ wdrożeń, 500M EUR, 50 mld PLN)
-2. Trust Bar — "Pracowałem dla:" / "Worked for:"
-3. Process — 4 kroki: Diagnoza → Strategia → Wdrożenie → Wartość
-4. Case Studies — ORLEN, Żabka, KGHM (z metrykami)
-5. About → 6. Education → 7. Resume
-8. Skills — "W czym mogę Ci pomóc" / "How I can help you" (z outcome lines — złoty tekst z rezultatem)
-9. Portfolio → 10. Clients → 11. Contact (availability signal)
-
-Mid-page CTA po Process i po Cases. CTA ghost button prowadzi do "Rezultaty" (case studies), nie do CV. Hero benefit-oriented (nie self-focused).
-
-Identyczna kolejność i numeracja sekcji obowiązuje również w `en/index.html`.
-
-## Fakty i ton (KRYTYCZNE)
-- **Polpharma NIE jest klientem** — nie dodawać do trust bara (była w systemie prompcie workera; jeśli edytujesz `worker/index.js` zostaw na liście „inni" jeśli nie jesteś pewny, ale na stronie głównej — nigdy).
-- Stat: **"25+ lat doświadczenia"** (nie 20+).
-- Ton: premium, profesjonalny, wiarygodny — **nigdy prostacki ani nachalny**.
-- Worker chat: model `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, system prompt zawiera kompletne CV — przy zmianach faktów na stronie zsynchronizuj `worker/index.js`.
-- Frontend wywołuje worker pod stałym URL-em `https://mamcarz-chat-api.pawel-767.workers.dev` (hardcoded w `assets/js/main.js:158`). Przy zmianie nazwy workera (`worker/wrangler.toml: name`) zsynchronizuj również ten URL.
-
-## Redesign „Flight Plan" (w toku, 2026-08)
-- Spec: `docs/superpowers/specs/2026-08-25-mamcarz-platform-redesign-design.md`; plany wykonawcze: `docs/superpowers/plans/2026-08-25-flight-plan-*.md` (foundation-home → pages-content → seo-facts-worker).
-- Plany przewidują `content/site-facts.json` (rejestr faktów ze statusem `approved`/`review`/`retired`) i `scripts/verify-site.mjs` (walidator bez zależności) — **jeszcze nie istnieją**; do czasu ich powstania źródłem prawdy o faktach jest CV w `worker/index.js` i sekcja „Fakty i ton" powyżej.
-- Plany zakazują push/merge/deploy w ramach ich realizacji — te kroki są osobne i jawne.
-
-## SEO / metadata
-- Każda strona ma `<link rel="canonical">`, `hreflang` (pl / en / x-default), Open Graph i Schema.org (`Person` na home, `Service`/`Article` na podstronach gdzie ma sens).
-- `sitemap.xml` i `llms.txt` / `llms-full.txt` aktualizować ręcznie przy dodawaniu nowych stron.
+Nie zmieniaj digestów chronionych artefaktów ani kontraktów tylko po to, by test przeszedł. Najpierw ustal przyczynę, potem aktualizuj implementację, testy i baseline wyłącznie po świadomym przeglądzie.
