@@ -218,8 +218,8 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "409fb074a8980e16c1c3a4e4a999f56e9b479cac47387a92c4d1b58ae41320d3",
-  "en/index.html": "5526f010c08048e096f100a6660f424c293130dd1ca59e316f1ad2ef0741191f",
+  "index.html": "d3aa4e7a515745efc7c7225896acf741e187ff49b0cec9c52de36117b6b3f834",
+  "en/index.html": "fa3de435913e6e3ddda65e79a0683469697b1f37b04f638a2335fac4a5f03f05",
   "uslugi/transformacja-zakupow/index.html": "aed3ecc755910dbf61ec6f74f3ac91ef3fd6928b017c3af8e5a2b2c3b177f9d3",
   "en/uslugi/transformacja-zakupow/index.html": "aa4306ca8eded0a9f3abe124a322cff05412a75c7c38ad969b26f26c625459d4",
   "uslugi/wdrozenie-sap-ariba/index.html": "771726a6b6756400553f5acb3bc368b744e02a1e949ce3e8c3fb326b98ee9db0",
@@ -7105,7 +7105,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "8450b5b5dd7477afdf15f0ba08b5fdeda175843e31af27ad5df485eaca0d5c9f",
+    "a8c31e555dae4c6f0a65183eb6e9ecf77dd17cca138e8ec8818b7995c1a52ce4",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });

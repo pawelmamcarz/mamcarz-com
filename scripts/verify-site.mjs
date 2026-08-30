@@ -19,7 +19,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "8450b5b5dd7477afdf15f0ba08b5fdeda175843e31af27ad5df485eaca0d5c9f";
+const TASK10_REVIEWED_CSS_SHA256 = "a8c31e555dae4c6f0a65183eb6e9ecf77dd17cca138e8ec8818b7995c1a52ce4";
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
 const PLAN3_VALIDATION_DATE = "2026-08-27";

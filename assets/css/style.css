@@ -1317,16 +1317,36 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 
 .clients-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   border-top: var(--line-strong);
   border-left: var(--line);
 }
 
-.client-item {
+.client-group {
   min-width: 0;
-  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.25rem 1.75rem;
   border-right: var(--line);
   border-bottom: var(--line);
+}
+
+.client-group__name {
+  min-height: 2.6em;
+  margin: 0 0 1rem;
+  color: var(--signal-dark);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.client-group__items { display: flex; flex-direction: column; gap: 0.55rem; }
+
+.client-item {
+  min-width: 0;
   color: var(--panel);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -1335,7 +1355,7 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
   text-transform: uppercase;
 }
 
-.client-item:hover { background: var(--white); color: var(--signal-dark); }
+.client-item:hover { color: var(--signal-dark); }
 
 .beyond-work {
   padding: 1.25rem var(--page-gutter);
@@ -2391,6 +2411,9 @@ footer :focus-visible,
 
 /* 10 Responsive: <=1179, <=759, <=359 */
 @media (max-width: 1179px) {
+  /* Pięć sektorów klientów robi się ciasne poniżej ~1180 px; trzy kolumny
+     utrzymują nazwy firm w jednej linii aż do breakpointu jednokolumnowego. */
+  .clients-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .layout-grid,
   .hero-grid,
   .evidence-row,
