@@ -46,7 +46,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Kierunek: „Flight Plan” — redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
 - Fonty: Barlow Semi Condensed dla nagłówków, DM Sans dla tekstu, DM Mono dla etykiet i danych.
 - Główne tokeny w `:root`: `--runway-ink`, `--signal`, `--signal-dark`, `--sky-band`, `--ink-secondary`, `--line`, `--line-strong`.
-- Wspólna wersja zasobów w publicznych dokumentach: `20260825-flightplan-3`.
+- Wspólna wersja zasobów w publicznych dokumentach: `20260831-titanium-cobalt-1`.
 - Nie przywracaj Playfair Display, generycznych kart, przypadkowych gradientów, dekoracyjnych wykresów ani narracji udającej fakty.
 - Zachowuj semantyczny HTML, jeden `main`, jeden `h1`, widoczny focus, działanie bez JavaScriptu i obsługę `prefers-reduced-motion`.
 - `404.html` jest jednym dokumentem PL/EN: PL działa domyślnie bez JS, ma `noindex`, nie ma canonicala, a wczesny skrypt może zmienić wyłącznie `lang`, `title` i istniejący opis.

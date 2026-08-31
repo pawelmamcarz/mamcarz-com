@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
@@ -218,8 +218,8 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "d3aa4e7a515745efc7c7225896acf741e187ff49b0cec9c52de36117b6b3f834",
-  "en/index.html": "fa3de435913e6e3ddda65e79a0683469697b1f37b04f638a2335fac4a5f03f05",
+  "index.html": "80076edb8766539077d3d4a6d75fc0566e9d95272fb6a51d45e2f22f72592c17",
+  "en/index.html": "24866fdd108ff308b317708e3d976e07e6433be5de9647a3300b84fc740e9ed9",
   "uslugi/transformacja-zakupow/index.html": "aed3ecc755910dbf61ec6f74f3ac91ef3fd6928b017c3af8e5a2b2c3b177f9d3",
   "en/uslugi/transformacja-zakupow/index.html": "aa4306ca8eded0a9f3abe124a322cff05412a75c7c38ad969b26f26c625459d4",
   "uslugi/wdrozenie-sap-ariba/index.html": "771726a6b6756400553f5acb3bc368b744e02a1e949ce3e8c3fb326b98ee9db0",
@@ -228,10 +228,10 @@ const task9ProtectedContentHashes = Object.freeze({
   "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "8340055950d73a3c4753f97d63654c270d7857d0d17f668a68f2b47b8c88ca40",
   "aplikacje-operacyjne/index.html": "a708e697c34d8ec29067472c1452f0d323977aac317b3c87b43b3c64962acbff",
   "en/aplikacje-operacyjne/index.html": "9bcc65302c996a9e00cf17d39376769c708182b9da3b7f941358c5ab9ed412da",
-  "lotnictwo/index.html": "6ca4adea7ab3232c31f5f96894734376b73043b856ab0c69bb66e26faa706d0b",
-  "en/lotnictwo/index.html": "0823777ace817d243ed8dbe68ad4f0819141886dac7aebeabf627c541b9068f1",
-  "case-studies/index.html": "2b625df6c188032b8d91845dfc0193f24a110fb991bab34a1e0a462752ce6f75",
-  "en/case-studies/index.html": "c2ec2ae6ab45f02969707045f38ab715d1e1ab21f58143e6094767c136476969",
+  "lotnictwo/index.html": "46e311335813747073a90fef94850ebc43ebe041dd46b75760098e22ce398bcf",
+  "en/lotnictwo/index.html": "ba4a1403e68a72070e20de77184bec5ea5667f865b11c3bb2fffbd40d2c2965b",
+  "case-studies/index.html": "95d37805ce42d54a929cb672226f98e4e135ffc7859374a7071fa755e9e2e59b",
+  "en/case-studies/index.html": "4e340c60c3edf33f0b437c9869b66420f70740475186ca553a2e0d2f186758b9",
   "wiedza/index.html": "01e3ff51f0ea944751df396bc604d879ad1bd994f154a0162a781c5bcda84235",
   "en/wiedza/index.html": "ecfc2ac93e5baca1290a06bde5c11064bbcb4b2750d04ab6ad6d3f74971f0b0f",
   "wystapienia/index.html": "6aa5850a51f4d2583ace3db4983bfa2f5cebd9ed6f65f4f2924765429c3ee7e9",
@@ -299,11 +299,11 @@ function task9ExpectedShell(entry) {
 function task9CanonicalHtml(entry, html = task9SiteShellProductHtml[entry.path]) {
   const shell = task9ExpectedShell(entry);
   return html
-    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260825-flightplan-3")
+    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260831-titanium-cobalt-1")
     .replace(/<nav class="site-nav"[\s\S]*?<\/nav>/, shell.nav)
     .replace(/<div class="nav-overlay"[\s\S]*?<\/div>\s*<button class="back-to-top"[\s\S]*?<\/button>/, shell.controls)
     .replace(/<footer(?: class="site-footer")?>[\s\S]*?<\/footer>/, shell.footer)
-    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>');
+    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>');
 }
 
 function task9ProtectedContent(html) {
@@ -417,7 +417,7 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}">
     <link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}">
     <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">
     ${head}
   </head><body data-page="${dataPage}">
     <a class="skip-link" href="#main">Skip</a>
@@ -425,7 +425,7 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
     <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+    <script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>
   </body></html>`;
 }
 
@@ -494,6 +494,10 @@ async function pageArchitectureFixture({ files, facts, public_claim_surfaces, ex
       "assets/img/signature.png": "fixture-image",
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      "assets/img/portfolio/camobook.webp": "fixture-webp",
+      "assets/img/portfolio/camobook.jpg": "fixture-jpg",
+      "assets/img/portfolio/filmolot.webp": "fixture-webp",
+      "assets/img/portfolio/filmolot.jpg": "fixture-jpg",
       ...speakingProductAssets,
       "procurement-2026/index.html": procurementParentProductHtml,
       ...artifactProductHtml,
@@ -634,7 +638,7 @@ function homepageFixture(lang, content) {
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite"},{"@type":"Person"}]}</script>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">
   </head><body>
     <a href="#main" class="skip-link">${skipLabel}</a>
     ${navigationFixture[lang]}<main id="main">
@@ -652,7 +656,7 @@ function homepageFixture(lang, content) {
     <section id="clients"></section>
     <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
   </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><input id="chat-input" maxlength="2000">
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+    <script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>
   </body></html>`;
 }
 
@@ -708,24 +712,26 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pu
     mkdir(resolve(root, "uslugi/wdrozenie-sap-ariba"), { recursive: true }),
     mkdir(resolve(root, "worker"), { recursive: true })
   ]);
-  await Promise.all([
-    writeFile(resolve(root, "content/site-facts.json"), JSON.stringify({ version: 1, public_claim_surfaces, facts: fixtureFacts, blocked_claims })),
-    writeFile(resolve(root, "index.html"), plHtml ?? homepageFixture("pl", pl)),
-    writeFile(resolve(root, "en/index.html"), enHtml ?? homepageFixture("en", en)),
-    writeFile(resolve(root, "uslugi/wdrozenie-sap-ariba/index.html"), serviceHtml),
-    writeFile(resolve(root, "404.html"), notFoundHtml),
-    writeFile(resolve(root, "assets/css/style.css"), css),
-    writeFile(resolve(root, "assets/js/main.js"), js),
-    ...(heroImage === null ? [] : [writeFile(resolve(root, "assets/img/IMG_3284-480.webp"), heroImage)]),
-    writeFile(resolve(root, "llms.txt"), llms),
-    writeFile(resolve(root, "llms-full.txt"), llmsFull),
-    writeFile(resolve(root, "worker/index.js"), worker),
-    ...Object.entries(extraFiles).map(async ([relativePath, content]) => {
+  const defaultFiles = {
+    "content/site-facts.json": JSON.stringify({ version: 1, public_claim_surfaces, facts: fixtureFacts, blocked_claims }),
+    "index.html": plHtml ?? homepageFixture("pl", pl),
+    "en/index.html": enHtml ?? homepageFixture("en", en),
+    "uslugi/wdrozenie-sap-ariba/index.html": serviceHtml,
+    "404.html": notFoundHtml,
+    "assets/css/style.css": css,
+    "assets/js/main.js": js,
+    "llms.txt": llms,
+    "llms-full.txt": llmsFull,
+    "worker/index.js": worker,
+    ...(heroImage === null ? {} : { "assets/img/IMG_3284-480.webp": heroImage })
+  };
+  await Promise.all(
+    Object.entries({ ...defaultFiles, ...extraFiles }).map(async ([relativePath, content]) => {
       const filePath = resolve(root, relativePath);
       await mkdir(resolve(filePath, ".."), { recursive: true });
       await writeFile(filePath, content);
     })
-  ]);
+  );
   return root;
 }
 
@@ -845,6 +851,10 @@ async function productionRegistryFixture(overrides = {}) {
       "en/wystapienia/index.html": speakingProductHtml.en,
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      "assets/img/portfolio/camobook.webp": "fixture-webp",
+      "assets/img/portfolio/camobook.jpg": "fixture-jpg",
+      "assets/img/portfolio/filmolot.webp": "fixture-webp",
+      "assets/img/portfolio/filmolot.jpg": "fixture-jpg",
       ...speakingProductAssets,
       ...extraFiles
     }
@@ -923,7 +933,7 @@ const projectFactIdFixture = new Set([
   "portfolio.czympojade_pl", "portfolio.czympojade_pl.type", "portfolio.przypominamy_com", "portfolio.przypominamy_com.type",
   "portfolio.procuracost", "portfolio.procuracost.type", "portfolio.procurement_process_2026", "portfolio.procurement_process_2026.type",
   "portfolio.silence_tax", "portfolio.silence_tax.type", "portfolio.akrobacja_com", "portfolio.akrobacja_com.current_status",
-  "portfolio.akrobacja_com.type", "portfolio.filmolot_pl", "portfolio.filmolot_pl.type"
+  "portfolio.akrobacja_com.type", "portfolio.camobook_com", "portfolio.camobook_com.type", "portfolio.filmolot_pl", "portfolio.filmolot_pl.type"
 ]);
 const projectSurfaceFixture = new Set(["case-studies/index.html", "en/case-studies/index.html"]);
 
@@ -1070,14 +1080,14 @@ function knowledgePageFixture(lang) {
     <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
     <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">
   </head><body class="knowledge-page" data-page="knowledge">
     <a href="#main" class="skip-link">${copy.skip}</a>
     <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
     <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
     <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+    <script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>
   </body></html>`;
 }
 
@@ -1151,6 +1161,8 @@ function aviationFactRecords() {
     { id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
     { id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
     { id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "llms-full.txt"] },
+    { id: "portfolio.camobook_com", value: "CamoBook", display_pl: "CamoBook", display_en: "CamoBook", source_label: "Owner confirmation, 2026-08-31: CamoBook is Paweł Mamcarz's project", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"] },
+    { id: "portfolio.camobook_com.type", value: "electronic technical logbook and CAMO software for light aviation", display_pl: "Elektroniczny PDT i oprogramowanie CAMO dla lekkiego lotnictwa.", display_en: "Electronic technical logbook and CAMO software for light aviation.", source_type: "public_source", source_label: "Official CamoBook public site inspected 2026-08-31", source_url: "https://camobook.com/", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"] },
     { id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", source_label: "Owner confirmed portfolio project, 2026-08-25", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] },
     { id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", surfaces: ["index.html", "en/index.html", "lotnictwo/index.html", "en/lotnictwo/index.html"] }
   ];
@@ -1227,7 +1239,11 @@ async function aviationPageMutation({ lang = "pl", mutate = (html) => html, muta
     facts,
     extraFiles: {
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
-      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg"
+      "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
+      "assets/img/portfolio/camobook.webp": "fixture-webp",
+      "assets/img/portfolio/camobook.jpg": "fixture-jpg",
+      "assets/img/portfolio/filmolot.webp": "fixture-webp",
+      "assets/img/portfolio/filmolot.jpg": "fixture-jpg"
     }
   });
   return runVerification({ root, scope: "pages", family: "aviation" });
@@ -1352,24 +1368,24 @@ test("Plan 2 Task 1 requires exact canonical, real hreflang and paired language 
 test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside site-nav", async () => {
   const mutations = [
     ["stylesheet template decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></template>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1"></template>'
     )],
     ["stylesheet hidden decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" hidden>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" hidden>'
     )],
     ["script noscript decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><noscript><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></noscript>'
+      '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>',
+      '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1"></script><noscript><script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script></noscript>'
     )],
     ["script template decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><template><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></template>'
+      '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>',
+      '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1"></script><template><script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script></template>'
     )],
     ["script hidden decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><script src="/assets/js/main.js?v=20260825-flightplan-3" defer hidden></script>'
+      '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>',
+      '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1"></script><script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer hidden></script>'
     )],
     ["route outside navigation", "page-navigation", (html) => html
       .replace('<a href="/lotnictwo/">Lotnictwo</a>', '<a href="/usunieta-trasa/">Lotnictwo</a>')
@@ -2601,7 +2617,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["paragraph", (html) => html.replace('<p class="section-label">01 / Problem</p>', '<p class="section-label"/>')],
     ["details", (html) => html.replace('<details class="nav-group">', '<details class="nav-group"/>')],
     ["summary", (html) => html.replace("<summary>Doradztwo</summary>", "<summary/>")],
-    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>', '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer/>')],
+    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>', '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer/>')],
     ["style", (html) => html.replace("</footer>", "<style/></style></footer>")]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
@@ -2992,7 +3008,7 @@ test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actio
     ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
     ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png"', 'img data="/assets/img/signature.png"')],
     ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
-    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></body>')],
+    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1"></body>')],
     ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
     ["unapproved event handler", (html) => html.replace('class="footer-sign"', 'class="footer-sign" onfocus="location.href=\'/#contact\'"')]
   ];
@@ -3130,8 +3146,8 @@ test("Plan 2 Task 2 fix round 5 independently inventories executable, style and 
 
   const duplicateStylesheetHref = await applicationPageMutation({
     mutate: (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" href="/assets/css/style.css?v=20260825-flightplan-3">'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">'
     )
   });
   assert.ok(errorIds(duplicateStylesheetHref).includes("application-resource-census"), duplicateStylesheetHref.errors.join("\n"));
@@ -3219,6 +3235,99 @@ test("Plan 2 Task 6 accepts the exact bilingual Projects evidence register", asy
   assert.deepEqual(result.errors, []);
 });
 
+test("CamoBook is an approved bilingual aviation project across every portfolio surface", async () => {
+  const factData = await readFacts();
+  const expectedSurfaces = [
+    "index.html", "en/index.html",
+    "lotnictwo/index.html", "en/lotnictwo/index.html",
+    "case-studies/index.html", "en/case-studies/index.html",
+    "llms-full.txt"
+  ];
+  const name = factData.facts.find((record) => record.id === "portfolio.camobook_com");
+  const type = factData.facts.find((record) => record.id === "portfolio.camobook_com.type");
+  assert.deepEqual(name, {
+    id: "portfolio.camobook_com",
+    value: "CamoBook",
+    display_pl: "CamoBook",
+    display_en: "CamoBook",
+    kind: "constant",
+    as_of: null,
+    source_type: "owner_verified",
+    source_label: "Owner confirmation, 2026-08-31: CamoBook is Paweł Mamcarz's project",
+    source_url: null,
+    surfaces: expectedSurfaces,
+    status: "approved"
+  });
+  assert.deepEqual(type, {
+    id: "portfolio.camobook_com.type",
+    value: "electronic technical logbook and CAMO software for light aviation",
+    display_pl: "Elektroniczny PDT i oprogramowanie CAMO dla lekkiego lotnictwa.",
+    display_en: "Electronic technical logbook and CAMO software for light aviation.",
+    kind: "constant",
+    as_of: null,
+    source_type: "public_source",
+    source_label: "Official CamoBook public site inspected 2026-08-31",
+    source_url: "https://camobook.com/",
+    surfaces: expectedSurfaces,
+    status: "approved"
+  });
+
+  const pages = await Promise.all([
+    "index.html", "en/index.html",
+    "lotnictwo/index.html", "en/lotnictwo/index.html",
+    "case-studies/index.html", "en/case-studies/index.html"
+  ].map(async (path) => [path, await readFile(resolve(path), "utf8")]));
+  for (const [path, html] of pages) {
+    assert.match(html, /data-fact-id="portfolio\.camobook_com">CamoBook</, `${path} must publish the CamoBook name`);
+    const expectedDescription = path.startsWith("en/")
+      ? "Electronic technical logbook and CAMO software for light aviation."
+      : "Elektroniczny PDT i oprogramowanie CAMO dla lekkiego lotnictwa.";
+    assert.match(html, new RegExp(`data-fact-id="portfolio\\.camobook_com\\.type">${expectedDescription.replaceAll(".", "\\.")}<`), `${path} must publish the localized CamoBook description`);
+    assert.ok(html.indexOf('data-fact-id="portfolio.akrobacja_com"') < html.indexOf('data-fact-id="portfolio.camobook_com"'), `${path} must place CamoBook after akrobacja.com`);
+    assert.ok(html.indexOf('data-fact-id="portfolio.camobook_com"') < html.indexOf('data-fact-id="portfolio.filmolot_pl"'), `${path} must place CamoBook before FilmoLot.pl`);
+  }
+  assert.match(pages.find(([path]) => path === "index.html")[1], /href="https:\/\/camobook\.com\/"/);
+  assert.match(pages.find(([path]) => path === "en/index.html")[1], /href="https:\/\/camobook\.com\/en\/"/);
+  assert.match(pages.find(([path]) => path === "case-studies/index.html")[1], /EVIDENCE REGISTER \/ 13 POZYCJI/);
+  assert.match(pages.find(([path]) => path === "en/case-studies/index.html")[1], /EVIDENCE REGISTER \/ 13 ENTRIES/);
+
+  const llmsFull = await readFile(resolve("llms-full.txt"), "utf8");
+  assert.match(llmsFull, /\[portfolio\.camobook_com\] CamoBook/);
+  assert.match(llmsFull, /\[portfolio\.camobook_com\.type\] Electronic technical logbook and CAMO software for light aviation\./);
+});
+
+test("the aviation register gives each venture its own documentary image", async () => {
+  const contracts = {
+    "lotnictwo/index.html": [
+      ["akrobacja", "portfolio.akrobacja_com", "Widok publicznej strony akrobacja.com"],
+      ["camobook", "portfolio.camobook_com", "Zrzut publicznej strony CamoBook"],
+      ["filmolot", "portfolio.filmolot_pl", "Widok publicznej strony FilmoLot.pl"]
+    ],
+    "en/lotnictwo/index.html": [
+      ["akrobacja", "portfolio.akrobacja_com", "View of the public akrobacja.com site"],
+      ["camobook", "portfolio.camobook_com", "Screenshot of the public CamoBook site"],
+      ["filmolot", "portfolio.filmolot_pl", "View of the public FilmoLot.pl site"]
+    ]
+  };
+
+  for (const [path, expectedRows] of Object.entries(contracts)) {
+    const html = await readFile(resolve(path), "utf8");
+    const rows = html.split('<div class="aviation-venture-row">').slice(1);
+    assert.equal(rows.length, expectedRows.length, `${path} must expose three flat venture rows`);
+    expectedRows.forEach(([asset, factId, alt], index) => {
+      const row = rows[index];
+      assert.match(row, new RegExp(`<source type="image/webp" srcset="/assets/img/portfolio/${asset}\\.webp">`));
+      assert.match(row, new RegExp(`<img src="/assets/img/portfolio/${asset}\\.jpg" alt="${alt.replaceAll(".", "\\.")}"`));
+      assert.match(row, new RegExp(`data-fact-id="${factId.replaceAll(".", "\\.")}"`));
+    });
+  }
+
+  for (const extension of ["jpg", "webp"]) {
+    const asset = await stat(resolve(`assets/img/portfolio/camobook.${extension}`));
+    assert.ok(asset.isFile() && asset.size > 0, `CamoBook ${extension} image must be a non-empty local asset`);
+  }
+});
+
 test("Plan 2 Task 6 rejects coordinated page and mutable-registry claim drift", async () => {
   const fabricated = "Successful CONNECT programme";
   const result = await projectPageMutation({
@@ -3251,7 +3360,7 @@ test("Plan 2 Task 6 rejects reviewed facts promoted onto Projects and exact publ
   assertProjectRegistryInventoryErrors(surfaces, "reordered project surfaces");
 });
 
-test("Plan 2 Task 6 rejects wholesale removal of all 31 facts and both Projects surfaces", async () => {
+test("Plan 2 Task 6 rejects wholesale removal of all 33 facts and both Projects surfaces", async () => {
   const results = await projectRegistryMutation({
     mutateFacts: (facts) => facts.filter((record) => !projectFactIdFixture.has(record.id)),
     mutateSurfaces: (surfaces) => surfaces.filter((surface) => !projectSurfaceFixture.has(surface))
@@ -3278,16 +3387,65 @@ test("Plan 2 Task 7 fix round 1 keeps each dark contact foreground independently
     return (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
   };
   const contracts = [
-    ["Speaking heading", ".speaking-contact h2", "var(--white)", "#F7F9F8", "#193D49", 3],
-    ["Speaking body", ".speaking-contact p:not(.section-label)", "var(--white)", "#F7F9F8", "#193D49", 4.5],
-    ["Speaking label", ".speaking-contact .section-label", "var(--signal-light)", "#FF9B7D", "#193D49", 4.5],
-    ["Procurement heading", ".procurement-contact h2", "var(--white)", "#F7F9F8", "#0C252E", 3],
-    ["Procurement body", ".procurement-contact p:not(.section-label)", "var(--white)", "#F7F9F8", "#0C252E", 4.5],
-    ["Procurement label", ".procurement-contact .section-label", "var(--signal-light)", "#FF9B7D", "#0C252E", 4.5]
+    ["Speaking heading", ".speaking-contact h2", "var(--white)", "#F8FAFA", "#1C2D3A", 3],
+    ["Speaking body", ".speaking-contact p:not(.section-label)", "var(--white)", "#F8FAFA", "#1C2D3A", 4.5],
+    ["Speaking label", ".speaking-contact .section-label", "var(--signal-light)", "#BBD7F0", "#1C2D3A", 4.5],
+    ["Procurement heading", ".procurement-contact h2", "var(--white)", "#F8FAFA", "#0F1A21", 3],
+    ["Procurement body", ".procurement-contact p:not(.section-label)", "var(--white)", "#F8FAFA", "#0F1A21", 4.5],
+    ["Procurement label", ".procurement-contact .section-label", "var(--signal-light)", "#BBD7F0", "#0F1A21", 4.5]
   ];
   for (const [label, selector, token, foreground, background, minimum] of contracts) {
     assert.equal(property(selector, "color"), token, `${label} must own its foreground token`);
     assert.ok(contrast(foreground, background) >= minimum, `${label} contrast must be at least ${minimum}:1`);
+  }
+});
+
+test("the titanium and cobalt system renders flat technical portfolio surfaces", () => {
+  const rules = parseCssRules(foundationCss);
+  const property = (selector, name) => rules
+    .filter((rule) => rule.media.length === 0 && rule.selectors.includes(selector))
+    .reduce((value, rule) => rule.declarations.get(name) ?? value, undefined);
+
+  assert.equal(property(":root", "--sky-paper"), "#EEF1F2");
+  assert.equal(property(":root", "--white"), "#F8FAFA");
+  assert.equal(property(":root", "--runway-ink"), "#141B22");
+  assert.equal(property(":root", "--panel"), "#1C2D3A");
+  assert.equal(property(":root", "--signal"), "#245A8D");
+  assert.equal(property(":root", "--signal-dark"), "#173F68");
+  assert.equal(property(":root", "--boundary"), "#7E8C94");
+  assert.equal(property(":root", "--ink-secondary"), "#455963");
+
+  assert.equal(property(".home-cta", "background"), "var(--panel)");
+  assert.equal(property("#why", "background"), "var(--panel)");
+  assert.equal(property(".cta-banner", "background"), "var(--panel)");
+  assert.equal(property(".service-contact", "background"), "var(--panel)");
+  assert.equal(property(".pcard", "display"), "grid");
+  assert.equal(property(".pcard", "grid-template-rows"), "minmax(0, auto) 1fr");
+  assert.equal(property(".pcard__img", "position"), "static");
+  assert.equal(property(".pcard__body", "position"), "static");
+});
+
+test("standalone public diagrams use the same titanium and cobalt palette", async () => {
+  const paths = [
+    "infographic_procurement_2026_EN.html",
+    "diagrams/diagram1_universal.html",
+    "diagrams/infographic.html",
+    "diagrams/diagram2_ariba.html",
+    "diagrams/diagram3_maturity.html"
+  ];
+  const expectedTokens = [
+    "--artifact-bg: #141B22",
+    "--artifact-panel: #1C2D3A",
+    "--artifact-paper: #EEF1F2",
+    "--artifact-line: #7E8C94",
+    "--artifact-signal: #245A8D",
+    "--artifact-white: #F8FAFA"
+  ];
+  const retiredPalette = /#(?:102831|193D49|E9EDEF|8E9CA1|D94B2B|F7F9F8)/i;
+  for (const path of paths) {
+    const html = await readFile(resolve(path), "utf8");
+    for (const token of expectedTokens) assert.ok(html.includes(token), `${path} must include ${token}`);
+    assert.doesNotMatch(html, retiredPalette, `${path} must not retain the retired rust palette`);
   }
 });
 
@@ -3696,6 +3854,11 @@ test("facts scope requires the canonical Polpharma block", async () => {
   const root = await fixture({ blocked_claims: [] });
   const result = await runVerification({ root, scope: "facts" });
   assert.ok(errorIds(result).includes("blocked-canonical-polpharma"));
+});
+
+test("fixture file overrides replace defaults without competing writes", async () => {
+  const root = await fixture({ llms: "default", extraFiles: { "llms.txt": "override" } });
+  assert.equal(await readFile(resolve(root, "llms.txt"), "utf8"), "override");
 });
 
 test("facts scope treats an unnegated Polpharma mention as a blocked client claim", async () => {
@@ -4177,7 +4340,7 @@ function notFoundContractFixture() {
     <title>404 · Strona nie istnieje | mamcarz.com</title>
     <meta name="description" content="Pod tym adresem nie ma strony.">
     <meta name="robots" content="noindex, follow">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">
     <style>[data-lang="en"]{display:none}html[lang="en"] [data-lang="pl"]{display:none}html[lang="en"] [data-lang="en"]{display:revert}</style>
     <script>(function(){var english=location.pathname.indexOf("/en/")===0;if(!english)return;document.documentElement.lang="en";document.title="404 · Page not found | mamcarz.com";var meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute("content","There is no page at this address.");})();</script>
   </head><body>
@@ -4187,7 +4350,7 @@ function notFoundContractFixture() {
       <a href="/" data-lang="pl">Strona główna</a><a href="/#contact" data-lang="pl">Kontakt</a>
       <a href="/en/" data-lang="en">Home</a><a href="/en/#contact" data-lang="en">Contact</a>
     </main><footer class="site-footer">mamcarz.com</footer>
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+    <script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>
   </body></html>`;
 }
 
@@ -4200,7 +4363,7 @@ test("Plan 3 Task 5 requires one no-JS-safe bilingual 404 document", async (t) =
     ["second h1", "not-found-h1", (html) => html.replace("</main>", "<h1>Duplicate</h1></main>")],
     ["second main", "not-found-main", (html) => html.replace("</footer>", "<main></main></footer>")],
     ["indexable error", "not-found-robots", (html) => html.replace("noindex, follow", "index, follow")],
-    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260825-flightplan-3", "stale")],
+    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260831-titanium-cobalt-1", "stale")],
     ["missing English contact", "not-found-links", (html) => html.replace('href="/en/#contact"', 'href="/en/"')],
     ["duplicate id", "not-found-ids", (html) => html.replace("</main>", '<span id="main"></span></main>')],
     ["English default", "not-found-default", (html) => html.replace('<html lang="pl">', '<html lang="en">')],
@@ -5869,8 +6032,8 @@ const task7HomeMutations = [
   ["missing hero image width", "home-hero-image", (html) => html.replace(' width="960"', "")],
   ["missing hero image height", "home-hero-image", (html) => html.replace(' height="1280"', "")],
   ["missing high-priority hero fetch", "home-hero-image", (html) => html.replace(' fetchpriority="high"', "")],
-  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260825-flightplan-3', 'style.css?v=stale')],
-  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260825-flightplan-3', 'main.js?v=stale')],
+  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260831-titanium-cobalt-1', 'style.css?v=stale')],
+  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260831-titanium-cobalt-1', 'main.js?v=stale')],
   ["inline presentation style", "home-inline-style", (html) => html.replace('<section id="hero">', '<section id="hero" style="display:block">')]
 ];
 
@@ -5885,36 +6048,36 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round3ExactResourceMutations = [
   ["alternate stylesheet rel", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">'
   )],
   ["stylesheet title attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" title="decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" title="decoy">'
   )],
   ["stylesheet integrity attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" integrity="sha256-decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" integrity="sha256-decoy">'
   )],
   ["stylesheet data decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" data-decoy="true">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" data-decoy="true">'
   )],
   ["deferred async browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer async>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer async>'
   )],
   ["typed browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer type="text/javascript">'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer type="text/javascript">'
   )],
   ["browser script integrity attribute", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer integrity="sha256-decoy">'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer integrity="sha256-decoy">'
   )],
   ["browser script data decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer data-decoy="true">'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer data-decoy="true">'
   )],
   ["disabled latin font preload", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6024,12 +6187,12 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round2ActiveResourceMutations = [
   ["stylesheet with inactive media", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" media="not all">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" media="not all">'
   )],
   ["disabled stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" disabled>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" disabled>'
   )],
   ["latin font preload with inactive media", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6040,12 +6203,12 @@ const task7Round2ActiveResourceMutations = [
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin media="not all">'
   )],
   ["nomodule browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer nomodule>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer nomodule>'
   )],
   ["stylesheet inside noscript", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></noscript>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1"></noscript>'
   )],
   ["latin font preload inside noscript", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6056,12 +6219,12 @@ const task7Round2ActiveResourceMutations = [
     '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></noscript>'
   )],
   ["browser script inside noscript", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<noscript><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></noscript>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>',
+    '<noscript><script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script></noscript>'
   )],
   ["stylesheet inside template", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></template>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1"></template>'
   )],
   ["latin font preload inside template", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6072,20 +6235,20 @@ const task7Round2ActiveResourceMutations = [
     '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></template>'
   )],
   ["browser script inside template", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<template><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></template>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>',
+    '<template><script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script></template>'
   )],
   ["stylesheet inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></div>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1"></div>'
   )],
   ["font preload inside hidden ancestor", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
     '<div hidden><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></div>'
   )],
   ["browser script inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></div>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>',
+    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script></div>'
   )]
 ];
 
@@ -6116,36 +6279,36 @@ const task7ReviewHomeSemanticMutations = [
     '<div hidden><input id="chat-input" maxlength="2000"></div>'
   )],
   ["stylesheet changed to a style preload", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">'
   )],
   ["hidden stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" hidden>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1" hidden>'
   )],
   ["stylesheet attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">'
   )],
   ["additional active stylesheet", "home-cache-version", (html) => html.replace(
     "</head>",
     '<link rel="stylesheet" href="/assets/css/extra.css">\n  </head>'
   )],
   ["non-executable JSON browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" type="application/json" defer>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" type="application/json" defer>'
   )],
   ["browser script without defer", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3">'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1">'
   )],
   ["hidden browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer hidden>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>',
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer hidden>'
   )],
   ["browser-script attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<meta src="/assets/js/main.js?v=20260825-flightplan-3" defer>'
+    '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>',
+    '<meta src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer>'
   )],
   ["additional executable browser script", "home-cache-version", (html) => html.replace(
     "</body>",
@@ -6160,8 +6323,8 @@ const task7ReviewHomeSemanticMutations = [
     '/assets/fonts/dmsans-latext.woff2'
   )],
   ["third font preload", "home-font-preload", (html) => html.replace(
-    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">',
+    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">'
   )],
   ["font preload with the wrong rel", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6258,7 +6421,7 @@ test("Plan 2 Task 8 independently enforces the shared artifact shell, resources,
   const cases = [
     ["artifact identity", "artifact-manifest", "diagrams/diagram1_universal.html", (html) => html.replace('data-artifact="process"', 'data-artifact="process-map"')],
     ["toolbar destination", "artifact-toolbar", "diagrams/diagram1_universal.html", (html) => html.replace('href="/en/wiedza/" target="_top"', 'href="/" target="_top"')],
-    ["visual token", "artifact-style", "diagrams/diagram1_universal.html", (html) => html.replace('--artifact-signal: #D94B2B;', '--artifact-signal: #D94B2C;')],
+    ["visual token", "artifact-style", "diagrams/diagram1_universal.html", (html) => html.replace('--artifact-signal: #245A8D;', '--artifact-signal: #245A8E;')],
     ["external resource", "artifact-resource", "diagrams/diagram1_universal.html", (html) => html.replace('</style>', '@import url("https://example.com/font.css");</style>')],
     ["inline style", "artifact-safety", "diagrams/diagram1_universal.html", (html) => html.replace('<main class="artifact-shell">', '<main class="artifact-shell" style="display:block">')],
     ["unsafe DOM sink", "artifact-safety", "diagrams/diagram1_universal.html", (html) => html.replace('  </script>\n</body>', '    panel.innerHTML = "unsafe";\n  </script>\n</body>')],
@@ -6297,7 +6460,7 @@ test("Plan 2 Task 8 fix round 1 owns distinct pointer hits for open paths and fi
 
   const cases = [
     ["open paths made fill-sensitive", (html) => html.replace("pointer-events: stroke;", "pointer-events: visiblePainted;")],
-    ["filled lens loses its centre hit", (html) => html.replace('r="18" fill="#193D49"', 'r="18" fill="none"')]
+    ["filled lens loses its centre hit", (html) => html.replace('r="18" fill="#1C2D3A"', 'r="18" fill="none"')]
   ];
   for (const [label, mutate] of cases) {
     const result = await artifactFamilyMutation({ path: processPath, mutate });
@@ -6700,7 +6863,7 @@ test("Plan 2 Task 8 fix round 2 owns the recursive public artifact manifest and 
     malformed = await artifactFamilyMutation({
       overrides: {
         ...overrides,
-        "diagrams/diagram1_universal.html": `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Malformed artifact</title>${artifactFaviconLink}<style>:root { --artifact-bg: #102831; --artifact-panel: #193D49; --artifact-paper: #E9EDEF; --artifact-line: #8E9CA1; --artifact-signal: #D94B2B; }</style></head></html>`
+        "diagrams/diagram1_universal.html": `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Malformed artifact</title>${artifactFaviconLink}<style>:root { --artifact-bg: #141B22; --artifact-panel: #1C2D3A; --artifact-paper: #EEF1F2; --artifact-line: #7E8C94; --artifact-signal: #245A8D; }</style></head></html>`
       }
     });
   } catch (cause) {
@@ -6981,10 +7144,10 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
     ["external footer link", task9Mutate("index.html", (html) => html.replace('href="/wiedza/">Wiedza</a></li><li><a href="/#contact"', 'href="https://example.com/">Wiedza</a></li><li><a href="/#contact"'))],
     ["signature asset swapped", task9Mutate("index.html", (html) => html.replace("/assets/img/signature.png", "/assets/img/og.jpg"))],
     ["signature dimensions removed", task9Mutate("index.html", (html) => html.replace(' width="160" height="50"', ""))],
-    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260825-flightplan-3", "style.css?v=20260825-flightplan-1"))],
-    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260825-flightplan-3", "main.js?v=20260825-flightplan-1"))],
-    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></head>'))],
-    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></body>'))],
+    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260831-titanium-cobalt-1", "style.css?v=20260825-flightplan-1"))],
+    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260831-titanium-cobalt-1", "main.js?v=20260825-flightplan-1"))],
+    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1"></head>'))],
+    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script></body>'))],
     ["wrapper inside direct navigation text anchor", task9Mutate("index.html", (html) => html.replace(
       '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
       '<a href="/aplikacje-operacyjne/"><span>Aplikacje</span></a>'
@@ -7090,6 +7253,8 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
     "- [hero.experience_years] 25+ years of procurement experience.",
     "- [career.apsolut.title] Associate Partner, CEE Region",
     "- [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.",
+    "- [portfolio.camobook_com] CamoBook",
+    "- [portfolio.camobook_com.type] Electronic technical logbook and CAMO software for light aviation.",
     "- [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
   ];
   for (const line of requiredLines) {
@@ -7097,7 +7262,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "2fbaf0a295f937d2a2c8a2686af8ab97e0827d1a7e2775b1d782bde965d5928e",
+    "9453529318fee9ab07a54472319e0109c4e6c628f495c29f03a5a0c0d7187891",
     "llms-full.txt must retain the exact approved fact index without regenerated biography"
   );
 });
@@ -7105,7 +7270,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "82fa61d632f0cc98921e818bca2a2089ba6d8eb8840eb49cfdca0e55766ff21f",
+    "68fb016786573bfb499b161e40be30262ec3ff4bc9f3d886c587a085e78c9b26",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });
@@ -7331,7 +7496,7 @@ function plan3Schema(entry, shape = "graph") {
 
 function plan3Page(entry, { body, head = "", schema = plan3Schema(entry), hreflang = plan3Hreflang(entry), assets = null } = {}) {
   const shellAssets = assets ?? (plan3ShellFiles.has(entry.file)
-    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">\n<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>'
+    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1">\n<script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script>'
     : "");
   const content = body ?? (entry.file === "index.html" ? '<p data-fact-id="fixture.claim">Verified claim</p>' : "Page copy");
   const locale = entry.lang === "pl" ? "pl_PL" : "en_US";
@@ -7372,9 +7537,10 @@ function plan3RealPresentationBody() {
 }
 
 function plan3Sitemap() {
+  const contentChangedRoutes = new Set(["/", "/en/", "/lotnictwo/", "/en/lotnictwo/", "/case-studies/", "/en/case-studies/"]);
   const blocks = plan3ExpectedPublicPages.map((entry, index) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = index < 19 ? "2026-08-27" : "2026-08-26";
+    const lastmod = contentChangedRoutes.has(entry.route) ? "2026-08-31" : index < 19 ? "2026-08-27" : "2026-08-26";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
   });
   return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
@@ -7600,7 +7766,7 @@ test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and 
     ["duplicate ids", [plan3Fact(), plan3Fact()], "fact-duplicate-id"],
     ["duplicate surfaces", [plan3Fact({ surfaces: ["index.html", "index.html"] })], "fact-duplicate-surface"],
     ["unsupported enum", [plan3Fact({ status: "published" })], "fact-status"],
-    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-08-28" })], "fact-as-of-future"],
+    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-09-01" })], "fact-as-of-future"],
     ["malformed date", [plan3Fact({ kind: "dated", as_of: "2026-02-30" })], "fact-as-of"],
     ["public source without HTTPS", [plan3Fact({ source_type: "public_source", source_url: "http://example.com/source" })], "fact-source-url"],
     ["secret-like nested key", [plan3Fact({ evidence: { api_token: "do-not-publish" } })], "fact-secret-key"],
@@ -7755,10 +7921,10 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
   });
   await t.test("sitemap pins one exact content-change date per route", async () => {
     const cases = [
-      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-25</lastmod>")],
-      ["future date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-28</lastmod>")],
-      ["missing date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "")],
-      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-27</lastmod><lastmod>2026-08-27</lastmod>")]
+      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-08-31</lastmod>", "<lastmod>2026-08-30</lastmod>")],
+      ["future date", plan3Sitemap().replace("<lastmod>2026-08-31</lastmod>", "<lastmod>2026-09-01</lastmod>")],
+      ["missing date", plan3Sitemap().replace("<lastmod>2026-08-31</lastmod>", "")],
+      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-08-31</lastmod>", "<lastmod>2026-08-31</lastmod><lastmod>2026-08-31</lastmod>")]
     ];
     for (const [label, sitemap] of cases) {
       const changedRoot = await plan3Root({ sitemap });

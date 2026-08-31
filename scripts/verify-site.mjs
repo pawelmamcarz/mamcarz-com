@@ -19,10 +19,10 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "82fa61d632f0cc98921e818bca2a2089ba6d8eb8840eb49cfdca0e55766ff21f";
+const TASK10_REVIEWED_CSS_SHA256 = "68fb016786573bfb499b161e40be30262ec3ff4bc9f3d886c587a085e78c9b26";
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
-const PLAN3_VALIDATION_DATE = "2026-08-27";
+const PLAN3_VALIDATION_DATE = "2026-08-31";
 
 export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: Object.freeze(["Person", "WebSite"]) }),
@@ -52,8 +52,8 @@ export const PUBLIC_PAGES = Object.freeze([
 ]);
 
 const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
-  "/": "2026-08-27",
-  "/en/": "2026-08-27",
+  "/": "2026-08-31",
+  "/en/": "2026-08-31",
   "/uslugi/transformacja-zakupow/": "2026-08-27",
   "/en/uslugi/transformacja-zakupow/": "2026-08-27",
   "/uslugi/wdrozenie-sap-ariba/": "2026-08-27",
@@ -62,10 +62,10 @@ const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
   "/en/uslugi/doradztwo-zamowienia-publiczne/": "2026-08-27",
   "/aplikacje-operacyjne/": "2026-08-27",
   "/en/aplikacje-operacyjne/": "2026-08-27",
-  "/lotnictwo/": "2026-08-27",
-  "/en/lotnictwo/": "2026-08-27",
-  "/case-studies/": "2026-08-27",
-  "/en/case-studies/": "2026-08-27",
+  "/lotnictwo/": "2026-08-31",
+  "/en/lotnictwo/": "2026-08-31",
+  "/case-studies/": "2026-08-31",
+  "/en/case-studies/": "2026-08-31",
   "/wiedza/": "2026-08-27",
   "/en/wiedza/": "2026-08-27",
   "/wystapienia/": "2026-08-27",
@@ -2398,8 +2398,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     error(errors, "home-hero-image", page.path, "visible hero requires one visible image with explicit positive width and height plus fetchpriority=high");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedCss = "/assets/css/style.css?v=20260831-titanium-cobalt-1";
+  const expectedJs = "/assets/js/main.js?v=20260831-titanium-cobalt-1";
   const stylesheetAttributeNames = new Set(["rel", "href"]);
   const stylesheetNodes = elements.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -2596,13 +2596,14 @@ function verifyHomepageParity(plBody, enBody, plParsedBody, enParsedBody, errors
 
   const plLinks = pairedLinkSequence(plParsedBody);
   const enLinks = pairedLinkSequence(enParsedBody);
+  const localizedExternalRoutes = new Map([["https://camobook.com/", "https://camobook.com/en/"]]);
   const expectedEnglishLinks = plLinks.map(({ href }) => {
-    if (/^https?:\/\//i.test(href)) return href;
+    if (/^https?:\/\//i.test(href)) return localizedExternalRoutes.get(href) ?? href;
     return localizedHomeRoutes.get(href) ?? null;
   });
   const actualEnglishLinks = enLinks.map(({ href }) => href);
   if (expectedEnglishLinks.some((href) => href === null) || !exactSequence(expectedEnglishLinks, actualEnglishLinks)) {
-    error(errors, "home-parity-links", "en/index.html", "ordered internal routes must use exact /en/ counterparts and external routes must remain unchanged");
+    error(errors, "home-parity-links", "en/index.html", "ordered internal routes must use exact /en/ counterparts; external routes remain unchanged except the approved localized CamoBook route");
   }
 
 }
@@ -4137,8 +4138,8 @@ function verifyNotFound(html, errors) {
     error(errors, "not-found-robots", path, "404 must have one robots meta containing noindex");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedCss = "/assets/css/style.css?v=20260831-titanium-cobalt-1";
+  const expectedJs = "/assets/js/main.js?v=20260831-titanium-cobalt-1";
   const stylesheets = byName("link").filter((element) => elementIsActiveResource(element)
     && elementAttributeTokens(element, "rel").includes("stylesheet"));
   const externalScripts = byName("script").filter((element) => elementIsActiveResource(element)
@@ -4307,13 +4308,13 @@ async function verifyFoundation(context) {
 
     const rootDeclarations = rootRules[0]?.declarations ?? new Map();
     const requiredTokens = new Map([
-      ["--sky-paper", "#E9EDEF"],
-      ["--runway-ink", "#102831"],
-      ["--signal", "#D94B2B"],
-      ["--panel", "#193D49"],
-      ["--boundary", "#8E9CA1"],
-      ["--white", "#F7F9F8"],
-      ["--muted", "#52707A"]
+      ["--sky-paper", "#EEF1F2"],
+      ["--runway-ink", "#141B22"],
+      ["--signal", "#245A8D"],
+      ["--panel", "#1C2D3A"],
+      ["--boundary", "#7E8C94"],
+      ["--white", "#F8FAFA"],
+      ["--muted", "#53656F"]
     ]);
     for (const [property, value] of requiredTokens) {
       if (rootDeclarations.get(property) !== value) error(context.errors, "flight-token", "assets/css/style.css", `missing ${property}: ${value}`);
@@ -4498,8 +4499,9 @@ async function verifyFoundation(context) {
     }
     const componentContrastContracts = [
       ["::selection", "background", "var(--signal-dark)"],
-      [".btn-primary", "background", "var(--signal-dark)"], [".home-cta", "background", "var(--signal-dark)"],
-      [".cta-banner", "background", "var(--signal-dark)"], ["#why", "background", "var(--signal-dark)"],
+      [".btn-primary", "background", "var(--signal-dark)"], [".home-cta", "background", "var(--panel)"],
+      [".cta-banner", "background", "var(--panel)"], ["#why", "background", "var(--panel)"],
+      [".service-contact", "background", "var(--panel)"],
       [".about-badge", "background", "var(--signal-dark)"], [".chat-send", "background", "var(--signal-dark)"],
       [".back-to-top", "background", "var(--signal-dark)"], [".nav-lang:hover", "background", "var(--signal-dark)"],
       [".nav-logo b", "color", "var(--signal-dark)"], [".gold-link", "color", "var(--signal-dark)"],
@@ -4518,7 +4520,7 @@ async function verifyFoundation(context) {
       ["--signal-dark", "--white", 4.5], ["--signal-dark", "--sky-paper", 4.5], ["--signal-dark", "--sky-band", 4.5],
       ["--ink-secondary", "--white", 4.5], ["--ink-secondary", "--sky-paper", 4.5], ["--ink-secondary", "--sky-band", 4.5],
       ["--signal-light", "--panel", 4.5], ["--signal-light", "--panel-deep", 4.5],
-      ["--focus-dark", "--signal-dark", 3], ["--focus-dark", "--sky-paper", 3], ["--focus-dark", "--sky-band", 3], ["--focus-dark", "--white", 3],
+      ["--focus-dark", "--sky-paper", 3], ["--focus-dark", "--sky-band", 3], ["--focus-dark", "--white", 3],
       ["--white", "--signal-dark", 4.5], ["--white", "--panel", 3], ["--white", "--panel-deep", 3]
     ];
     for (const [foreground, background, minimum] of contrastPairs) {
@@ -4689,7 +4691,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-hreflang", path, "requires exact active pl, en and x-default hreflang entries for the real route pair");
   }
 
-  const expectedStylesheet = "/assets/css/style.css?v=20260825-flightplan-3";
+  const expectedStylesheet = "/assets/css/style.css?v=20260831-titanium-cobalt-1";
   const links = elements.filter((element) => element.name === "link");
   const stylesheetCandidates = links.filter((element) => elementAttributeTokens(element, "rel").includes("stylesheet")
     || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
@@ -4698,7 +4700,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-stylesheet", path, `requires one active shared stylesheet ${expectedStylesheet}`);
   }
 
-  const expectedScript = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedScript = "/assets/js/main.js?v=20260831-titanium-cobalt-1";
   const scriptCandidates = elements.filter((element) => element.name === "script" && element.attributes.has("src"));
   const validScripts = scriptCandidates.filter((element) => elementHasExactAttributeNames(element, new Set(["src", "defer"]))
     && elementAttribute(element, "src") === expectedScript
@@ -5058,8 +5060,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 189, digest: "08d1b9fbc78a0e99702c63fc90d0450c2684da2da8e53cec771daf710d32e31d" }),
-  en: Object.freeze({ elementCount: 189, digest: "305891223310b7e755323fd3f4b8ea49bbcee17ad89a843f31103454bd48dcec" })
+  pl: Object.freeze({ elementCount: 189, digest: "e513b5ce71e2a1b372f9ded0fa85e4ec90d19cf3010991656726acc388c49c50" }),
+  en: Object.freeze({ elementCount: 189, digest: "5f65a66c5ba3826ccafe47c3b564f6ae2749491e833539ad81f66454613877b0" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -5070,7 +5072,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260831-titanium-cobalt-1" })
   ]),
   en: Object.freeze([
     Object.freeze({ rel: "canonical", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
@@ -5080,7 +5082,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260831-titanium-cobalt-1" })
   ])
 });
 const APPLICATION_ZERO_RESOURCE_TAGS = new Set([
@@ -5366,7 +5368,7 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
     && exactApplicationResourceAttributes(schema, { type: "application/ld+json" })
     && external?.parent === body
     && bodyChildren.at(-1) === external
-    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260831-titanium-cobalt-1", defer: null })
     && rawElementText(external).trim() === "";
 
   const footerSigns = all.filter((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
@@ -5660,7 +5662,7 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260831-titanium-cobalt-1" }
   ];
   const expectedHeadTags = [
     "meta", "meta", "title", "meta", "meta", "meta",
@@ -6162,6 +6164,8 @@ const AVIATION_FACT_ORDER = Object.freeze([
   "portfolio.akrobacja_com",
   "portfolio.akrobacja_com.current_status",
   "portfolio.akrobacja_com.type",
+  "portfolio.camobook_com",
+  "portfolio.camobook_com.type",
   "portfolio.filmolot_pl",
   "portfolio.filmolot_pl.type"
 ]);
@@ -6177,6 +6181,8 @@ const AVIATION_FACT_CONTRACT = Object.freeze([
   Object.freeze({ id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt",  ...PROJECT_SURFACES], status: "approved" }),
   Object.freeze({ id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt",  ...PROJECT_SURFACES], status: "approved" }),
   Object.freeze({ id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt",  ...PROJECT_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.camobook_com", value: "CamoBook", display_pl: "CamoBook", display_en: "CamoBook", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmation, 2026-08-31: CamoBook is Paweł Mamcarz's project", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "portfolio.camobook_com.type", value: "electronic technical logbook and CAMO software for light aviation", display_pl: "Elektroniczny PDT i oprogramowanie CAMO dla lekkiego lotnictwa.", display_en: "Electronic technical logbook and CAMO software for light aviation.", kind: "constant", as_of: null, source_type: "public_source", source_label: "Official CamoBook public site inspected 2026-08-31", source_url: "https://camobook.com/", surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES, "llms-full.txt"], status: "approved" }),
   Object.freeze({ id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed portfolio project, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" }),
   Object.freeze({ id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" })
 ]);
@@ -6205,7 +6211,7 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260831-titanium-cobalt-1" }
   ]),
   en: Object.freeze([
     { rel: "canonical", href: "https://mamcarz.com/en/lotnictwo/" },
@@ -6215,13 +6221,26 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260831-titanium-cobalt-1" }
   ])
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 191, digest: "6f3322042e7ed934dbf3bb32f146f6e109738dcc4e87dc67c7ce8882baae11fc" }),
-  en: Object.freeze({ elementCount: 191, digest: "1dc4dd1da65ae07f05b6e81176d6f53424d114eb53d4284c7d672f662a2bfccd" })
+  pl: Object.freeze({ elementCount: 204, digest: "295520e95ba1fcac459ad1a7e71b4478cf6d173d674a9497a87205d9d5d955da" }),
+  en: Object.freeze({ elementCount: 204, digest: "b74f6c48c5f8881ec69b7b4becb1d1de803b5f9e080ca211fba14917fdfa56cc" })
+});
+
+const AVIATION_VENTURE_MEDIA_CONTRACT = Object.freeze({
+  pl: Object.freeze([
+    Object.freeze({ webp: "/assets/img/portfolio/akrobacja.webp", jpg: "/assets/img/portfolio/akrobacja.jpg", alt: "Widok publicznej strony akrobacja.com", width: "1400", height: "492" }),
+    Object.freeze({ webp: "/assets/img/portfolio/camobook.webp", jpg: "/assets/img/portfolio/camobook.jpg", alt: "Zrzut publicznej strony CamoBook", width: "1400", height: "640" }),
+    Object.freeze({ webp: "/assets/img/portfolio/filmolot.webp", jpg: "/assets/img/portfolio/filmolot.jpg", alt: "Widok publicznej strony FilmoLot.pl", width: "1400", height: "640" })
+  ]),
+  en: Object.freeze([
+    Object.freeze({ webp: "/assets/img/portfolio/akrobacja.webp", jpg: "/assets/img/portfolio/akrobacja.jpg", alt: "View of the public akrobacja.com site", width: "1400", height: "492" }),
+    Object.freeze({ webp: "/assets/img/portfolio/camobook.webp", jpg: "/assets/img/portfolio/camobook.jpg", alt: "Screenshot of the public CamoBook site", width: "1400", height: "640" }),
+    Object.freeze({ webp: "/assets/img/portfolio/filmolot.webp", jpg: "/assets/img/portfolio/filmolot.jpg", alt: "View of the public FilmoLot.pl site", width: "1400", height: "640" })
+  ])
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -6232,7 +6251,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "02", "SAFE", "Szkolenie i bezpieczeństwo", "Standard przed wykonaniem.", "Przygotowanie obejmuje kryteria, komunikację i odpowiedzialność za każdy etap pracy.", "Zakres", "uprawnienia do akrobacji", "Doświadczenie", "pilot pokazowy Diverse Extreme Team (2013)",
     "03", "MEDIA", "Media", "Obraz podporządkowany zadaniu.", "Plan ujęć, podział odpowiedzialności i wykonanie tworzą jeden przebieg pracy.", "Fotografia", "fotograf prasowy agencji Forum", "Realizacja", "sesje air-to-air, realizacje wideo i dronem",
     "04", "DATA", "Software", "Proces przeniesiony do narzędzia.", "Software porządkuje dane, kolejne stany i odpowiedzialność. Interfejs wynika z przebiegu pracy.", "WEJŚCIE", "Procedura", "PRZEPŁYW", "Dane i decyzje", "WYJŚCIE", "Ślad działania",
-    "05", "LOG", "Projekty", "Rejestr przedsięwzięć lotniczych.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
+    "05", "LOG", "Projekty", "Rejestr przedsięwzięć lotniczych.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / D02", "CamoBook", "Elektroniczny PDT i oprogramowanie CAMO dla lekkiego lotnictwa.", "PROJECT / M03", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
     "06", "COMMS", "Kontakt", "Ustalmy zakres i odpowiedzialność.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
     "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
   ]),
@@ -6243,7 +6262,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "02", "SAFE", "Training and safety", "The standard comes before execution.", "Preparation covers criteria, communication and responsibility for each stage of work.", "Scope", "aerobatics rating", "Experience", "display pilot for the Diverse Extreme Team (2013)",
     "03", "MEDIA", "Media", "The image follows the task.", "Shot planning, assigned responsibility and execution form one working sequence.", "Photography", "Press photographer with Forum Agency", "Production", "air-to-air shoots, video and drone production",
     "04", "DATA", "Software", "The process transferred into a tool.", "Software organises data, consecutive states and responsibility. The interface follows the working process.", "INPUT", "Procedure", "FLOW", "Data and decisions", "OUTPUT", "Action trail",
-    "05", "LOG", "Projects", "Aviation venture register.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
+    "05", "LOG", "Projects", "Aviation venture register.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / D02", "CamoBook", "Electronic technical logbook and CAMO software for light aviation.", "PROJECT / M03", "FilmoLot.pl", "Aviation · photography and video",
     "06", "COMMS", "Contact", "Set the scope and responsibility.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
     "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
   ])
@@ -6263,7 +6282,7 @@ function verifyAviationFactContract(path, factData, errors) {
       : actual[key] === expected[key]);
   });
   if (!valid) {
-    error(errors, "aviation-fact-contract", path, "requires the immutable owner-approved values, provenance, state and exact surfaces for all eleven Task 3 facts");
+    error(errors, "aviation-fact-contract", path, "requires the immutable approved values, provenance, state and exact surfaces for all thirteen aviation facts");
   }
 }
 
@@ -6420,23 +6439,24 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(scripts[0], { type: "application/ld+json" })
     && scripts[1]?.parent === body
     && bodyChildren.at(-1) === scripts[1]
-    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260831-titanium-cobalt-1", defer: null })
     && rawElementText(scripts[1]).trim() === "";
   const pictures = all.filter((element) => element.name === "picture");
   const sources = all.filter((element) => element.name === "source");
   const images = all.filter((element) => element.name === "img");
-  const venturePicture = pictures[0];
-  const ventureImage = images.find((image) => elementHasClass(image.parent, "aviation-venture-image"));
+  const expectedMedia = AVIATION_VENTURE_MEDIA_CONTRACT[lang];
+  const ventureImages = pictures.map((picture) => elementDescendants(picture, "img")[0]);
   const footerSign = all.find((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
   const signature = images.find((image) => image.parent === footerSign);
-  const mediaValid = pictures.length === 1
-    && exactApplicationResourceAttributes(venturePicture, { class: "aviation-venture-image" })
-    && sources.length === 1
-    && sources[0].parent === venturePicture
-    && exactApplicationResourceAttributes(sources[0], { type: "image/webp", srcset: "/assets/img/portfolio/akrobacja.webp" })
-    && images.length === 2
-    && ventureImage?.parent === venturePicture
-    && exactApplicationResourceAttributes(ventureImage, { src: "/assets/img/portfolio/akrobacja.jpg", alt: lang === "pl" ? "Widok projektu akrobacja.com" : "View of the akrobacja.com project", width: "1400", height: "492", loading: "lazy", decoding: "async" })
+  const mediaValid = pictures.length === expectedMedia.length
+    && sources.length === expectedMedia.length
+    && images.length === expectedMedia.length + 1
+    && pictures.every((picture, index) => exactApplicationResourceAttributes(picture, { class: "aviation-venture-image" })
+      && elementHasClass(picture.parent, "aviation-venture-row")
+      && sources[index]?.parent === picture
+      && exactApplicationResourceAttributes(sources[index], { type: "image/webp", srcset: expectedMedia[index].webp })
+      && ventureImages[index]?.parent === picture
+      && exactApplicationResourceAttributes(ventureImages[index], { src: expectedMedia[index].jpg, alt: expectedMedia[index].alt, width: expectedMedia[index].width, height: expectedMedia[index].height, loading: "lazy", decoding: "async" }))
     && footerSign !== undefined
     && elementIsWithin(footerSign, footer)
     && exactApplicationResourceAttributes(signature, { src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
@@ -6456,7 +6476,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && all.filter((element) => element.attributes.has("style")).length === 0
     && resourceAttributesValid;
   if (!valid) {
-    error(errors, "aviation-resource-census", path, "requires the exact local links, scripts, Akrobacja picture, signature image and zero other resource or inline-style surfaces");
+    error(errors, "aviation-resource-census", path, "requires the exact local links, scripts, three venture pictures, signature image and zero other resource or inline-style surfaces");
   }
 }
 
@@ -6528,7 +6548,6 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
     factsValid = factsValid
       && AVIATION_FACT_ORDER[index] === factId
       && record?.status === "approved"
-      && record?.source_url === null
       && Array.isArray(record?.surfaces)
       && record.surfaces.includes(path)
       && publishedStaticText(factElements[index]) === normalizeExactLiteral(display ?? "")
@@ -6543,12 +6562,16 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
   }
 
   const pictures = all.filter((element) => elementHasClass(element, "aviation-venture-image"));
-  const sources = pictures.length === 1 ? elementDescendants(pictures[0], "source") : [];
-  const images = pictures.length === 1 ? elementDescendants(pictures[0], "img") : [];
-  if (pictures.length !== 1 || sources.length !== 1 || images.length !== 1
-    || elementAttribute(sources[0], "srcset") !== "/assets/img/portfolio/akrobacja.webp"
-    || elementAttribute(images[0], "src") !== "/assets/img/portfolio/akrobacja.jpg") {
-    error(errors, "aviation-image", path, "requires the single approved local Akrobacja webp/jpg image pair");
+  const expectedMedia = AVIATION_VENTURE_MEDIA_CONTRACT[lang];
+  const imagesValid = pictures.length === expectedMedia.length && pictures.every((picture, index) => {
+    const sources = elementDescendants(picture, "source");
+    const images = elementDescendants(picture, "img");
+    return sources.length === 1 && images.length === 1
+      && elementAttribute(sources[0], "srcset") === expectedMedia[index].webp
+      && elementAttribute(images[0], "src") === expectedMedia[index].jpg;
+  });
+  if (!imagesValid) {
+    error(errors, "aviation-image", path, "requires the three approved local Akrobacja, CamoBook and FilmoLot webp/jpg image pairs in venture order");
   }
 
   const schemaScripts = all.filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -6642,19 +6665,19 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
 const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
   pl: Object.freeze([
     "https://mamcarz.com/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260831-titanium-cobalt-1",
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
     "/procurement-2026/", "/wystapienia/", "/#contact", "/", "/assets/img/signature.png", "/", "/uslugi/transformacja-zakupow/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/assets/js/main.js?v=20260831-titanium-cobalt-1"
   ]),
   en: Object.freeze([
     "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260831-titanium-cobalt-1",
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
     "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
     "/infographic_procurement_2026_EN.html", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
-    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
+    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/assets/js/main.js?v=20260831-titanium-cobalt-1"
   ])
 });
 
@@ -6699,7 +6722,7 @@ function knowledgeDocumentMarkup(contract, lang) {
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const alternateLocale = lang === "pl" ? "en_US" : "pl_PL";
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></body></html>`;
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260831-titanium-cobalt-1"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260831-titanium-cobalt-1" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -7049,7 +7072,7 @@ function verifyKnowledgeBoundary(path, parsedRoot, errors) {
     || [...element.attributes.keys()].some((name) => /^(?:datetime|datepublished|datemodified|data-date)$/i.test(name)));
   const extraScripts = elements.filter((element) => element.name === "script"
     && elementAttribute(element, "type") !== "application/ld+json"
-    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-3");
+    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260831-titanium-cobalt-1");
   const inactiveUrlViolation = knowledgeInactiveUrlViolation(parsedRoot);
   const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot) || inactiveUrlViolation;
   if (bannedRoute) {
@@ -7201,6 +7224,7 @@ const PROJECT_STRUCTURE = Object.freeze([
   ]) }),
   Object.freeze({ group: "aviation", projects: Object.freeze([
     Object.freeze({ id: "akrobacja", facts: Object.freeze(["portfolio.akrobacja_com", "portfolio.akrobacja_com.current_status", "portfolio.akrobacja_com.type"]) }),
+    Object.freeze({ id: "camobook", facts: Object.freeze(["portfolio.camobook_com", "portfolio.camobook_com.type"]) }),
     Object.freeze({ id: "filmolot", facts: Object.freeze(["portfolio.filmolot_pl", "portfolio.filmolot_pl.type"]) })
   ]) })
 ]);
@@ -7236,6 +7260,8 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"portfolio.akrobacja_com","value":"akrobacja.com","display_pl":"akrobacja.com","display_en":"akrobacja.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com.current_status","value":"active aviation venture as of 2026-08-26","display_pl":"Aktualna marka działalności lotniczej","display_en":"Current aviation venture","kind":"dated","as_of":"2026-08-26","source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com.type","value":"aerobatic-flight voucher sales platform","display_pl":"Platforma sprzedaży voucherów na loty akrobacyjne.","display_en":"Voucher sales platform for aerobatic flights.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.camobook_com","value":"CamoBook","display_pl":"CamoBook","display_en":"CamoBook","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmation, 2026-08-31: CamoBook is Paweł Mamcarz's project","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.camobook_com.type","value":"electronic technical logbook and CAMO software for light aviation","display_pl":"Elektroniczny PDT i oprogramowanie CAMO dla lekkiego lotnictwa.","display_en":"Electronic technical logbook and CAMO software for light aviation.","kind":"constant","as_of":null,"source_type":"public_source","source_label":"Official CamoBook public site inspected 2026-08-31","source_url":"https://camobook.com/","surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.filmolot_pl","value":"FilmoLot.pl aviation photography and video project","display_pl":"FilmoLot.pl","display_en":"FilmoLot.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.filmolot_pl.type","value":"aviation photography and video","display_pl":"Lotnictwo · fotografia i wideo","display_en":"Aviation · photography and video","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"})
 ]);
@@ -7243,7 +7269,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "58d57aeaaaeb1df6f4e6a55ad546db65d73a940b5bc17cba9b6981ff1529dc22", en: "13ba10e60708b2379f4ed1faf67819c7817526e6c2f8bd611fee8ea18ae46fa3" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "2e1b5c608f891d89ee09fafcac60c2d8d4235ca955bb695afce155c1cfb4a505", en: "d9bf20ae6033cfdaf73370ee0c0f1df1dae907f850afda6937afb9d1092d0523" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7265,7 +7291,7 @@ function verifyProjectRegistryInventory(factData, errors, { required = false } =
   for (const surface of PROJECT_SURFACES) {
     const actual = records.filter((record) => Array.isArray(record?.surfaces) && record.surfaces.includes(surface)).map((record) => record.id).sort();
     const expected = [...PROJECT_FACT_ORDER].sort();
-    if (JSON.stringify(actual) !== JSON.stringify(expected)) failures.push(`${surface} must authorize exactly the 31 immutable Projects facts`);
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) failures.push(`${surface} must authorize exactly the 33 immutable Projects facts`);
   }
   for (const expected of PROJECT_FACT_CONTRACT) {
     const matches = records.filter((record) => record?.id === expected.id);
@@ -7302,7 +7328,7 @@ function verifyProjectSchema(path, parsedRoot, lang, errors) {
       itemListElement: plan3ProjectSchemaRows(parsedRoot, contract.url)
     }
   };
-  if (!sameJsonContract(actual, expected)) error(errors, "project-schema", path, "requires one exact bounded localized CollectionPage with a 12-item visible name, description and local-fragment ItemList only");
+  if (!sameJsonContract(actual, expected)) error(errors, "project-schema", path, "requires one exact bounded localized CollectionPage with a 13-item visible name, description and local-fragment ItemList only");
 }
 
 function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
@@ -7312,7 +7338,7 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = elements.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260831-titanium-cobalt-1" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   const invalidAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
     return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
@@ -7389,7 +7415,7 @@ function verifyProjectPage(path, parsedRoot, lang, factData, errors) {
     });
   }
   const factIds = projectNodes.flatMap((project) => elementDescendants(project).filter((element) => element.attributes.has("data-fact-id")).map((element) => elementAttribute(element, "data-fact-id")));
-  if (!evidenceValid || JSON.stringify(factIds) !== JSON.stringify(PROJECT_FACT_ORDER)) error(errors, "project-evidence", path, "requires the exact 12-project and 31-fact immutable bilingual evidence order");
+  if (!evidenceValid || JSON.stringify(factIds) !== JSON.stringify(PROJECT_FACT_ORDER)) error(errors, "project-evidence", path, "requires the exact 13-project and 33-fact immutable bilingual evidence order");
 
   const times = all.filter((element) => element.name === "time");
   const statusNodes = all.filter((element) => elementAttribute(element, "data-fact-id") === "portfolio.akrobacja_com.current_status");
@@ -7608,9 +7634,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "6f95f286b5e8975418ef587dafdaeaea11df006f963ee4bce5a94c1806f4ae60", en: "314fea33c827a9ae0465b653ef8c1f9beb006a3eda1d07d56b2838cb5fc53e31" }),
-  ariba: Object.freeze({ pl: "73d75ff44382f05e5f0b2b80f8a3839cf51ff6e7135cdb434ca8f681aff3b685", en: "88c42d6e762b0f157d4500bca917e0ecf5bca84f62ae004b6dd83737152f57f9" }),
-  publicProcurement: Object.freeze({ pl: "411e129e8b2db8cf4920e9c0c74ea7a037e4838b5770aac2b0db5dfdf072e83e", en: "24c327fa2c0716a3ed558d1dd21fb2dfd1cb3272d342e5ece14270cd4e31b877" })
+  transformation: Object.freeze({ pl: "b92e864d3338af5f238b5c6eac37c7425d89d96a0d7fa2cd1bb05806c5ddb000", en: "6bdef0adaf3e3fb15b9e68908917c1ed00f86a07666d7b140d5241dfb72d8982" }),
+  ariba: Object.freeze({ pl: "36d839b95bbb4ad29ba392041e2963ae512251f7f5f82233161b776ca0f1964b", en: "20b3da343625ed4cfe2ddb3c9398b9f5a0d31e7f98f83234f450e29a89757fad" }),
+  publicProcurement: Object.freeze({ pl: "f1516617dc5fa26f885b2c5e620d865ae06f13525a4b57837a7e257d44c1e417", en: "0e501a67522f9101cfd280dba9f01755ea300e4823bf4f9fbbc9dc18ee822135" })
 });
 
 function serviceKeyForPath(path) {
@@ -7681,7 +7707,7 @@ function verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors) {
   const extraExecutable = elements.filter((element) => element.name === "script").some((script) => {
     const type = elementAttribute(script, "type");
     const src = elementAttribute(script, "src");
-    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")));
+    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260831-titanium-cobalt-1" && script.attributes.has("defer")));
   });
   const externalAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
@@ -7992,7 +8018,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "4d520eb2ec5a26f6f0138934c499fc3420a76fb8007cdd459d478c54b731d451", en: "c7a18036660bda80d22d8e1f5f0b8f001dfee209f376d34b6ccd81e34ece634f" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "4c8d5301e4ace544e879e93f41df9822e1631dfebd496e0ae159bb7135b5523a", en: "dbfa9d2e6210504257d432a52cdad6ba93df13d7dd0a34b1e9c454fb8417ab9e" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8191,7 +8217,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260831-titanium-cobalt-1" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature || !validRecordingAssets) {
     error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and canonical YouTube link; forbids embeds, forms, inline styles, extra scripts or controls");
   }
@@ -8260,7 +8286,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity.html", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", null]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "4877bac0b1fa68631923a2167ed23a8e0d4e6df54cd76c3b49bb18a9902636d2";
+const PROCUREMENT_DOCUMENT_MANIFEST = "640fecae826962dac868340b7a7e6b33cfd2e6127b757d77aa8d752bfa05dc18";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -8335,7 +8361,7 @@ async function verifyProcurementParent(_factData, context) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260831-titanium-cobalt-1" && script.attributes.has("defer")).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)))
     || invalidAnchor || !validScripts || !validSignature || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames plus the exact footer signature image");
   verifyProcurementSchema(parsedRoot, context.errors);
@@ -8440,11 +8466,11 @@ const ARTIFACT_LEADS = Object.freeze({
   "infographic_procurement_2026_EN.html": "A compact workshop sheet for separating a process sequence from the choices made for a particular operating model."
 });
 const ARTIFACT_TOKENS = Object.freeze({
-  "--artifact-bg": "#102831",
-  "--artifact-panel": "#193D49",
-  "--artifact-paper": "#E9EDEF",
-  "--artifact-line": "#8E9CA1",
-  "--artifact-signal": "#D94B2B"
+  "--artifact-bg": "#141B22",
+  "--artifact-panel": "#1C2D3A",
+  "--artifact-paper": "#EEF1F2",
+  "--artifact-line": "#7E8C94",
+  "--artifact-signal": "#245A8D"
 });
 const ARTIFACT_FONT_PATHS = new Set([
   "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2",
@@ -8954,7 +8980,7 @@ function verifyProcessArtifact(path, artifact, errors) {
     && paths.length === 14
     && paths.every((element) => elementAttribute(element, "fill") === "none" && hasPaintedStroke(element))
     && lensCircles.length === 5
-    && lensCircles.every((element) => elementAttribute(element, "fill") === "#193D49" && hasPaintedStroke(element))
+    && lensCircles.every((element) => elementAttribute(element, "fill") === "#1C2D3A" && hasPaintedStroke(element))
     && outerRings.length === 1
     && elementAttribute(outerRings[0], "fill") === "none"
     && hasPaintedStroke(outerRings[0])
@@ -9495,10 +9521,10 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
   const sharedScripts = scripts.filter((element) => element.attributes.has("src") || (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
   const inlineExecutable = scripts.filter((element) => !element.attributes.has("src") && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const resourceValid = stylesheets.length === 1
-    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260831-titanium-cobalt-1" })
     && elementIsActiveResource(stylesheets[0])
     && sharedScripts.length === 1
-    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260831-titanium-cobalt-1", defer: null })
     && elementIsActiveResource(sharedScripts[0])
     && rawElementText(sharedScripts[0]).trim() === ""
     && elementDescendants(parsedRoot, "style").length === 0
@@ -10278,10 +10304,10 @@ function plan3ReviewedStaticNumber(path, unit, token) {
 
   if (PROJECT_SURFACES.includes(path)) {
     if (elementHasClass(owner, "projects-kicker")
-      && token.value === "12"
-      && new Set(["EVIDENCE REGISTER / 12 POZYCJI", "EVIDENCE REGISTER / 12 ENTRIES"]).has(ownerText)) return true;
+      && token.value === "13"
+      && new Set(["EVIDENCE REGISTER / 13 POZYCJI", "EVIDENCE REGISTER / 13 ENTRIES"]).has(ownerText)) return true;
     if (elementHasClass(owner, "project-row__rail")
-      && /^(?:A-0[1-5]|P-0[1-5]|L-0[1-2])$/.test(token.value)
+      && /^(?:A-0[1-5]|P-0[1-5]|L-0[1-3])$/.test(token.value)
       && ownerText === token.value) return true;
     if (token.value === "2026-08-26"
       && owner.name === "time"
@@ -10292,8 +10318,8 @@ function plan3ReviewedStaticNumber(path, unit, token) {
 
   if (AVIATION_SURFACES.includes(path)) {
     if (elementHasClass(owner, "aviation-venture-entry__code")
-      && new Set(["PROJECT / A01", "PROJECT / M02"]).has(ownerText)
-      && new Set(["A01", "M02"]).has(token.value)) return true;
+      && new Set(["PROJECT / A01", "PROJECT / D02", "PROJECT / M03"]).has(ownerText)
+      && new Set(["A01", "D02", "M03"]).has(token.value)) return true;
     if (token.value === "2026-08-26"
       && owner.name === "span"
       && new Set(["Stan na 2026-08-26", "As of 2026-08-26"]).has(ownerText)
@@ -10770,9 +10796,9 @@ async function verifyMetadata(factData, context) {
     if (!PLAN3_ARTIFACT_FILES.has(entry.file)) {
       const stylesheets = all.filter((element) => element.name === "link" && (elementAttributeTokens(element, "rel").includes("stylesheet") || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")));
       const scripts = all.filter((element) => element.name === "script" && ((elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js") || element.attributes.has("src")));
-      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === "/assets/css/style.css?v=20260825-flightplan-3");
+      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === "/assets/css/style.css?v=20260831-titanium-cobalt-1");
       const validScripts = scripts.filter((element) => elementIsActiveResource(element)
-        && elementAttribute(element, "src") === "/assets/js/main.js?v=20260825-flightplan-3"
+        && elementAttribute(element, "src") === "/assets/js/main.js?v=20260831-titanium-cobalt-1"
         && element.attributes.has("defer"));
       if (stylesheets.length !== 1 || validStyles.length !== 1 || scripts.length !== 1 || validScripts.length !== 1) {
         error(context.errors, "metadata-assets", entry.file, "site shell requires exact Flight Plan 3 CSS and deferred JS assets");

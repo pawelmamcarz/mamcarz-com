@@ -58,5 +58,7 @@ Only fact displays approved in content/site-facts.json are listed below. The ide
 - [portfolio.akrobacja_com] akrobacja.com
 - [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.
 - [portfolio.akrobacja_com.type] Voucher sales platform for aerobatic flights.
+- [portfolio.camobook_com] CamoBook
+- [portfolio.camobook_com.type] Electronic technical logbook and CAMO software for light aviation.
 - [portfolio.czympojade_pl] czympojade.pl
 - [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.
