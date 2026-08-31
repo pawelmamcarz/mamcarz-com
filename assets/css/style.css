@@ -234,19 +234,19 @@
 
 :root {
   color-scheme: light;
-  --sky-paper: #E9EDEF;
-  --runway-ink: #102831;
-  --signal: #D94B2B;
-  --panel: #193D49;
-  --boundary: #8E9CA1;
-  --white: #F7F9F8;
-  --muted: #52707A;
-  --sky-band: #DCE4E7;
-  --panel-deep: #0C252E;
-  --signal-dark: #A9361D;
-  --ink-secondary: #46636D;
-  --signal-light: #FF9B7D;
-  --focus-dark: #050A0C;
+  --sky-paper: #EEF1F2;
+  --runway-ink: #141B22;
+  --signal: #245A8D;
+  --panel: #1C2D3A;
+  --boundary: #7E8C94;
+  --white: #F8FAFA;
+  --muted: #53656F;
+  --sky-band: #E4E8EA;
+  --panel-deep: #0F1A21;
+  --signal-dark: #173F68;
+  --ink-secondary: #455963;
+  --signal-light: #BBD7F0;
+  --focus-dark: #080C10;
   --content-max: 1280px;
   --page-gutter: clamp(20px, 4vw, 56px);
   --section-space: clamp(72px, 9vw, 144px);
@@ -906,7 +906,7 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
   padding: clamp(32px, 5vw, 64px) var(--page-gutter);
   border-top: var(--line-strong);
   border-bottom: var(--line-strong);
-  background: var(--signal-dark);
+  background: var(--panel);
   color: var(--white);
 }
 
@@ -1090,7 +1090,7 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
   background: var(--signal-light);
 }
 
-#why { background: var(--signal-dark); color: var(--white); }
+#why { background: var(--panel); color: var(--white); }
 
 .why-container {
   width: min(100% - (2 * var(--page-gutter)), var(--content-max));
@@ -1279,32 +1279,41 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 }
 
 .pcard {
-  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, auto) 1fr;
   min-width: 0;
-  min-height: 500px;
+  min-height: 0;
   overflow: hidden;
   border: var(--line-strong);
   background: var(--panel);
   color: var(--white);
 }
 
-.pcard--wide { grid-column: 1 / -1; min-height: 560px; }
+.pcard--wide { grid-column: 1 / -1; min-height: 0; }
+
+.pcard > picture {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1400 / 640;
+  border-bottom: 1px solid color-mix(in srgb, var(--white) 26%, transparent);
+  background: var(--panel-deep);
+}
 
 .pcard__img,
 .pcard__noimg {
-  position: absolute;
-  inset: 0;
+  position: static;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1400 / 640;
 }
 
 .pcard__img {
+  display: block;
+  height: 100%;
   object-fit: cover;
-  filter: saturate(0.72) contrast(1.05) brightness(0.7);
-  transition: filter 180ms ease;
+  filter: saturate(0.78) contrast(1.04);
 }
 
-.pcard:hover .pcard__img { filter: saturate(0.65) contrast(1.08) brightness(0.58); }
+.pcard:hover .pcard__img { filter: saturate(0.78) contrast(1.04); }
 
 .pcard__noimg {
   display: grid;
@@ -1318,14 +1327,12 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 }
 
 .pcard__body {
-  position: absolute;
-  z-index: 1;
-  right: 1rem;
-  bottom: 1rem;
-  left: 1rem;
+  position: static;
+  display: grid;
+  min-height: 210px;
+  align-content: start;
   padding: clamp(20px, 3vw, 36px);
-  border: 1px solid color-mix(in srgb, var(--white) 40%, transparent);
-  background: var(--panel-deep);
+  background: var(--panel);
 }
 
 .pcard__tag,
@@ -1658,11 +1665,12 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 .aviation-dispatch-note { display: grid; grid-template-columns: auto minmax(0, 1fr); border-top: 3px solid var(--runway-ink); }
 .aviation-dispatch-note span, .aviation-dispatch-note strong { padding: 0.9rem 0; border-bottom: var(--line); }
 .aviation-dispatch-note strong { font-size: 0.95rem; }
-.aviation-venture-dossier { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr); border-top: 3px solid var(--runway-ink); border-bottom: var(--line-strong); }
-.aviation-venture-image { display: block; grid-row: span 2; min-height: 100%; border-right: var(--line-strong); background: var(--panel-deep); }
-.aviation-venture-image img { display: block; width: 100%; height: 100%; min-height: 420px; object-fit: cover; }
+.aviation-venture-dossier { display: grid; border-top: 3px solid var(--runway-ink); border-bottom: var(--line-strong); }
+.aviation-venture-row { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr); border-bottom: var(--line-strong); }
+.aviation-venture-row:last-child { border-bottom: 0; }
+.aviation-venture-image { display: block; min-height: 100%; overflow: hidden; border-right: var(--line-strong); background: var(--panel-deep); }
+.aviation-venture-image img { display: block; width: 100%; height: 100%; min-height: 320px; object-fit: cover; filter: saturate(0.78) contrast(1.04); }
 .aviation-venture-entry { padding: clamp(2rem, 4vw, 3.5rem); }
-.aviation-venture-entry + .aviation-venture-entry { border-top: var(--line); }
 .aviation-venture-entry h3 { margin: 0.45rem 0 1rem; font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.5rem); line-height: 0.98; }
 .aviation-venture-entry > p:last-child { color: var(--ink-secondary); }
 .aviation-status-line { display: grid; gap: 0.3rem; margin-bottom: 1rem; }
@@ -1815,7 +1823,7 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
   padding: clamp(40px, 6vw, 80px) var(--page-gutter);
   border-top: var(--line-strong);
   border-bottom: var(--line-strong);
-  background: var(--signal-dark);
+  background: var(--panel);
   color: var(--white);
 }
 
@@ -2419,7 +2427,7 @@ footer :focus-visible,
 }
 
 .service-evidence-ledger strong { font-weight: 500; }
-.service-contact { background: var(--signal-dark); color: var(--white); }
+.service-contact { background: var(--panel); color: var(--white); }
 .service-contact .section-label { color: color-mix(in srgb, var(--white) 72%, transparent); }
 .service-contact .section-label::after { background: color-mix(in srgb, var(--white) 48%, transparent); }
 .service-contact p { color: color-mix(in srgb, var(--white) 78%, transparent); }
@@ -2651,7 +2659,7 @@ footer :focus-visible,
   .aviation-log,
   .aviation-dispatch-note,
   .aviation-contact__action { grid-column: 1; }
-  .aviation-venture-dossier { grid-template-columns: minmax(0, 1fr); }
+  .aviation-venture-row { grid-template-columns: minmax(0, 1fr); }
   .aviation-venture-image { grid-row: auto; border-right: 0; border-bottom: var(--line-strong); }
   .aviation-venture-image img { min-height: 220px; }
 
@@ -2724,7 +2732,7 @@ footer :focus-visible,
 
   .pcard,
   .pcard--wide {
-    min-height: 480px;
+    min-height: 0;
     grid-column: 1;
   }
 
