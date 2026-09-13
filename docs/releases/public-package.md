@@ -6,6 +6,8 @@ Strona pozostaje statycznym HTML-em. Aktualna procedura zastępuje publikowanie 
 
 1. Uruchom `npm run verify:ci` (Node.js 22 lub nowszy). Weryfikacja i pakowanie nie wymagają instalacji zależności npm; `sharp` jest potrzebny tylko do opcjonalnej optymalizacji obrazów.
 2. Wynik w `dist/` zawiera strony z `PUBLIC_PAGES` oraz pliki z `scripts/public-assets.json`. Kopiowanie zachowuje zawartość plików. Dokumentacja, rejestr faktów, testy, kod Workera i konfiguracja narzędzi nie są częścią paczki.
+Istniejące strony `prywatnosc/index.html` i `en/prywatnosc/index.html` są zachowane na jawnej liście zasobów. Commit `b151c98` świadomie pozostawił je poza `PUBLIC_PAGES` i indeksami. Paczka utrzymuje ich dotychczasową dostępność; nie rozszerza ani nie zmienia ich treści. Ujednolicenie manifestu z rzeczywistą wersją produkcyjną wymaga odzyskania źródeł tej wersji.
+
 3. Nowe obrazy, fonty i pliki do pobrania dopisz do `scripts/public-assets.json`. Nowe strony dodaj do normatywnego `PUBLIC_PAGES` i pozostałych wymaganych indeksów.
 4. Opcjonalny podgląd: `wrangler pages dev dist`. Podgląd nie wdraża strony ani Workera.
 

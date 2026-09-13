@@ -77,3 +77,11 @@ test('every packaged HTML/CSS local reference resolves inside the public package
     }
   }
 });
+
+test('preserves the already published PL and EN privacy pages', async t => {
+  const root = await fixture(t);
+  await packageSite(root);
+  for (const file of ['prywatnosc/index.html', 'en/prywatnosc/index.html']) {
+    assert.deepEqual(await readFile(join(root, 'dist', file)), await readFile(new URL('../' + file, import.meta.url)));
+  }
+});
