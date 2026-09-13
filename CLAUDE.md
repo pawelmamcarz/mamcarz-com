@@ -10,17 +10,19 @@ mamcarz.com to osobista strona profesjonalna Pawła Mamcarza. Trzy równorzędne
 2. aplikacje operacyjne,
 3. lotnictwo.
 
-Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska jest w root, a angielska pod `en/`. Jedynym opcjonalnym krokiem offline jest optymalizacja obrazów przez `npm run optimize:images` (wymaga `sharp`).
+Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska jest w root, a angielska pod `en/`. Przed wydaniem `npm run package:site` weryfikuje stronę i kopiuje publiczne pliki do `dist/`, bez transformacji HTML. Opcjonalna optymalizacja obrazów: `npm run optimize:images` (wymaga `sharp`).
 
 ## Hosting i wydanie
 
 - Hosting: Cloudflare Pages, projekt `mamcarz-com` (nie Vercel).
 - Podgląd: `wrangler pages dev .` albo dowolny statyczny serwer.
-- Wydanie strony: `wrangler pages deploy . --project-name mamcarz-com --branch main --commit-dirty=true`.
-- Lokalny `./deploy.sh` najpierw wykonuje push, potem deploy; jest w `.gitignore` i może nie istnieć w świeżym klonie.
+- Paczka publikacji: `npm run package:site`. Strony pochodzą z `PUBLIC_PAGES`, pozostałe zasoby z jawnej listy `scripts/public-assets.json`. Nowy zasób publiczny wymaga aktualizacji tej listy. Nie publikuj katalogu repozytorium.
+- Podgląd paczki: `wrangler pages dev dist`.
+- Wydanie strony po przygotowaniu paczki: `wrangler pages deploy dist --project-name mamcarz-com --branch main --commit-dirty=true`.
+- Historyczny lokalny `./deploy.sh` może łączyć push i deploy; jest w `.gitignore`. Przed użyciem wymaga przeglądu oraz dostosowania do `dist/` i osobnych zatwierdzeń.
 - Worker czatu w `worker/` jest osobnym wdrożeniem: `cd worker && wrangler deploy`.
 - Push, merge, deploy Pages i deploy Workera są osobnymi bramkami. Nie wykonuj żadnej z nich bez odpowiedniego zatwierdzenia.
-- `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i obecnie nie zawiera aktywnych reguł. Redirect `www` na apex jest konfiguracją Cloudflare Bulk Redirect poza repozytorium; przed wydaniem trzeba osobno odczytać jego stan i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
+- `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i obecnie nie zawiera aktywnych reguł. Redirect `www` na apex jest regułą domenową Cloudflare Redirect Rules poza repozytorium (`www to apex 301 preserving path and query`, potwierdzono w panelu 2026-09-13; lista Bulk Redirect jest pusta). Przed wydaniem trzeba osobno odczytać stan tej reguły i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
 
 ## Struktura i manifest tras
 
@@ -84,9 +86,13 @@ npm run verify:facts
 npm run verify:site
 npm run test:verify-site
 npm run test:worker
+npm run test:package
+npm run package:site
 node --check assets/js/main.js
 node --check worker/index.js
 cmp -s AGENTS.md CLAUDE.md
 ```
 
 Nie zmieniaj digestów chronionych artefaktów ani kontraktów tylko po to, by test przeszedł. Najpierw ustal przyczynę, potem aktualizuj implementację, testy i baseline wyłącznie po świadomym przeglądzie.
+
+`npm run verify:ci` wykonuje powyższy zestaw. Workflow `.github/workflows/verify.yml` uruchamia go dla PR i push do main, bez wdrażania i bez sekretów Cloudflare.
