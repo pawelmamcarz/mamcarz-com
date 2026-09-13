@@ -15,7 +15,10 @@
     "verify:discovery": "node scripts/verify-site.mjs --scope=discovery",
     "verify:seo": "node scripts/verify-site.mjs --scope=seo",
     "test:verify-site": "node --test scripts/verify-site.test.mjs",
-    "test:worker": "node --test worker/index.test.mjs"
+    "test:worker": "node --test worker/index.test.mjs",
+    "package:site": "npm run verify:site && node scripts/package-site.mjs",
+    "test:package": "node --test scripts/package-site.test.mjs",
+    "verify:ci": "node scripts/verify-ci.mjs"
   },
   "devDependencies": {
     "sharp": "^0.33.5"
