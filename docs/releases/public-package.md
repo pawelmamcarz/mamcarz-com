@@ -13,7 +13,7 @@ Strona pozostaje statycznym HTML-em. Aktualna procedura zastępuje publikowanie 
 
 ## Zatwierdzone wydanie
 
-Przed wydaniem potwierdź docelowy commit i projekt, przygotuj zdalnie zweryfikowany punkt powrotu oraz odczytaj konfigurację Bulk Redirect dla www. Sprawdź odpowiedź 301 z zachowaniem ścieżki i query. Push, merge, Pages i Worker wymagają właściwych osobnych zatwierdzeń.
+Przed wydaniem potwierdź docelowy commit i projekt, przygotuj zdalnie zweryfikowany punkt powrotu oraz odczytaj konfigurację domenowej Redirect Rule dla www (`www to apex 301 preserving path and query`; stan potwierdzony 2026-09-13). Sprawdź odpowiedź 301 z zachowaniem ścieżki i query. Push, merge, Pages i Worker wymagają właściwych osobnych zatwierdzeń.
 
 Po zatwierdzeniu Pages i ponownym przygotowaniu paczki:
 
