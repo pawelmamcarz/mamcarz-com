@@ -1,4 +1,4 @@
-/** Canonical product version. Bump only when cutting a release. */
+/** Canonical product version: YEAR.WEEK.RELEASE (ISO week). Bump only when cutting a release. */
 export const VERSION = "2026.39.1";
 
 /**

@@ -24,7 +24,7 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 
 ## Wersja produktu i wersja zasobów
 
-Kanoniczna wersja produktu jest w `version.js` jako `VERSION`. Format: `YEAR.WEEK.RELEASE` (rok i numer tygodnia ISO, potem kolejne wydanie w tym tygodniu). Bieżące wydanie: `2026.39.1`. Numer podbijamy **tylko przy cięciu wydania**, nie przy każdym PR. Konkretny build zapisujemy skrótem commita w `CHANGELOG.md` albo w runbooku w `docs/releases/`; nie wstawiamy SHA do HTML.
+Kanoniczna wersja produktu jest w `version.js` jako `VERSION`. Format: `YEAR.WEEK.RELEASE` (rok i numer tygodnia ISO, potem kolejne wydanie w tym tygodniu). Bieżące wydanie: `2026.39.1`. To nie jest semver. Git tag nie jest źródłem prawdy. Numer podbijamy **tylko przy cięciu wydania**; feature PR-y nie ruszają `version.js` ani `CHANGELOG.md`. Ten sam tydzień ISO → tylko N+1. Nowy tydzień → `ROK.NOWY_TYDZIEŃ.1`. Nie ma osobnej komendy bumpa: ręczna edycja przy cięciu. Konkretny build zapisujemy skrótem commita w `CHANGELOG.md` albo w runbooku w `docs/releases/`; nie wstawiamy SHA do HTML.
 
 Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny token cache-bust, nie wersja produktu. Aktualny token: `20260921-flightplan-4`, powiązany z wydaniem `2026.39.1`. Przy cięciu wydania aktualizujemy oba: `VERSION` w `version.js` oraz token zasobów we wszystkich publicznych dokumentach i kontraktach weryfikacyjnych.
 

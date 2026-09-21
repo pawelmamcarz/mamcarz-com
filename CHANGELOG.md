@@ -1,10 +1,10 @@
 # Changelog
 
-Wersje mamcarz.com numerujemy jako **ROK.TYDZIEŃ.KOLEJNE-WYDANIE** (tydzień ISO). Najnowsze wydanie jest na górze. Numer podbijamy tylko przy cięciu wydania, nie przy każdym PR.
+Wersje mamcarz.com numerujemy jako **ROK.TYDZIEŃ.KOLEJNE-WYDANIE** (tydzień ISO). To nie jest semver. Najnowsze wydanie jest na górze. Numer podbijamy tylko przy cięciu wydania; zwykłe PR-y nie ruszają tego pliku ani `version.js`. Ten sam tydzień ISO → tylko kolejny numer wydania. Nowy tydzień → `ROK.NOWY_TYDZIEŃ.1`.
 
 Konkretny build wskazujemy skrótem commita w runbooku albo tutaj, nie w HTML strony.
 
-## 2026.39.1 — 21 września 2026
+## Wersja 2026.39.1 z dnia 21 września 2026
 
 Pierwsze wydanie w numeracji produktowej. Zbiera to, co weszło na `main` po redesignie Flight Plan, w tym warstwę Jev w czacie (PR #14).
 
