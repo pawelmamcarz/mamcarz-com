@@ -98,9 +98,12 @@ const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
   "### Operational applications / Aplikacje operacyjne",
   "- PL | Operational applications: https://mamcarz.com/aplikacje-operacyjne/",
   "- EN | Operational applications: https://mamcarz.com/en/aplikacje-operacyjne/",
+  "- Listed products: czympojade.pl, Przypominamy.com, ProcuraCost, silence-tax.com",
+  "- Public Silence Tax variant: https://fnp.silence-tax.com",
   "### Aviation / Lotnictwo",
   "- PL | Aviation: https://mamcarz.com/lotnictwo/",
   "- EN | Aviation: https://mamcarz.com/en/lotnictwo/",
+  "- Aviation venture: akrobacja.com",
   "### Projects, knowledge and speaking",
   "- PL | Projects: https://mamcarz.com/case-studies/",
   "- EN | Projects: https://mamcarz.com/en/case-studies/",
@@ -128,7 +131,8 @@ const LLMS_FULL_STATIC_LINES = Object.freeze([
   "## Organisations",
   "## Approved project displays",
   "## Roles",
-  "## Aviation and verified ventures"
+  "## Aviation and verified ventures",
+  "## Operational products"
 ]);
 
 export const PUBLIC_PAGE_PAIRS = Object.freeze(PUBLIC_PAGES
@@ -230,6 +234,15 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "Produkt / 03",
     "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 03 ProcuraCost Funkcja Kalkulator kosztów procedur zakupowych.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator kosztów procedur zakupowych.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "Produkt / 04",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.silence_tax portfolio.silence_tax.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 04 silence-tax.com Funkcja Kalkulator kosztów milczenia w organizacji.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 04\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"silence-tax.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator kosztów milczenia w organizacji.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -392,6 +405,15 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "Product / 03",
     "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 03 ProcuraCost Function Procurement procedure cost calculator.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Procurement procedure cost calculator.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "Product / 04",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.silence_tax portfolio.silence_tax.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 04 silence-tax.com Function Calculator for the cost of silence in an organisation.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 04\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"silence-tax.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Calculator for the cost of silence in an organisation.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -4798,6 +4820,11 @@ const APPLICATION_EVIDENCE_CONTRACT = Object.freeze([
     ids: Object.freeze(["portfolio.procuracost", "portfolio.procuracost.type"]),
     pl: Object.freeze({ context: "Produkt / 03", name: "ProcuraCost", label: "Funkcja", meaning: "Kalkulator kosztów procedur zakupowych." }),
     en: Object.freeze({ context: "Product / 03", name: "ProcuraCost", label: "Function", meaning: "Procurement procedure cost calculator." })
+  }),
+  Object.freeze({
+    ids: Object.freeze(["portfolio.silence_tax", "portfolio.silence_tax.type"]),
+    pl: Object.freeze({ context: "Produkt / 04", name: "silence-tax.com", label: "Funkcja", meaning: "Kalkulator kosztów milczenia w organizacji." }),
+    en: Object.freeze({ context: "Product / 04", name: "silence-tax.com", label: "Function", meaning: "Calculator for the cost of silence in an organisation." })
   })
 ]);
 
@@ -4849,10 +4876,11 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operacja", "Uruchomienie", "Przygotowanie danych, odbiór procesu i wejście do codziennej pracy."
       ]),
       evidence: Object.freeze([
-        "03 / Evidence", "Wybrane produkty.", "Trzy różne zakresy pokazane przez ich zatwierdzone znaczenie produktowe.",
+        "03 / Evidence", "Wybrane produkty.", "Wybrane zakresy pokazane przez ich zatwierdzone znaczenie produktowe. fnp.silence-tax.com to publiczny wariant na silniku Silence Tax, nie osobna marka.",
         "Produkt / 01", "czympojade.pl", "Funkcja", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
         "Produkt / 02", "Przypominamy.com", "Funkcja", "Platforma powiadomień dla organizacji.",
-        "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych."
+        "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych.",
+        "Produkt / 04", "silence-tax.com", "Funkcja", "Kalkulator kosztów milczenia w organizacji."
       ]),
       fit: Object.freeze([
         "04 / Fit", "Warunki dobrego dopasowania.",
@@ -4928,10 +4956,11 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operation", "Launch", "Data preparation, process acceptance and entry into day-to-day work."
       ]),
       evidence: Object.freeze([
-        "03 / Evidence", "Selected products.", "Three different scopes, shown through their approved product meaning.",
+        "03 / Evidence", "Selected products.", "Selected scopes, shown through their approved product meaning. fnp.silence-tax.com is a public Silence Tax variant on the same engine, not a third brand.",
         "Product / 01", "czympojade.pl", "Function", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
         "Product / 02", "Przypominamy.com", "Function", "Notification platform for organisations.",
-        "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator."
+        "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator.",
+        "Product / 04", "silence-tax.com", "Function", "Calculator for the cost of silence in an organisation."
       ]),
       fit: Object.freeze([
         "04 / Fit", "Conditions for a good fit.",
@@ -5061,8 +5090,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 189, digest: "7db6efb9b2ba6f896ed1f138503b404ca1cdb583ebe5dd8a70213406bff1bbe5" }),
-  en: Object.freeze({ elementCount: 189, digest: "293b2f06d3c433bc47da4723f1514257f1ee1457b12e2618410cfddc72bf341a" })
+  pl: Object.freeze({ elementCount: 196, digest: "98a7f2e9d816806793dcfa7ded9e1a7d8dd2620eed3779e02ae7606ffa2db1b9" }),
+  en: Object.freeze({ elementCount: 196, digest: "3be197c6892f048255b5c9697c8fbbc062bce24fa967a75e097177502dfc8d06" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -6095,7 +6124,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       && exactRegistry;
   }
   if (!exactEvidenceContract) {
-    error(errors, "application-evidence-contract", path, "requires the immutable ordered three-row, six-ID Task 2 evidence contract and exact registry literals");
+    error(errors, "application-evidence-contract", path, "requires the immutable ordered four-row, eight-ID evidence contract and exact registry literals");
   }
   if (!validEvidenceLinks) {
     error(errors, "application-evidence-link", path, "evidence links must exactly match a non-null approved source_url on an associated fact");
@@ -7228,14 +7257,14 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"project.motor_oil.implementation","value":"SAP procurement implementation for Motor Oil Hellas","display_pl":"Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas","display_en":"SAP procurement implementation for Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl fleet TCO calculator","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.czympojade_pl.type","value":"fleet TCO calculator using the Bielik model for ownership-cost analysis","display_pl":"Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.","display_en":"Fleet TCO calculator using the Bielik model to analyse total cost of ownership.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved","surface_rules":{"llms-full.txt":{"approved_any":["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."]}}}),
-  Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procuracost.type","value":"procurement procedure cost calculator","display_pl":"Kalkulator kosztów procedur zakupowych.","display_en":"Procurement procedure cost calculator.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost.type","value":"procurement procedure cost calculator","display_pl":"Kalkulator kosztów procedur zakupowych.","display_en":"Procurement procedure cost calculator.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.procurement_process_2026","value":"Procurement Process 2026 interactive model","display_pl":"Procurement Process 2026","display_en":"Procurement Process 2026","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.procurement_process_2026.type","value":"interactive procurement process model","display_pl":"Interaktywny model procesu zakupowego.","display_en":"Interactive procurement process model.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.silence_tax","value":"silence-tax.com calculator","display_pl":"silence-tax.com","display_en":"silence-tax.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.silence_tax.type","value":"organisational silence cost calculator","display_pl":"Kalkulator kosztów milczenia w organizacji.","display_en":"Calculator for the cost of silence in an organisation.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax","value":"silence-tax.com calculator","display_pl":"silence-tax.com","display_en":"silence-tax.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://silence-tax.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax.type","value":"organisational silence cost calculator","display_pl":"Kalkulator kosztów milczenia w organizacji.","display_en":"Calculator for the cost of silence in an organisation.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":"https://silence-tax.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com","value":"akrobacja.com","display_pl":"akrobacja.com","display_en":"akrobacja.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com.current_status","value":"active aviation venture as of 2026-08-26","display_pl":"Aktualna marka działalności lotniczej","display_en":"Current aviation venture","kind":"dated","as_of":"2026-08-26","source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com.type","value":"aerobatic-flight voucher sales platform","display_pl":"Platforma sprzedaży voucherów na loty akrobacyjne.","display_en":"Voucher sales platform for aerobatic flights.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
@@ -7246,7 +7275,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "7e950dedc7e23db7b2d4bacd955da1baaaaaa9b54a56aea2797387b0e2ebbec9", en: "dd8ea5ddf3b8838c7c08750738776dac900b648d8c1f0d6a5f21dcd9aeed1b3c" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "7bacf4fed5bb1c9074c73bcafa4f4883ea4a279ed1eb04cc7e5231adb886fc42", en: "b9ba3dbde92b108699e3ce223477feaad9e21ffceb6e997e7a53439c7254c6f7" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7995,7 +8024,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "55945ef28c6f91e59f4cb6092cf618c0714d3e4d721c341800246db279291952", en: "fd4937acb0ade872be2269b4d1286c47234ef9c51d98d8140351297ed5443d88" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "36662bc45b76dd1bd45284c4e624b239357ed9dfe3330e72a9bca34d73823982", en: "69488c70cfb80907429dcb940b7dc15a06628ec8622c7af7aec0ec960b01c5fd" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];

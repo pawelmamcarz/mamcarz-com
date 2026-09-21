@@ -58,5 +58,14 @@ Only fact displays approved in content/site-facts.json are listed below. The ide
 - [portfolio.akrobacja_com] akrobacja.com
 - [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.
 - [portfolio.akrobacja_com.type] Voucher sales platform for aerobatic flights.
+
+## Operational products
+
 - [portfolio.czympojade_pl] czympojade.pl
 - [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.
+- [portfolio.przypominamy_com] Przypominamy.com
+- [portfolio.przypominamy_com.type] Przypominamy.com: Notification platform for organisations.
+- [portfolio.silence_tax] silence-tax.com
+- [portfolio.silence_tax.type] silence-tax.com: Calculator for the cost of silence in an organisation.
+- [portfolio.procuracost] ProcuraCost
+- [portfolio.procuracost.type] ProcuraCost: Procurement procedure cost calculator.
