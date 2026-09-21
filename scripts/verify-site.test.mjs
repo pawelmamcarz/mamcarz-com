@@ -226,8 +226,8 @@ const task9ProtectedContentHashes = Object.freeze({
   "en/uslugi/wdrozenie-sap-ariba/index.html": "d95877ab82f2168495be252d63fabad892a8a4362727be55d00f08088e350e2e",
   "uslugi/doradztwo-zamowienia-publiczne/index.html": "ef2b81271888f56b89309a072b60845a8ebada1c65c7d089766f5f04769b3bf2",
   "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "8340055950d73a3c4753f97d63654c270d7857d0d17f668a68f2b47b8c88ca40",
-  "aplikacje-operacyjne/index.html": "88c89054689854d625e132fbbf88e4a54ce4c43eccc22a9bc2a884bf8ff9ad1f",
-  "en/aplikacje-operacyjne/index.html": "32e34334ee333e55b892276a5708d24171b4988a5a5eb65568bb50136b5ae3c6",
+  "aplikacje-operacyjne/index.html": "cada26035957da15cb5956cf8a34aa8d1156b4a2a39388b57d07f90c5402f56e",
+  "en/aplikacje-operacyjne/index.html": "bcd4de8e2e422923d31e2c429ea84c29e429d5962503747110664ce257e801c2",
   "lotnictwo/index.html": "6ca4adea7ab3232c31f5f96894734376b73043b856ab0c69bb66e26faa706d0b",
   "en/lotnictwo/index.html": "0823777ace817d243ed8dbe68ad4f0819141886dac7aebeabf627c541b9068f1",
   "case-studies/index.html": "16521577920522e137b4e41e9e8c333a5ff432f469cc7e12584c43e1e183be1b",
@@ -1143,7 +1143,13 @@ function applicationFactRecords() {
     display_en: displayEn,
     surfaces,
     status: "approved",
-    source_url: id.startsWith("portfolio.silence_tax") ? "https://silence-tax.com" : null
+    source_url: ({
+      "portfolio.czympojade_pl": "https://czympojade.pl",
+      "portfolio.przypominamy_com": "https://przypominamy.com",
+      "portfolio.procuracost": "https://procuracost.com",
+      "portfolio.silence_tax": "https://silence-tax.com",
+      "portfolio.silence_tax.type": "https://silence-tax.com"
+    })[id] ?? null
   }));
 }
 
@@ -1971,7 +1977,7 @@ test("Plan 2 Task 2 binds every evidence row to approved paired surfaces and loc
   assert.ok(errorIds(surfaceResult).includes("application-evidence-surface"), surfaceResult.errors.join("\n"));
 
   const wrongDisplay = await applicationPageMutation({
-    mutate: (html) => html.replace(">czympojade.pl</h3>", ">Transport tool</h3>")
+    mutate: (html) => html.replace(">czympojade.pl</a></h3>", ">Transport tool</a></h3>")
   });
   assert.ok(errorIds(wrongDisplay).includes("application-evidence-value"), wrongDisplay.errors.join("\n"));
 });
@@ -2067,7 +2073,7 @@ test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner
       "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd><p>Dodatkowy element.</p>"
     )],
     ["registry-coordinated display drift", { facts: [fact(), driftFact] }, (html) => html.replace(
-      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
       '<h3 class="evidence-row__title">Transport Registry Drift</h3>'
     )]
   ];
@@ -2081,9 +2087,11 @@ test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner
 });
 
 test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts only its exact registered URL", async () => {
+  const productTitle = '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>';
   const linkTitle = (href) => `<h3 class="evidence-row__title"><a href="${href}">czympojade.pl</a></h3>`;
+  const rewriteTitle = (html, href) => html.replace(productTitle, linkTitle(href));
   const unapproved = await applicationPageMutation({
-    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle("https://example.com/unapproved"))
+    mutate: (html) => rewriteTitle(html, "https://example.com/unapproved")
   });
   assert.ok(errorIds(unapproved).includes("application-evidence-link"), unapproved.errors.join("\n"));
 
@@ -2098,7 +2106,10 @@ test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts
   });
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
-    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle(approvedUrl))
+    mutate: (html) => rewriteTitle(html, approvedUrl),
+    extraFiles: {
+      "en/aplikacje-operacyjne/index.html": rewriteTitle(applicationPageFixture("en"), approvedUrl)
+    }
   });
   assert.deepEqual(approved.errors, []);
 });
@@ -2324,12 +2335,16 @@ test("Plan 2 Task 2 fix round 3 exempts anchors only inside the three owned evid
     source_url: approvedUrl,
     surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
   });
+  const rewriteTitle = (html) => html.replace(
+    '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
+    `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
+  );
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
-    mutate: (html) => html.replace(
-      '<h3 class="evidence-row__title">czympojade.pl</h3>',
-      `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
-    )
+    mutate: rewriteTitle,
+    extraFiles: {
+      "en/aplikacje-operacyjne/index.html": rewriteTitle(applicationPageFixture("en"))
+    }
   });
   assert.deepEqual(approved.errors, []);
 });
@@ -2468,7 +2483,7 @@ test("Plan 2 Task 2 fix round 4 rejects every unapproved attribute on active and
   const duplicateEvidenceHref = await applicationPageMutation({
     facts: [fact(), approvedFact],
     mutate: (html) => html.replace(
-      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
       `<h3 class="evidence-row__title"><a href="${approvedUrl}" href="https://example.com/unapproved">czympojade.pl</a></h3>`
     )
   });
@@ -3450,7 +3465,7 @@ test("Owner correction updates Czym pojadę from timetable wording to the fleet 
     as_of: null,
     source_type: "owner_verified",
     source_label: sourceLabel,
-    source_url: procurementBeyondInterview.href,
+    source_url: "https://czympojade.pl",
     surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
     status: "approved"
   });
