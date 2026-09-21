@@ -218,8 +218,8 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "73eaaf8f8252df2a6efa99fa118135765746aae26304684d8339b1e9c793531a",
-  "en/index.html": "80973b683cecbf16dbd9c0807f62b74d41fc204d91ed6e18f2a7cccf3fa2298e",
+  "index.html": "52bfd393b578e0918b024dcc6bdf60ce81527b92350a0b2d1028f8af55f24987",
+  "en/index.html": "af4eafc04e3404133ce194a643a898d7d5647d80712171b048c31ba0425f809d",
   "uslugi/transformacja-zakupow/index.html": "aed3ecc755910dbf61ec6f74f3ac91ef3fd6928b017c3af8e5a2b2c3b177f9d3",
   "en/uslugi/transformacja-zakupow/index.html": "aa4306ca8eded0a9f3abe124a322cff05412a75c7c38ad969b26f26c625459d4",
   "uslugi/wdrozenie-sap-ariba/index.html": "771726a6b6756400553f5acb3bc368b744e02a1e949ce3e8c3fb326b98ee9db0",
