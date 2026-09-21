@@ -218,24 +218,24 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "d3aa4e7a515745efc7c7225896acf741e187ff49b0cec9c52de36117b6b3f834",
-  "en/index.html": "fa3de435913e6e3ddda65e79a0683469697b1f37b04f638a2335fac4a5f03f05",
+  "index.html": "73eaaf8f8252df2a6efa99fa118135765746aae26304684d8339b1e9c793531a",
+  "en/index.html": "80973b683cecbf16dbd9c0807f62b74d41fc204d91ed6e18f2a7cccf3fa2298e",
   "uslugi/transformacja-zakupow/index.html": "aed3ecc755910dbf61ec6f74f3ac91ef3fd6928b017c3af8e5a2b2c3b177f9d3",
   "en/uslugi/transformacja-zakupow/index.html": "aa4306ca8eded0a9f3abe124a322cff05412a75c7c38ad969b26f26c625459d4",
   "uslugi/wdrozenie-sap-ariba/index.html": "771726a6b6756400553f5acb3bc368b744e02a1e949ce3e8c3fb326b98ee9db0",
   "en/uslugi/wdrozenie-sap-ariba/index.html": "d95877ab82f2168495be252d63fabad892a8a4362727be55d00f08088e350e2e",
   "uslugi/doradztwo-zamowienia-publiczne/index.html": "ef2b81271888f56b89309a072b60845a8ebada1c65c7d089766f5f04769b3bf2",
   "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "8340055950d73a3c4753f97d63654c270d7857d0d17f668a68f2b47b8c88ca40",
-  "aplikacje-operacyjne/index.html": "a708e697c34d8ec29067472c1452f0d323977aac317b3c87b43b3c64962acbff",
-  "en/aplikacje-operacyjne/index.html": "9bcc65302c996a9e00cf17d39376769c708182b9da3b7f941358c5ab9ed412da",
+  "aplikacje-operacyjne/index.html": "88c89054689854d625e132fbbf88e4a54ce4c43eccc22a9bc2a884bf8ff9ad1f",
+  "en/aplikacje-operacyjne/index.html": "32e34334ee333e55b892276a5708d24171b4988a5a5eb65568bb50136b5ae3c6",
   "lotnictwo/index.html": "6ca4adea7ab3232c31f5f96894734376b73043b856ab0c69bb66e26faa706d0b",
   "en/lotnictwo/index.html": "0823777ace817d243ed8dbe68ad4f0819141886dac7aebeabf627c541b9068f1",
-  "case-studies/index.html": "2b625df6c188032b8d91845dfc0193f24a110fb991bab34a1e0a462752ce6f75",
-  "en/case-studies/index.html": "c2ec2ae6ab45f02969707045f38ab715d1e1ab21f58143e6094767c136476969",
+  "case-studies/index.html": "16521577920522e137b4e41e9e8c333a5ff432f469cc7e12584c43e1e183be1b",
+  "en/case-studies/index.html": "04636483917c5f0028dd53946059e8202e6d9fa989fe36ac4f40140f1a3b214a",
   "wiedza/index.html": "01e3ff51f0ea944751df396bc604d879ad1bd994f154a0162a781c5bcda84235",
   "en/wiedza/index.html": "ecfc2ac93e5baca1290a06bde5c11064bbcb4b2750d04ab6ad6d3f74971f0b0f",
-  "wystapienia/index.html": "6aa5850a51f4d2583ace3db4983bfa2f5cebd9ed6f65f4f2924765429c3ee7e9",
-  "en/wystapienia/index.html": "25bce5bb1478d6e0ea7875866c8d952fa7e1bb1be5f3a7d84d42f7b4a7e7e5b6",
+  "wystapienia/index.html": "36155258a983d20e861a060ab279e0e6d4437e8ccccf6f4f68b94fde7bfee7cb",
+  "en/wystapienia/index.html": "737d405fffaf7c4fc4ce57f504d8b8f259d9798971eb03348db776960174f760",
   "procurement-2026/index.html": "81e3cc05c2ba55df668a79a257b150ac2398ffbf1b09c4e9634886fed7815827"
 });
 
@@ -799,6 +799,9 @@ const productionFactSurfaceControls = {
     "Current aviation venture: akrobacja.com.",
     "Voucher sales platform for aerobatic flights.",
     "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
+    "Przypominamy.com: Notification platform for organisations.",
+    "silence-tax.com: Calculator for the cost of silence in an organisation.",
+    "ProcuraCost: Procurement procedure cost calculator.",
     "Neutral context after the controlled claims."
   ].join("\n"),
   worker: `import factRegistry from "../content/site-facts.json" with { type: "json" };\nconst verifiedFacts = ${JSON.stringify([
@@ -1119,13 +1122,16 @@ const applicationEvidenceFacts = [
   ["portfolio.przypominamy_com", "Przypominamy.com", "Przypominamy.com"],
   ["portfolio.przypominamy_com.type", "Platforma powiadomień dla organizacji.", "Notification platform for organisations."],
   ["portfolio.procuracost", "ProcuraCost", "ProcuraCost"],
-  ["portfolio.procuracost.type", "Kalkulator kosztów procedur zakupowych.", "Procurement procedure cost calculator."]
+  ["portfolio.procuracost.type", "Kalkulator kosztów procedur zakupowych.", "Procurement procedure cost calculator."],
+  ["portfolio.silence_tax", "silence-tax.com", "silence-tax.com"],
+  ["portfolio.silence_tax.type", "Kalkulator kosztów milczenia w organizacji.", "Calculator for the cost of silence in an organisation."]
 ];
 
 const applicationEvidenceRows = [
   ["portfolio.czympojade_pl", "portfolio.czympojade_pl.type"],
   ["portfolio.przypominamy_com", "portfolio.przypominamy_com.type"],
-  ["portfolio.procuracost", "portfolio.procuracost.type"]
+  ["portfolio.procuracost", "portfolio.procuracost.type"],
+  ["portfolio.silence_tax", "portfolio.silence_tax.type"]
 ];
 
 function applicationFactRecords() {
@@ -1136,7 +1142,8 @@ function applicationFactRecords() {
     display_pl: displayPl,
     display_en: displayEn,
     surfaces,
-    status: "approved"
+    status: "approved",
+    source_url: id.startsWith("portfolio.silence_tax") ? "https://silence-tax.com" : null
   }));
 }
 
@@ -7098,7 +7105,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "2fbaf0a295f937d2a2c8a2686af8ab97e0827d1a7e2775b1d782bde965d5928e",
+    "f1544343c8d6d901008ccb6e5a3092a47b932368402425ab38ec500e314f16c7",
     "llms-full.txt must retain the exact approved fact index without regenerated biography"
   );
 });
@@ -9139,7 +9146,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   const verifier = await import("./verify-site.mjs");
   const entries = verifier.PRESENTATION_INDEX_OCCURRENCES;
   assert.ok(Array.isArray(entries), "the verifier must export the reviewed occurrence manifest");
-  assert.equal(entries.length, 153, "every reviewed presentation index in the 24 public pages is inventoried");
+  assert.equal(entries.length, 155, "every reviewed presentation index in the 24 public pages is inventoried");
 
   const canonical = JSON.stringify([...entries].sort((left, right) => [
     left.file,
@@ -9156,7 +9163,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   ].join("\0"))));
   assert.equal(
     createHash("sha256").update(canonical).digest("hex"),
-    "881a57835cc5508552711e26a582b835327689ce1619f3722240e88c9116880f",
+    "4d6e78d879bfd52759c1ec3ac56f792af407cd4d310e3c93614a14bc7a61d903",
     "presentation markup changes require an explicit inventory audit and baseline refresh"
   );
 });

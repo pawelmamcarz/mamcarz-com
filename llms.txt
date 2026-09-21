@@ -22,11 +22,14 @@ This file is a navigation index. The three core areas have equal status: Advisor
 
 - PL | Operational applications: https://mamcarz.com/aplikacje-operacyjne/
 - EN | Operational applications: https://mamcarz.com/en/aplikacje-operacyjne/
+- Listed products: czympojade.pl, Przypominamy.com, ProcuraCost, silence-tax.com
+- Public Silence Tax variant: https://fnp.silence-tax.com
 
 ### Aviation / Lotnictwo
 
 - PL | Aviation: https://mamcarz.com/lotnictwo/
 - EN | Aviation: https://mamcarz.com/en/lotnictwo/
+- Aviation venture: akrobacja.com
 
 ### Projects, knowledge and speaking
 
