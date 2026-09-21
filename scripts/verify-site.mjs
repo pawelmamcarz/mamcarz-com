@@ -3,8 +3,11 @@ import { createHash } from "node:crypto";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
+import { ASSET_CACHE_VERSION } from "../version.js";
 
 const defaultRoot = resolve(import.meta.dirname, "..");
+const SHARED_STYLESHEET_HREF = `/assets/css/style.css?v=${ASSET_CACHE_VERSION}`;
+const SHARED_SCRIPT_SRC = `/assets/js/main.js?v=${ASSET_CACHE_VERSION}`;
 const factKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "surfaces", "status"];
 const kinds = new Set(["constant", "dated"]);
 const sourceTypes = new Set(["owner_verified", "public_source", "internal_evidence"]);
@@ -2398,8 +2401,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     error(errors, "home-hero-image", page.path, "visible hero requires one visible image with explicit positive width and height plus fetchpriority=high");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedCss = SHARED_STYLESHEET_HREF;
+  const expectedJs = SHARED_SCRIPT_SRC;
   const stylesheetAttributeNames = new Set(["rel", "href"]);
   const stylesheetNodes = elements.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -4137,8 +4140,8 @@ function verifyNotFound(html, errors) {
     error(errors, "not-found-robots", path, "404 must have one robots meta containing noindex");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedCss = SHARED_STYLESHEET_HREF;
+  const expectedJs = SHARED_SCRIPT_SRC;
   const stylesheets = byName("link").filter((element) => elementIsActiveResource(element)
     && elementAttributeTokens(element, "rel").includes("stylesheet"));
   const externalScripts = byName("script").filter((element) => elementIsActiveResource(element)
@@ -4689,7 +4692,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-hreflang", path, "requires exact active pl, en and x-default hreflang entries for the real route pair");
   }
 
-  const expectedStylesheet = "/assets/css/style.css?v=20260825-flightplan-3";
+  const expectedStylesheet = SHARED_STYLESHEET_HREF;
   const links = elements.filter((element) => element.name === "link");
   const stylesheetCandidates = links.filter((element) => elementAttributeTokens(element, "rel").includes("stylesheet")
     || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
@@ -4698,7 +4701,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-stylesheet", path, `requires one active shared stylesheet ${expectedStylesheet}`);
   }
 
-  const expectedScript = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedScript = SHARED_SCRIPT_SRC;
   const scriptCandidates = elements.filter((element) => element.name === "script" && element.attributes.has("src"));
   const validScripts = scriptCandidates.filter((element) => elementHasExactAttributeNames(element, new Set(["src", "defer"]))
     && elementAttribute(element, "src") === expectedScript
@@ -5058,8 +5061,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 189, digest: "08d1b9fbc78a0e99702c63fc90d0450c2684da2da8e53cec771daf710d32e31d" }),
-  en: Object.freeze({ elementCount: 189, digest: "305891223310b7e755323fd3f4b8ea49bbcee17ad89a843f31103454bd48dcec" })
+  pl: Object.freeze({ elementCount: 189, digest: "7db6efb9b2ba6f896ed1f138503b404ca1cdb583ebe5dd8a70213406bff1bbe5" }),
+  en: Object.freeze({ elementCount: 189, digest: "293b2f06d3c433bc47da4723f1514257f1ee1457b12e2618410cfddc72bf341a" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -5070,7 +5073,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    Object.freeze({ rel: "stylesheet", href: SHARED_STYLESHEET_HREF })
   ]),
   en: Object.freeze([
     Object.freeze({ rel: "canonical", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
@@ -5080,7 +5083,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    Object.freeze({ rel: "stylesheet", href: SHARED_STYLESHEET_HREF })
   ])
 });
 const APPLICATION_ZERO_RESOURCE_TAGS = new Set([
@@ -5366,7 +5369,7 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
     && exactApplicationResourceAttributes(schema, { type: "application/ld+json" })
     && external?.parent === body
     && bodyChildren.at(-1) === external
-    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(external, { src: SHARED_SCRIPT_SRC, defer: null })
     && rawElementText(external).trim() === "";
 
   const footerSigns = all.filter((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
@@ -5660,7 +5663,7 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: SHARED_STYLESHEET_HREF }
   ];
   const expectedHeadTags = [
     "meta", "meta", "title", "meta", "meta", "meta",
@@ -6205,7 +6208,7 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: SHARED_STYLESHEET_HREF }
   ]),
   en: Object.freeze([
     { rel: "canonical", href: "https://mamcarz.com/en/lotnictwo/" },
@@ -6215,13 +6218,13 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: SHARED_STYLESHEET_HREF }
   ])
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 191, digest: "6f3322042e7ed934dbf3bb32f146f6e109738dcc4e87dc67c7ce8882baae11fc" }),
-  en: Object.freeze({ elementCount: 191, digest: "1dc4dd1da65ae07f05b6e81176d6f53424d114eb53d4284c7d672f662a2bfccd" })
+  pl: Object.freeze({ elementCount: 191, digest: "852586262e0b65947bafda09c437d0b5058850ed486a698f724753083b4d4ca9" }),
+  en: Object.freeze({ elementCount: 191, digest: "6ed46f21d76484c3b8368ddc4b47bd1b29bdce1c04c7cf46fb99a14774632f88" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -6420,7 +6423,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(scripts[0], { type: "application/ld+json" })
     && scripts[1]?.parent === body
     && bodyChildren.at(-1) === scripts[1]
-    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(scripts[1], { src: SHARED_SCRIPT_SRC, defer: null })
     && rawElementText(scripts[1]).trim() === "";
   const pictures = all.filter((element) => element.name === "picture");
   const sources = all.filter((element) => element.name === "source");
@@ -6642,19 +6645,19 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
 const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
   pl: Object.freeze([
     "https://mamcarz.com/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
     "/procurement-2026/", "/wystapienia/", "/#contact", "/", "/assets/img/signature.png", "/", "/uslugi/transformacja-zakupow/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", SHARED_SCRIPT_SRC
   ]),
   en: Object.freeze([
     "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
     "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
     "/infographic_procurement_2026_EN.html", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
-    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
+    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", SHARED_SCRIPT_SRC
   ])
 });
 
@@ -6699,7 +6702,7 @@ function knowledgeDocumentMarkup(contract, lang) {
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const alternateLocale = lang === "pl" ? "en_US" : "pl_PL";
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></body></html>`;
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="${SHARED_STYLESHEET_HREF}"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="${SHARED_SCRIPT_SRC}" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -7049,7 +7052,7 @@ function verifyKnowledgeBoundary(path, parsedRoot, errors) {
     || [...element.attributes.keys()].some((name) => /^(?:datetime|datepublished|datemodified|data-date)$/i.test(name)));
   const extraScripts = elements.filter((element) => element.name === "script"
     && elementAttribute(element, "type") !== "application/ld+json"
-    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-3");
+    && elementAttribute(element, "src") !== SHARED_SCRIPT_SRC);
   const inactiveUrlViolation = knowledgeInactiveUrlViolation(parsedRoot);
   const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot) || inactiveUrlViolation;
   if (bannedRoute) {
@@ -7243,7 +7246,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "58d57aeaaaeb1df6f4e6a55ad546db65d73a940b5bc17cba9b6981ff1529dc22", en: "13ba10e60708b2379f4ed1faf67819c7817526e6c2f8bd611fee8ea18ae46fa3" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "7e950dedc7e23db7b2d4bacd955da1baaaaaa9b54a56aea2797387b0e2ebbec9", en: "dd8ea5ddf3b8838c7c08750738776dac900b648d8c1f0d6a5f21dcd9aeed1b3c" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7312,7 +7315,7 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = elements.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === SHARED_SCRIPT_SRC && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   const invalidAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
     return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
@@ -7608,9 +7611,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "6f95f286b5e8975418ef587dafdaeaea11df006f963ee4bce5a94c1806f4ae60", en: "314fea33c827a9ae0465b653ef8c1f9beb006a3eda1d07d56b2838cb5fc53e31" }),
-  ariba: Object.freeze({ pl: "73d75ff44382f05e5f0b2b80f8a3839cf51ff6e7135cdb434ca8f681aff3b685", en: "88c42d6e762b0f157d4500bca917e0ecf5bca84f62ae004b6dd83737152f57f9" }),
-  publicProcurement: Object.freeze({ pl: "411e129e8b2db8cf4920e9c0c74ea7a037e4838b5770aac2b0db5dfdf072e83e", en: "24c327fa2c0716a3ed558d1dd21fb2dfd1cb3272d342e5ece14270cd4e31b877" })
+  transformation: Object.freeze({ pl: "5ed9bd980370591e658685415732b7a941d0f02ff311554418d19f18d6f569b2", en: "7e81267a59691f41db2f8fad7842b79c131a25211b331c9b510c450ee0d1f651" }),
+  ariba: Object.freeze({ pl: "f1a5688d8080124d2fc10aea77181b26142706384386fc6d01ab54ef73f791c4", en: "499d4ef164da895cdd292bf2c3ccd05b188df09d3a7374a86fcc5b247d799d2b" }),
+  publicProcurement: Object.freeze({ pl: "70f9ff99ea63cadc178de74c7f15efe1afba251dd85619e7eb88ff76ee16c5ba", en: "3de06d87c4fc92951d7518b3407c72a11f3c09dd4aec1ab65f59ff1469f34165" })
 });
 
 function serviceKeyForPath(path) {
@@ -7681,7 +7684,7 @@ function verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors) {
   const extraExecutable = elements.filter((element) => element.name === "script").some((script) => {
     const type = elementAttribute(script, "type");
     const src = elementAttribute(script, "src");
-    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")));
+    return !((type === "application/ld+json" && !src) || (src === SHARED_SCRIPT_SRC && script.attributes.has("defer")));
   });
   const externalAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
@@ -7992,7 +7995,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "4d520eb2ec5a26f6f0138934c499fc3420a76fb8007cdd459d478c54b731d451", en: "c7a18036660bda80d22d8e1f5f0b8f001dfee209f376d34b6ccd81e34ece634f" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "55945ef28c6f91e59f4cb6092cf618c0714d3e4d721c341800246db279291952", en: "fd4937acb0ade872be2269b4d1286c47234ef9c51d98d8140351297ed5443d88" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8191,7 +8194,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === SHARED_SCRIPT_SRC && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature || !validRecordingAssets) {
     error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and canonical YouTube link; forbids embeds, forms, inline styles, extra scripts or controls");
   }
@@ -8260,7 +8263,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity.html", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", null]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "4877bac0b1fa68631923a2167ed23a8e0d4e6df54cd76c3b49bb18a9902636d2";
+const PROCUREMENT_DOCUMENT_MANIFEST = "ccfa826be95b780b7f97a1ca1ea934635097637655e4448c6d33d27aaf58e9b5";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -8335,7 +8338,7 @@ async function verifyProcurementParent(_factData, context) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === SHARED_SCRIPT_SRC && script.attributes.has("defer")).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)))
     || invalidAnchor || !validScripts || !validSignature || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames plus the exact footer signature image");
   verifyProcurementSchema(parsedRoot, context.errors);
@@ -9495,10 +9498,10 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
   const sharedScripts = scripts.filter((element) => element.attributes.has("src") || (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
   const inlineExecutable = scripts.filter((element) => !element.attributes.has("src") && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const resourceValid = stylesheets.length === 1
-    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: SHARED_STYLESHEET_HREF })
     && elementIsActiveResource(stylesheets[0])
     && sharedScripts.length === 1
-    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(sharedScripts[0], { src: SHARED_SCRIPT_SRC, defer: null })
     && elementIsActiveResource(sharedScripts[0])
     && rawElementText(sharedScripts[0]).trim() === ""
     && elementDescendants(parsedRoot, "style").length === 0
@@ -10770,9 +10773,9 @@ async function verifyMetadata(factData, context) {
     if (!PLAN3_ARTIFACT_FILES.has(entry.file)) {
       const stylesheets = all.filter((element) => element.name === "link" && (elementAttributeTokens(element, "rel").includes("stylesheet") || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")));
       const scripts = all.filter((element) => element.name === "script" && ((elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js") || element.attributes.has("src")));
-      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === "/assets/css/style.css?v=20260825-flightplan-3");
+      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === SHARED_STYLESHEET_HREF);
       const validScripts = scripts.filter((element) => elementIsActiveResource(element)
-        && elementAttribute(element, "src") === "/assets/js/main.js?v=20260825-flightplan-3"
+        && elementAttribute(element, "src") === SHARED_SCRIPT_SRC
         && element.attributes.has("defer"));
       if (stylesheets.length !== 1 || validStyles.length !== 1 || scripts.length !== 1 || validScripts.length !== 1) {
         error(context.errors, "metadata-assets", entry.file, "site shell requires exact Flight Plan 3 CSS and deferred JS assets");
