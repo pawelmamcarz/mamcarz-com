@@ -32,6 +32,7 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 - `procurement-2026/`, `diagrams/`, `infographic_procurement_2026_EN.html` — samodzielne materiały pomocnicze; nie podlegają automatycznie regule par PL/EN.
 - `assets/css/style.css` — wspólny arkusz; `assets/js/main.js` — nawigacja, chat i drobne interakcje; `assets/img/` i `assets/fonts/` — zasoby.
 - `content/site-facts.json` — rejestr zatwierdzonych faktów i powierzchni publikacji.
+- `worker/index.js` — czat; `worker/jev-policy.js` — pytania, kryteria i progi TypeSafe Jev; `worker/jev.js` — cienka osłona `typesafe/jev` przez `env.AI`.
 - `scripts/verify-site.mjs` — manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 24 publicznych dokumentów.
 - `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, `404.html` — powierzchnie discovery i błędów.
 
@@ -60,7 +61,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Dawna nazwa WarsawFlightSafety jest wycofana. Według potwierdzenia właściciela z 2026-08-26 aktualną marką przedsięwzięcia lotniczego jest `akrobacja.com`; nie przedstawiaj ich jako dwóch bieżących przedsięwzięć.
 - Ton jest premium, rzeczowy i spokojny. Unikaj superlatywów bez dowodu, obietnic SLA, nachalnego języka, myślników używanych mechanicznie i stylistycznych „AI tells”.
 - Przy zmianie faktów audytuj wszystkie powierzchnie z rejestru, w tym `worker/index.js`, `assets/js/main.js`, `llms.txt` i `llms-full.txt`. Worker nie jest „pełnym CV”; jego prompt ma używać tylko zatwierdzonego, potrzebnego zakresu.
-- Worker używa modelu `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Frontend wywołuje `https://mamcarz-chat-api.pawel-767.workers.dev`; zmianę nazwy lub URL trzeba zsynchronizować i przetestować po obu stronach.
+- Worker używa modelu `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Przed Llama Worker może raz wywołać `typesafe/jev` przez istniejące wiązanie `env.AI` (bez osobnego `TYPESAFE_API_KEY`) do typowanego routingu, osłon jailbreak/spam i sond faktów; błąd, timeout lub brak odpowiedzi Jev nie blokuje ścieżki klienta. Jev nie generuje treści dla użytkownika. Frontend wywołuje `https://mamcarz-chat-api.pawel-767.workers.dev`; zmianę nazwy lub URL trzeba zsynchronizować i przetestować po obu stronach.
 
 ## SEO i metadata
 
