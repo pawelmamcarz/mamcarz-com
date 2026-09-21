@@ -25,7 +25,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 const TASK10_REVIEWED_CSS_SHA256 = "82fa61d632f0cc98921e818bca2a2089ba6d8eb8840eb49cfdca0e55766ff21f";
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
-const PLAN3_VALIDATION_DATE = "2026-08-27";
+const PLAN3_VALIDATION_DATE = "2026-09-21";
 
 export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: Object.freeze(["Person", "WebSite"]) }),
@@ -55,8 +55,8 @@ export const PUBLIC_PAGES = Object.freeze([
 ]);
 
 const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
-  "/": "2026-08-27",
-  "/en/": "2026-08-27",
+  "/": "2026-09-21",
+  "/en/": "2026-09-21",
   "/uslugi/transformacja-zakupow/": "2026-08-27",
   "/en/uslugi/transformacja-zakupow/": "2026-08-27",
   "/uslugi/wdrozenie-sap-ariba/": "2026-08-27",

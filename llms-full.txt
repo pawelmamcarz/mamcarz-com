@@ -44,6 +44,7 @@ Only fact displays approved in content/site-facts.json are listed below. The ide
 
 ## Roles
 
+- [career.all_for_one.title] Sales Director
 - [career.apsolut.title] Associate Partner, CEE Region
 - [career.sap.title] SAP Ariba Senior Account Executive
 - [career.orlen_general.title] Head of General Procurement

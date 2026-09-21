@@ -218,8 +218,8 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "73eaaf8f8252df2a6efa99fa118135765746aae26304684d8339b1e9c793531a",
-  "en/index.html": "80973b683cecbf16dbd9c0807f62b74d41fc204d91ed6e18f2a7cccf3fa2298e",
+  "index.html": "52bfd393b578e0918b024dcc6bdf60ce81527b92350a0b2d1028f8af55f24987",
+  "en/index.html": "af4eafc04e3404133ce194a643a898d7d5647d80712171b048c31ba0425f809d",
   "uslugi/transformacja-zakupow/index.html": "aed3ecc755910dbf61ec6f74f3ac91ef3fd6928b017c3af8e5a2b2c3b177f9d3",
   "en/uslugi/transformacja-zakupow/index.html": "aa4306ca8eded0a9f3abe124a322cff05412a75c7c38ad969b26f26c625459d4",
   "uslugi/wdrozenie-sap-ariba/index.html": "771726a6b6756400553f5acb3bc368b744e02a1e949ce3e8c3fb326b98ee9db0",
@@ -3640,6 +3640,7 @@ test("registry keeps responsibility facts atomic and Polish-English meanings ali
   const { facts } = await readFacts();
   const byId = new Map(facts.map((record) => [record.id, record]));
   const expectedResponsibilities = {
+    "career.all_for_one.responsibility": ["Kontynuuję rolę w apsolut po przejęciu apsolut przez All for One.", "I continue the apsolut role after All for One acquired apsolut."],
     "career.apsolut.responsibility": ["Rozwijam działalność w regionie CEE.", "I develop the business in the CEE region."],
     "career.sap.responsibility": ["Rozwijałem rynek SAP Ariba w Polsce i regionie CEE.", "I developed the SAP Ariba market in Poland and the CEE region."],
     "career.pzu.responsibility": ["Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model."],
@@ -7096,6 +7097,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   const requiredLines = [
     "# Paweł Mamcarz: approved public fact index",
     "- [hero.experience_years] 25+ years of procurement experience.",
+    "- [career.all_for_one.title] Sales Director",
     "- [career.apsolut.title] Associate Partner, CEE Region",
     "- [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.",
     "- [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
@@ -7105,7 +7107,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "f1544343c8d6d901008ccb6e5a3092a47b932368402425ab38ec500e314f16c7",
+    "f6ba658ce855ed8a7760b136a4a844609c99c72c02b8b7f043146d23efaac6d0",
     "llms-full.txt must retain the exact approved fact index without regenerated biography"
   );
 });
@@ -7382,7 +7384,9 @@ function plan3RealPresentationBody() {
 function plan3Sitemap() {
   const blocks = plan3ExpectedPublicPages.map((entry, index) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = index < 19 ? "2026-08-27" : "2026-08-26";
+    const lastmod = entry.route === "/" || entry.route === "/en/"
+      ? "2026-09-21"
+      : index < 19 ? "2026-08-27" : "2026-08-26";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
   });
   return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
@@ -7608,7 +7612,7 @@ test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and 
     ["duplicate ids", [plan3Fact(), plan3Fact()], "fact-duplicate-id"],
     ["duplicate surfaces", [plan3Fact({ surfaces: ["index.html", "index.html"] })], "fact-duplicate-surface"],
     ["unsupported enum", [plan3Fact({ status: "published" })], "fact-status"],
-    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-08-28" })], "fact-as-of-future"],
+    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-09-22" })], "fact-as-of-future"],
     ["malformed date", [plan3Fact({ kind: "dated", as_of: "2026-02-30" })], "fact-as-of"],
     ["public source without HTTPS", [plan3Fact({ source_type: "public_source", source_url: "http://example.com/source" })], "fact-source-url"],
     ["secret-like nested key", [plan3Fact({ evidence: { api_token: "do-not-publish" } })], "fact-secret-key"],
@@ -7763,10 +7767,10 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
   });
   await t.test("sitemap pins one exact content-change date per route", async () => {
     const cases = [
-      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-25</lastmod>")],
-      ["future date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-28</lastmod>")],
-      ["missing date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "")],
-      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-27</lastmod><lastmod>2026-08-27</lastmod>")]
+      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-09-21</lastmod>", "<lastmod>2026-08-25</lastmod>")],
+      ["future date", plan3Sitemap().replace("<lastmod>2026-09-21</lastmod>", "<lastmod>2026-09-22</lastmod>")],
+      ["missing date", plan3Sitemap().replace("<lastmod>2026-09-21</lastmod>", "")],
+      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-09-21</lastmod>", "<lastmod>2026-09-21</lastmod><lastmod>2026-09-21</lastmod>")]
     ];
     for (const [label, sitemap] of cases) {
       const changedRoot = await plan3Root({ sitemap });
