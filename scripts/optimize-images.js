@@ -8,8 +8,8 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const OUT_DIR = path.join(ROOT, "assets", "img");
 
 // Źródła podpina się tu ręcznie na czas optymalizacji. Oryginałów nie trzymamy
-// w repozytorium: katalog główny jest publikowany przez Cloudflare Pages w całości,
-// więc każdy plik tutaj jest dostępny pod bezpośrednim adresem.
+// w repozytorium. Publiczne wyniki dodaj jawnie do scripts/public-assets.json;
+// Cloudflare Pages otrzymuje wyłącznie paczkę dist/.
 const SOURCES = [];
 
 const WIDTHS = [480, 960, 1920];
