@@ -2089,8 +2089,9 @@ test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner
 test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts only its exact registered URL", async () => {
   const productTitle = '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>';
   const linkTitle = (href) => `<h3 class="evidence-row__title"><a href="${href}">czympojade.pl</a></h3>`;
+  const rewriteTitle = (html, href) => html.replace(productTitle, linkTitle(href));
   const unapproved = await applicationPageMutation({
-    mutate: (html) => html.replace(productTitle, linkTitle("https://example.com/unapproved"))
+    mutate: (html) => rewriteTitle(html, "https://example.com/unapproved")
   });
   assert.ok(errorIds(unapproved).includes("application-evidence-link"), unapproved.errors.join("\n"));
 
@@ -2105,7 +2106,10 @@ test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts
   });
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
-    mutate: (html) => html.replace(productTitle, linkTitle(approvedUrl))
+    mutate: (html) => rewriteTitle(html, approvedUrl),
+    extraFiles: {
+      "en/aplikacje-operacyjne/index.html": rewriteTitle(applicationPageFixture("en"), approvedUrl)
+    }
   });
   assert.deepEqual(approved.errors, []);
 });
@@ -2331,12 +2335,16 @@ test("Plan 2 Task 2 fix round 3 exempts anchors only inside the three owned evid
     source_url: approvedUrl,
     surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
   });
+  const rewriteTitle = (html) => html.replace(
+    '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
+    `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
+  );
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
-    mutate: (html) => html.replace(
-      '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
-      `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
-    )
+    mutate: rewriteTitle,
+    extraFiles: {
+      "en/aplikacje-operacyjne/index.html": rewriteTitle(applicationPageFixture("en"))
+    }
   });
   assert.deepEqual(approved.errors, []);
 });
