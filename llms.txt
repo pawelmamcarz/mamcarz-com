@@ -69,6 +69,7 @@ This file is a navigation index. The three core areas have equal status: Advisor
 - [project.kghm.integration] SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA
 - [project.lot.implementation] SAP Ariba implementation for PLL LOT
 - [project.motor_oil.implementation] SAP procurement implementation for Motor Oil Hellas
+- [career.all_for_one.title] Sales Director
 - [career.apsolut.title] Associate Partner, CEE Region
 - [career.sap.title] SAP Ariba Senior Account Executive
 - [career.orlen_general.title] Head of General Procurement
