@@ -299,11 +299,11 @@ function task9ExpectedShell(entry) {
 function task9CanonicalHtml(entry, html = task9SiteShellProductHtml[entry.path]) {
   const shell = task9ExpectedShell(entry);
   return html
-    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260921-2026.39.1")
+    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260921-flightplan-4")
     .replace(/<nav class="site-nav"[\s\S]*?<\/nav>/, shell.nav)
     .replace(/<div class="nav-overlay"[\s\S]*?<\/div>\s*<button class="back-to-top"[\s\S]*?<\/button>/, shell.controls)
     .replace(/<footer(?: class="site-footer")?>[\s\S]*?<\/footer>/, shell.footer)
-    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>');
+    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>');
 }
 
 function task9ProtectedContent(html) {
@@ -417,7 +417,7 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}">
     <link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}">
     <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
     ${head}
   </head><body data-page="${dataPage}">
     <a class="skip-link" href="#main">Skip</a>
@@ -425,7 +425,7 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
     <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
-    <script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -634,7 +634,7 @@ function homepageFixture(lang, content) {
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite"},{"@type":"Person"}]}</script>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
   </head><body>
     <a href="#main" class="skip-link">${skipLabel}</a>
     ${navigationFixture[lang]}<main id="main">
@@ -652,7 +652,7 @@ function homepageFixture(lang, content) {
     <section id="clients"></section>
     <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
   </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><input id="chat-input" maxlength="2000">
-    <script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -1070,14 +1070,14 @@ function knowledgePageFixture(lang) {
     <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
     <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
   </head><body class="knowledge-page" data-page="knowledge">
     <a href="#main" class="skip-link">${copy.skip}</a>
     <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
     <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
     <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
-    <script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -1352,24 +1352,24 @@ test("Plan 2 Task 1 requires exact canonical, real hreflang and paired language 
 test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside site-nav", async () => {
   const mutations = [
     ["stylesheet template decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1"></template>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></template>'
     )],
     ["stylesheet hidden decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" hidden>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" hidden>'
     )],
     ["script noscript decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>',
-      '<script src="/assets/js/main.js?v=20260921-2026.39.1"></script><noscript><script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script></noscript>'
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><noscript><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></noscript>'
     )],
     ["script template decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>',
-      '<script src="/assets/js/main.js?v=20260921-2026.39.1"></script><template><script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script></template>'
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><template><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></template>'
     )],
     ["script hidden decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>',
-      '<script src="/assets/js/main.js?v=20260921-2026.39.1"></script><script src="/assets/js/main.js?v=20260921-2026.39.1" defer hidden></script>'
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><script src="/assets/js/main.js?v=20260921-flightplan-4" defer hidden></script>'
     )],
     ["route outside navigation", "page-navigation", (html) => html
       .replace('<a href="/lotnictwo/">Lotnictwo</a>', '<a href="/usunieta-trasa/">Lotnictwo</a>')
@@ -2601,7 +2601,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["paragraph", (html) => html.replace('<p class="section-label">01 / Problem</p>', '<p class="section-label"/>')],
     ["details", (html) => html.replace('<details class="nav-group">', '<details class="nav-group"/>')],
     ["summary", (html) => html.replace("<summary>Doradztwo</summary>", "<summary/>")],
-    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>', '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer/>')],
+    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>', '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer/>')],
     ["style", (html) => html.replace("</footer>", "<style/></style></footer>")]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
@@ -2992,7 +2992,7 @@ test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actio
     ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
     ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png"', 'img data="/assets/img/signature.png"')],
     ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
-    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1"></body>')],
+    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></body>')],
     ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
     ["unapproved event handler", (html) => html.replace('class="footer-sign"', 'class="footer-sign" onfocus="location.href=\'/#contact\'"')]
   ];
@@ -3130,8 +3130,8 @@ test("Plan 2 Task 2 fix round 5 independently inventories executable, style and 
 
   const duplicateStylesheetHref = await applicationPageMutation({
     mutate: (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" href="/assets/css/style.css?v=20260921-2026.39.1">'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" href="/assets/css/style.css?v=20260921-flightplan-4">'
     )
   });
   assert.ok(errorIds(duplicateStylesheetHref).includes("application-resource-census"), duplicateStylesheetHref.errors.join("\n"));
@@ -3154,6 +3154,7 @@ test("Plan 2 Task 2 fix round 5 resource census survives coordinated PL EN diges
   const scriptsDirectory = resolve(root, "scripts");
   const verifierPath = resolve(scriptsDirectory, "verify-site.mjs");
   await mkdir(scriptsDirectory, { recursive: true });
+  await writeFile(resolve(root, "version.js"), await readFile(resolve("version.js"), "utf8"));
   const verifierSource = await readFile(modulePath, "utf8");
   const manifestMessage = "`actual-manifest=${lang}:${actual.elementCount}:${actual.digest}; requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`";
   assert.ok(verifierSource.includes(manifestMessage), "digest probe must instrument the manifest diagnostic");
@@ -4177,7 +4178,7 @@ function notFoundContractFixture() {
     <title>404 · Strona nie istnieje | mamcarz.com</title>
     <meta name="description" content="Pod tym adresem nie ma strony.">
     <meta name="robots" content="noindex, follow">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
     <style>[data-lang="en"]{display:none}html[lang="en"] [data-lang="pl"]{display:none}html[lang="en"] [data-lang="en"]{display:revert}</style>
     <script>(function(){var english=location.pathname.indexOf("/en/")===0;if(!english)return;document.documentElement.lang="en";document.title="404 · Page not found | mamcarz.com";var meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute("content","There is no page at this address.");})();</script>
   </head><body>
@@ -4187,7 +4188,7 @@ function notFoundContractFixture() {
       <a href="/" data-lang="pl">Strona główna</a><a href="/#contact" data-lang="pl">Kontakt</a>
       <a href="/en/" data-lang="en">Home</a><a href="/en/#contact" data-lang="en">Contact</a>
     </main><footer class="site-footer">mamcarz.com</footer>
-    <script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -4200,7 +4201,7 @@ test("Plan 3 Task 5 requires one no-JS-safe bilingual 404 document", async (t) =
     ["second h1", "not-found-h1", (html) => html.replace("</main>", "<h1>Duplicate</h1></main>")],
     ["second main", "not-found-main", (html) => html.replace("</footer>", "<main></main></footer>")],
     ["indexable error", "not-found-robots", (html) => html.replace("noindex, follow", "index, follow")],
-    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260921-2026.39.1", "stale")],
+    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260921-flightplan-4", "stale")],
     ["missing English contact", "not-found-links", (html) => html.replace('href="/en/#contact"', 'href="/en/"')],
     ["duplicate id", "not-found-ids", (html) => html.replace("</main>", '<span id="main"></span></main>')],
     ["English default", "not-found-default", (html) => html.replace('<html lang="pl">', '<html lang="en">')],
@@ -5869,8 +5870,8 @@ const task7HomeMutations = [
   ["missing hero image width", "home-hero-image", (html) => html.replace(' width="960"', "")],
   ["missing hero image height", "home-hero-image", (html) => html.replace(' height="1280"', "")],
   ["missing high-priority hero fetch", "home-hero-image", (html) => html.replace(' fetchpriority="high"', "")],
-  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260921-2026.39.1', 'style.css?v=stale')],
-  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260921-2026.39.1', 'main.js?v=stale')],
+  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260921-flightplan-4', 'style.css?v=stale')],
+  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260921-flightplan-4', 'main.js?v=stale')],
   ["inline presentation style", "home-inline-style", (html) => html.replace('<section id="hero">', '<section id="hero" style="display:block">')]
 ];
 
@@ -5885,36 +5886,36 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round3ExactResourceMutations = [
   ["alternate stylesheet rel", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["stylesheet title attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" title="decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" title="decoy">'
   )],
   ["stylesheet integrity attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" integrity="sha256-decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" integrity="sha256-decoy">'
   )],
   ["stylesheet data decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" data-decoy="true">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" data-decoy="true">'
   )],
   ["deferred async browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer async>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer async>'
   )],
   ["typed browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer type="text/javascript">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer type="text/javascript">'
   )],
   ["browser script integrity attribute", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer integrity="sha256-decoy">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer integrity="sha256-decoy">'
   )],
   ["browser script data decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer data-decoy="true">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer data-decoy="true">'
   )],
   ["disabled latin font preload", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6024,12 +6025,12 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round2ActiveResourceMutations = [
   ["stylesheet with inactive media", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" media="not all">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" media="not all">'
   )],
   ["disabled stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" disabled>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" disabled>'
   )],
   ["latin font preload with inactive media", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6040,12 +6041,12 @@ const task7Round2ActiveResourceMutations = [
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin media="not all">'
   )],
   ["nomodule browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer nomodule>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer nomodule>'
   )],
   ["stylesheet inside noscript", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1"></noscript>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></noscript>'
   )],
   ["latin font preload inside noscript", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6056,12 +6057,12 @@ const task7Round2ActiveResourceMutations = [
     '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></noscript>'
   )],
   ["browser script inside noscript", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>',
-    '<noscript><script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script></noscript>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<noscript><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></noscript>'
   )],
   ["stylesheet inside template", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1"></template>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></template>'
   )],
   ["latin font preload inside template", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6072,20 +6073,20 @@ const task7Round2ActiveResourceMutations = [
     '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></template>'
   )],
   ["browser script inside template", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>',
-    '<template><script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script></template>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<template><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></template>'
   )],
   ["stylesheet inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1"></div>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></div>'
   )],
   ["font preload inside hidden ancestor", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
     '<div hidden><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></div>'
   )],
   ["browser script inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>',
-    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script></div>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></div>'
   )]
 ];
 
@@ -6116,36 +6117,36 @@ const task7ReviewHomeSemanticMutations = [
     '<div hidden><input id="chat-input" maxlength="2000"></div>'
   )],
   ["stylesheet changed to a style preload", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260921-2026.39.1">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["hidden stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1" hidden>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" hidden>'
   )],
   ["stylesheet attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["additional active stylesheet", "home-cache-version", (html) => html.replace(
     "</head>",
     '<link rel="stylesheet" href="/assets/css/extra.css">\n  </head>'
   )],
   ["non-executable JSON browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" type="application/json" defer>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" type="application/json" defer>'
   )],
   ["browser script without defer", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4">'
   )],
   ["hidden browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer>',
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer hidden>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer hidden>'
   )],
   ["browser-script attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>',
-    '<meta src="/assets/js/main.js?v=20260921-2026.39.1" defer>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<meta src="/assets/js/main.js?v=20260921-flightplan-4" defer>'
   )],
   ["additional executable browser script", "home-cache-version", (html) => html.replace(
     "</body>",
@@ -6160,8 +6161,8 @@ const task7ReviewHomeSemanticMutations = [
     '/assets/fonts/dmsans-latext.woff2'
   )],
   ["third font preload", "home-font-preload", (html) => html.replace(
-    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">',
-    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">'
+    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["font preload with the wrong rel", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6981,10 +6982,10 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
     ["external footer link", task9Mutate("index.html", (html) => html.replace('href="/wiedza/">Wiedza</a></li><li><a href="/#contact"', 'href="https://example.com/">Wiedza</a></li><li><a href="/#contact"'))],
     ["signature asset swapped", task9Mutate("index.html", (html) => html.replace("/assets/img/signature.png", "/assets/img/og.jpg"))],
     ["signature dimensions removed", task9Mutate("index.html", (html) => html.replace(' width="160" height="50"', ""))],
-    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260921-2026.39.1", "style.css?v=20260825-flightplan-1"))],
-    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260921-2026.39.1", "main.js?v=20260825-flightplan-1"))],
-    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1"></head>'))],
-    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script></body>'))],
+    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260921-flightplan-4", "style.css?v=20260825-flightplan-1"))],
+    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260921-flightplan-4", "main.js?v=20260825-flightplan-1"))],
+    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></head>'))],
+    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></body>'))],
     ["wrapper inside direct navigation text anchor", task9Mutate("index.html", (html) => html.replace(
       '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
       '<a href="/aplikacje-operacyjne/"><span>Aplikacje</span></a>'
@@ -7331,7 +7332,7 @@ function plan3Schema(entry, shape = "graph") {
 
 function plan3Page(entry, { body, head = "", schema = plan3Schema(entry), hreflang = plan3Hreflang(entry), assets = null } = {}) {
   const shellAssets = assets ?? (plan3ShellFiles.has(entry.file)
-    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-2026.39.1">\n<script src="/assets/js/main.js?v=20260921-2026.39.1" defer></script>'
+    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">\n<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>'
     : "");
   const content = body ?? (entry.file === "index.html" ? '<p data-fact-id="fixture.claim">Verified claim</p>' : "Page copy");
   const locale = entry.lang === "pl" ? "pl_PL" : "en_US";

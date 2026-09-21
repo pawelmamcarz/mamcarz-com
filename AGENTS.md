@@ -26,7 +26,7 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 
 Kanoniczna wersja produktu jest w `version.js` jako `VERSION`. Format: `YEAR.WEEK.RELEASE` (rok i numer tygodnia ISO, potem kolejne wydanie w tym tygodniu). Bieżące wydanie: `2026.39.1`. Numer podbijamy **tylko przy cięciu wydania**, nie przy każdym PR. Konkretny build zapisujemy skrótem commita w `CHANGELOG.md` albo w runbooku w `docs/releases/`; nie wstawiamy SHA do HTML.
 
-Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny token cache-bust, nie wersja produktu. Aktualny token: `20260921-2026.39.1`, powiązany z wydaniem `2026.39.1`. Przy cięciu wydania aktualizujemy oba: `VERSION` w `version.js` oraz token zasobów we wszystkich publicznych dokumentach i kontraktach weryfikacyjnych.
+Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny token cache-bust, nie wersja produktu. Aktualny token: `20260921-flightplan-4`, powiązany z wydaniem `2026.39.1`. Przy cięciu wydania aktualizujemy oba: `VERSION` w `version.js` oraz token zasobów we wszystkich publicznych dokumentach i kontraktach weryfikacyjnych.
 
 ## Struktura i manifest tras
 
@@ -55,7 +55,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Kierunek: „Flight Plan” — redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
 - Fonty: Barlow Semi Condensed dla nagłówków, DM Sans dla tekstu, DM Mono dla etykiet i danych.
 - Główne tokeny w `:root`: `--runway-ink`, `--signal`, `--signal-dark`, `--sky-band`, `--ink-secondary`, `--line`, `--line-strong`.
-- Wspólna wersja zasobów w publicznych dokumentach: `20260921-2026.39.1` (cache-bust powiązany z wydaniem produktu `2026.39.1`).
+- Wspólna wersja zasobów w publicznych dokumentach: `20260921-flightplan-4` (cache-bust powiązany z wydaniem produktu `2026.39.1`).
 - Nie przywracaj Playfair Display, generycznych kart, przypadkowych gradientów, dekoracyjnych wykresów ani narracji udającej fakty.
 - Zachowuj semantyczny HTML, jeden `main`, jeden `h1`, widoczny focus, działanie bez JavaScriptu i obsługę `prefers-reduced-motion`.
 - `404.html` jest jednym dokumentem PL/EN: PL działa domyślnie bez JS, ma `noindex`, nie ma canonicala, a wczesny skrypt może zmienić wyłącznie `lang`, `title` i istniejący opis.
