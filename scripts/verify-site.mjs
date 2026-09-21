@@ -8,6 +8,8 @@ import { ASSET_CACHE_VERSION } from "../version.js";
 const defaultRoot = resolve(import.meta.dirname, "..");
 const SHARED_STYLESHEET_HREF = `/assets/css/style.css?v=${ASSET_CACHE_VERSION}`;
 const SHARED_SCRIPT_SRC = `/assets/js/main.js?v=${ASSET_CACHE_VERSION}`;
+const SHARED_SIGNATURE_SRC = `/assets/img/signature.png?v=${ASSET_CACHE_VERSION}`;
+const FOOTER_OWNER_LINE = "© 1993–2026 Paweł Mamcarz · mamcarz.com";
 const factKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "surfaces", "status"];
 const kinds = new Set(["constant", "dated"]);
 const sourceTypes = new Set(["owner_verified", "public_source", "internal_evidence"]);
@@ -4897,7 +4899,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
+      FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/", "Strona główna"]),
@@ -4977,7 +4979,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
+      FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/en/", "Home"]),
@@ -5090,8 +5092,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 196, digest: "560e6070bf1de299a21d7f8a7b6f632db9cea82ab5733968dae6ea3c84e70f23" }),
-  en: Object.freeze({ elementCount: 196, digest: "96c03383e68846aee96a1e4b86daaa4327b81eb81336a860e6f6fb02009e3823" })
+  pl: Object.freeze({ elementCount: 196, digest: "57618ab052454ef6d141ad6a3d8770d775978a392bc6f7bbc062f387da05afca" }),
+  en: Object.freeze({ elementCount: 196, digest: "d1a1bb9075160226024074d8bddf7b86ef3af03ffe005472c47dbd1e1b88b33e" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -5409,7 +5411,7 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
     && images.length === 1
     && images[0].parent === footerSigns[0]
     && exactApplicationResourceAttributes(images[0], {
-      src: "/assets/img/signature.png",
+      src: SHARED_SIGNATURE_SRC,
       alt: "",
       width: "160",
       height: "50",
@@ -5577,7 +5579,7 @@ function validApplicationAnchorLeaf(anchor, expected) {
     return children.length === 1
       && image?.name === "img"
       && exactApplicationAttributes(image, {
-        src: "/assets/img/signature.png",
+        src: SHARED_SIGNATURE_SRC,
       alt: "",
       width: "160",
       height: "50",
@@ -6252,8 +6254,8 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 191, digest: "852586262e0b65947bafda09c437d0b5058850ed486a698f724753083b4d4ca9" }),
-  en: Object.freeze({ elementCount: 191, digest: "6ed46f21d76484c3b8368ddc4b47bd1b29bdce1c04c7cf46fb99a14774632f88" })
+  pl: Object.freeze({ elementCount: 191, digest: "001d6348e4841109d09ab7ce2a5763b941bf553d0783016a0037cc4e78d2e6ec" }),
+  en: Object.freeze({ elementCount: 191, digest: "8202484d0eacff5489a3c240bad592aa011142adcddb9e712d98c86ebee43066" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -6266,7 +6268,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "Proces przeniesiony do narzędzia.", "Software porządkuje dane, kolejne stany i odpowiedzialność. Interfejs wynika z przebiegu pracy.", "WEJŚCIE", "Procedura", "PRZEPŁYW", "Dane i decyzje", "WYJŚCIE", "Ślad działania",
     "05", "LOG", "Projekty", "Rejestr przedsięwzięć lotniczych.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
     "06", "COMMS", "Kontakt", "Ustalmy zakres i odpowiedzialność.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
-    "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
+    FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
   ]),
   en: Object.freeze([
     "Skip to content", "PM", "· Mamcarz.com", "Advisory", "Procurement transformation", "SAP Ariba implementation", "Public procurement", "Applications", "Aviation", "Projects", "Insights", "About", "Contact", "PL", "↑",
@@ -6277,7 +6279,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "The process transferred into a tool.", "Software organises data, consecutive states and responsibility. The interface follows the working process.", "INPUT", "Procedure", "FLOW", "Data and decisions", "OUTPUT", "Action trail",
     "05", "LOG", "Projects", "Aviation venture register.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
     "06", "COMMS", "Contact", "Set the scope and responsibility.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
-    "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
+    FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
   ])
 });
 
@@ -6471,7 +6473,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(ventureImage, { src: "/assets/img/portfolio/akrobacja.jpg", alt: lang === "pl" ? "Widok projektu akrobacja.com" : "View of the akrobacja.com project", width: "1400", height: "492", loading: "lazy", decoding: "async" })
     && footerSign !== undefined
     && elementIsWithin(footerSign, footer)
-    && exactApplicationResourceAttributes(signature, { src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
+    && exactApplicationResourceAttributes(signature, { src: SHARED_SIGNATURE_SRC, alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
   const anchors = all.filter((element) => element.name === "a");
   const anchorsValid = JSON.stringify(anchors.map((anchor) => browserNormalizedUrl(elementAttribute(anchor, "href")))) === JSON.stringify(aviationExpectedAnchorHrefs(lang));
   const forbiddenTags = new Set([...APPLICATION_ZERO_RESOURCE_TAGS].filter((name) => name !== "picture" && name !== "source"));
@@ -6677,7 +6679,7 @@ const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
     "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
-    "/procurement-2026/", "/wystapienia/", "/#contact", "/", "/assets/img/signature.png", "/", "/uslugi/transformacja-zakupow/",
+    "/procurement-2026/", "/wystapienia/", "/#contact", "/", SHARED_SIGNATURE_SRC, "/", "/uslugi/transformacja-zakupow/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", SHARED_SCRIPT_SRC
   ]),
   en: Object.freeze([
@@ -6685,7 +6687,7 @@ const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
     "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
     "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
-    "/infographic_procurement_2026_EN.html", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
+    "/infographic_procurement_2026_EN.html", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", SHARED_SIGNATURE_SRC, "/en/",
     "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", SHARED_SCRIPT_SRC
   ])
 });
@@ -6731,7 +6733,7 @@ function knowledgeDocumentMarkup(contract, lang) {
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const alternateLocale = lang === "pl" ? "en_US" : "pl_PL";
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="${SHARED_STYLESHEET_HREF}"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="${SHARED_SCRIPT_SRC}" defer></script></body></html>`;
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="${SHARED_STYLESHEET_HREF}"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="${SHARED_SIGNATURE_SRC}" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">${FOOTER_OWNER_LINE}</div></div><ul class="footer-links">${footer}</ul></footer><script src="${SHARED_SCRIPT_SRC}" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -6989,7 +6991,7 @@ function knowledgeHasDateBoundaryViolation(parsedRoot) {
       let value = node.value;
       const parent = node.parent;
       if (node.type === "text" && parent?.type === "element" && elementHasClass(parent, "footer-copy")
-        && publishedStaticText(parent) === "© 2026 Paweł Mamcarz · mamcarz.com") {
+        && publishedStaticText(parent) === FOOTER_OWNER_LINE) {
         value = "";
       }
       if (node.type === "text" && parent?.type === "element" && parent.name === "script"
@@ -7275,7 +7277,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "2456eab770a5522ca6512280b2ce5a968e27b94a8bd3b5ee7638b5962870ab78", en: "83578c7309040b169792ca4bd7d5393726f0a25b550c2a508e118412631b3b3c" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "41942c5f42e3d72f7a34fa1ea28696bfc5a63896762f05e984398ebd8fcb5123", en: "af1a975cc370ea92bc9e79e47ea6acca012334fac590773f855deda7fe1f4857" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7352,7 +7354,7 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const images = elements.filter((element) => element.name === "img");
   const signatureValid = images.length === 1
     && elementHasClass(images[0].parent, "footer-sign")
-    && exactApplicationResourceAttributes(images[0], { src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
+    && exactApplicationResourceAttributes(images[0], { src: SHARED_SIGNATURE_SRC, alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
   if (elements.some((element) => forbidden.has(element.name)) || !signatureValid || eventOrStyle || !validScripts || invalidAnchors.length > 0) {
     error(errors, "project-resource-census", path, "forbids images, external project links, embeds, inline styles or executable drift and allows only the exact schema, shell resources and contextual mail CTA");
   }
@@ -7640,9 +7642,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "5ed9bd980370591e658685415732b7a941d0f02ff311554418d19f18d6f569b2", en: "7e81267a59691f41db2f8fad7842b79c131a25211b331c9b510c450ee0d1f651" }),
-  ariba: Object.freeze({ pl: "f1a5688d8080124d2fc10aea77181b26142706384386fc6d01ab54ef73f791c4", en: "499d4ef164da895cdd292bf2c3ccd05b188df09d3a7374a86fcc5b247d799d2b" }),
-  publicProcurement: Object.freeze({ pl: "70f9ff99ea63cadc178de74c7f15efe1afba251dd85619e7eb88ff76ee16c5ba", en: "3de06d87c4fc92951d7518b3407c72a11f3c09dd4aec1ab65f59ff1469f34165" })
+  transformation: Object.freeze({ pl: "0a218a8de9b2fe0cb6747f81ccdaf6f616832eb017be9bcd23cdd75f29152877", en: "81f99d92dd7740d221c1364b7c9a76d61579ea8b090d20068cff5290655b3ccb" }),
+  ariba: Object.freeze({ pl: "7c40be7813c4d0e7b7af43b16861091ef15e2de98a0e293641bd00562308160b", en: "415fc81d39776892a538627040e63d12fca9070a9dd4e2a98319c592d2767250" }),
+  publicProcurement: Object.freeze({ pl: "443cd142288d8fecb534ea687e6c1f07ef2b8a57a3347f8b52b29c04725d6fd9", en: "9d5bc66c304014903a5d8c13283bf217bcab891b913c7acde75c7817b9c687c9" })
 });
 
 function serviceKeyForPath(path) {
@@ -7706,7 +7708,7 @@ function verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors) {
   const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "object", "picture", "source", "style", "video"]);
   const images = elements.filter((element) => element.name === "img");
   const validSignature = images.length === 1
-    && elementAttribute(images[0], "src") === "/assets/img/signature.png"
+    && elementAttribute(images[0], "src") === SHARED_SIGNATURE_SRC
     && elementAttribute(images[0], "alt") === ""
     && elementIsWithin(images[0], elements.find((element) => element.name === "footer"));
   const eventOrStyle = elements.some((element) => element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)));
@@ -8024,7 +8026,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "6a90a0021bc9220f8267efb3d1c87fc5ce3905bbec0a182fdda4e3e25d09b9e0", en: "9d9c371f0e8ca4b15c7abd54d7d187109f2f99a9ac6b7844b695233dc9aaf2c7" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "3eafbe74eddcb3bd1d61ec22be9b2cecb4c0fa78c975215e5b96d1605bcdd21a", en: "9d40a5f118d8d1eb5c49f2d2024d679dc2550b74944c62b2cfdee2a7c6247276" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8200,7 +8202,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const recordingPictures = all.filter((element) => element.name === "picture" && elementIsWithin(element, recording));
   const recordingSources = all.filter((element) => element.name === "source" && elementIsWithin(element, recording));
   const validSignature = signatureImages.length === 1 && exactElementAttributes(signatureImages[0], {
-    src: "/assets/img/signature.png",
+    src: SHARED_SIGNATURE_SRC,
     alt: "",
     width: "160",
     height: "50",
@@ -8292,7 +8294,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity.html", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", null]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "ccfa826be95b780b7f97a1ca1ea934635097637655e4448c6d33d27aaf58e9b5";
+const PROCUREMENT_DOCUMENT_MANIFEST = "5d2ef17fcc16695b9cdce8130a71031d5035c52e3a229c976a8e88ad47035a91";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -8353,7 +8355,7 @@ async function verifyProcurementParent(_factData, context) {
   const forbiddenTags = new Set(["audio", "base", "embed", "form", "object", "picture", "source", "style", "video"]);
   const signatureImages = all.filter((element) => element.name === "img" && elementIsWithin(element, all.find((candidate) => elementHasClass(candidate, "footer-sign"))));
   const validSignature = signatureImages.length === 1 && exactElementAttributes(signatureImages[0], {
-    src: "/assets/img/signature.png",
+    src: SHARED_SIGNATURE_SRC,
     alt: "",
     width: "160",
     height: "50",
@@ -9508,16 +9510,16 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
     && shellElementHasExactDirectElements(sign, signChildren)
     && signature?.name === "img"
     && exactApplicationResourceAttributes(signature, {
-      src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async"
+      src: SHARED_SIGNATURE_SRC, alt: "", width: "160", height: "50", loading: "lazy", decoding: "async"
     })
     && owner?.name === "div"
     && exactApplicationResourceAttributes(owner, { class: "footer-copy" })
     && shellElementHasOnlyTextAndComments(owner)
-    && normalizeExactHtmlLiteral(rawElementText(owner)) === "© 2026 Paweł Mamcarz · mamcarz.com"
+    && normalizeExactHtmlLiteral(rawElementText(owner)) === FOOTER_OWNER_LINE
     && footerList?.name === "ul"
     && exactApplicationResourceAttributes(footerList, { class: "footer-links" })
     && exactShellListLinks(footerList, copy.footer, null);
-  if (!footerValid) error(errors, "site-shell-footer", entry.path, "requires the exact signature, 2026 owner line and ordered localized seven-link footer");
+  if (!footerValid) error(errors, "site-shell-footer", entry.path, "requires the exact signature, 1993–2026 owner line and ordered localized seven-link footer");
 
   const stylesheets = all.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -10300,9 +10302,9 @@ function plan3AncestorHasClass(element, className) {
 function plan3ReviewedStaticNumber(path, unit, token) {
   const owner = unit.element;
   const ownerText = unit.text;
-  if (token.value === "2026"
+  if (token.value === "1993–2026"
     && elementHasClass(owner, "footer-copy")
-    && ownerText === "© 2026 Paweł Mamcarz · mamcarz.com") return true;
+    && ownerText === FOOTER_OWNER_LINE) return true;
 
   if (SERVICE_SURFACE_LIST.includes(path)
     && plan3AncestorHasClass(owner, "service-scope-register")

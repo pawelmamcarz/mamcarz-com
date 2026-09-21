@@ -292,7 +292,7 @@ function task9ExpectedShell(entry) {
   return Object.freeze({
     nav: `<nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"${logoCurrent}><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.group}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${entry.counterpart}" class="nav-lang">${copy.language}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>`,
     controls: `<div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${copy.back}">↑</button>`,
-    footer: `<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>`
+    footer: `<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>`
   });
 }
 
@@ -424,7 +424,7 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     ${pageNavigationFixture(lang, pairedRoute, route)}
     <button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
-    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
     <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
@@ -1079,7 +1079,7 @@ function knowledgePageFixture(lang) {
     <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
     <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
-    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
     <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
@@ -2628,7 +2628,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["attributes on a closing tag", (html) => html.replace("<span></span>", "<span></span claim>")],
     ["stray closing tag", (html) => html.replace("</footer>", "</claim></footer>")],
     ["stray opening tag", (html) => html.replace("</footer>", "<span></footer>")],
-    ["closing tag for a void element", (html) => html.replace('<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async">', '<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></img>')],
+    ["closing tag for a void element", (html) => html.replace('<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async">', '<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></img>')],
     ["mismatched nesting", (html) => html.replace("</footer>", "<div><span></div></span></footer>")],
     ["slash before stray opening-tag content", (html) => html.replace("<span></span>", "<span / claim></span>")]
   ];
@@ -2997,7 +2997,7 @@ test("Plan 2 Task 4 fix round 2 owns URL-valued metadata, itemid and statically 
 test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actionable controls", async () => {
   const cases = [
     ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
-    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png"', 'img data="/assets/img/signature.png"')],
+    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png?v=20260921-flightplan-4"', 'img data="/assets/img/signature.png?v=20260921-flightplan-4"')],
     ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
     ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></body>')],
     ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
@@ -6979,7 +6979,7 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
       '<a href="/en/procurement-2026/" class="nav-lang">EN</a>'
     ))],
     ["legacy navHamburger", task9Mutate("index.html", (html) => html.replace('id="nav-toggle"', 'id="navHamburger"'))],
-    ["footer year altered", task9Mutate("index.html", (html) => html.replace("© 2026 Paweł", "© 1993–2026 Paweł"))],
+    ["footer year altered", task9Mutate("index.html", (html) => html.replace("© 1993–2026 Paweł", "© 2026 Paweł"))],
     ["footer link removed", task9Mutate("index.html", (html) => html.replace('<li><a href="/wiedza/">Wiedza</a></li>', ""))],
     ["footer link added", task9Mutate("index.html", (html) => html.replace('</ul></footer>', '<li><a href="/extra/">Extra</a></li></ul></footer>'))],
     ["footer links reordered", task9Mutate("index.html", (html) => html.replace(
@@ -7019,7 +7019,7 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
     ["wrapper inside logo mark", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<b><span>PM</span></b>'))],
     ["logo mark changed from b to span", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<span>PM</span>'))],
     ["wrapper inside disclosure summary", task9Mutate("index.html", (html) => html.replace('<summary>Doradztwo</summary>', '<summary><span>Doradztwo</span></summary>'))],
-    ["wrapper inside footer owner", task9Mutate("index.html", (html) => html.replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '<span>© 2026 Paweł Mamcarz · mamcarz.com</span></div>'))],
+    ["wrapper inside footer owner", task9Mutate("index.html", (html) => html.replace('© 1993–2026 Paweł Mamcarz · mamcarz.com</div>', '<span>© 1993–2026 Paweł Mamcarz · mamcarz.com</span></div>'))],
     ["wrapper inside back-to-top", task9Mutate("index.html", (html) => html.replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę"><span>↑</span></button>'))],
     ["nested element inside toggle span", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span><i></i></span><span></span><span></span></button>'))],
     ["non-span direct child inside toggle", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span></span><span></span><span></span><i></i></button>'))],
@@ -7053,8 +7053,8 @@ test("Plan 2 Task 9 permits formatting whitespace and comments in exact shell to
     .replace('<span></span><span></span><span></span></button>', '<span>\n<!-- bar --></span><span></span><span></span></button>')
     .replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay">\n<!-- overlay -->\n</div>')
     .replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę">\n<!-- back -->↑\n</button>')
-    .replace('<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
-    .replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '\n<!-- owner -->© 2026 Paweł Mamcarz · mamcarz.com\n</div>')
+    .replace('<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
+    .replace('© 1993–2026 Paweł Mamcarz · mamcarz.com</div>', '\n<!-- owner -->© 1993–2026 Paweł Mamcarz · mamcarz.com\n</div>')
     .replace('<ul class="footer-links">', '<ul class="footer-links">\n<!-- links -->'));
   const root = await task9SiteShellRoot(overrides);
   const result = await runVerification({ root, scope: "pages", family: "all" });
