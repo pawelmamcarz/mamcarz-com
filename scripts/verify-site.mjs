@@ -5090,8 +5090,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 196, digest: "98a7f2e9d816806793dcfa7ded9e1a7d8dd2620eed3779e02ae7606ffa2db1b9" }),
-  en: Object.freeze({ elementCount: 196, digest: "3be197c6892f048255b5c9697c8fbbc062bce24fa967a75e097177502dfc8d06" })
+  pl: Object.freeze({ elementCount: 196, digest: "560e6070bf1de299a21d7f8a7b6f632db9cea82ab5733968dae6ea3c84e70f23" }),
+  en: Object.freeze({ elementCount: 196, digest: "96c03383e68846aee96a1e4b86daaa4327b81eb81336a860e6f6fb02009e3823" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -7275,7 +7275,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "7bacf4fed5bb1c9074c73bcafa4f4883ea4a279ed1eb04cc7e5231adb886fc42", en: "b9ba3dbde92b108699e3ce223477feaad9e21ffceb6e997e7a53439c7254c6f7" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "2456eab770a5522ca6512280b2ce5a968e27b94a8bd3b5ee7638b5962870ab78", en: "83578c7309040b169792ca4bd7d5393726f0a25b550c2a508e118412631b3b3c" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -8024,7 +8024,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "36662bc45b76dd1bd45284c4e624b239357ed9dfe3330e72a9bca34d73823982", en: "69488c70cfb80907429dcb940b7dc15a06628ec8622c7af7aec0ec960b01c5fd" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "6a90a0021bc9220f8267efb3d1c87fc5ce3905bbec0a182fdda4e3e25d09b9e0", en: "9d9c371f0e8ca4b15c7abd54d7d187109f2f99a9ac6b7844b695233dc9aaf2c7" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
