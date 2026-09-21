@@ -799,6 +799,9 @@ const productionFactSurfaceControls = {
     "Current aviation venture: akrobacja.com.",
     "Voucher sales platform for aerobatic flights.",
     "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
+    "Przypominamy.com: Notification platform for organisations.",
+    "silence-tax.com: Calculator for the cost of silence in an organisation.",
+    "ProcuraCost: Procurement procedure cost calculator.",
     "Neutral context after the controlled claims."
   ].join("\n"),
   worker: `import factRegistry from "../content/site-facts.json" with { type: "json" };\nconst verifiedFacts = ${JSON.stringify([
@@ -7102,7 +7105,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "2fbaf0a295f937d2a2c8a2686af8ab97e0827d1a7e2775b1d782bde965d5928e",
+    "f1544343c8d6d901008ccb6e5a3092a47b932368402425ab38ec500e314f16c7",
     "llms-full.txt must retain the exact approved fact index without regenerated biography"
   );
 });
@@ -9143,7 +9146,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   const verifier = await import("./verify-site.mjs");
   const entries = verifier.PRESENTATION_INDEX_OCCURRENCES;
   assert.ok(Array.isArray(entries), "the verifier must export the reviewed occurrence manifest");
-  assert.equal(entries.length, 153, "every reviewed presentation index in the 24 public pages is inventoried");
+  assert.equal(entries.length, 155, "every reviewed presentation index in the 24 public pages is inventoried");
 
   const canonical = JSON.stringify([...entries].sort((left, right) => [
     left.file,
@@ -9160,7 +9163,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   ].join("\0"))));
   assert.equal(
     createHash("sha256").update(canonical).digest("hex"),
-    "881a57835cc5508552711e26a582b835327689ce1619f3722240e88c9116880f",
+    "4d6e78d879bfd52759c1ec3ac56f792af407cd4d310e3c93614a14bc7a61d903",
     "presentation markup changes require an explicit inventory audit and baseline refresh"
   );
 });
