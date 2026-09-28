@@ -1,5 +1,7 @@
 import factRegistry from "../content/site-facts.json" with { type: "json" };
 import { ALLOWED_URLS, DESTINATIONS, navigationAnswer, replyLinks } from './navigation.js';
+import { AREA_PROMPT_HINTS } from "./jev-policy.js";
+import { evaluateWithJev } from "./jev.js";
 
 export const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
@@ -153,6 +155,25 @@ function noConfirmation(language) {
     : "Nie mam potwierdzonej informacji w tym zakresie. Sprawdź Projekty: https://mamcarz.com/case-studies/ lub O mnie: https://mamcarz.com/#about. Kontakt: mailto:pawel@mamcarz.com.";
 }
 
+function blockedReply(language) {
+  return language === "en"
+    ? "I cannot help with that request. This chat helps you choose a mamcarz.com page. Contact: mailto:pawel@mamcarz.com."
+    : "Nie mogę wykonać tej prośby. Ten czat pomaga wybrać stronę mamcarz.com. Kontakt: mailto:pawel@mamcarz.com.";
+}
+
+function offPolicyReply(language) {
+  return language === "en"
+    ? "This chat helps you choose a mamcarz.com page. Ask about advisory, operational applications, aviation, or contact: mailto:pawel@mamcarz.com."
+    : "Ten czat pomaga wybrać stronę mamcarz.com. Zapytaj o doradztwo, aplikacje operacyjne, lotnictwo albo kontakt: mailto:pawel@mamcarz.com.";
+}
+
+function systemPromptFor(area, languageInstruction) {
+  const hint = area && AREA_PROMPT_HINTS[area];
+  return hint
+    ? `${SYSTEM_PROMPT}\n\n${languageInstruction}\n\nWskazówka routingu: ${hint}`
+    : `${SYSTEM_PROMPT}\n\n${languageInstruction}`;
+}
+
 function genericError(status, language) {
   const messages = language === "en" ? {
     400: "Invalid request.",
@@ -286,6 +307,16 @@ export default {
         const reply = noConfirmation(language);
         return json({ reply, links: replyLinks(reply) }, 200, cors, requestId);
       }
+      const jev = await evaluateWithJev(env, messages);
+      if (jev?.action === "block") {
+        return json({ reply: blockedReply(language) }, 200, cors, requestId);
+      }
+      if (jev?.action === "no_confirmation") {
+        return json({ reply: noConfirmation(language) }, 200, cors, requestId);
+      }
+      if (jev?.action === "off_policy") {
+        return json({ reply: offPolicyReply(language) }, 200, cors, requestId);
+      }
       const navigation = navigationAnswer(finalUserContent, language);
       if (navigation) return json(navigation, 200, cors, requestId);
       if (typeof env.AI?.run !== "function") throw new Error("AI binding unavailable");
@@ -293,7 +324,7 @@ export default {
         ? "For this conversation, reply only in English and use the /en/ versions of website links."
         : "W tej rozmowie odpowiadaj wyłącznie po polsku i używaj polskich adresów stron.";
       const response = await env.AI.run(MODEL, {
-        messages: [{ role: "system", content: `${SYSTEM_PROMPT}\n\n${languageInstruction}` }, ...messages],
+        messages: [{ role: "system", content: systemPromptFor(jev?.area, languageInstruction) }, ...messages],
         max_tokens: 500,
         temperature: 0.2
       });

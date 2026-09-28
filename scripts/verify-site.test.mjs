@@ -218,24 +218,24 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "31243f9cc349f97076e0ea14068235fd63edfc3c74cd131b9f8f969c110a975c",
-  "en/index.html": "bcd8aae0b77b42ec3ffd62f4e1f976036e274d49ee0a7876942c6100e1e89387",
+  "index.html": "fc616eb15d61bceffb4aa5e7f9214c06c852fc98f7381e15f8a1a614faa25e09",
+  "en/index.html": "7d57c81058b58194ab3ca50fda9bd00c4b3f66d54d116e69a8c0055c49c07831",
   "uslugi/transformacja-zakupow/index.html": "fffac19ec9b11b530ba8b0c471573252ee723bda3797f182d16d8baae2399dd1",
   "en/uslugi/transformacja-zakupow/index.html": "4bed2ac8b3630a4bb68fd3f87f4411ac38a6ce6e990ff1c2f353f1af127a9b15",
   "uslugi/wdrozenie-sap-ariba/index.html": "6472aa640f740db4d67d74eb22a935d72510407a44178de8a76eeeeb4630ac2b",
   "en/uslugi/wdrozenie-sap-ariba/index.html": "85d8f3c84ddfe470db16597bf812090f2b9243921802a1e23f49f4822aa577f7",
   "uslugi/doradztwo-zamowienia-publiczne/index.html": "14433b66c911fb5aa9d6a2f7ce28c30ddc0e5f161f6bb4c1c2578dc491f00c76",
   "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "e33ce670c9509813f85a90620d1070226eb6cbca24efac9335bac0a1092fa1d1",
-  "aplikacje-operacyjne/index.html": "d4e054a68aa0fbcd604a3a2ee8b2a2f080026d3232db9587fa47277d76891ea2",
-  "en/aplikacje-operacyjne/index.html": "09ad001033474c6c2a97ce48240c97e9f2c0865c4e73c9705a0e4652521497cb",
+  "aplikacje-operacyjne/index.html": "8b95bc8f54ea399eb01df8e7be8d7e3f2c63d45c47d74e339e54bd0625553e8d",
+  "en/aplikacje-operacyjne/index.html": "d5ec96748fcd1941274482d9e05b8a304f857f47977a48d9b34b26e61b0e5ed9",
   "lotnictwo/index.html": "6ad6b3287758a32e316ca9a07087e6cf8d54ffd5dc5efa5da977cf06d64c6e89",
   "en/lotnictwo/index.html": "62f07c136afce5c5dd84e4cc9f3d8c65ad6aa58704d737ca89c9ccf60a0540c1",
-  "case-studies/index.html": "148ce67d913ed6507034f7ac0b00cb108f820fa04c075ef2430ee5b2bd743a98",
-  "en/case-studies/index.html": "05cc9fbb00e40fc3b1bbdff6b9a91bc4f4e3053a9093603cce71dc3f630e7426",
+  "case-studies/index.html": "8f4fa424061d5f79315e232c8fd74b4aeef708033afd7b4b5a55055c55015c9b",
+  "en/case-studies/index.html": "4d890dd08fb6aabd526a546d0db5f7370bbf5d916f394c7c72714d68b7c1a717",
   "wiedza/index.html": "fd920733c688241ce880b421b46bf88f9f9bba701f8c51656b5913fdaa19941f",
   "en/wiedza/index.html": "c4438cc5b631215e6c85fbd6c83c9a41e75bd5f2bbc2d664309f89d214ab96ca",
-  "wystapienia/index.html": "5e543e7bfdcc5f1d0c6237ef594577fb6a949f1b3a25679d66c709f44b30f026",
-  "en/wystapienia/index.html": "60d9df0b5851cde8314952ce2154d25012e23940150055207ada169914181070",
+  "wystapienia/index.html": "5dc24a6fec484edd7009acdb522114c3e76df3399eefa835bebfcb36868648d2",
+  "en/wystapienia/index.html": "ffc47f9d004ce5f87ec52f42687dd78586368bcb832114394237316987fdeb8d",
   "procurement-2026/index.html": "b243841e71a5e0e03763efbd004024ad1404cc76b3a7eaea08dd0912546e462e"
 });
 
@@ -292,18 +292,18 @@ function task9ExpectedShell(entry) {
   return Object.freeze({
     nav: `<nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"${logoCurrent}><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.group}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${entry.counterpart}" class="nav-lang">${copy.language}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>`,
     controls: `<div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${copy.back}">↑</button>`,
-    footer: `<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>`
+    footer: `<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>`
   });
 }
 
 function task9CanonicalHtml(entry, html = task9SiteShellProductHtml[entry.path]) {
   const shell = task9ExpectedShell(entry);
   return html
-    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260904-quality-1")
+    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260921-flightplan-4")
     .replace(/<nav class="site-nav"[\s\S]*?<\/nav>/, shell.nav)
     .replace(/<div class="nav-overlay"[\s\S]*?<\/div>\s*<button class="back-to-top"[\s\S]*?<\/button>/, shell.controls)
     .replace(/<footer(?: class="site-footer")?>[\s\S]*?<\/footer>/, shell.footer)
-    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>');
+    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>');
 }
 
 function task9ProtectedContent(html) {
@@ -417,15 +417,15 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}">
     <link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}">
     <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
     ${head}
   </head><body data-page="${dataPage}">
     <a class="skip-link" href="#main">Skip</a>
     ${pageNavigationFixture(lang, pairedRoute, route)}
     <button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
-    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
-    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -636,7 +636,7 @@ function homepageFixture(lang, content) {
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite"},{"@type":"Person"}]}</script>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
   </head><body>
     <a href="#main" class="skip-link">${skipLabel}</a>
     ${navigationFixture[lang]}<main id="main">
@@ -654,7 +654,7 @@ function homepageFixture(lang, content) {
     <section id="clients"></section>
     <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
   </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><div id="ai-chat" hidden><input id="chat-input" maxlength="2000"></div><p data-chat-fallback>Email contact is available.</p>
-    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -801,6 +801,9 @@ const productionFactSurfaceControls = {
     "Current aviation venture: akrobacja.com.",
     "Voucher sales platform for aerobatic flights.",
     "czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
+    "Przypominamy.com: Notification platform for organisations.",
+    "silence-tax.com: Calculator for the cost of silence in an organisation.",
+    "ProcuraCost: Procurement procedure cost calculator.",
     "Neutral context after the controlled claims."
   ].join("\n"),
   worker: `import factRegistry from "../content/site-facts.json" with { type: "json" };\nconst verifiedFacts = ${JSON.stringify([
@@ -1072,14 +1075,14 @@ function knowledgePageFixture(lang) {
     <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
     <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
   </head><body class="knowledge-page" data-page="knowledge">
     <a href="#main" class="skip-link">${copy.skip}</a>
     <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
     <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
-    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
-    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -1121,13 +1124,16 @@ const applicationEvidenceFacts = [
   ["portfolio.przypominamy_com", "Przypominamy.com", "Przypominamy.com"],
   ["portfolio.przypominamy_com.type", "Platforma powiadomień dla organizacji.", "Notification platform for organisations."],
   ["portfolio.procuracost", "ProcuraCost", "ProcuraCost"],
-  ["portfolio.procuracost.type", "Kalkulator kosztów procedur zakupowych.", "Procurement procedure cost calculator."]
+  ["portfolio.procuracost.type", "Kalkulator kosztów procedur zakupowych.", "Procurement procedure cost calculator."],
+  ["portfolio.silence_tax", "silence-tax.com", "silence-tax.com"],
+  ["portfolio.silence_tax.type", "Kalkulator kosztów milczenia w organizacji.", "Calculator for the cost of silence in an organisation."]
 ];
 
 const applicationEvidenceRows = [
   ["portfolio.czympojade_pl", "portfolio.czympojade_pl.type"],
   ["portfolio.przypominamy_com", "portfolio.przypominamy_com.type"],
-  ["portfolio.procuracost", "portfolio.procuracost.type"]
+  ["portfolio.procuracost", "portfolio.procuracost.type"],
+  ["portfolio.silence_tax", "portfolio.silence_tax.type"]
 ];
 
 function applicationFactRecords() {
@@ -1139,7 +1145,14 @@ function applicationFactRecords() {
     display_pl: displayPl,
     display_en: displayEn,
     surfaces,
-    status: "approved"
+    status: "approved",
+    source_url: ({
+      "portfolio.czympojade_pl": "https://czympojade.pl",
+      "portfolio.przypominamy_com": "https://przypominamy.com",
+      "portfolio.procuracost": "https://procuracost.com",
+      "portfolio.silence_tax": "https://silence-tax.com",
+      "portfolio.silence_tax.type": "https://silence-tax.com"
+    })[id] ?? null
   }));
 }
 
@@ -1355,24 +1368,24 @@ test("Plan 2 Task 1 requires exact canonical, real hreflang and paired language 
 test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside site-nav", async () => {
   const mutations = [
     ["stylesheet template decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></template>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></template>'
     )],
     ["stylesheet hidden decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" hidden>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" hidden>'
     )],
     ["script noscript decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
-      '<script src="/assets/js/main.js?v=20260904-quality-1"></script><noscript><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></noscript>'
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><noscript><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></noscript>'
     )],
     ["script template decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
-      '<script src="/assets/js/main.js?v=20260904-quality-1"></script><template><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></template>'
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><template><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></template>'
     )],
     ["script hidden decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
-      '<script src="/assets/js/main.js?v=20260904-quality-1"></script><script src="/assets/js/main.js?v=20260904-quality-1" defer hidden></script>'
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><script src="/assets/js/main.js?v=20260921-flightplan-4" defer hidden></script>'
     )],
     ["route outside navigation", "page-navigation", (html) => html
       .replace('<a href="/lotnictwo/">Lotnictwo</a>', '<a href="/usunieta-trasa/">Lotnictwo</a>')
@@ -2077,9 +2090,11 @@ test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner
 });
 
 test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts only its exact registered URL", async () => {
+  const productTitle = '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>';
   const linkTitle = (href) => `<h3 class="evidence-row__title"><a href="${href}">czympojade.pl</a></h3>`;
+  const rewriteTitle = (html, href) => html.replace(productTitle, linkTitle(href));
   const unapproved = await applicationPageMutation({
-    mutate: (html) => html.replace('<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>', linkTitle("https://example.com/unapproved"))
+    mutate: (html) => rewriteTitle(html, "https://example.com/unapproved")
   });
   assert.ok(errorIds(unapproved).includes("application-evidence-link"), unapproved.errors.join("\n"));
 
@@ -2095,7 +2110,10 @@ test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts
   });
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
-    mutate: (html) => html.replace('<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>', linkTitle(approvedUrl))
+    mutate: (html) => rewriteTitle(html, approvedUrl),
+    extraFiles: {
+      "en/aplikacje-operacyjne/index.html": rewriteTitle(applicationPageFixture("en"), approvedUrl)
+    }
   });
   assert.deepEqual(approved.errors, []);
 });
@@ -2322,12 +2340,16 @@ test("Plan 2 Task 2 fix round 3 exempts anchors only inside the three owned evid
     publication_url: "https://czympojade.pl",
     surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
   });
+  const rewriteTitle = (html) => html.replace(
+    '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
+    `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
+  );
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
-    mutate: (html) => html.replace(
-      '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
-      `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
-    )
+    mutate: rewriteTitle,
+    extraFiles: {
+      "en/aplikacje-operacyjne/index.html": rewriteTitle(applicationPageFixture("en"))
+    }
   });
   assert.deepEqual(approved.errors, []);
 });
@@ -2607,7 +2629,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["paragraph", (html) => html.replace('<p class="section-label">01 / Problem</p>', '<p class="section-label"/>')],
     ["details", (html) => html.replace('<details class="nav-group">', '<details class="nav-group"/>')],
     ["summary", (html) => html.replace("<summary>Doradztwo</summary>", "<summary/>")],
-    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>', '<script src="/assets/js/main.js?v=20260904-quality-1" defer/>')],
+    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>', '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer/>')],
     ["style", (html) => html.replace("</footer>", "<style/></style></footer>")]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
@@ -2627,7 +2649,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["attributes on a closing tag", (html) => html.replace("<span></span>", "<span></span claim>")],
     ["stray closing tag", (html) => html.replace("</footer>", "</claim></footer>")],
     ["stray opening tag", (html) => html.replace("</footer>", "<span></footer>")],
-    ["closing tag for a void element", (html) => html.replace('<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async">', '<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></img>')],
+    ["closing tag for a void element", (html) => html.replace('<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async">', '<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></img>')],
     ["mismatched nesting", (html) => html.replace("</footer>", "<div><span></div></span></footer>")],
     ["slash before stray opening-tag content", (html) => html.replace("<span></span>", "<span / claim></span>")]
   ];
@@ -2996,9 +3018,9 @@ test("Plan 2 Task 4 fix round 2 owns URL-valued metadata, itemid and statically 
 test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actionable controls", async () => {
   const cases = [
     ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
-    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png"', 'img data="/assets/img/signature.png"')],
+    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png?v=20260921-flightplan-4"', 'img data="/assets/img/signature.png?v=20260921-flightplan-4"')],
     ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
-    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></body>')],
+    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></body>')],
     ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
     ["unapproved event handler", (html) => html.replace('class="footer-sign"', 'class="footer-sign" onfocus="location.href=\'/#contact\'"')]
   ];
@@ -3136,8 +3158,8 @@ test("Plan 2 Task 2 fix round 5 independently inventories executable, style and 
 
   const duplicateStylesheetHref = await applicationPageMutation({
     mutate: (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" href="/assets/css/style.css?v=20260904-quality-1">'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" href="/assets/css/style.css?v=20260921-flightplan-4">'
     )
   });
   assert.ok(errorIds(duplicateStylesheetHref).includes("application-resource-census"), duplicateStylesheetHref.errors.join("\n"));
@@ -3160,6 +3182,7 @@ test("Plan 2 Task 2 fix round 5 resource census survives coordinated PL EN diges
   const scriptsDirectory = resolve(root, "scripts");
   const verifierPath = resolve(scriptsDirectory, "verify-site.mjs");
   await mkdir(scriptsDirectory, { recursive: true });
+  await writeFile(resolve(root, "version.js"), await readFile(resolve("version.js"), "utf8"));
   const verifierSource = await readFile(modulePath, "utf8");
   const manifestMessage = "`actual-manifest=${lang}:${actual.elementCount}:${actual.digest}; requires the exact ${expected.elementCount}-element Task 2 tag, position and complete attribute manifest`";
   assert.ok(verifierSource.includes(manifestMessage), "digest probe must instrument the manifest diagnostic");
@@ -3482,7 +3505,7 @@ test("Owner correction updates Czym pojadę from timetable wording to the fleet 
     as_of: null,
     source_type: "owner_verified",
     source_label: sourceLabel,
-    source_url: procurementBeyondInterview.href,
+    source_url: "https://czympojade.pl",
     publication_url: "https://czympojade.pl",
     surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
     status: "approved"
@@ -3673,6 +3696,7 @@ test("registry keeps responsibility facts atomic and Polish-English meanings ali
   const { facts } = await readFacts();
   const byId = new Map(facts.map((record) => [record.id, record]));
   const expectedResponsibilities = {
+    "career.all_for_one.responsibility": ["Kontynuuję rolę w apsolut po przejęciu apsolut przez All for One.", "I continue the apsolut role after All for One acquired apsolut."],
     "career.apsolut.responsibility": ["Rozwijam działalność w regionie CEE.", "I develop the business in the CEE region."],
     "career.sap.responsibility": ["Rozwijałem rynek SAP Ariba w Polsce i regionie CEE.", "I developed the SAP Ariba market in Poland and the CEE region."],
     "career.pzu.responsibility": ["Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model."],
@@ -4218,7 +4242,7 @@ function notFoundContractFixture() {
     <title>404 · Strona nie istnieje | mamcarz.com</title>
     <meta name="description" content="Pod tym adresem nie ma strony.">
     <meta name="robots" content="noindex, follow">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
     <style>[data-lang="en"]{display:none}html[lang="en"] [data-lang="pl"]{display:none}html[lang="en"] [data-lang="en"]{display:revert}</style>
     <script>(function(){var english=location.pathname.indexOf("/en/")===0;if(!english)return;document.documentElement.lang="en";document.title="404 · Page not found | mamcarz.com";var meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute("content","There is no page at this address.");})();</script>
   </head><body>
@@ -4228,7 +4252,7 @@ function notFoundContractFixture() {
       <a href="/" data-lang="pl">Strona główna</a><a href="/#contact" data-lang="pl">Kontakt</a>
       <a href="/en/" data-lang="en">Home</a><a href="/en/#contact" data-lang="en">Contact</a>
     </main><footer class="site-footer">mamcarz.com</footer>
-    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
+    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
 }
 
@@ -4241,7 +4265,7 @@ test("Plan 3 Task 5 requires one no-JS-safe bilingual 404 document", async (t) =
     ["second h1", "not-found-h1", (html) => html.replace("</main>", "<h1>Duplicate</h1></main>")],
     ["second main", "not-found-main", (html) => html.replace("</footer>", "<main></main></footer>")],
     ["indexable error", "not-found-robots", (html) => html.replace("noindex, follow", "index, follow")],
-    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260904-quality-1", "stale")],
+    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260921-flightplan-4", "stale")],
     ["missing English contact", "not-found-links", (html) => html.replace('href="/en/#contact"', 'href="/en/"')],
     ["duplicate id", "not-found-ids", (html) => html.replace("</main>", '<span id="main"></span></main>')],
     ["English default", "not-found-default", (html) => html.replace('<html lang="pl">', '<html lang="en">')],
@@ -5910,8 +5934,8 @@ const task7HomeMutations = [
   ["missing hero image width", "home-hero-image", (html) => html.replace(' width="960"', "")],
   ["missing hero image height", "home-hero-image", (html) => html.replace(' height="1280"', "")],
   ["missing high-priority hero fetch", "home-hero-image", (html) => html.replace(' fetchpriority="high"', "")],
-  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260904-quality-1', 'style.css?v=stale')],
-  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260904-quality-1', 'main.js?v=stale')],
+  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260921-flightplan-4', 'style.css?v=stale')],
+  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260921-flightplan-4', 'main.js?v=stale')],
   ["inline presentation style", "home-inline-style", (html) => html.replace('<section id="hero">', '<section id="hero" style="display:block">')]
 ];
 
@@ -5926,36 +5950,36 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round3ExactResourceMutations = [
   ["alternate stylesheet rel", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260904-quality-1">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["stylesheet title attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" title="decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" title="decoy">'
   )],
   ["stylesheet integrity attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" integrity="sha256-decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" integrity="sha256-decoy">'
   )],
   ["stylesheet data decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" data-decoy="true">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" data-decoy="true">'
   )],
   ["deferred async browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer async>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer async>'
   )],
   ["typed browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer type="text/javascript">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer type="text/javascript">'
   )],
   ["browser script integrity attribute", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer integrity="sha256-decoy">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer integrity="sha256-decoy">'
   )],
   ["browser script data decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer data-decoy="true">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer data-decoy="true">'
   )],
   ["disabled latin font preload", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6065,12 +6089,12 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round2ActiveResourceMutations = [
   ["stylesheet with inactive media", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" media="not all">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" media="not all">'
   )],
   ["disabled stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" disabled>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" disabled>'
   )],
   ["latin font preload with inactive media", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6081,12 +6105,12 @@ const task7Round2ActiveResourceMutations = [
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin media="not all">'
   )],
   ["nomodule browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer nomodule>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer nomodule>'
   )],
   ["stylesheet inside noscript", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></noscript>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></noscript>'
   )],
   ["latin font preload inside noscript", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6097,12 +6121,12 @@ const task7Round2ActiveResourceMutations = [
     '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></noscript>'
   )],
   ["browser script inside noscript", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
-    '<noscript><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></noscript>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<noscript><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></noscript>'
   )],
   ["stylesheet inside template", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></template>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></template>'
   )],
   ["latin font preload inside template", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6113,20 +6137,20 @@ const task7Round2ActiveResourceMutations = [
     '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></template>'
   )],
   ["browser script inside template", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
-    '<template><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></template>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<template><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></template>'
   )],
   ["stylesheet inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></div>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></div>'
   )],
   ["font preload inside hidden ancestor", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
     '<div hidden><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></div>'
   )],
   ["browser script inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
-    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></div>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></div>'
   )]
 ];
 
@@ -6157,36 +6181,36 @@ const task7ReviewHomeSemanticMutations = [
     '<div hidden><input id="chat-input" maxlength="2000"></div>'
   )],
   ["stylesheet changed to a style preload", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260904-quality-1">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["hidden stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" hidden>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" hidden>'
   )],
   ["stylesheet attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["additional active stylesheet", "home-cache-version", (html) => html.replace(
     "</head>",
     '<link rel="stylesheet" href="/assets/css/extra.css">\n  </head>'
   )],
   ["non-executable JSON browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1" type="application/json" defer>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" type="application/json" defer>'
   )],
   ["browser script without defer", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1">'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4">'
   )],
   ["hidden browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer hidden>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer hidden>'
   )],
   ["browser-script attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
-    '<meta src="/assets/js/main.js?v=20260904-quality-1" defer>'
+    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
+    '<meta src="/assets/js/main.js?v=20260921-flightplan-4" defer>'
   )],
   ["additional executable browser script", "home-cache-version", (html) => html.replace(
     "</body>",
@@ -6201,8 +6225,8 @@ const task7ReviewHomeSemanticMutations = [
     '/assets/fonts/dmsans-latext.woff2'
   )],
   ["third font preload", "home-font-preload", (html) => html.replace(
-    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
-    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">'
+    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
+    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
   )],
   ["font preload with the wrong rel", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -7012,7 +7036,7 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
       '<a href="/en/procurement-2026/" class="nav-lang">EN</a>'
     ))],
     ["legacy navHamburger", task9Mutate("index.html", (html) => html.replace('id="nav-toggle"', 'id="navHamburger"'))],
-    ["footer year altered", task9Mutate("index.html", (html) => html.replace("© 2026 Paweł", "© 1993–2026 Paweł"))],
+    ["footer year altered", task9Mutate("index.html", (html) => html.replace("© 1993–2026 Paweł", "© 2026 Paweł"))],
     ["footer link removed", task9Mutate("index.html", (html) => html.replace('<li><a href="/wiedza/">Wiedza</a></li>', ""))],
     ["footer link added", task9Mutate("index.html", (html) => html.replace('</ul></footer>', '<li><a href="/extra/">Extra</a></li></ul></footer>'))],
     ["footer links reordered", task9Mutate("index.html", (html) => html.replace(
@@ -7022,10 +7046,10 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
     ["external footer link", task9Mutate("index.html", (html) => html.replace('href="/wiedza/">Wiedza</a></li><li><a href="/#contact"', 'href="https://example.com/">Wiedza</a></li><li><a href="/#contact"'))],
     ["signature asset swapped", task9Mutate("index.html", (html) => html.replace("/assets/img/signature.png", "/assets/img/og.jpg"))],
     ["signature dimensions removed", task9Mutate("index.html", (html) => html.replace(' width="160" height="50"', ""))],
-    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260904-quality-1", "style.css?v=20260825-flightplan-1"))],
-    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260904-quality-1", "main.js?v=20260825-flightplan-1"))],
-    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></head>'))],
-    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script></body>'))],
+    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260921-flightplan-4", "style.css?v=20260825-flightplan-1"))],
+    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260921-flightplan-4", "main.js?v=20260825-flightplan-1"))],
+    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></head>'))],
+    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></body>'))],
     ["wrapper inside direct navigation text anchor", task9Mutate("index.html", (html) => html.replace(
       '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
       '<a href="/aplikacje-operacyjne/"><span>Aplikacje</span></a>'
@@ -7052,7 +7076,7 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
     ["wrapper inside logo mark", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<b><span>PM</span></b>'))],
     ["logo mark changed from b to span", task9Mutate("index.html", (html) => html.replace('<b>PM</b>', '<span>PM</span>'))],
     ["wrapper inside disclosure summary", task9Mutate("index.html", (html) => html.replace('<summary>Doradztwo</summary>', '<summary><span>Doradztwo</span></summary>'))],
-    ["wrapper inside footer owner", task9Mutate("index.html", (html) => html.replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '<span>© 2026 Paweł Mamcarz · mamcarz.com</span></div>'))],
+    ["wrapper inside footer owner", task9Mutate("index.html", (html) => html.replace('© 1993–2026 Paweł Mamcarz · mamcarz.com</div>', '<span>© 1993–2026 Paweł Mamcarz · mamcarz.com</span></div>'))],
     ["wrapper inside back-to-top", task9Mutate("index.html", (html) => html.replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę"><span>↑</span></button>'))],
     ["nested element inside toggle span", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span><i></i></span><span></span><span></span></button>'))],
     ["non-span direct child inside toggle", task9Mutate("index.html", (html) => html.replace('<span></span><span></span><span></span></button>', '<span></span><span></span><span></span><i></i></button>'))],
@@ -7086,8 +7110,8 @@ test("Plan 2 Task 9 permits formatting whitespace and comments in exact shell to
     .replace('<span></span><span></span><span></span></button>', '<span>\n<!-- bar --></span><span></span><span></span></button>')
     .replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay">\n<!-- overlay -->\n</div>')
     .replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę">\n<!-- back -->↑\n</button>')
-    .replace('<img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
-    .replace('© 2026 Paweł Mamcarz · mamcarz.com</div>', '\n<!-- owner -->© 2026 Paweł Mamcarz · mamcarz.com\n</div>')
+    .replace('<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
+    .replace('© 1993–2026 Paweł Mamcarz · mamcarz.com</div>', '\n<!-- owner -->© 1993–2026 Paweł Mamcarz · mamcarz.com\n</div>')
     .replace('<ul class="footer-links">', '<ul class="footer-links">\n<!-- links -->'));
   const root = await task9SiteShellRoot(overrides);
   const result = await runVerification({ root, scope: "pages", family: "all" });
@@ -7129,6 +7153,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   const requiredLines = [
     "# Paweł Mamcarz: approved public fact index",
     "- [hero.experience_years] 25+ years of procurement experience.",
+    "- [career.all_for_one.title] Sales Director",
     "- [career.apsolut.title] Associate Partner, CEE Region",
     "- [portfolio.akrobacja_com.current_status] Current aviation venture: akrobacja.com.",
     "- [portfolio.czympojade_pl.type] czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."
@@ -7138,7 +7163,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "2fbaf0a295f937d2a2c8a2686af8ab97e0827d1a7e2775b1d782bde965d5928e",
+    "f6ba658ce855ed8a7760b136a4a844609c99c72c02b8b7f043146d23efaac6d0",
     "llms-full.txt must retain the exact approved fact index without regenerated biography"
   );
 });
@@ -7373,7 +7398,7 @@ function plan3Schema(entry, shape = "graph") {
 
 function plan3Page(entry, { body, head = "", schema = plan3Schema(entry), hreflang = plan3Hreflang(entry), assets = null } = {}) {
   const shellAssets = assets ?? (plan3ShellFiles.has(entry.file)
-    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">\n<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>'
+    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">\n<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>'
     : "");
   const content = body ?? (entry.file === "index.html" ? '<p data-fact-id="fixture.claim">Verified claim</p>' : "Page copy");
   const locale = entry.lang === "pl" ? "pl_PL" : "en_US";
@@ -9182,7 +9207,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   const verifier = await import("./verify-site.mjs");
   const entries = verifier.PRESENTATION_INDEX_OCCURRENCES;
   assert.ok(Array.isArray(entries), "the verifier must export the reviewed occurrence manifest");
-  assert.equal(entries.length, 145, "every reviewed presentation index in the 25 public pages is inventoried");
+  assert.equal(entries.length, 147, "every reviewed presentation index in the 25 public pages is inventoried");
 
   const canonical = JSON.stringify([...entries].sort((left, right) => [
     left.file,
@@ -9199,7 +9224,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   ].join("\0"))));
   assert.equal(
     createHash("sha256").update(canonical).digest("hex"),
-    "a3d4b82c660c995bff7ee5d0528725e53ca496ae3f8dd978df1eeda12da10b4c",
+    "92458fcad0d422ff88a9088d0bec0d560907be504a4685519ab791a32ba16103",
     "presentation markup changes require an explicit inventory audit and baseline refresh"
   );
 });

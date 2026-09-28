@@ -14,9 +14,14 @@ This file is a navigation index. The three core areas have equal status: Advisor
 ### Operational applications / Aplikacje operacyjne
 - PL | Operational applications: https://mamcarz.com/aplikacje-operacyjne/
 - EN | Operational applications: https://mamcarz.com/en/aplikacje-operacyjne/
+- Listed products: czympojade.pl, Przypominamy.com, ProcuraCost, silence-tax.com
+- Public Silence Tax variant: https://fnp.silence-tax.com
+
 ### Aviation / Lotnictwo
 - PL | Aviation: https://mamcarz.com/lotnictwo/
 - EN | Aviation: https://mamcarz.com/en/lotnictwo/
+- Aviation venture: akrobacja.com
+
 ### Projects, knowledge and speaking
 - PL | Projects: https://mamcarz.com/case-studies/
 - EN | Projects: https://mamcarz.com/en/case-studies/
@@ -50,6 +55,7 @@ This file is a navigation index. The three core areas have equal status: Advisor
 - [project.kghm.integration] SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA
 - [project.lot.implementation] SAP Ariba implementation for PLL LOT
 - [project.motor_oil.implementation] SAP procurement implementation for Motor Oil Hellas
+- [career.all_for_one.title] Sales Director
 - [career.apsolut.title] Associate Partner, CEE Region
 - [career.sap.title] SAP Ariba Senior Account Executive
 - [career.orlen_general.title] Head of General Procurement

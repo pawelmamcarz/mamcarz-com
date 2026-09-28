@@ -22,6 +22,12 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 - Push, merge, deploy Pages i deploy Workera są osobnymi bramkami. Nie wykonuj żadnej z nich bez odpowiedniego zatwierdzenia.
 - `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i przekierowuje dawny adres samodzielnej infografiki na `/diagrams/infographic`. Redirect `www` na apex jest konfiguracją Cloudflare Bulk Redirect poza repozytorium; przed wydaniem trzeba osobno odczytać jego stan i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
 
+## Wersja produktu i wersja zasobów
+
+Kanoniczna wersja produktu jest w `version.js` jako `VERSION`. Format: `YEAR.WEEK.RELEASE` (rok i numer tygodnia ISO, potem kolejne wydanie w tym tygodniu). Bieżące wydanie: `2026.39.1`. To nie jest semver. Git tag nie jest źródłem prawdy. Numer podbijamy **tylko przy cięciu wydania**; feature PR-y nie ruszają `version.js` ani `CHANGELOG.md`. Ten sam tydzień ISO → tylko N+1. Nowy tydzień → `ROK.NOWY_TYDZIEŃ.1`. Nie ma osobnej komendy bumpa: ręczna edycja przy cięciu. Konkretny build zapisujemy skrótem commita w `CHANGELOG.md` albo w runbooku w `docs/releases/`; nie wstawiamy SHA do HTML.
+
+Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny token cache-bust, nie wersja produktu. Aktualny token: `20260921-flightplan-4`, powiązany z wydaniem `2026.39.1`. Przy cięciu wydania aktualizujemy oba: `VERSION` w `version.js` oraz token zasobów we wszystkich publicznych dokumentach i kontraktach weryfikacyjnych.
+
 ## Struktura i manifest tras
 
 - `index.html`, `en/index.html` — strony główne.
@@ -32,7 +38,10 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 - `procurement-2026/`, `diagrams/` — samodzielne materiały pomocnicze; nie podlegają automatycznie regule par PL/EN. Trasy diagramów nie mają rozszerzenia `.html`. `infographic_procurement_2026_EN.html` pozostaje lokalną kopią historyczną, wyłączoną z publikacji.
 - `prywatnosc/`, `en/prywatnosc/` — informacje o prywatności, dostępne ze stopki i czatu.
 - `assets/css/style.css` — wspólny arkusz; `assets/js/main.js` — nawigacja, chat i drobne interakcje; `assets/img/` i `assets/fonts/` — zasoby.
+- `version.js` — kanoniczna wersja produktu (`VERSION`) i token cache-bust zasobów (`ASSET_CACHE_VERSION`).
+- `CHANGELOG.md` — dziennik wydań z perspektywy właściciela strony.
 - `content/site-facts.json` — rejestr zatwierdzonych faktów i powierzchni publikacji.
+- `worker/index.js` — czat; `worker/jev-policy.js` — pytania, kryteria i progi TypeSafe Jev; `worker/jev.js` — cienka osłona `typesafe/jev` przez `env.AI`.
 - `scripts/verify-site.mjs` — manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 25 publicznych dokumentów.
 - `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, `404.html` — powierzchnie discovery i błędów.
 
@@ -47,7 +56,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Kierunek: „Flight Plan” — redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
 - Fonty: Barlow Semi Condensed dla nagłówków, DM Sans dla tekstu, DM Mono dla etykiet i danych.
 - Główne tokeny w `:root`: `--runway-ink`, `--signal`, `--signal-dark`, `--sky-band`, `--ink-secondary`, `--line`, `--line-strong`.
-- Wspólna wersja zasobów w publicznych dokumentach: `20260904-quality-1`.
+- Wspólna wersja zasobów w publicznych dokumentach: `20260921-flightplan-4` (cache-bust powiązany z wydaniem produktu `2026.39.1`).
 - Nie przywracaj Playfair Display, generycznych kart, przypadkowych gradientów, dekoracyjnych wykresów ani narracji udającej fakty.
 - Zachowuj semantyczny HTML, jeden `main`, jeden `h1`, widoczny focus, działanie bez JavaScriptu i obsługę `prefers-reduced-motion`.
 - `404.html` jest jednym dokumentem PL/EN: PL działa domyślnie bez JS, ma `noindex`, nie ma canonicala, a wczesny skrypt może zmienić wyłącznie `lang`, `title` i istniejący opis.
@@ -61,7 +70,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Dawna nazwa WarsawFlightSafety jest wycofana. Według potwierdzenia właściciela z 2026-08-26 aktualną marką przedsięwzięcia lotniczego jest `akrobacja.com`; nie przedstawiaj ich jako dwóch bieżących przedsięwzięć.
 - Ton jest premium, rzeczowy i spokojny. Unikaj superlatywów bez dowodu, obietnic SLA, nachalnego języka, myślników używanych mechanicznie i stylistycznych „AI tells”.
 - Przy zmianie faktów audytuj wszystkie powierzchnie z rejestru, w tym `worker/index.js`, `assets/js/main.js`, `llms.txt` i `llms-full.txt`. Worker nie jest „pełnym CV”; jego prompt ma używać tylko zatwierdzonego, potrzebnego zakresu.
-- Worker używa modelu `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Frontend wywołuje `https://mamcarz-chat-api.pawel-767.workers.dev`; zmianę nazwy lub URL trzeba zsynchronizować i przetestować po obu stronach.
+- Worker używa modelu `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Przed Llama Worker może raz wywołać `typesafe/jev` przez istniejące wiązanie `env.AI` (bez osobnego `TYPESAFE_API_KEY`) do typowanego routingu, osłon jailbreak/spam i sond faktów; błąd, timeout lub brak odpowiedzi Jev nie blokuje ścieżki klienta. Jev nie generuje treści dla użytkownika. Frontend wywołuje `https://mamcarz-chat-api.pawel-767.workers.dev`; zmianę nazwy lub URL trzeba zsynchronizować i przetestować po obu stronach.
 
 ## SEO i metadata
 

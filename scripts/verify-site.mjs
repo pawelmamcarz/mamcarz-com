@@ -3,8 +3,13 @@ import { createHash } from "node:crypto";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
+import { ASSET_CACHE_VERSION } from "../version.js";
 
 const defaultRoot = resolve(import.meta.dirname, "..");
+const SHARED_STYLESHEET_HREF = `/assets/css/style.css?v=${ASSET_CACHE_VERSION}`;
+const SHARED_SCRIPT_SRC = `/assets/js/main.js?v=${ASSET_CACHE_VERSION}`;
+const SHARED_SIGNATURE_SRC = `/assets/img/signature.png?v=${ASSET_CACHE_VERSION}`;
+const FOOTER_OWNER_LINE = "© 1993–2026 Paweł Mamcarz · mamcarz.com";
 const factKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "surfaces", "status"];
 const kinds = new Set(["constant", "dated"]);
 const sourceTypes = new Set(["owner_verified", "public_source", "internal_evidence"]);
@@ -106,9 +111,12 @@ const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
   "### Operational applications / Aplikacje operacyjne",
   "- PL | Operational applications: https://mamcarz.com/aplikacje-operacyjne/",
   "- EN | Operational applications: https://mamcarz.com/en/aplikacje-operacyjne/",
+  "- Listed products: czympojade.pl, Przypominamy.com, ProcuraCost, silence-tax.com",
+  "- Public Silence Tax variant: https://fnp.silence-tax.com",
   "### Aviation / Lotnictwo",
   "- PL | Aviation: https://mamcarz.com/lotnictwo/",
   "- EN | Aviation: https://mamcarz.com/en/lotnictwo/",
+  "- Aviation venture: akrobacja.com",
   "### Projects, knowledge and speaking",
   "- PL | Projects: https://mamcarz.com/case-studies/",
   "- EN | Projects: https://mamcarz.com/en/case-studies/",
@@ -138,7 +146,8 @@ const LLMS_FULL_STATIC_LINES = Object.freeze([
   "## Organisations",
   "## Approved project displays",
   "## Roles",
-  "## Aviation and verified ventures"
+  "## Aviation and verified ventures",
+  "## Operational products"
 ]);
 
 export const PUBLIC_PAGE_PAIRS = Object.freeze(PUBLIC_PAGES
@@ -240,6 +249,15 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "Produkt / 03",
     "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 03 ProcuraCost Funkcja Kalkulator kosztów procedur zakupowych.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator kosztów procedur zakupowych.\"]]"
+  },
+  {
+    "file": "aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "Produkt / 04",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.silence_tax portfolio.silence_tax.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 04 silence-tax.com Funkcja Kalkulator kosztów milczenia w organizacji.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 04\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"silence-tax.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator kosztów milczenia w organizacji.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -402,6 +420,15 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "Product / 03",
     "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 03 ProcuraCost Function Procurement procedure cost calculator.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Procurement procedure cost calculator.\"]]"
+  },
+  {
+    "file": "en/aplikacje-operacyjne/index.html",
+    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[2]>article[4]>p[1]",
+    "token": "04",
+    "occurrence": 1,
+    "ownerText": "Product / 04",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.silence_tax portfolio.silence_tax.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 04 silence-tax.com Function Calculator for the cost of silence in an organisation.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 04\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"silence-tax.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Calculator for the cost of silence in an organisation.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -2354,8 +2381,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     error(errors, "home-hero-image", page.path, "visible hero requires one visible image with explicit positive width and height plus fetchpriority=high");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260904-quality-1";
-  const expectedJs = "/assets/js/main.js?v=20260904-quality-1";
+  const expectedCss = SHARED_STYLESHEET_HREF;
+  const expectedJs = SHARED_SCRIPT_SRC;
   const stylesheetAttributeNames = new Set(["rel", "href"]);
   const stylesheetNodes = elements.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -4096,8 +4123,8 @@ function verifyNotFound(html, errors) {
     error(errors, "not-found-robots", path, "404 must have one robots meta containing noindex");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260904-quality-1";
-  const expectedJs = "/assets/js/main.js?v=20260904-quality-1";
+  const expectedCss = SHARED_STYLESHEET_HREF;
+  const expectedJs = SHARED_SCRIPT_SRC;
   const stylesheets = byName("link").filter((element) => elementIsActiveResource(element)
     && elementAttributeTokens(element, "rel").includes("stylesheet"));
   const externalScripts = byName("script").filter((element) => elementIsActiveResource(element)
@@ -4648,7 +4675,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-hreflang", path, "requires exact active pl, en and x-default hreflang entries for the real route pair");
   }
 
-  const expectedStylesheet = "/assets/css/style.css?v=20260904-quality-1";
+  const expectedStylesheet = SHARED_STYLESHEET_HREF;
   const links = elements.filter((element) => element.name === "link");
   const stylesheetCandidates = links.filter((element) => elementAttributeTokens(element, "rel").includes("stylesheet")
     || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
@@ -4657,7 +4684,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-stylesheet", path, `requires one active shared stylesheet ${expectedStylesheet}`);
   }
 
-  const expectedScript = "/assets/js/main.js?v=20260904-quality-1";
+  const expectedScript = SHARED_SCRIPT_SRC;
   const scriptCandidates = elements.filter((element) => element.name === "script" && element.attributes.has("src"));
   const validScripts = scriptCandidates.filter((element) => elementHasExactAttributeNames(element, new Set(["src", "defer"]))
     && elementAttribute(element, "src") === expectedScript
@@ -4754,6 +4781,11 @@ const APPLICATION_EVIDENCE_CONTRACT = Object.freeze([
     ids: Object.freeze(["portfolio.procuracost", "portfolio.procuracost.type"]),
     pl: Object.freeze({ context: "Produkt / 03", name: "ProcuraCost", label: "Funkcja", meaning: "Kalkulator kosztów procedur zakupowych." }),
     en: Object.freeze({ context: "Product / 03", name: "ProcuraCost", label: "Function", meaning: "Procurement procedure cost calculator." })
+  }),
+  Object.freeze({
+    ids: Object.freeze(["portfolio.silence_tax", "portfolio.silence_tax.type"]),
+    pl: Object.freeze({ context: "Produkt / 04", name: "silence-tax.com", label: "Funkcja", meaning: "Kalkulator kosztów milczenia w organizacji." }),
+    en: Object.freeze({ context: "Product / 04", name: "silence-tax.com", label: "Function", meaning: "Calculator for the cost of silence in an organisation." })
   })
 ]);
 
@@ -4806,10 +4838,11 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operacja", "Uruchomienie", "Przygotowanie danych, odbiór procesu i wejście do codziennej pracy."
       ]),
       evidence: Object.freeze([
-        "03 / Produkty", "Wybrane produkty.", "Przykłady aplikacji operacyjnych.",
+    "03 / Produkty", "Wybrane produkty.", "Wybrane zakresy pokazane przez ich zatwierdzone znaczenie produktowe. fnp.silence-tax.com to publiczny wariant na silniku Silence Tax, nie osobna marka.",
         "Produkt / 01", "czympojade.pl", "Funkcja", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
         "Produkt / 02", "Przypominamy.com", "Funkcja", "Platforma powiadomień dla organizacji.",
-        "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych."
+        "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych.",
+        "Produkt / 04", "silence-tax.com", "Funkcja", "Kalkulator kosztów milczenia w organizacji."
       ]),
       fit: Object.freeze([
         "04 / Współpraca", "Warunki dobrego dopasowania.",
@@ -4826,7 +4859,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
+      FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/", "Strona główna"]),
@@ -4886,10 +4919,11 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operation", "Launch", "Data preparation, process acceptance and entry into day-to-day work."
       ]),
       evidence: Object.freeze([
-        "03 / Evidence", "Selected products.", "Examples of operational applications.",
+        "03 / Evidence", "Selected products.", "Selected scopes, shown through their approved product meaning. fnp.silence-tax.com is a public Silence Tax variant on the same engine, not a third brand.",
         "Product / 01", "czympojade.pl", "Function", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
         "Product / 02", "Przypominamy.com", "Function", "Notification platform for organisations.",
-        "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator."
+        "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator.",
+        "Product / 04", "silence-tax.com", "Function", "Calculator for the cost of silence in an organisation."
       ]),
       fit: Object.freeze([
         "04 / Fit", "Conditions for a good fit.",
@@ -4906,7 +4940,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
+      FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/en/", "Home"]),
@@ -5027,8 +5061,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 194, digest: "96174bdf87aecda7e50bee6e4547336b5ceda0c45f9a7317e7ed4f76cd8680ae" }),
-  en: Object.freeze({ elementCount: 194, digest: "7c918ab1ceef1e65c71613740b99674f5d3a4857678c79efd6cab7a82ef59ae4" })
+  pl: Object.freeze({ elementCount: 201, digest: "54b0826a406e00e8f4e3398f276a9b2021dea9247079cd0850967740cdcd7b7e" }),
+  en: Object.freeze({ elementCount: 201, digest: "c87a5f97402c76c65d1149262716267f20abb6e8e8eea29a4cae0090e01b87bf" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -5039,7 +5073,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" })
+    Object.freeze({ rel: "stylesheet", href: SHARED_STYLESHEET_HREF })
   ]),
   en: Object.freeze([
     Object.freeze({ rel: "canonical", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
@@ -5049,7 +5083,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" })
+    Object.freeze({ rel: "stylesheet", href: SHARED_STYLESHEET_HREF })
   ])
 });
 const APPLICATION_ZERO_RESOURCE_TAGS = new Set([
@@ -5335,7 +5369,7 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
     && exactApplicationResourceAttributes(schema, { type: "application/ld+json" })
     && external?.parent === body
     && bodyChildren.at(-1) === external
-    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260904-quality-1", defer: null })
+    && exactApplicationResourceAttributes(external, { src: SHARED_SCRIPT_SRC, defer: null })
     && rawElementText(external).trim() === "";
 
   const footerSigns = all.filter((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
@@ -5346,7 +5380,7 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
     && images.length === 1
     && images[0].parent === footerSigns[0]
     && exactApplicationResourceAttributes(images[0], {
-      src: "/assets/img/signature.png",
+      src: SHARED_SIGNATURE_SRC,
       alt: "",
       width: "160",
       height: "50",
@@ -5515,7 +5549,7 @@ function validApplicationAnchorLeaf(anchor, expected) {
     return children.length === 1
       && image?.name === "img"
       && exactApplicationAttributes(image, {
-        src: "/assets/img/signature.png",
+        src: SHARED_SIGNATURE_SRC,
       alt: "",
       width: "160",
       height: "50",
@@ -5631,7 +5665,7 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" }
+    { rel: "stylesheet", href: SHARED_STYLESHEET_HREF }
   ];
   const expectedHeadTags = [
     "meta", "meta", "title", "meta", "meta", "meta",
@@ -6063,7 +6097,7 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       && exactRegistry;
   }
   if (!exactEvidenceContract) {
-    error(errors, "application-evidence-contract", path, "requires the immutable ordered three-row, six-ID Task 2 evidence contract and exact registry literals");
+    error(errors, "application-evidence-contract", path, "requires the immutable ordered four-row, eight-ID evidence contract and exact registry literals");
   }
   if (!validEvidenceLinks) {
     error(errors, "application-evidence-link", path, "evidence links must exactly match a non-null approved source_url on an associated fact");
@@ -6178,7 +6212,7 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" }
+    { rel: "stylesheet", href: SHARED_STYLESHEET_HREF }
   ]),
   en: Object.freeze([
     { rel: "canonical", href: "https://mamcarz.com/en/lotnictwo/" },
@@ -6188,13 +6222,13 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" }
+    { rel: "stylesheet", href: SHARED_STYLESHEET_HREF }
   ])
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 198, digest: "379e55dc764108d273ed776c0c6bc7d805d7524a98e16f9c07705f7690b9438b" }),
-  en: Object.freeze({ elementCount: 198, digest: "69b5caddb313f968e7373111da22198ac986afce48243ee98b5b98057577572a" })
+  pl: Object.freeze({ elementCount: 198, digest: "f96a2d816719628815d93a0ef9d960d8018bc649b263385c59ccae34861d313e" }),
+  en: Object.freeze({ elementCount: 198, digest: "d8fcd739b57c151589fe05322f266d29580917b18260dc084ff8cd1063a384b8" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -6207,7 +6241,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "Proces przeniesiony do narzędzia.", "Software porządkuje dane, kolejne stany i odpowiedzialność. Interfejs wynika z przebiegu pracy.", "WEJŚCIE", "Procedura", "PRZEPŁYW", "Dane i decyzje", "WYJŚCIE", "Ślad działania",
     "05", "LOG", "Projekty", "Projekty lotnicze.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
     "06", "COMMS", "Kontakt", "Porozmawiajmy o projekcie.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
-    "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
+    FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
   ]),
   en: Object.freeze([
     "Skip to content", "PM", "· Mamcarz.com", "Advisory", "Procurement transformation", "SAP Ariba implementation", "Public procurement", "Applications", "Aviation", "Projects", "Insights", "About", "Contact", "PL", "↑",
@@ -6218,7 +6252,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "The process transferred into a tool.", "Software organises data, consecutive states and responsibility. The interface follows the working process.", "INPUT", "Procedure", "FLOW", "Data and decisions", "OUTPUT", "Action trail",
     "05", "LOG", "Projects", "Aviation projects.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
     "06", "COMMS", "Contact", "Let’s discuss your project.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
-    "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
+    FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
   ])
 });
 
@@ -6397,7 +6431,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(scripts[0], { type: "application/ld+json" })
     && scripts[1]?.parent === body
     && bodyChildren.at(-1) === scripts[1]
-    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260904-quality-1", defer: null })
+    && exactApplicationResourceAttributes(scripts[1], { src: SHARED_SCRIPT_SRC, defer: null })
     && rawElementText(scripts[1]).trim() === "";
   const pictures = all.filter((element) => element.name === "picture");
   const sources = all.filter((element) => element.name === "source");
@@ -6416,7 +6450,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(ventureImage, { src: "/assets/img/portfolio/akrobacja.jpg", alt: lang === "pl" ? "Widok projektu akrobacja.com" : "View of the akrobacja.com project", width: "1400", height: "492", loading: "lazy", decoding: "async" })
     && footerSign !== undefined
     && elementIsWithin(footerSign, footer)
-    && exactApplicationResourceAttributes(signature, { src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
+    && exactApplicationResourceAttributes(signature, { src: SHARED_SIGNATURE_SRC, alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
   const anchors = all.filter((element) => element.name === "a");
   const anchorsValid = JSON.stringify(anchors.map((anchor) => browserNormalizedUrl(elementAttribute(anchor, "href")))) === JSON.stringify(aviationExpectedAnchorHrefs(lang));
   const forbiddenTags = new Set([...APPLICATION_ZERO_RESOURCE_TAGS].filter((name) => name !== "picture" && name !== "source"));
@@ -6614,19 +6648,19 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
 const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
   pl: Object.freeze([
     "https://mamcarz.com/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260904-quality-1",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
-    "/procurement-2026/", "/wystapienia/", "/#contact", "/", "/assets/img/signature.png", "/", "/uslugi/transformacja-zakupow/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/prywatnosc/", "/assets/js/main.js?v=20260904-quality-1"
+    "/procurement-2026/", "/wystapienia/", "/#contact", "/", SHARED_SIGNATURE_SRC, "/", "/uslugi/transformacja-zakupow/",
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/prywatnosc/", SHARED_SCRIPT_SRC
   ]),
   en: Object.freeze([
     "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260904-quality-1",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
     "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
-    "/diagrams/infographic", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
-    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/en/prywatnosc/", "/assets/js/main.js?v=20260904-quality-1"
+    "/diagrams/infographic", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", SHARED_SIGNATURE_SRC, "/en/",
+    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/en/prywatnosc/", SHARED_SCRIPT_SRC
   ])
 });
 
@@ -6671,7 +6705,7 @@ function knowledgeDocumentMarkup(contract, lang) {
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const alternateLocale = lang === "pl" ? "en_US" : "pl_PL";
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></body></html>`;
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="${SHARED_STYLESHEET_HREF}"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="${SHARED_SIGNATURE_SRC}" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">${FOOTER_OWNER_LINE}</div></div><ul class="footer-links">${footer}</ul></footer><script src="${SHARED_SCRIPT_SRC}" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -6929,7 +6963,7 @@ function knowledgeHasDateBoundaryViolation(parsedRoot) {
       let value = node.value;
       const parent = node.parent;
       if (node.type === "text" && parent?.type === "element" && elementHasClass(parent, "footer-copy")
-        && publishedStaticText(parent) === "© 2026 Paweł Mamcarz · mamcarz.com") {
+        && publishedStaticText(parent) === FOOTER_OWNER_LINE) {
         value = "";
       }
       if (node.type === "text" && parent?.type === "element" && parent.name === "script"
@@ -7021,7 +7055,7 @@ function verifyKnowledgeBoundary(path, parsedRoot, errors) {
     || [...element.attributes.keys()].some((name) => /^(?:datetime|datepublished|datemodified|data-date)$/i.test(name)));
   const extraScripts = elements.filter((element) => element.name === "script"
     && elementAttribute(element, "type") !== "application/ld+json"
-    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260904-quality-1");
+    && elementAttribute(element, "src") !== SHARED_SCRIPT_SRC);
   const inactiveUrlViolation = knowledgeInactiveUrlViolation(parsedRoot);
   const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot) || inactiveUrlViolation;
   if (bannedRoute) {
@@ -7195,16 +7229,16 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"project.lot.implementation","value":"SAP Ariba implementation for PLL LOT","display_pl":"Wdrożenie SAP Ariba dla PLL LOT","display_en":"SAP Ariba implementation for PLL LOT","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"client.motor_oil_hellas","value":"Motor Oil Hellas","display_pl":"Motor Oil Hellas","display_en":"Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"project.motor_oil.implementation","value":"SAP procurement implementation for Motor Oil Hellas","display_pl":"Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas","display_en":"SAP procurement implementation for Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl fleet TCO calculator","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl fleet TCO calculator","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://czympojade.pl","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.czympojade_pl.type","value":"fleet TCO calculator using the Bielik model for ownership-cost analysis","display_pl":"Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.","display_en":"Fleet TCO calculator using the Bielik model to analyse total cost of ownership.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved","surface_rules":{"llms-full.txt":{"approved_any":["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."]}}}),
-  Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procuracost.type","value":"procurement procedure cost calculator","display_pl":"Kalkulator kosztów procedur zakupowych.","display_en":"Procurement procedure cost calculator.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://przypominamy.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://procuracost.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost.type","value":"procurement procedure cost calculator","display_pl":"Kalkulator kosztów procedur zakupowych.","display_en":"Procurement procedure cost calculator.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.procurement_process_2026","value":"Procurement Process 2026 interactive model","display_pl":"Procurement Process 2026","display_en":"Procurement Process 2026","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.procurement_process_2026.type","value":"interactive procurement process model","display_pl":"Interaktywny model procesu zakupowego.","display_en":"Interactive procurement process model.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.silence_tax","value":"silence-tax.com calculator","display_pl":"silence-tax.com","display_en":"silence-tax.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.silence_tax.type","value":"organisational silence cost calculator","display_pl":"Kalkulator kosztów milczenia w organizacji.","display_en":"Calculator for the cost of silence in an organisation.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax","value":"silence-tax.com calculator","display_pl":"silence-tax.com","display_en":"silence-tax.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://silence-tax.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax.type","value":"organisational silence cost calculator","display_pl":"Kalkulator kosztów milczenia w organizacji.","display_en":"Calculator for the cost of silence in an organisation.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":"https://silence-tax.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com","value":"akrobacja.com","display_pl":"akrobacja.com","display_en":"akrobacja.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com.current_status","value":"active aviation venture as of 2026-08-26","display_pl":"Aktualna marka działalności lotniczej","display_en":"Current aviation venture","kind":"dated","as_of":"2026-08-26","source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com.type","value":"aerobatic-flight voucher sales platform","display_pl":"Platforma sprzedaży voucherów na loty akrobacyjne.","display_en":"Voucher sales platform for aerobatic flights.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
@@ -7215,10 +7249,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({
-  "pl": "59e9ffebee031f8f60993a3cd5e85a5649e34a918bf0566a85b194e3b42f8c22",
-  "en": "a6536f379679cb32e412b50e9312ea3e5b2c6e20db78ffb097a34ea8e8bd1594"
-});
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "6565f5e79145c2d5893cbf5d16f8a6013a16d2d753b71a95cfab0cc80168c05d", en: "9d56cd4ce6dae78567b5e44bf65ce39a6e6d3e8e874c0f6a2367deced3aaba32" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7287,7 +7318,7 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = elements.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === SHARED_SCRIPT_SRC && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   const invalidAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
     return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref && !approvedPublicationAnchor(anchor));
@@ -7295,7 +7326,7 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const images = elements.filter((element) => element.name === "img");
   const signatureValid = images.length === 1
     && elementHasClass(images[0].parent, "footer-sign")
-    && exactApplicationResourceAttributes(images[0], { src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
+    && exactApplicationResourceAttributes(images[0], { src: SHARED_SIGNATURE_SRC, alt: "", width: "160", height: "50", loading: "lazy", decoding: "async" });
   if (elements.some((element) => forbidden.has(element.name)) || !signatureValid || eventOrStyle || !validScripts || invalidAnchors.length > 0) {
     error(errors, "project-resource-census", path, "forbids images, external project links, embeds, inline styles or executable drift and allows only the exact schema, shell resources and contextual mail CTA");
   }
@@ -7595,18 +7626,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  "transformation": {
-    "pl": "340581928545af2a20f5fa6421c05b37a442a3798a5f9a4314118ba5224a3ece",
-    "en": "1dc8ef5af63c6d6589422adbbc9b7d15307736fba1f804e48e2a5b49b1fecbfa"
-  },
-  "ariba": {
-    "pl": "6203a3581793e2fe10e7119bb65332a59d9ef792a6c6e74e08c381b63a6744fa",
-    "en": "c2c3d51d69fbbd71e542835c38ae7ab9a88bc77832295f5b433c9003c530aef2"
-  },
-  "publicProcurement": {
-    "pl": "6368b70ba9815407cfbd9a7cb924ddae389376b0d3a40445e0933dc372863a10",
-    "en": "4e98bbc16eae645f7fccd4d36dabb6714a87b87ff6749e654f96147c53d98f1b"
-  }
+  transformation: Object.freeze({ pl: "41b9df7bf965dc26a47f7068b9f5c946799730a1290e22361b110333bcdc4eef", en: "ebf80296d7f5fabd0d4664ceb39d87b09b69beb8d325c0a6fb700a3b310d7f73" }),
+  ariba: Object.freeze({ pl: "33b20769fb9ae52d05ae156476bec43901fcc2c5eb16fd74d5b64095f476e59c", en: "2c5355b1b598fa4fe3d29ccb6e561016fdaec66b826a45d44a7902b5364cbe42" }),
+  publicProcurement: Object.freeze({ pl: "75fbc5a42eb49d8d8ba7162c9b31aa7773a72672329554bd17f3f1fdbb5be599", en: "b74912a9b832ba16bc1b1ca546bd1194c9c40cd096609f8b0c3a78e336efae08" })
 });
 
 function serviceKeyForPath(path) {
@@ -7670,14 +7692,14 @@ function verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors) {
   const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "object", "picture", "source", "style", "video"]);
   const images = elements.filter((element) => element.name === "img");
   const validSignature = images.length === 1
-    && elementAttribute(images[0], "src") === "/assets/img/signature.png"
+    && elementAttribute(images[0], "src") === SHARED_SIGNATURE_SRC
     && elementAttribute(images[0], "alt") === ""
     && elementIsWithin(images[0], elements.find((element) => element.name === "footer"));
   const eventOrStyle = elements.some((element) => element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)));
   const extraExecutable = elements.filter((element) => element.name === "script").some((script) => {
     const type = elementAttribute(script, "type");
     const src = elementAttribute(script, "src");
-    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer")));
+    return !((type === "application/ld+json" && !src) || (src === SHARED_SCRIPT_SRC && script.attributes.has("defer")));
   });
   const externalAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
@@ -8004,10 +8026,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({
-  "pl": "7c85bf6132a20ff65d3912f5237ca9b4a99ecbbaeb185f73d134605a7de9c2d7",
-  "en": "2c37f4f48d568358645550a0494a2e8e109f17603fbe989a8334a6798cdfd0f2"
-});
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "c9f5a15546fcea831f4fa919c0a78d01ca7637c9464617c7a0deb970fd95f29a", en: "174a2fd9f2ebb5cef48fa111e8ee734d4f95fd7ecdd54d1b55826f5ad5716312" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8216,7 +8235,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const recordingPictures = all.filter((element) => element.name === "picture" && elementIsWithin(element, recording));
   const recordingSources = all.filter((element) => element.name === "source" && elementIsWithin(element, recording));
   const validSignature = signatureImages.length === 1 && exactElementAttributes(signatureImages[0], {
-    src: "/assets/img/signature.png",
+    src: SHARED_SIGNATURE_SRC,
     alt: "",
     width: "160",
     height: "50",
@@ -8242,7 +8261,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === SHARED_SCRIPT_SRC && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature || !validRecordingAssets) {
     error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and two approved YouTube links; forbids embeds, forms, inline styles, extra scripts or controls");
   }
@@ -8310,7 +8329,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", "Materiał po angielsku · rozwiń"]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "757e06f583980b58b5c67caafbe2038cc2578323e724476bf231ab4f57555fef";
+const PROCUREMENT_DOCUMENT_MANIFEST = "8b6d80d7d57068e2be2defb39e133070ac4de411a9fb2b3353b4f1f0c427d63b";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -8371,7 +8390,7 @@ async function verifyProcurementParent(_factData, context) {
   const forbiddenTags = new Set(["audio", "base", "embed", "form", "object", "picture", "source", "style", "video"]);
   const signatureImages = all.filter((element) => element.name === "img" && elementIsWithin(element, all.find((candidate) => elementHasClass(candidate, "footer-sign"))));
   const validSignature = signatureImages.length === 1 && exactElementAttributes(signatureImages[0], {
-    src: "/assets/img/signature.png",
+    src: SHARED_SIGNATURE_SRC,
     alt: "",
     width: "160",
     height: "50",
@@ -8385,7 +8404,7 @@ async function verifyProcurementParent(_factData, context) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer")).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === SHARED_SCRIPT_SRC && script.attributes.has("defer")).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)))
     || invalidAnchor || !validScripts || !validSignature || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames plus the exact footer signature image");
   verifyProcurementSchema(parsedRoot, context.errors);
@@ -9526,16 +9545,16 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
     && shellElementHasExactDirectElements(sign, signChildren)
     && signature?.name === "img"
     && exactApplicationResourceAttributes(signature, {
-      src: "/assets/img/signature.png", alt: "", width: "160", height: "50", loading: "lazy", decoding: "async"
+      src: SHARED_SIGNATURE_SRC, alt: "", width: "160", height: "50", loading: "lazy", decoding: "async"
     })
     && owner?.name === "div"
     && exactApplicationResourceAttributes(owner, { class: "footer-copy" })
     && shellElementHasOnlyTextAndComments(owner)
-    && normalizeExactHtmlLiteral(rawElementText(owner)) === "© 2026 Paweł Mamcarz · mamcarz.com"
+    && normalizeExactHtmlLiteral(rawElementText(owner)) === FOOTER_OWNER_LINE
     && footerList?.name === "ul"
     && exactApplicationResourceAttributes(footerList, { class: "footer-links" })
     && exactShellListLinks(footerList, copy.footer, null);
-  if (!footerValid) error(errors, "site-shell-footer", entry.path, "requires the exact signature, 2026 owner line and ordered localized seven-link footer");
+  if (!footerValid) error(errors, "site-shell-footer", entry.path, "requires the exact signature, 1993–2026 owner line and ordered localized seven-link footer");
 
   const stylesheets = all.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -9545,10 +9564,10 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
   const sharedScripts = scripts.filter((element) => element.attributes.has("src") || (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
   const inlineExecutable = scripts.filter((element) => !element.attributes.has("src") && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const resourceValid = stylesheets.length === 1
-    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" })
+    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: SHARED_STYLESHEET_HREF })
     && elementIsActiveResource(stylesheets[0])
     && sharedScripts.length === 1
-    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260904-quality-1", defer: null })
+    && exactApplicationResourceAttributes(sharedScripts[0], { src: SHARED_SCRIPT_SRC, defer: null })
     && elementIsActiveResource(sharedScripts[0])
     && rawElementText(sharedScripts[0]).trim() === ""
     && elementDescendants(parsedRoot, "style").length === 0
@@ -10325,9 +10344,9 @@ function plan3ReviewedStaticNumber(path, unit, token) {
     && owner.name === "p" && elementHasClass(owner, "legal-updated")
     && ["Ostatnia aktualizacja: 4 września 2026", "Last updated: 4 September 2026"].includes(ownerText)
     && ["4", "2026"].includes(token.value)) return true;
-  if (token.value === "2026"
+  if (token.value === "1993–2026"
     && elementHasClass(owner, "footer-copy")
-    && ownerText === "© 2026 Paweł Mamcarz · mamcarz.com") return true;
+    && ownerText === FOOTER_OWNER_LINE) return true;
 
   if (SERVICE_SURFACE_LIST.includes(path)
     && plan3AncestorHasClass(owner, "service-scope-register")
@@ -10827,9 +10846,9 @@ async function verifyMetadata(factData, context) {
     if (!PLAN3_ARTIFACT_FILES.has(entry.file)) {
       const stylesheets = all.filter((element) => element.name === "link" && (elementAttributeTokens(element, "rel").includes("stylesheet") || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")));
       const scripts = all.filter((element) => element.name === "script" && ((elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js") || element.attributes.has("src")));
-      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === "/assets/css/style.css?v=20260904-quality-1");
+      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === SHARED_STYLESHEET_HREF);
       const validScripts = scripts.filter((element) => elementIsActiveResource(element)
-        && elementAttribute(element, "src") === "/assets/js/main.js?v=20260904-quality-1"
+        && elementAttribute(element, "src") === SHARED_SCRIPT_SRC
         && element.attributes.has("defer"));
       if (stylesheets.length !== 1 || validStyles.length !== 1 || scripts.length !== 1 || validScripts.length !== 1) {
         error(context.errors, "metadata-assets", entry.file, "site shell requires exact Flight Plan 3 CSS and deferred JS assets");
