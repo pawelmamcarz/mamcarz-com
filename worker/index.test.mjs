@@ -368,10 +368,61 @@ test("Wrangler configuration pins the reviewed limiter and observability contrac
     'name = "CHAT_RATE_LIMITER"',
     'namespace_id = "2026082501"',
     "limit = 10",
+    'name = "CHAT_NETWORK_RATE_LIMITER"',
+    'namespace_id = "2026090401"',
+    "limit = 30",
     "period = 60",
     "head_sampling_rate = 0.01"
   ]) assert.ok(config.includes(exact), exact);
-  assert.equal((config.match(/\[\[ratelimits\]\]/gu) ?? []).length, 1);
+  assert.equal((config.match(/\[\[ratelimits\]\]/gu) ?? []).length, 2);
   assert.equal((config.match(/\[observability\]/gu) ?? []).length, 1);
   assert.doesNotMatch(config, /DEV_ALLOWED_ORIGINS/u);
+});
+
+test('site navigation returns real localized links without an AI request', async () => {
+  for (const [question, language, route] of [
+    ['Aplikacje operacyjne', 'pl', '/aplikacje-operacyjne/'],
+    ['Aviation', 'en', '/en/lotnictwo/'],
+    ['Wdrożenie SAP Ariba', 'pl', '/uslugi/wdrozenie-sap-ariba/'],
+    ['Privacy', 'en', '/en/prywatnosc/']
+  ]) {
+    const {env,calls}=makeEnv();
+    const response=await worker.fetch(post(validBody(question),{headers:{'Accept-Language':language}}),env);
+    const payload=await json(response);
+    assert.equal(response.status,200);
+    assert(payload.links.some(link=>link.url===`https://mamcarz.com${route}`), JSON.stringify(payload));
+    assert.equal(calls.ai.length,0);
+  }
+});
+
+test('network limiter survives client identifier rotation without exposing the IP', async () => {
+  const keys=[];
+  const {env,calls}=makeEnv();
+  env.CHAT_NETWORK_RATE_LIMITER={limit:async({key})=>{keys.push(key);return {success:keys.length===1};}};
+  for (const clientId of [CLIENT_ID,crypto.randomUUID()]) {
+    const response=await worker.fetch(post(validBody('Aplikacje'),{clientId,headers:{'CF-Connecting-IP':'192.0.2.25'}}),env);
+    assert.equal(response.status,keys.length===1?200:429);
+    if(response.status===429)assert.equal(response.headers.get('Retry-After'),'60');
+  }
+  assert.equal(keys[0],keys[1]);
+  assert.match(keys[0],/^[a-f0-9]{64}$/);
+  assert(!keys[0].includes('192.0.2.25'));
+  assert.equal(calls.ai.length,0);
+});
+
+test('AI cannot invent a path on an otherwise approved hostname', async () => {
+  const {env}=makeEnv({aiPayload:{response:'See https://mamcarz.com/invented-service/'}});
+  const payload=await json(await worker.fetch(post(validBody()),env));
+  assert(!payload.reply.includes('invented-service'));
+  assert(payload.links.every(link=>!link.url.includes('invented-service')));
+});
+
+test('AI receives the selected language even for an ambiguous greeting', async () => {
+  for (const [language, instruction] of [['en', 'reply only in English'], ['pl', 'odpowiadaj wyłącznie po polsku']]) {
+    const {env,calls}=makeEnv();
+    const response=await worker.fetch(post(validBody('Hello'),{headers:{'Accept-Language':language}}),env);
+    assert.equal(response.status,200);
+    assert.equal(calls.ai.length,1);
+    assert(calls.ai[0].input.messages[0].content.includes(instruction));
+  }
 });

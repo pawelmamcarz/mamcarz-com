@@ -1,58 +1,42 @@
 # Paweł Mamcarz
-
 This file is a navigation index. The three core areas have equal status: Advisory, Operational applications and Aviation.
-
 ## Canonical public pages
-
 ### Home
-
 - PL | Home: https://mamcarz.com/
 - EN | Home: https://mamcarz.com/en/
-
 ### Advisory / Doradztwo
-
 - PL | Procurement transformation: https://mamcarz.com/uslugi/transformacja-zakupow/
 - EN | Procurement transformation: https://mamcarz.com/en/uslugi/transformacja-zakupow/
 - PL | SAP Ariba implementation: https://mamcarz.com/uslugi/wdrozenie-sap-ariba/
 - EN | SAP Ariba implementation: https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba/
 - PL | Public procurement advisory: https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne/
 - EN | Public procurement advisory: https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne/
-
 ### Operational applications / Aplikacje operacyjne
-
 - PL | Operational applications: https://mamcarz.com/aplikacje-operacyjne/
 - EN | Operational applications: https://mamcarz.com/en/aplikacje-operacyjne/
-
 ### Aviation / Lotnictwo
-
 - PL | Aviation: https://mamcarz.com/lotnictwo/
 - EN | Aviation: https://mamcarz.com/en/lotnictwo/
-
 ### Projects, knowledge and speaking
-
 - PL | Projects: https://mamcarz.com/case-studies/
 - EN | Projects: https://mamcarz.com/en/case-studies/
 - PL | Knowledge: https://mamcarz.com/wiedza/
 - EN | Insights: https://mamcarz.com/en/wiedza/
 - PL | Speaking: https://mamcarz.com/wystapienia/
 - EN | Speaking: https://mamcarz.com/en/wystapienia/
-
 ### Procurement model and helper materials
-
 - PL only | Procurement Process 2026: https://mamcarz.com/procurement-2026/
-- EN only | Procurement process reference model: https://mamcarz.com/diagrams/diagram1_universal.html
-- EN only | Conceptual SAP procurement map: https://mamcarz.com/diagrams/diagram2_ariba.html
-- EN only | Editable procurement maturity scenario: https://mamcarz.com/diagrams/diagram3_maturity.html
-- EN only | Procurement process reference infographic: https://mamcarz.com/diagrams/infographic.html
-- EN only | Procurement process reference infographic: https://mamcarz.com/infographic_procurement_2026_EN.html
-
+- EN only | Procurement process reference model: https://mamcarz.com/diagrams/diagram1_universal
+- EN only | Conceptual SAP procurement map: https://mamcarz.com/diagrams/diagram2_ariba
+- EN only | Editable procurement maturity scenario: https://mamcarz.com/diagrams/diagram3_maturity
+- EN only | Procurement process reference infographic: https://mamcarz.com/diagrams/infographic
+### Privacy
+- PL | Privacy: https://mamcarz.com/prywatnosc/
+- EN | Privacy: https://mamcarz.com/en/prywatnosc/
 ## Contact routes
-
 - PL: /#contact
 - EN: /en/#contact
-
 ## Approved short facts
-
 - [hero.experience_years] 25+ years of procurement experience.
 - [hero.implementations] 20+ SAP Ariba implementations.
 - [client.orlen] ORLEN

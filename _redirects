@@ -1,2 +1,4 @@
 # Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.
-# No path redirects are currently defined.
+# The legacy standalone infographic shares the canonical embedded resource.
+/infographic_procurement_2026_EN.html /diagrams/infographic 301
+/infographic_procurement_2026_EN /diagrams/infographic 301

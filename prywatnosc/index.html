@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prywatność · Paweł Mamcarz</title>
-<meta name="description" content="Co ten serwis robi z danymi: bez ciasteczek, bez analityki i bez zewnętrznych osadzeń. Opis dotyczy wyłącznie mechanizmów faktycznie działających w kodzie.">
+<meta name="description" content="Informacje o danych przetwarzanych przez serwis, czat i kontakt e-mailowy.">
 <meta name="author" content="Paweł Mamcarz">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://mamcarz.com/prywatnosc/">
@@ -12,18 +12,18 @@
 <link rel="alternate" hreflang="en" href="https://mamcarz.com/en/prywatnosc/">
 <link rel="alternate" hreflang="x-default" href="https://mamcarz.com/prywatnosc/">
 <meta property="og:title" content="Prywatność · Paweł Mamcarz">
-<meta property="og:description" content="Co ten serwis robi z danymi: bez ciasteczek, bez analityki i bez zewnętrznych osadzeń. Opis dotyczy wyłącznie mechanizmów faktycznie działających w kodzie.">
+<meta property="og:description" content="Informacje o danych przetwarzanych przez serwis, czat i kontakt e-mailowy.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mamcarz.com/prywatnosc/">
 <meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg">
 <meta property="og:locale" content="pl_PL">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:site_name" content="Paweł Mamcarz">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Prywatność","url":"https://mamcarz.com/prywatnosc/","description":"Co ten serwis robi z danymi: bez ciasteczek, bez analityki i bez zewnętrznych osadzeń.","inLanguage":"pl"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Prywatność","url":"https://mamcarz.com/prywatnosc/","description":"Informacje o danych przetwarzanych przez serwis, czat i kontakt e-mailowy.","inLanguage":"pl"}</script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
 </head>
 
 <body class="knowledge-page" data-page="privacy">
@@ -41,13 +41,13 @@
     <div class="page-hero-content">
       <nav class="breadcrumb" aria-label="Okruszki"><a href="/">Strona główna</a><span aria-hidden="true">/</span><span aria-current="page">Prywatność</span></nav>
       <h1 class="page-title">Prywatność</h1>
-      <p class="page-lead">Ten serwis nie używa ciasteczek, nie prowadzi analityki i nie osadza treści z zewnętrznych domen. Poniżej opisuję wyłącznie te mechanizmy, które faktycznie działają w kodzie strony.</p>
+      <p class="page-lead">Informacje o danych przetwarzanych przez serwis, czat i kontakt e-mailowy.</p>
     </div>
   </header>
 
   <section class="section-shell legal-body">
     <h2>Kto odpowiada za serwis</h2>
-    <p>Serwis mamcarz.com prowadzi Paweł Mamcarz. W sprawach dotyczących danych: <a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>.</p>
+    <p>Serwis mamcarz.com prowadzi Paweł Mamcarz. W sprawach dotyczących danych: <!--email_off--><a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a><!--/email_off-->.</p>
 
     <h2>Czego ten serwis nie robi</h2>
     <ul>
@@ -59,30 +59,31 @@
     </ul>
 
     <h2>Czat na stronie kontaktu</h2>
-    <p>Jedyny element, który przetwarza dane, to czat. Działa tak:</p>
+    <p>Czat przetwarza wysłane wiadomości. Działa tak:</p>
     <ul>
       <li><strong>Identyfikator techniczny.</strong> Przy pierwszym użyciu przeglądarka zapisuje w pamięci lokalnej losowy identyfikator. Nie zawiera on imienia, adresu e-mail ani danych urządzenia: to losowy ciąg wygenerowany na Twoim komputerze.</li>
       <li><strong>Do czego służy.</strong> Wyłącznie do ograniczania nadużyć, czyli limitu dziesięciu wiadomości na minutę. Do mechanizmu limitującego trafia jedynie nieodwracalny skrót kryptograficzny tego identyfikatora, a nie on sam.</li>
-      <li><strong>Treść rozmowy.</strong> Wiadomości, które wpiszesz, są wysyłane do usługi Cloudflare Workers AI, która generuje odpowiedź. Nie wpisuj tam danych, których nie chcesz przekazywać do przetwarzania.</li>
+      <li><strong>Treść rozmowy.</strong> Wiadomości, które wyślesz, trafiają do Cloudflare Worker. Typowe pytania o nawigację otrzymują odpowiedź z mapy serwisu; pozostałe mogą trafić do Cloudflare Workers AI. Nie wpisuj tam danych, których nie chcesz przekazywać do przetwarzania.</li>
       <li><strong>Logi.</strong> Przy błędzie zapisywany jest identyfikator żądania, ścieżka i klasa błędu. Treść wiadomości nie trafia do logów.</li>
     </ul>
     <p>Identyfikator czatu usuniesz, czyszcząc dane witryny mamcarz.com w ustawieniach przeglądarki. Czat będzie działać dalej: przy następnym użyciu powstanie nowy losowy identyfikator.</p>
 
+    <p>Dodatkowy limit działa na poziomie sieci, na podstawie skrótu adresu IP i dnia. Skrót trafia do mechanizmu limitującego. Adres IP nie jest dołączany do wiadomości czatu ani do aplikacyjnych logów błędów.</p>
     <h2>Hosting</h2>
     <p>Serwis działa na Cloudflare Pages, a czat na Cloudflare Workers. Cloudflare jako dostawca infrastruktury przetwarza techniczne dane żądań, w tym adres IP, w zakresie niezbędnym do dostarczenia strony i ochrony przed nadużyciami. Odbywa się to na poziomie platformy, niezależnie od kodu tego serwisu.</p>
 
     <h2>Kontakt e-mailowy</h2>
-    <p>Jeśli napiszesz na <a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>, treść wiadomości i adres nadawcy przechowuję tak długo, jak wymaga tego prowadzona korespondencja.</p>
+    <p>Jeśli napiszesz na <!--email_off--><a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a><!--/email_off-->, treść wiadomości i adres nadawcy przechowuję tak długo, jak wymaga tego prowadzona korespondencja.</p>
 
     <h2>Twoje uprawnienia</h2>
-    <p>Możesz zapytać, jakie dane Cię dotyczą, poprosić o ich poprawienie lub usunięcie, albo sprzeciwić się przetwarzaniu. Napisz na <a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>.</p>
+    <p>Możesz zapytać, jakie dane Cię dotyczą, poprosić o ich poprawienie lub usunięcie, albo sprzeciwić się przetwarzaniu. Napisz na <!--email_off--><a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a><!--/email_off-->.</p>
 
-    <p class="legal-updated">Ostatnia aktualizacja: 30 sierpnia 2026</p>
+    <p class="legal-updated">Ostatnia aktualizacja: 4 września 2026</p>
   </section>
 </main>
 
-<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="/" aria-label="Paweł Mamcarz, strona główna"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links"><li><a href="/">Strona główna</a></li><li><a href="/uslugi/transformacja-zakupow/">Doradztwo</a></li><li><a href="/aplikacje-operacyjne/">Aplikacje</a></li><li><a href="/lotnictwo/">Lotnictwo</a></li><li><a href="/case-studies/">Projekty</a></li><li><a href="/wiedza/">Wiedza</a></li><li><a href="/#contact">Kontakt</a></li></ul></footer>
+<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="/" aria-label="Paweł Mamcarz, strona główna"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links"><li><a href="/">Strona główna</a></li><li><a href="/uslugi/transformacja-zakupow/">Doradztwo</a></li><li><a href="/aplikacje-operacyjne/">Aplikacje</a></li><li><a href="/lotnictwo/">Lotnictwo</a></li><li><a href="/case-studies/">Projekty</a></li><li><a href="/wiedza/">Wiedza</a></li><li><a href="/#contact">Kontakt</a></li><li><a href="/prywatnosc/">Prywatność</a></li></ul></footer>
 
-<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
 </body>
 </html>

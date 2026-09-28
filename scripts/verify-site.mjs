@@ -19,10 +19,19 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "82fa61d632f0cc98921e818bca2a2089ba6d8eb8840eb49cfdca0e55766ff21f";
+const TASK10_REVIEWED_CSS_SHA256 = "9f0bff0740a1be7095636cc0925957a5ef6ae60931bd510793da1f1d2d9e6294";
+const PUBLICATION_URLS = Object.freeze({"portfolio.akrobacja_com": "https://akrobacja.com", "portfolio.filmolot_pl": "https://filmolot.pl", "portfolio.czympojade_pl": "https://czympojade.pl", "portfolio.przypominamy_com": "https://przypominamy.com", "portfolio.procurement_process_2026": "/procurement-2026/", "portfolio.silence_tax": "https://silence-tax.com", "portfolio.procuracost": "https://procuracost.com"});
+
+function approvedPublicationAnchor(anchor) {
+  const parent = anchor.parent;
+  const ids = [elementAttribute(parent, "data-fact-id"), ...(elementAttribute(parent?.parent, "data-fact-ids") ?? "").split(/\s+/)].filter(Boolean);
+  return parent?.name === "h3" && ids.some(id => PUBLICATION_URLS[id] === elementAttribute(anchor, "href"))
+    && exactElementAttributes(anchor, { href: elementAttribute(anchor, "href") }) && directElementChildren(anchor).length === 0;
+}
+
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
-const PLAN3_VALIDATION_DATE = "2026-08-27";
+const PLAN3_VALIDATION_DATE = "2026-09-28";
 
 export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: Object.freeze(["Person", "WebSite"]) }),
@@ -43,39 +52,41 @@ export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "en/wiedza/index.html", route: "/en/wiedza/", lang: "en", pair: "/wiedza/", schema: Object.freeze(["CollectionPage"]) }),
   Object.freeze({ file: "wystapienia/index.html", route: "/wystapienia/", lang: "pl", pair: "/en/wystapienia/", schema: Object.freeze(["CollectionPage"]) }),
   Object.freeze({ file: "en/wystapienia/index.html", route: "/en/wystapienia/", lang: "en", pair: "/wystapienia/", schema: Object.freeze(["CollectionPage"]) }),
+  Object.freeze({ file: "prywatnosc/index.html", route: "/prywatnosc/", lang: "pl", pair: "/en/prywatnosc/", schema: Object.freeze(["WebPage"]) }),
+  Object.freeze({ file: "en/prywatnosc/index.html", route: "/en/prywatnosc/", lang: "en", pair: "/prywatnosc/", schema: Object.freeze(["WebPage"]) }),
   Object.freeze({ file: "procurement-2026/index.html", route: "/procurement-2026/", lang: "pl", pair: null, schema: Object.freeze(["Article"]) }),
-  Object.freeze({ file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
-  Object.freeze({ file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
-  Object.freeze({ file: "diagrams/diagram3_maturity.html", route: "/diagrams/diagram3_maturity.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
-  Object.freeze({ file: "diagrams/infographic.html", route: "/diagrams/infographic.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
-  Object.freeze({ file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) })
+  Object.freeze({ file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
+  Object.freeze({ file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
+  Object.freeze({ file: "diagrams/diagram3_maturity.html", route: "/diagrams/diagram3_maturity", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
+  Object.freeze({ file: "diagrams/infographic.html", route: "/diagrams/infographic", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
 ]);
 
 const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
-  "/": "2026-08-27",
-  "/en/": "2026-08-27",
-  "/uslugi/transformacja-zakupow/": "2026-08-27",
-  "/en/uslugi/transformacja-zakupow/": "2026-08-27",
-  "/uslugi/wdrozenie-sap-ariba/": "2026-08-27",
-  "/en/uslugi/wdrozenie-sap-ariba/": "2026-08-27",
-  "/uslugi/doradztwo-zamowienia-publiczne/": "2026-08-27",
-  "/en/uslugi/doradztwo-zamowienia-publiczne/": "2026-08-27",
-  "/aplikacje-operacyjne/": "2026-08-27",
-  "/en/aplikacje-operacyjne/": "2026-08-27",
-  "/lotnictwo/": "2026-08-27",
-  "/en/lotnictwo/": "2026-08-27",
-  "/case-studies/": "2026-08-27",
-  "/en/case-studies/": "2026-08-27",
-  "/wiedza/": "2026-08-27",
-  "/en/wiedza/": "2026-08-27",
-  "/wystapienia/": "2026-08-27",
-  "/en/wystapienia/": "2026-08-27",
-  "/procurement-2026/": "2026-08-27",
-  "/diagrams/diagram1_universal.html": "2026-08-26",
-  "/diagrams/diagram2_ariba.html": "2026-08-26",
-  "/diagrams/diagram3_maturity.html": "2026-08-26",
-  "/diagrams/infographic.html": "2026-08-26",
-  "/infographic_procurement_2026_EN.html": "2026-08-26"
+  "/": "2026-09-28",
+  "/en/": "2026-09-28",
+  "/uslugi/transformacja-zakupow/": "2026-09-04",
+  "/en/uslugi/transformacja-zakupow/": "2026-09-04",
+  "/uslugi/wdrozenie-sap-ariba/": "2026-09-04",
+  "/en/uslugi/wdrozenie-sap-ariba/": "2026-09-04",
+  "/uslugi/doradztwo-zamowienia-publiczne/": "2026-09-04",
+  "/en/uslugi/doradztwo-zamowienia-publiczne/": "2026-09-04",
+  "/aplikacje-operacyjne/": "2026-09-04",
+  "/en/aplikacje-operacyjne/": "2026-09-04",
+  "/lotnictwo/": "2026-09-04",
+  "/en/lotnictwo/": "2026-09-04",
+  "/case-studies/": "2026-09-04",
+  "/en/case-studies/": "2026-09-04",
+  "/wiedza/": "2026-09-04",
+  "/en/wiedza/": "2026-09-04",
+  "/wystapienia/": "2026-09-07",
+  "/en/wystapienia/": "2026-09-07",
+  "/procurement-2026/": "2026-09-04",
+  "/diagrams/diagram1_universal": "2026-09-04",
+  "/diagrams/diagram2_ariba": "2026-09-04",
+  "/diagrams/diagram3_maturity": "2026-09-04",
+  "/diagrams/infographic": "2026-09-04",
+  "/prywatnosc/": "2026-09-04",
+  "/en/prywatnosc/": "2026-09-04",
 });
 
 const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
@@ -107,11 +118,13 @@ const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
   "- EN | Speaking: https://mamcarz.com/en/wystapienia/",
   "### Procurement model and helper materials",
   "- PL only | Procurement Process 2026: https://mamcarz.com/procurement-2026/",
-  "- EN only | Procurement process reference model: https://mamcarz.com/diagrams/diagram1_universal.html",
-  "- EN only | Conceptual SAP procurement map: https://mamcarz.com/diagrams/diagram2_ariba.html",
-  "- EN only | Editable procurement maturity scenario: https://mamcarz.com/diagrams/diagram3_maturity.html",
-  "- EN only | Procurement process reference infographic: https://mamcarz.com/diagrams/infographic.html",
-  "- EN only | Procurement process reference infographic: https://mamcarz.com/infographic_procurement_2026_EN.html",
+  "- EN only | Procurement process reference model: https://mamcarz.com/diagrams/diagram1_universal",
+  "- EN only | Conceptual SAP procurement map: https://mamcarz.com/diagrams/diagram2_ariba",
+  "- EN only | Editable procurement maturity scenario: https://mamcarz.com/diagrams/diagram3_maturity",
+  "- EN only | Procurement process reference infographic: https://mamcarz.com/diagrams/infographic",
+  "### Privacy",
+  "- PL | Privacy: https://mamcarz.com/prywatnosc/",
+  "- EN | Privacy: https://mamcarz.com/en/prywatnosc/",
   "## Contact routes",
   "- PL: /#contact",
   "- EN: /en/#contact",
@@ -153,8 +166,8 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "ownerPath": "html[1]>body[1]>main[1]>section[2]>div[1]>div[1]>div[1]>p[1]",
     "token": "02",
     "occurrence": 1,
-    "ownerText": "02 / Delivery",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / Delivery Od rozpoznania do uruchomienia.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Delivery\"],[\"h2{class=\\\"section-title\\\"}\",\"Od rozpoznania do uruchomienia.\"]]"
+    "ownerText": "02 / Realizacja",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-delivery\",data-section=\"delivery\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / Realizacja Od rozpoznania do uruchomienia.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Realizacja\"],[\"h2{class=\\\"section-title\\\"}\",\"Od rozpoznania do uruchomienia.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -198,8 +211,8 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>div[1]>p[1]",
     "token": "03",
     "occurrence": 1,
-    "ownerText": "03 / Evidence",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Evidence Wybrane produkty.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Evidence\"],[\"h2{class=\\\"section-title\\\"}\",\"Wybrane produkty.\"]]"
+    "ownerText": "03 / Produkty",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Produkty Wybrane produkty.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Produkty\"],[\"h2{class=\\\"section-title\\\"}\",\"Wybrane produkty.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -208,7 +221,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "01",
     "occurrence": 1,
     "ownerText": "Produkt / 01",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.czympojade_pl portfolio.czympojade_pl.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 01 czympojade.pl Funkcja Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 01\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"czympojade.pl\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.\"]]"
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.czympojade_pl portfolio.czympojade_pl.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 01 czympojade.pl Funkcja Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 01\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"czympojade.pl\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -217,7 +230,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "02",
     "occurrence": 1,
     "ownerText": "Produkt / 02",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.przypominamy_com portfolio.przypominamy_com.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 02 Przypominamy.com Funkcja Platforma powiadomień dla organizacji.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 02\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"Przypominamy.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Platforma powiadomień dla organizacji.\"]]"
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.przypominamy_com portfolio.przypominamy_com.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 02 Przypominamy.com Funkcja Platforma powiadomień dla organizacji.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 02\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"Przypominamy.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Platforma powiadomień dla organizacji.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -226,7 +239,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "Produkt / 03",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 03 ProcuraCost Funkcja Kalkulator kosztów procedur zakupowych.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator kosztów procedur zakupowych.\"]]"
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Produkt / 03 ProcuraCost Funkcja Kalkulator kosztów procedur zakupowych.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Produkt / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Funkcja Kalkulator kosztów procedur zakupowych.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -234,8 +247,8 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "ownerPath": "html[1]>body[1]>main[1]>section[4]>div[1]>div[1]>div[1]>p[1]",
     "token": "04",
     "occurrence": 1,
-    "ownerText": "04 / Fit",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-fit\",data-section=\"fit\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"04 / Fit Warunki dobrego dopasowania.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Fit\"],[\"h2{class=\\\"section-title\\\"}\",\"Warunki dobrego dopasowania.\"]]"
+    "ownerText": "04 / Współpraca",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section applications-section--band application-fit\",data-section=\"fit\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"04 / Współpraca Warunki dobrego dopasowania.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Współpraca\"],[\"h2{class=\\\"section-title\\\"}\",\"Warunki dobrego dopasowania.\"]]"
   },
   {
     "file": "aplikacje-operacyjne/index.html",
@@ -361,7 +374,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "03 / Evidence",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Evidence Selected products.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Evidence\"],[\"h2{class=\\\"section-title\\\"}\",\"Selected products.\"]]"
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Evidence Selected products.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Evidence\"],[\"h2{class=\\\"section-title\\\"}\",\"Selected products.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -370,7 +383,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "01",
     "occurrence": 1,
     "ownerText": "Product / 01",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.czympojade_pl portfolio.czympojade_pl.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 01 czympojade.pl Function Fleet TCO calculator using the Bielik model to analyse total cost of ownership.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 01\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"czympojade.pl\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Fleet TCO calculator using the Bielik model to analyse total cost of ownership.\"]]"
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.czympojade_pl portfolio.czympojade_pl.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 01 czympojade.pl Function Fleet TCO calculator using the Bielik model to analyse total cost of ownership.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 01\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"czympojade.pl\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Fleet TCO calculator using the Bielik model to analyse total cost of ownership.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -379,7 +392,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "02",
     "occurrence": 1,
     "ownerText": "Product / 02",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.przypominamy_com portfolio.przypominamy_com.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 02 Przypominamy.com Function Notification platform for organisations.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 02\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"Przypominamy.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Notification platform for organisations.\"]]"
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.przypominamy_com portfolio.przypominamy_com.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 02 Przypominamy.com Function Notification platform for organisations.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 02\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"Przypominamy.com\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Notification platform for organisations.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -388,7 +401,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "Product / 03",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 03 ProcuraCost Function Procurement procedure cost calculator.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Procurement procedure cost calculator.\"]]"
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-evidence-list\"}>article{class=\"evidence-row\",data-fact-ids=\"portfolio.procuracost portfolio.procuracost.type\"}>p{class=\"evidence-row__context\"}|parentText=\"Product / 03 ProcuraCost Function Procurement procedure cost calculator.\"|parentChildren=[[\"p{class=\\\"evidence-row__context\\\"}\",\"Product / 03\"],[\"h3{class=\\\"evidence-row__title\\\"}\",\"ProcuraCost\"],[\"dl{class=\\\"evidence-row__ledger\\\"}\",\"Function Procurement procedure cost calculator.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -500,15 +513,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
   },
   {
     "file": "en/lotnictwo/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "03",
-    "occurrence": 1,
-    "ownerText": "FLIGHT PLAN / CORE ROUTE 03",
-    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero aviation-hero\"}>div{class=\"page-hero-content\"}>p{class=\"aviation-call-sign\"}|parentText=\"Home/AviationFLIGHT PLAN / CORE ROUTE 03AviationAviation is one of the core areas of my business. I connect operations, sales, training, safety, media and software in work that depends on clear procedures and accountability.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/Aviation\"],[\"p{class=\\\"aviation-call-sign\\\"}\",\"FLIGHT PLAN / CORE ROUTE 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Aviation\"],[\"p{class=\\\"page-lead\\\"}\",\"Aviation is one of the core areas of my business. I connect operations, sales, training, safety, media and software in work that depends on clear procedures and accountability.\"]]"
-  },
-  {
-    "file": "en/lotnictwo/index.html",
     "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>span[1]",
     "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>span[1]",
     "token": "01",
@@ -563,15 +567,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
   },
   {
     "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "03",
-    "occurrence": 1,
-    "ownerText": "DOSSIER / ADVISORY 03",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Home/Public procurement advisoryDOSSIER / ADVISORY 03Public procurement advisoryI help structure procedure strategy, responsibilities, documents and decisions in public procurement projects. I work across procurement, technology and project governance, with a clear boundary around legal responsibility.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/Public procurement advisory\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Public procurement advisory\"],[\"p{class=\\\"page-lead\\\"}\",\"I help structure procedure strategy, responsibilities, documents and decisions in public procurement projects. I work across procurement, technology and project governance, with a clear boundary around legal responsibility.\"]]"
-  },
-  {
-    "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
     "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
     "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
     "token": "01",
@@ -595,7 +590,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "03 / Scope",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeAdvisory work register.DecisionsDecision structure and acceptance points.StrategyProcurement strategy for the planned procedure.RolesResponsibility map for the team and stakeholders.EvaluationApproach to evaluation and documentation of choices.TechnologyTechnology requirements supporting the working process.CooperationGovernance and cooperation with legal counsel.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Advisory work register.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"DecisionsDecision structure and acceptance points.StrategyProcurement strategy for the planned procedure.RolesResponsibility map for the team and stakeholders.EvaluationApproach to evaluation and documentation of choices.TechnologyTechnology requirements supporting the working process.CooperationGovernance and cooperation with legal counsel.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeAdvisory scope.DecisionsDecision structure and acceptance points.StrategyProcurement strategy for the planned procedure.RolesResponsibility map for the team and stakeholders.EvaluationApproach to evaluation and documentation of choices.TechnologyTechnology requirements supporting the working process.CooperationGovernance and cooperation with legal counsel.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Advisory scope.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"DecisionsDecision structure and acceptance points.StrategyProcurement strategy for the planned procedure.RolesResponsibility map for the team and stakeholders.EvaluationApproach to evaluation and documentation of choices.TechnologyTechnology requirements supporting the working process.CooperationGovernance and cooperation with legal counsel.\"]]"
   },
   {
     "file": "en/uslugi/doradztwo-zamowienia-publiczne/index.html",
@@ -662,15 +657,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
   },
   {
     "file": "en/uslugi/transformacja-zakupow/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "01",
-    "occurrence": 1,
-    "ownerText": "DOSSIER / ADVISORY 01",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Home/Procurement transformationDOSSIER / ADVISORY 01Procurement transformationI structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/Procurement transformation\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 01\"],[\"h1{class=\\\"page-title\\\"}\",\"Procurement transformation\"],[\"p{class=\\\"page-lead\\\"}\",\"I structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.\"]]"
-  },
-  {
-    "file": "en/uslugi/transformacja-zakupow/index.html",
     "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
     "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
     "token": "01",
@@ -685,7 +671,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "02",
     "occurrence": 1,
     "ownerText": "02 / Fit",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / FitA clear decision on both sides.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Fit\"],[\"h2{class=\\\"service-section__title\\\"}\",\"A clear decision on both sides.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / FitWhere we start.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Fit\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Where we start.\"]]"
   },
   {
     "file": "en/uslugi/transformacja-zakupow/index.html",
@@ -694,7 +680,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "03 / Scope",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeChange-design register.ModelTarget Operating Model and role allocation.ProcessSource-to-pay, S2P and P2P.DataSpend analysis and ownership of definitions.DecisionsCategory strategy and governance.TechnologyRequirements derived from process and data.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Change-design register.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"ModelTarget Operating Model and role allocation.ProcessSource-to-pay, S2P and P2P.DataSpend analysis and ownership of definitions.DecisionsCategory strategy and governance.TechnologyRequirements derived from process and data.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeWhat the transformation covers.ModelTarget Operating Model and role allocation.ProcessSource-to-pay, S2P and P2P.DataSpend analysis and ownership of definitions.DecisionsCategory strategy and governance.TechnologyRequirements derived from process and data.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"What the transformation covers.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"ModelTarget Operating Model and role allocation.ProcessSource-to-pay, S2P and P2P.DataSpend analysis and ownership of definitions.DecisionsCategory strategy and governance.TechnologyRequirements derived from process and data.\"]]"
   },
   {
     "file": "en/uslugi/transformacja-zakupow/index.html",
@@ -739,7 +725,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "04",
     "occurrence": 1,
     "ownerText": "04 / Method",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MethodFour decision closures.01DiagnosisCurrent process, spend, roles and data.02DesignTarget way of working and accountability.03SequenceOrder of change, dependencies and acceptance.04GovernanceDecision owners and project-control model.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Method\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Four decision closures.\"],[\"div{class=\\\"service-method\\\"}\",\"01DiagnosisCurrent process, spend, roles and data.02DesignTarget way of working and accountability.03SequenceOrder of change, dependencies and acceptance.04GovernanceDecision owners and project-control model.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MethodHow we work together.01DiagnosisCurrent process, spend, roles and data.02DesignTarget way of working and accountability.03SequenceOrder of change, dependencies and acceptance.04GovernanceDecision owners and project-control model.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Method\"],[\"h2{class=\\\"service-section__title\\\"}\",\"How we work together.\"],[\"div{class=\\\"service-method\\\"}\",\"01DiagnosisCurrent process, spend, roles and data.02DesignTarget way of working and accountability.03SequenceOrder of change, dependencies and acceptance.04GovernanceDecision owners and project-control model.\"]]"
   },
   {
     "file": "en/uslugi/transformacja-zakupow/index.html",
@@ -748,7 +734,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "05",
     "occurrence": 1,
     "ownerText": "05 / Evidence",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / EvidenceExperience recorded as facts.OrganisationPZU S.A.RoleStrategic Project DirectorScopeI led a procurement transformation project from spend analysis to the target operating model.OrganisationPwC Polska Sp. z o.o.RoleAssociate Director, Advisory / Procurement ExpertMethodI worked with the CAPP (Complete & Agile Procurement) methodology.Project roleCONNECT Project ManagerPlatformCentral sourcing platform for the ORLEN GroupCONNECT scope15 ORLEN Group entities across 4 countries, 60-person team\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Evidence\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Experience recorded as facts.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganisationPZU S.A.RoleStrategic Project DirectorScopeI led a procurement transformation project from spend analysis to the target operating model.OrganisationPwC Polska Sp. z o.o.RoleAssociate Director, Advisory / Procurement ExpertMethodI worked with the CAPP (Complete & Agile Procurement) methodology.Project roleCONNECT Project ManagerPlatformCentral sourcing platform for the ORLEN GroupCONNECT scope15 ORLEN Group entities across 4 countries, 60-person team\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / EvidenceSelected projects.OrganisationPZU S.A.RoleStrategic Project DirectorScopeI led a procurement transformation project from spend analysis to the target operating model.OrganisationPwC Polska Sp. z o.o.RoleAssociate Director, Advisory / Procurement ExpertMethodI worked with the CAPP (Complete & Agile Procurement) methodology.Project roleCONNECT Project ManagerPlatformCentral sourcing platform for the ORLEN GroupCONNECT scope15 ORLEN Group entities across 4 countries, 60-person team\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Evidence\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Selected projects.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganisationPZU S.A.RoleStrategic Project DirectorScopeI led a procurement transformation project from spend analysis to the target operating model.OrganisationPwC Polska Sp. z o.o.RoleAssociate Director, Advisory / Procurement ExpertMethodI worked with the CAPP (Complete & Agile Procurement) methodology.Project roleCONNECT Project ManagerPlatformCentral sourcing platform for the ORLEN GroupCONNECT scope15 ORLEN Group entities across 4 countries, 60-person team\"]]"
   },
   {
     "file": "en/uslugi/transformacja-zakupow/index.html",
@@ -758,15 +744,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "06 / Contact",
     "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / ContactDefine the change project.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Contact\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Define the change project.\"]]"
-  },
-  {
-    "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "02",
-    "occurrence": 1,
-    "ownerText": "DOSSIER / ADVISORY 02",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Home/SAP Ariba implementationDOSSIER / ADVISORY 02SAP Ariba implementationI lead SAP Ariba implementations from process and data decisions through configuration, integration, testing and launch. The scope follows the real procurement operating model, not a feature checklist.\"|parentChildren=[[\"nav{aria-label=\\\"Breadcrumb\\\",class=\\\"breadcrumb\\\"}\",\"Home/SAP Ariba implementation\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 02\"],[\"h1{class=\\\"page-title\\\"}\",\"SAP Ariba implementation\"],[\"p{class=\\\"page-lead\\\"}\",\"I lead SAP Ariba implementations from process and data decisions through configuration, integration, testing and launch. The scope follows the real procurement operating model, not a feature checklist.\"]]"
   },
   {
     "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
@@ -784,7 +761,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "02",
     "occurrence": 1,
     "ownerText": "02 / Fit",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / FitImplementation needs decision owners.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Fit\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Implementation needs decision owners.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / FitWhat we agree before implementation.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Fit\"],[\"h2{class=\\\"service-section__title\\\"}\",\"What we agree before implementation.\"]]"
   },
   {
     "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
@@ -793,7 +770,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "03 / Scope",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeSolution scope register.SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingSuppliersSAP Ariba Supplier Lifecycle and PerformanceRiskSAP Ariba Supplier RiskExternal workforceSAP FieldglassIntegrationintegration with SAP S/4HANA\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Solution scope register.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingSuppliersSAP Ariba Supplier Lifecycle and PerformanceRiskSAP Ariba Supplier RiskExternal workforceSAP FieldglassIntegrationintegration with SAP S/4HANA\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ScopeImplementation scope.SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingSuppliersSAP Ariba Supplier Lifecycle and PerformanceRiskSAP Ariba Supplier RiskExternal workforceSAP FieldglassIntegrationintegration with SAP S/4HANA\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Scope\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Implementation scope.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingSuppliersSAP Ariba Supplier Lifecycle and PerformanceRiskSAP Ariba Supplier RiskExternal workforceSAP FieldglassIntegrationintegration with SAP S/4HANA\"]]"
   },
   {
     "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
@@ -847,7 +824,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "05",
     "occurrence": 1,
     "ownerText": "05 / Evidence",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / EvidenceScopes confirmed by facts.SAP Ariba implementations20+KGHM, roleImplementation and integration deliveryKGHM, scopeSourcing and external workforce managementKGHM, integrationSAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANAŻabka, roleDelivery of the SAP Ariba implementationŻabka, scopeProcurement, supplier risk and sourcingŻabka, solutionSAP Ariba Buying, Supplier Risk and sourcingPLL LOTSAP Ariba implementation for PLL LOTMotor Oil HellasSAP procurement implementation for Motor Oil Hellas\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Evidence\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Scopes confirmed by facts.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"SAP Ariba implementations20+KGHM, roleImplementation and integration deliveryKGHM, scopeSourcing and external workforce managementKGHM, integrationSAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANAŻabka, roleDelivery of the SAP Ariba implementationŻabka, scopeProcurement, supplier risk and sourcingŻabka, solutionSAP Ariba Buying, Supplier Risk and sourcingPLL LOTSAP Ariba implementation for PLL LOTMotor Oil HellasSAP procurement implementation for Motor Oil Hellas\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / EvidenceImplementation examples.SAP Ariba implementations20+KGHM, roleImplementation and integration deliveryKGHM, scopeSourcing and external workforce managementKGHM, integrationSAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANAŻabka, roleDelivery of the SAP Ariba implementationŻabka, scopeProcurement, supplier risk and sourcingŻabka, solutionSAP Ariba Buying, Supplier Risk and sourcingPLL LOTSAP Ariba implementation for PLL LOTMotor Oil HellasSAP procurement implementation for Motor Oil Hellas\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Evidence\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Implementation examples.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"SAP Ariba implementations20+KGHM, roleImplementation and integration deliveryKGHM, scopeSourcing and external workforce managementKGHM, integrationSAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANAŻabka, roleDelivery of the SAP Ariba implementationŻabka, scopeProcurement, supplier risk and sourcingŻabka, solutionSAP Ariba Buying, Supplier Risk and sourcingPLL LOTSAP Ariba implementation for PLL LOTMotor Oil HellasSAP procurement implementation for Motor Oil Hellas\"]]"
   },
   {
     "file": "en/uslugi/wdrozenie-sap-ariba/index.html",
@@ -964,7 +941,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "04",
     "occurrence": 1,
     "ownerText": "04 / Interview",
-    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-recording\",data-section=\"interview\",id=\"interview\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"04 / InterviewA conversation about implementation\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Interview\"],[\"h2{}\",\"A conversation about implementation\"]]"
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-recording\",data-section=\"interview\",id=\"interview\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"04 / InterviewPodcasts and interviews\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Interview\"],[\"h2{}\",\"Podcasts and interviews\"]]"
   },
   {
     "file": "en/wystapienia/index.html",
@@ -1010,15 +987,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "04 / Wartość",
     "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"04 / Wartość Wartość Sprawdzam użycie, wynik i kolejne decyzje rozwojowe. Artefakt: Pomiar i iteracja\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"04 / Wartość\"],[\"h3{}\",\"Wartość\"],[\"p{}\",\"Sprawdzam użycie, wynik i kolejne decyzje rozwojowe.\"],[\"p{}\",\"Artefakt: Pomiar i iteracja\"]]"
-  },
-  {
-    "file": "lotnictwo/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "03",
-    "occurrence": 1,
-    "ownerText": "FLIGHT PLAN / CORE ROUTE 03",
-    "containerSignature": "body{class=\"aviation-page\",data-page=\"aviation\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero aviation-hero\"}>div{class=\"page-hero-content\"}>p{class=\"aviation-call-sign\"}|parentText=\"Strona główna/Lotnictwo FLIGHT PLAN / CORE ROUTE 03 Lotnictwo Lotnictwo jest jednym z głównych obszarów mojej działalności. Łączę operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach, które wymagają jasnych procedur oraz odpowiedzialności.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Lotnictwo\"],[\"p{class=\\\"aviation-call-sign\\\"}\",\"FLIGHT PLAN / CORE ROUTE 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Lotnictwo\"],[\"p{class=\\\"page-lead\\\"}\",\"Lotnictwo jest jednym z głównych obszarów mojej działalności. Łączę operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach, które wymagają jasnych procedur oraz odpowiedzialności.\"]]"
   },
   {
     "file": "lotnictwo/index.html",
@@ -1076,48 +1044,39 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
   },
   {
     "file": "procurement-2026/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[1]>header[1]>span[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[1]>header[1]>span[1]",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[1]>details[1]>summary[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[1]>details[1]>summary[1]>span[1]",
     "token": "01",
     "occurrence": 1,
     "ownerText": "01",
-    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"1\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"01Materiał w języku angielskimInfografika: od cyklu do orkiestracji\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"01\"],[\"div{}\",\"Materiał w języku angielskimInfografika: od cyklu do orkiestracji\"]]"
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"1\",id=\"material-1\"}>details{}>summary{}>span{aria-hidden=\"true\"}|parentText=\"01Infografika: od cyklu do orkiestracjiMateriał po angielsku · rozwiń\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"01\"],[\"h2{}\",\"Infografika: od cyklu do orkiestracji\"],[\"span{class=\\\"artifact-language\\\"}\",\"Materiał po angielsku · rozwiń\"]]"
   },
   {
     "file": "procurement-2026/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[2]>header[1]>span[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[2]>header[1]>span[1]",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[2]>details[1]>summary[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[2]>details[1]>summary[1]>span[1]",
     "token": "02",
     "occurrence": 1,
     "ownerText": "02",
-    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"2\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"02Diagram procesu zakupowego\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"02\"],[\"div{}\",\"Diagram procesu zakupowego\"]]"
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"2\",id=\"material-2\"}>details{}>summary{}>span{aria-hidden=\"true\"}|parentText=\"02Diagram procesu zakupowegoMateriał po angielsku · rozwiń\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"02\"],[\"h2{}\",\"Diagram procesu zakupowego\"],[\"span{class=\\\"artifact-language\\\"}\",\"Materiał po angielsku · rozwiń\"]]"
   },
   {
     "file": "procurement-2026/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[3]>header[1]>span[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[3]>header[1]>span[1]",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[3]>details[1]>summary[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[3]>details[1]>summary[1]>span[1]",
     "token": "03",
     "occurrence": 1,
     "ownerText": "03",
-    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"3\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"03Mapowanie modułów SAP Ariba\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"03\"],[\"div{}\",\"Mapowanie modułów SAP Ariba\"]]"
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"3\",id=\"material-3\"}>details{}>summary{}>span{aria-hidden=\"true\"}|parentText=\"03Mapowanie modułów SAP AribaMateriał po angielsku · rozwiń\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"03\"],[\"h2{}\",\"Mapowanie modułów SAP Ariba\"],[\"span{class=\\\"artifact-language\\\"}\",\"Materiał po angielsku · rozwiń\"]]"
   },
   {
     "file": "procurement-2026/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[4]>header[1]>span[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[4]>header[1]>span[1]",
+    "sourcePath": "html[1]>body[1]>main[1]>section[1]>article[4]>details[1]>summary[1]>span[1]",
+    "ownerPath": "html[1]>body[1]>main[1]>section[1]>article[4]>details[1]>summary[1]>span[1]",
     "token": "04",
     "occurrence": 1,
     "ownerText": "04",
-    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"4\"}>header{}>span{aria-hidden=\"true\"}|parentText=\"04Ocena dojrzałości zakupowej\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"04\"],[\"div{}\",\"Ocena dojrzałości zakupowej\"]]"
-  },
-  {
-    "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "03",
-    "occurrence": 1,
-    "ownerText": "DOSSIER / ADVISORY 03",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Strona główna/Doradztwo w zamówieniach publicznychDOSSIER / ADVISORY 03Doradztwo w zamówieniach publicznychPomagam uporządkować strategię postępowania, odpowiedzialności, dokumenty i decyzje w projektach objętych zamówieniami publicznymi. Pracuję na styku zakupów, technologii i zarządzania projektem, z wyraźną granicą odpowiedzialności prawnej.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Doradztwo w zamówieniach publicznych\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 03\"],[\"h1{class=\\\"page-title\\\"}\",\"Doradztwo w zamówieniach publicznych\"],[\"p{class=\\\"page-lead\\\"}\",\"Pomagam uporządkować strategię postępowania, odpowiedzialności, dokumenty i decyzje w projektach objętych zamówieniami publicznymi. Pracuję na styku zakupów, technologii i zarządzania projektem, z wyraźną granicą odpowiedzialności prawnej.\"]]"
+    "containerSignature": "body{class=\"procurement-parent-page\",data-page=\"procurement-parent\"}>main{id=\"main\",tabindex=\"-1\"}>section{aria-label=\"Materiały modelu\",class=\"procurement-artifacts\"}>article{class=\"procurement-artifact\",data-artifact=\"4\",id=\"material-4\"}>details{}>summary{}>span{aria-hidden=\"true\"}|parentText=\"04Ocena dojrzałości zakupowejMateriał po angielsku · rozwiń\"|parentChildren=[[\"span{aria-hidden=\\\"true\\\"}\",\"04\"],[\"h2{}\",\"Ocena dojrzałości zakupowej\"],[\"span{class=\\\"artifact-language\\\"}\",\"Materiał po angielsku · rozwiń\"]]"
   },
   {
     "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
@@ -1144,7 +1103,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "03 / Zakres",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresRejestr pracy doradczej.DecyzjeStruktura decyzji i punkty akceptacji.StrategiaStrategia zakupowa dla planowanego postępowania.RoleMapa odpowiedzialności zespołu i interesariuszy.OcenaPodejście do oceny i dokumentowania wyborów.TechnologiaWymagania technologiczne wspierające przebieg pracy.WspółpracaGovernance i współpraca z doradcą prawnym.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Rejestr pracy doradczej.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"DecyzjeStruktura decyzji i punkty akceptacji.StrategiaStrategia zakupowa dla planowanego postępowania.RoleMapa odpowiedzialności zespołu i interesariuszy.OcenaPodejście do oceny i dokumentowania wyborów.TechnologiaWymagania technologiczne wspierające przebieg pracy.WspółpracaGovernance i współpraca z doradcą prawnym.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresZakres doradztwa.DecyzjeStruktura decyzji i punkty akceptacji.StrategiaStrategia zakupowa dla planowanego postępowania.RoleMapa odpowiedzialności zespołu i interesariuszy.OcenaPodejście do oceny i dokumentowania wyborów.TechnologiaWymagania technologiczne wspierające przebieg pracy.WspółpracaGovernance i współpraca z doradcą prawnym.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Zakres doradztwa.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"DecyzjeStruktura decyzji i punkty akceptacji.StrategiaStrategia zakupowa dla planowanego postępowania.RoleMapa odpowiedzialności zespołu i interesariuszy.OcenaPodejście do oceny i dokumentowania wyborów.TechnologiaWymagania technologiczne wspierające przebieg pracy.WspółpracaGovernance i współpraca z doradcą prawnym.\"]]"
   },
   {
     "file": "uslugi/doradztwo-zamowienia-publiczne/index.html",
@@ -1211,15 +1170,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
   },
   {
     "file": "uslugi/transformacja-zakupow/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "01",
-    "occurrence": 1,
-    "ownerText": "DOSSIER / ADVISORY 01",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Strona główna/Transformacja zakupówDOSSIER / ADVISORY 01Transformacja zakupówPorządkuję model operacyjny zakupów: decyzje, role, procesy, dane i technologię. Efektem pracy jest uzgodniony projekt zmiany, który można wdrożyć i rozliczać.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Transformacja zakupów\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 01\"],[\"h1{class=\\\"page-title\\\"}\",\"Transformacja zakupów\"],[\"p{class=\\\"page-lead\\\"}\",\"Porządkuję model operacyjny zakupów: decyzje, role, procesy, dane i technologię. Efektem pracy jest uzgodniony projekt zmiany, który można wdrożyć i rozliczać.\"]]"
-  },
-  {
-    "file": "uslugi/transformacja-zakupow/index.html",
     "sourcePath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
     "ownerPath": "html[1]>body[1]>main[1]>section[1]>div[1]>div[1]>p[1]",
     "token": "01",
@@ -1234,7 +1184,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "02",
     "occurrence": 1,
     "ownerText": "02 / Dopasowanie",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / DopasowanieJasna decyzja po obu stronach.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Dopasowanie\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Jasna decyzja po obu stronach.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / DopasowanieOd czego zaczynamy.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Dopasowanie\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Od czego zaczynamy.\"]]"
   },
   {
     "file": "uslugi/transformacja-zakupow/index.html",
@@ -1243,7 +1193,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "03 / Zakres",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresRejestr projektowanej zmiany.ModelTarget Operating Model i podział ról.ProcesSource-to-pay, S2P i P2P.DaneSpend analysis i odpowiedzialność za definicje.DecyzjeCategory strategy i governance.TechnologiaWymagania wynikające z procesu i danych.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Rejestr projektowanej zmiany.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"ModelTarget Operating Model i podział ról.ProcesSource-to-pay, S2P i P2P.DaneSpend analysis i odpowiedzialność za definicje.DecyzjeCategory strategy i governance.TechnologiaWymagania wynikające z procesu i danych.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresCo obejmuje transformacja.ModelTarget Operating Model i podział ról.ProcesSource-to-pay, S2P i P2P.DaneSpend analysis i odpowiedzialność za definicje.DecyzjeCategory strategy i governance.TechnologiaWymagania wynikające z procesu i danych.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Co obejmuje transformacja.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"ModelTarget Operating Model i podział ról.ProcesSource-to-pay, S2P i P2P.DaneSpend analysis i odpowiedzialność za definicje.DecyzjeCategory strategy i governance.TechnologiaWymagania wynikające z procesu i danych.\"]]"
   },
   {
     "file": "uslugi/transformacja-zakupow/index.html",
@@ -1288,7 +1238,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "04",
     "occurrence": 1,
     "ownerText": "04 / Metoda",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MetodaCztery zamknięcia decyzyjne.01DiagnozaStan procesu, wydatków, ról i danych.02ProjektDocelowy model pracy i odpowiedzialności.03SekwencjaKolejność zmian, zależności i odbiory.04GovernanceWłaściciele decyzji i sposób rozliczania projektu.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Metoda\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Cztery zamknięcia decyzyjne.\"],[\"div{class=\\\"service-method\\\"}\",\"01DiagnozaStan procesu, wydatków, ról i danych.02ProjektDocelowy model pracy i odpowiedzialności.03SekwencjaKolejność zmian, zależności i odbiory.04GovernanceWłaściciele decyzji i sposób rozliczania projektu.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--panel\",data-section=\"method\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"04 / MetodaJak przebiega współpraca.01DiagnozaStan procesu, wydatków, ról i danych.02ProjektDocelowy model pracy i odpowiedzialności.03SekwencjaKolejność zmian, zależności i odbiory.04GovernanceWłaściciele decyzji i sposób rozliczania projektu.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Metoda\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Jak przebiega współpraca.\"],[\"div{class=\\\"service-method\\\"}\",\"01DiagnozaStan procesu, wydatków, ról i danych.02ProjektDocelowy model pracy i odpowiedzialności.03SekwencjaKolejność zmian, zależności i odbiory.04GovernanceWłaściciele decyzji i sposób rozliczania projektu.\"]]"
   },
   {
     "file": "uslugi/transformacja-zakupow/index.html",
@@ -1297,7 +1247,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "05",
     "occurrence": 1,
     "ownerText": "05 / Dowody",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / DowodyDoświadczenie zapisane faktami.OrganizacjaPZU S.A.RolaDyrektor Projektu StrategicznegoZakresProwadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.OrganizacjaPwC Polska Sp. z o.o.RolaWicedyrektor w Advisory / Procurement ExpertMetodykaPracowałem z metodyką CAPP (Complete & Agile Procurement).Rola projektowaKierownik projektu CONNECTPlatformaCentralna platforma sourcingowa dla Grupy ORLENZakres CONNECT15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Dowody\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Doświadczenie zapisane faktami.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganizacjaPZU S.A.RolaDyrektor Projektu StrategicznegoZakresProwadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.OrganizacjaPwC Polska Sp. z o.o.RolaWicedyrektor w Advisory / Procurement ExpertMetodykaPracowałem z metodyką CAPP (Complete & Agile Procurement).Rola projektowaKierownik projektu CONNECTPlatformaCentralna platforma sourcingowa dla Grupy ORLENZakres CONNECT15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / DowodyWybrane projekty.OrganizacjaPZU S.A.RolaDyrektor Projektu StrategicznegoZakresProwadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.OrganizacjaPwC Polska Sp. z o.o.RolaWicedyrektor w Advisory / Procurement ExpertMetodykaPracowałem z metodyką CAPP (Complete & Agile Procurement).Rola projektowaKierownik projektu CONNECTPlatformaCentralna platforma sourcingowa dla Grupy ORLENZakres CONNECT15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Dowody\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Wybrane projekty.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"OrganizacjaPZU S.A.RolaDyrektor Projektu StrategicznegoZakresProwadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.OrganizacjaPwC Polska Sp. z o.o.RolaWicedyrektor w Advisory / Procurement ExpertMetodykaPracowałem z metodyką CAPP (Complete & Agile Procurement).Rola projektowaKierownik projektu CONNECTPlatformaCentralna platforma sourcingowa dla Grupy ORLENZakres CONNECT15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół\"]]"
   },
   {
     "file": "uslugi/transformacja-zakupow/index.html",
@@ -1307,15 +1257,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "06 / Kontakt",
     "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-contact\",data-section=\"contact\"}>div{class=\"section-shell service-contact__inner\"}>div{}>p{class=\"section-label\"}|parentText=\"06 / KontaktUstalmy projekt zmiany.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"06 / Kontakt\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Ustalmy projekt zmiany.\"]]"
-  },
-  {
-    "file": "uslugi/wdrozenie-sap-ariba/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>header[1]>div[1]>p[1]",
-    "token": "02",
-    "occurrence": 1,
-    "ownerText": "DOSSIER / ADVISORY 02",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>header{class=\"page-hero service-hero\"}>div{class=\"page-hero-content\"}>p{class=\"service-dossier-code\"}|parentText=\"Strona główna/Wdrożenie SAP AribaDOSSIER / ADVISORY 02Wdrożenie SAP AribaProwadzę wdrożenia SAP Ariba od decyzji procesowych i danych po konfigurację, integrację, testy i uruchomienie. Zakres wynika z realnego modelu zakupowego, a nie z listy funkcji systemu.\"|parentChildren=[[\"nav{aria-label=\\\"Okruszki\\\",class=\\\"breadcrumb\\\"}\",\"Strona główna/Wdrożenie SAP Ariba\"],[\"p{class=\\\"service-dossier-code\\\"}\",\"DOSSIER / ADVISORY 02\"],[\"h1{class=\\\"page-title\\\"}\",\"Wdrożenie SAP Ariba\"],[\"p{class=\\\"page-lead\\\"}\",\"Prowadzę wdrożenia SAP Ariba od decyzji procesowych i danych po konfigurację, integrację, testy i uruchomienie. Zakres wynika z realnego modelu zakupowego, a nie z listy funkcji systemu.\"]]"
   },
   {
     "file": "uslugi/wdrozenie-sap-ariba/index.html",
@@ -1333,7 +1274,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "02",
     "occurrence": 1,
     "ownerText": "02 / Dopasowanie",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / DopasowanieWdrożenie potrzebuje właścicieli decyzji.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Dopasowanie\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Wdrożenie potrzebuje właścicieli decyzji.\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section service-section--band\",data-section=\"fit\"}>div{class=\"section-shell service-section__grid\"}>div{}>p{class=\"section-label\"}|parentText=\"02 / DopasowanieCo uzgadniamy przed wdrożeniem.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"02 / Dopasowanie\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Co uzgadniamy przed wdrożeniem.\"]]"
   },
   {
     "file": "uslugi/wdrozenie-sap-ariba/index.html",
@@ -1342,7 +1283,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "03",
     "occurrence": 1,
     "ownerText": "03 / Zakres",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresRejestr zakresu rozwiązania.SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingDostawcySAP Ariba Supplier Lifecycle and PerformanceRyzykoSAP Ariba Supplier RiskPracownicy zewnętrzniSAP FieldglassIntegracjaintegration with SAP S/4HANA\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Rejestr zakresu rozwiązania.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingDostawcySAP Ariba Supplier Lifecycle and PerformanceRyzykoSAP Ariba Supplier RiskPracownicy zewnętrzniSAP FieldglassIntegracjaintegration with SAP S/4HANA\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"scope\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"03 / ZakresZakres wdrożenia.SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingDostawcySAP Ariba Supplier Lifecycle and PerformanceRyzykoSAP Ariba Supplier RiskPracownicy zewnętrzniSAP FieldglassIntegracjaIntegracja z SAP S/4HANA\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Zakres\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Zakres wdrożenia.\"],[\"dl{class=\\\"service-scope-register\\\"}\",\"SourcingSAP Ariba SourcingContractsSAP Ariba ContractsBuyingSAP Ariba Buying and InvoicingDostawcySAP Ariba Supplier Lifecycle and PerformanceRyzykoSAP Ariba Supplier RiskPracownicy zewnętrzniSAP FieldglassIntegracjaIntegracja z SAP S/4HANA\"]]"
   },
   {
     "file": "uslugi/wdrozenie-sap-ariba/index.html",
@@ -1396,7 +1337,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "05",
     "occurrence": 1,
     "ownerText": "05 / Dowody",
-    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / DowodyZakresy potwierdzone faktami.Wdrożenia SAP Ariba20+KGHM, rolaRealizacja wdrożenia i integracjiKGHM, zakresSourcing i obsługa pracowników zewnętrznychKGHM, integracjaSAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANAŻabka, rolaRealizacja wdrożenia SAP AribaŻabka, zakresZakupy, ryzyko dostawców i sourcingŻabka, rozwiązanieSAP Ariba Buying, Supplier Risk i sourcingPLL LOTWdrożenie SAP Ariba dla PLL LOTMotor Oil HellasWdrożenie SAP w obszarze zakupów dla Motor Oil Hellas\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Dowody\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Zakresy potwierdzone faktami.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"Wdrożenia SAP Ariba20+KGHM, rolaRealizacja wdrożenia i integracjiKGHM, zakresSourcing i obsługa pracowników zewnętrznychKGHM, integracjaSAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANAŻabka, rolaRealizacja wdrożenia SAP AribaŻabka, zakresZakupy, ryzyko dostawców i sourcingŻabka, rozwiązanieSAP Ariba Buying, Supplier Risk i sourcingPLL LOTWdrożenie SAP Ariba dla PLL LOTMotor Oil HellasWdrożenie SAP w obszarze zakupów dla Motor Oil Hellas\"]]"
+    "containerSignature": "body{class=\"service-page\",data-page=\"services\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"service-section\",data-section=\"evidence\"}>div{class=\"section-shell\"}>p{class=\"section-label\"}|parentText=\"05 / DowodyPrzykłady wdrożeń.Wdrożenia SAP Ariba20+KGHM, rolaRealizacja wdrożenia i integracjiKGHM, zakresSourcing i obsługa pracowników zewnętrznychKGHM, integracjaSAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANAŻabka, rolaRealizacja wdrożenia SAP AribaŻabka, zakresZakupy, ryzyko dostawców i sourcingŻabka, rozwiązanieSAP Ariba Buying, Supplier Risk i sourcingPLL LOTWdrożenie SAP Ariba dla PLL LOTMotor Oil HellasWdrożenie SAP w obszarze zakupów dla Motor Oil Hellas\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Dowody\"],[\"h2{class=\\\"service-section__title\\\"}\",\"Przykłady wdrożeń.\"],[\"div{class=\\\"service-evidence-ledger\\\"}\",\"Wdrożenia SAP Ariba20+KGHM, rolaRealizacja wdrożenia i integracjiKGHM, zakresSourcing i obsługa pracowników zewnętrznychKGHM, integracjaSAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANAŻabka, rolaRealizacja wdrożenia SAP AribaŻabka, zakresZakupy, ryzyko dostawców i sourcingŻabka, rozwiązanieSAP Ariba Buying, Supplier Risk i sourcingPLL LOTWdrożenie SAP Ariba dla PLL LOTMotor Oil HellasWdrożenie SAP w obszarze zakupów dla Motor Oil Hellas\"]]"
   },
   {
     "file": "uslugi/wdrozenie-sap-ariba/index.html",
@@ -1504,7 +1445,7 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "token": "04",
     "occurrence": 1,
     "ownerText": "04 / Wywiad",
-    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-recording\",data-section=\"interview\",id=\"interview\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"04 / WywiadRozmowa o wdrożeniach\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Wywiad\"],[\"h2{}\",\"Rozmowa o wdrożeniach\"]]"
+    "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-recording\",data-section=\"interview\",id=\"interview\"}>header{class=\"speaking-group__head\"}>p{class=\"section-label\"}|parentText=\"04 / WywiadPodcasty i rozmowy\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"04 / Wywiad\"],[\"h2{}\",\"Podcasty i rozmowy\"]]"
   },
   {
     "file": "wystapienia/index.html",
@@ -1786,8 +1727,9 @@ function inspectHtmlStartTagSyntax(source) {
     const nameStart = cursor;
     while (cursor < source.length && !/[\s"'<>/=]/.test(source[cursor])) cursor += 1;
     if (cursor === nameStart) return { valid: false, selfClosing: false };
+    const attributeEnd = cursor;
     while (/\s/.test(source[cursor] ?? "")) cursor += 1;
-    if (source[cursor] !== "=") continue;
+    if (source[cursor] !== "=") { cursor = attributeEnd; continue; }
 
     cursor += 1;
     while (/\s/.test(source[cursor] ?? "")) cursor += 1;
@@ -2053,10 +1995,10 @@ const homepageMarkers = [
   'data-cta-after="process"',
   'id="cases"',
   'data-cta-after="cases"',
+  'id="skills"',
   'id="about"',
   'id="education"',
   'id="resume"',
-  'id="skills"',
   'id="portfolio"',
   'id="clients"',
   'id="contact"'
@@ -2121,6 +2063,7 @@ const aboutAviationFactOrder = [
 ];
 
 const localizedHomeRoutes = new Map([
+  ["/prywatnosc/", "/en/prywatnosc/"],
   ["/", "/en/"],
   ["/#about", "/en/#about"],
   ["/#contact", "/en/#contact"],
@@ -2382,8 +2325,21 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
   }
 
   const chatInputs = elements.filter((element) => element.name === "input" && elementAttribute(element, "id") === "chat-input");
-  if (chatInputs.length !== 1 || elementAttribute(chatInputs[0], "maxlength") !== "2000" || !elementIsStaticallyVisible(chatInputs[0])) {
-    error(errors, "home-chat-maxlength", page.path, "homepage requires one visible chat input with maxlength 2000");
+  const widgets = elements.filter(element => elementAttribute(element, "id") === "ai-chat");
+  const fallbacks = elements.filter(element => element.attributes.has("data-chat-fallback"));
+  const inputVisibleAfterInit = chatInputs.length === 1 && widgets.length === 1 && (() => {
+    for (let current = chatInputs[0]; current?.type === "element"; current = current.parent) {
+      if (current === widgets[0]) {
+        if (normalize(elementAttribute(current, "aria-hidden") ?? "") === "true" || elementHasHiddenInlineStyle(current)) return false;
+      } else if (elementIsStaticallyHidden(current)) return false;
+    }
+    return true;
+  })();
+  if (chatInputs.length !== 1 || elementAttribute(chatInputs[0], "maxlength") !== "2000"
+    || !inputVisibleAfterInit
+    || widgets.length !== 1 || !widgets[0].attributes.has("hidden") || !elementIsWithin(chatInputs[0], widgets[0])
+    || fallbacks.length !== 1 || !elementIsStaticallyVisible(fallbacks[0]) || !publishedStaticText(fallbacks[0])) {
+    error(errors, "home-chat-maxlength", page.path, "homepage requires a progressively enhanced chat with maxlength 2000 and a visible no-JS fallback");
   }
 
   const heroSections = elements.filter((element) => element.name === "section" && elementAttribute(element, "id") === "hero");
@@ -2398,8 +2354,8 @@ function verifyHomepageBaseline(parsedRoot, page, errors) {
     error(errors, "home-hero-image", page.path, "visible hero requires one visible image with explicit positive width and height plus fetchpriority=high");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedCss = "/assets/css/style.css?v=20260904-quality-1";
+  const expectedJs = "/assets/js/main.js?v=20260904-quality-1";
   const stylesheetAttributeNames = new Set(["rel", "href"]);
   const stylesheetNodes = elements.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -3273,6 +3229,9 @@ function verifyFactSchema(factData, publicSurfaces, errors) {
     if (!sourceTypes.has(fact.source_type)) error(errors, "fact-source-type", path, `facts[${index}] source_type is invalid`);
     if (!nonEmptyString(fact.source_label)) error(errors, "fact-source-label", path, `facts[${index}] source_label must be a non-empty string`);
     if (fact.source_url !== null && (!nonEmptyString(fact.source_url) || !isHttpUrl(fact.source_url))) error(errors, "fact-source-url", path, `facts[${index}] source_url must be null or an http(s) URL`);
+    if (Object.hasOwn(fact, "publication_url") && (fact.status !== "approved" || fact.publication_url !== PUBLICATION_URLS[fact.id])) {
+      error(errors, "fact-publication-url", path, `${fact.id}: publication URL must match the reviewed existing homepage destination`);
+    }
     const closedStatus = fact.status === "review" || fact.status === "retired";
     if (!Array.isArray(fact.surfaces) || (!closedStatus && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
       error(errors, "fact-surfaces", path, `facts[${index}] approved surfaces must be non-empty; review and retired surfaces must be an empty string array`);
@@ -4137,8 +4096,8 @@ function verifyNotFound(html, errors) {
     error(errors, "not-found-robots", path, "404 must have one robots meta containing noindex");
   }
 
-  const expectedCss = "/assets/css/style.css?v=20260825-flightplan-3";
-  const expectedJs = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedCss = "/assets/css/style.css?v=20260904-quality-1";
+  const expectedJs = "/assets/js/main.js?v=20260904-quality-1";
   const stylesheets = byName("link").filter((element) => elementIsActiveResource(element)
     && elementAttributeTokens(element, "rel").includes("stylesheet"));
   const externalScripts = byName("script").filter((element) => elementIsActiveResource(element)
@@ -4689,7 +4648,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-hreflang", path, "requires exact active pl, en and x-default hreflang entries for the real route pair");
   }
 
-  const expectedStylesheet = "/assets/css/style.css?v=20260825-flightplan-3";
+  const expectedStylesheet = "/assets/css/style.css?v=20260904-quality-1";
   const links = elements.filter((element) => element.name === "link");
   const stylesheetCandidates = links.filter((element) => elementAttributeTokens(element, "rel").includes("stylesheet")
     || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css"));
@@ -4698,7 +4657,7 @@ function verifyPageShell(path, html, lang, route, pairedRoute, errors) {
     error(errors, "page-stylesheet", path, `requires one active shared stylesheet ${expectedStylesheet}`);
   }
 
-  const expectedScript = "/assets/js/main.js?v=20260825-flightplan-3";
+  const expectedScript = "/assets/js/main.js?v=20260904-quality-1";
   const scriptCandidates = elements.filter((element) => element.name === "script" && element.attributes.has("src"));
   const validScripts = scriptCandidates.filter((element) => elementHasExactAttributeNames(element, new Set(["src", "defer"]))
     && elementAttribute(element, "src") === expectedScript
@@ -4827,7 +4786,8 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
     }),
     hero: Object.freeze([
       "Strona główna", "/", "Aplikacje operacyjne", "Aplikacje operacyjne",
-      "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji."
+      "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji.",
+      "Opisz aplikację operacyjną", "Zobacz aplikacje"
     ]),
     sections: Object.freeze({
       problem: Object.freeze([
@@ -4838,7 +4798,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "Lotnictwo", "Kwalifikacje, planowanie, dokumentacja i odpowiedzialność operacyjna."
       ]),
       delivery: Object.freeze([
-        "02 / Delivery", "Od rozpoznania do uruchomienia.",
+        "02 / Realizacja", "Od rozpoznania do uruchomienia.",
         "Kolejność pracy jest częścią rozwiązania. Każdy etap zamyka konkretną decyzję potrzebną do następnego kroku.",
         "01 / Rozpoznanie", "Discovery", "Problem, użytkownicy, decyzje i ograniczenia.",
         "02 / Struktura", "Model danych", "Obiekty, źródła, reguły jakości i odpowiedzialność.",
@@ -4846,13 +4806,13 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operacja", "Uruchomienie", "Przygotowanie danych, odbiór procesu i wejście do codziennej pracy."
       ]),
       evidence: Object.freeze([
-        "03 / Evidence", "Wybrane produkty.", "Trzy różne zakresy pokazane przez ich zatwierdzone znaczenie produktowe.",
+        "03 / Produkty", "Wybrane produkty.", "Przykłady aplikacji operacyjnych.",
         "Produkt / 01", "czympojade.pl", "Funkcja", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
         "Produkt / 02", "Przypominamy.com", "Funkcja", "Platforma powiadomień dla organizacji.",
         "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych."
       ]),
       fit: Object.freeze([
-        "04 / Fit", "Warunki dobrego dopasowania.",
+        "04 / Współpraca", "Warunki dobrego dopasowania.",
         "Najlepszym początkiem jest konkretny proces oraz osoby, które znają jego codzienny przebieg i wyjątki.",
         "Właściciel procesu", "Nazwana osoba podejmuje decyzje dotyczące reguł i priorytetów.",
         "Wiedza domenowa", "Dostęp do użytkowników i osób odpowiedzialnych za wyjątki w procesie.",
@@ -4866,7 +4826,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
+      "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/", "Strona główna"]),
@@ -4875,7 +4835,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]),
       Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#contact", "Kontakt"])
+      Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
     ])
   }),
   en: Object.freeze({
@@ -4906,7 +4866,8 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
     }),
     hero: Object.freeze([
       "Home", "/", "Operational applications", "Operational applications",
-      "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work."
+      "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work.",
+      "Describe the operational application", "View applications"
     ]),
     sections: Object.freeze({
       problem: Object.freeze([
@@ -4925,7 +4886,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operation", "Launch", "Data preparation, process acceptance and entry into day-to-day work."
       ]),
       evidence: Object.freeze([
-        "03 / Evidence", "Selected products.", "Three different scopes, shown through their approved product meaning.",
+        "03 / Evidence", "Selected products.", "Examples of operational applications.",
         "Product / 01", "czympojade.pl", "Function", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
         "Product / 02", "Przypominamy.com", "Function", "Notification platform for organisations.",
         "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator."
@@ -4945,7 +4906,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
+      "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/en/", "Home"]),
@@ -4954,7 +4915,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]),
       Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#contact", "Contact"])
+      Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
     ])
   })
 });
@@ -4981,6 +4942,8 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "nav-primary-5", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } },
     { role: "nav-language", href: "/en/aplikacje-operacyjne/", label: "EN", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/", class: "nav-lang" } },
     { role: "breadcrumb-home", href: "/", label: "Strona główna", kind: "text", attributes: { href: "/" } },
+    {"role": "hero-contact", "href": "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna", "label": "Opisz aplikację operacyjną", "kind": "text", "attributes": {"class": "btn-primary", "href": "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna"}},
+    {"role": "hero-products", "href": "#products", "label": "Zobacz aplikacje", "kind": "text", "attributes": {"class": "btn-ghost", "href": "#products"}},
     { role: "contact-cta", href: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna", label: "Opisz aplikację operacyjną", kind: "text", attributes: { class: "btn-primary", href: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna" } },
     { role: "footer-sign", href: "/", label: "", kind: "signature", attributes: { class: "footer-sign", href: "/", "aria-label": "Paweł Mamcarz, strona główna" } },
     { role: "footer-link-0", href: "/", label: "Strona główna", kind: "text", attributes: { href: "/" } },
@@ -4989,7 +4952,8 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "footer-link-3", href: "/lotnictwo/", label: "Lotnictwo", kind: "text", attributes: { href: "/lotnictwo/" } },
     { role: "footer-link-4", href: "/case-studies/", label: "Projekty", kind: "text", attributes: { href: "/case-studies/" } },
     { role: "footer-link-5", href: "/wiedza/", label: "Wiedza", kind: "text", attributes: { href: "/wiedza/" } },
-    { role: "footer-link-6", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } }
+    { role: "footer-link-6", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } },
+    {"role": "footer-link-7", "href": "/prywatnosc/", "label": "Prywatność", "kind": "text", "attributes": {"href": "/prywatnosc/"}}
   ]),
   en: freezeApplicationManifest([
     { role: "skip", href: "#main", label: "Skip to content", kind: "text", attributes: { href: "#main", class: "skip-link" } },
@@ -5005,6 +4969,8 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "nav-primary-5", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } },
     { role: "nav-language", href: "/aplikacje-operacyjne/", label: "PL", kind: "text", attributes: { href: "/aplikacje-operacyjne/", class: "nav-lang" } },
     { role: "breadcrumb-home", href: "/en/", label: "Home", kind: "text", attributes: { href: "/en/" } },
+    {"role": "hero-contact", "href": "mailto:pawel@mamcarz.com?subject=Operational%20application", "label": "Describe the operational application", "kind": "text", "attributes": {"class": "btn-primary", "href": "mailto:pawel@mamcarz.com?subject=Operational%20application"}},
+    {"role": "hero-products", "href": "#products", "label": "View applications", "kind": "text", "attributes": {"class": "btn-ghost", "href": "#products"}},
     { role: "contact-cta", href: "mailto:pawel@mamcarz.com?subject=Operational%20application", label: "Describe the operational application", kind: "text", attributes: { class: "btn-primary", href: "mailto:pawel@mamcarz.com?subject=Operational%20application" } },
     { role: "footer-sign", href: "/en/", label: "", kind: "signature", attributes: { class: "footer-sign", href: "/en/", "aria-label": "Paweł Mamcarz, homepage" } },
     { role: "footer-link-0", href: "/en/", label: "Home", kind: "text", attributes: { href: "/en/" } },
@@ -5013,7 +4979,8 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "footer-link-3", href: "/en/lotnictwo/", label: "Aviation", kind: "text", attributes: { href: "/en/lotnictwo/" } },
     { role: "footer-link-4", href: "/en/case-studies/", label: "Projects", kind: "text", attributes: { href: "/en/case-studies/" } },
     { role: "footer-link-5", href: "/en/wiedza/", label: "Insights", kind: "text", attributes: { href: "/en/wiedza/" } },
-    { role: "footer-link-6", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } }
+    { role: "footer-link-6", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } },
+    {"role": "footer-link-7", "href": "/en/prywatnosc/", "label": "Privacy", "kind": "text", "attributes": {"href": "/en/prywatnosc/"}}
   ])
 });
 
@@ -5031,6 +4998,7 @@ const APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST = Object.freeze({
     { role: "breadcrumb-current", tag: "span", attributes: { "aria-current": "page" } },
     { role: "problem-ledger", tag: "dl", attributes: { "aria-label": "Obszary metody" } },
     { role: "delivery-route", tag: "div", attributes: { "aria-label": "Droga do uruchomienia" } },
+    { role: "products", tag: "section", attributes: { id: "products" } },
     { role: "fit-ledger", tag: "dl", attributes: { "aria-label": "Warunki współpracy" } },
     { role: "footer-sign", tag: "a", attributes: { "aria-label": "Paweł Mamcarz, strona główna" } },
     { role: "footer-signature", tag: "img", attributes: { alt: "" } }
@@ -5048,6 +5016,7 @@ const APPLICATION_SEMANTIC_ATTRIBUTE_MANIFEST = Object.freeze({
     { role: "breadcrumb-current", tag: "span", attributes: { "aria-current": "page" } },
     { role: "problem-ledger", tag: "dl", attributes: { "aria-label": "Method domains" } },
     { role: "delivery-route", tag: "div", attributes: { "aria-label": "Route to launch" } },
+    { role: "products", tag: "section", attributes: { id: "products" } },
     { role: "fit-ledger", tag: "dl", attributes: { "aria-label": "Working conditions" } },
     { role: "footer-sign", tag: "a", attributes: { "aria-label": "Paweł Mamcarz, homepage" } },
     { role: "footer-signature", tag: "img", attributes: { alt: "" } }
@@ -5058,8 +5027,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 189, digest: "08d1b9fbc78a0e99702c63fc90d0450c2684da2da8e53cec771daf710d32e31d" }),
-  en: Object.freeze({ elementCount: 189, digest: "305891223310b7e755323fd3f4b8ea49bbcee17ad89a843f31103454bd48dcec" })
+  pl: Object.freeze({ elementCount: 194, digest: "96174bdf87aecda7e50bee6e4547336b5ceda0c45f9a7317e7ed4f76cd8680ae" }),
+  en: Object.freeze({ elementCount: 194, digest: "7c918ab1ceef1e65c71613740b99674f5d3a4857678c79efd6cab7a82ef59ae4" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -5070,7 +5039,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" })
   ]),
   en: Object.freeze([
     Object.freeze({ rel: "canonical", href: "https://mamcarz.com/en/aplikacje-operacyjne/" }),
@@ -5080,7 +5049,7 @@ const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
     Object.freeze({ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null }),
     Object.freeze({ rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null }),
-    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    Object.freeze({ rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" })
   ])
 });
 const APPLICATION_ZERO_RESOURCE_TAGS = new Set([
@@ -5252,8 +5221,8 @@ function applicationApprovedEvidenceAnchors(evidenceRows, factData) {
   for (const row of evidenceRows) {
     const ids = (elementAttribute(row, "data-fact-ids") ?? "").trim().split(/\s+/).filter(Boolean);
     const approvedUrls = new Set(ids.flatMap((factId) => records
-      .filter((fact) => fact.id === factId && fact.status === "approved" && isHttpUrl(fact.source_url))
-      .map((fact) => fact.source_url)));
+      .filter((fact) => fact.id === factId && fact.status === "approved")
+      .flatMap((fact) => [fact.source_url, fact.publication_url === PUBLICATION_URLS[fact.id] ? fact.publication_url : null].filter(isHttpUrl))));
     const rowChildren = directElementChildren(row);
     const ledgerRows = directElementChildren(rowChildren[2], "div");
     const ledgerLeaves = directElementChildren(ledgerRows[0]);
@@ -5366,7 +5335,7 @@ function verifyApplicationResourceCensus(path, parsedRoot, lang, body, footer, e
     && exactApplicationResourceAttributes(schema, { type: "application/ld+json" })
     && external?.parent === body
     && bodyChildren.at(-1) === external
-    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(external, { src: "/assets/js/main.js?v=20260904-quality-1", defer: null })
     && rawElementText(external).trim() === "";
 
   const footerSigns = all.filter((element) => element.name === "a" && elementHasClass(element, "footer-sign"));
@@ -5517,6 +5486,7 @@ function applicationAnchorRoleNodes(body, nav, main, footer) {
     ...primaryLinks.map((node, index) => [`nav-primary-${index}`, node]),
     ["nav-language", navChildren.find((element) => element.name === "a" && elementHasClass(element, "nav-lang"))],
     ["breadcrumb-home", directElementChildren(breadcrumb, "a")[0]],
+    ...(main ? elementDescendants(main, "a") : []).filter(a => elementHasClass(a.parent, "page-actions")).map((node, index) => [["hero-contact", "hero-products"][index], node]),
     ["contact-cta", contact === undefined ? undefined : elementDescendants(contact, "a").find((element) => elementHasClass(element, "btn-primary"))],
     ["footer-sign", footer === undefined || footer === null ? undefined : elementDescendants(footer, "a").find((element) => elementHasClass(element, "footer-sign"))],
     ...footerLinks.map((node, index) => [`footer-link-${index}`, node])
@@ -5598,6 +5568,7 @@ function applicationSemanticRoleNodes(body, nav, main, footer, anchorRoleNodes) 
     ["breadcrumb-current", breadcrumbSpans[1]],
     ["problem-ledger", firstDescendantWithClass(problem, "dl", "applications-ledger")],
     ["delivery-route", firstDescendantWithClass(delivery, "div", "route-sequence")],
+    ["products", mainSections.find(section => elementAttribute(section, "id") === "products")],
     ["fit-ledger", firstDescendantWithClass(fit, "dl", "applications-ledger")],
     ["footer-sign", footerSign],
     ["footer-signature", directElementChildren(footerSign, "img")[0]]
@@ -5660,7 +5631,7 @@ function verifyApplicationMetadata(path, parsedRoot, lang, errors) {
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" }
   ];
   const expectedHeadTags = [
     "meta", "meta", "title", "meta", "meta", "meta",
@@ -6040,8 +6011,8 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
       }
     }
     const approvedUrls = new Set(ids.flatMap((factId) => records
-      .filter((fact) => fact.id === factId && fact.status === "approved" && isHttpUrl(fact.source_url))
-      .map((fact) => fact.source_url)));
+      .filter((fact) => fact.id === factId && fact.status === "approved")
+      .flatMap((fact) => [fact.source_url, fact.publication_url === PUBLICATION_URLS[fact.id] ? fact.publication_url : null].filter(isHttpUrl))));
     const rowLinks = elementDescendants(row, "a");
     if (rowLinks.some((link) => !pageElementIsActive(link) || !approvedUrls.has(elementAttribute(link, "href")))) {
       validEvidenceLinks = false;
@@ -6101,9 +6072,11 @@ function verifyApplicationPage(path, parsedRoot, lang, factData, errors) {
   const contactSection = sectionByName.get("contact");
   const primaryCtas = active.filter((element) => elementHasClass(element, "btn-primary"));
   if (contactSection === undefined
-    || primaryCtas.length !== 1
-    || primaryCtas[0].name !== "a"
-    || !elementIsWithin(primaryCtas[0], contactSection)
+    || primaryCtas.length !== 2
+    || !primaryCtas.every(cta => elementAttribute(cta, "href") === expected.contactHref)
+    || !elementHasClass(primaryCtas[0].parent, "page-actions")
+    || primaryCtas[1].name !== "a"
+    || !elementIsWithin(primaryCtas[1], contactSection)
     || elementAttribute(primaryCtas[0], "href") !== expected.contactHref) {
     error(errors, "application-contact", path, "requires one localized primary mailto CTA inside contact");
   }
@@ -6205,7 +6178,7 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" }
   ]),
   en: Object.freeze([
     { rel: "canonical", href: "https://mamcarz.com/en/lotnictwo/" },
@@ -6215,37 +6188,37 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
     { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", crossorigin: null },
     { rel: "preload", as: "font", type: "font/woff2", href: "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", crossorigin: null },
-    { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" }
+    { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" }
   ])
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 191, digest: "6f3322042e7ed934dbf3bb32f146f6e109738dcc4e87dc67c7ce8882baae11fc" }),
-  en: Object.freeze({ elementCount: 191, digest: "1dc4dd1da65ae07f05b6e81176d6f53424d114eb53d4284c7d672f662a2bfccd" })
+  pl: Object.freeze({ elementCount: 198, digest: "379e55dc764108d273ed776c0c6bc7d805d7524a98e16f9c07705f7690b9438b" }),
+  en: Object.freeze({ elementCount: 198, digest: "69b5caddb313f968e7373111da22198ac986afce48243ee98b5b98057577572a" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
   pl: Object.freeze([
     "Przejdź do treści", "PM", "· Mamcarz.com", "Doradztwo", "Transformacja zakupów", "Wdrożenie SAP Ariba", "Zamówienia publiczne", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "O mnie", "Kontakt", "EN", "↑",
-    "Strona główna", "/", "Lotnictwo", "FLIGHT PLAN / CORE ROUTE 03", "Lotnictwo", AVIATION_PAGE_CONTRACT.pl.lead,
+    "Strona główna", "/", "Lotnictwo", "LOTNICTWO", "Lotnictwo", AVIATION_PAGE_CONTRACT.pl.lead, "Porozmawiaj o projekcie lotniczym", "Zobacz projekty",
     "01", "OPS", "Operacje", "Decyzje zapisane w procedurze.", "Zakres zaczyna się od ról, warunków i punktów decyzyjnych. Ich kolejność wyznacza sposób pracy.", "Licencja", "PPL(H)", "Licencja", "PPL(A)",
     "02", "SAFE", "Szkolenie i bezpieczeństwo", "Standard przed wykonaniem.", "Przygotowanie obejmuje kryteria, komunikację i odpowiedzialność za każdy etap pracy.", "Zakres", "uprawnienia do akrobacji", "Doświadczenie", "pilot pokazowy Diverse Extreme Team (2013)",
     "03", "MEDIA", "Media", "Obraz podporządkowany zadaniu.", "Plan ujęć, podział odpowiedzialności i wykonanie tworzą jeden przebieg pracy.", "Fotografia", "fotograf prasowy agencji Forum", "Realizacja", "sesje air-to-air, realizacje wideo i dronem",
     "04", "DATA", "Software", "Proces przeniesiony do narzędzia.", "Software porządkuje dane, kolejne stany i odpowiedzialność. Interfejs wynika z przebiegu pracy.", "WEJŚCIE", "Procedura", "PRZEPŁYW", "Dane i decyzje", "WYJŚCIE", "Ślad działania",
-    "05", "LOG", "Projekty", "Rejestr przedsięwzięć lotniczych.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
-    "06", "COMMS", "Kontakt", "Ustalmy zakres i odpowiedzialność.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
-    "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt"
+    "05", "LOG", "Projekty", "Projekty lotnicze.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
+    "06", "COMMS", "Kontakt", "Porozmawiajmy o projekcie.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
+    "© 2026 Paweł Mamcarz · mamcarz.com", "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
   ]),
   en: Object.freeze([
     "Skip to content", "PM", "· Mamcarz.com", "Advisory", "Procurement transformation", "SAP Ariba implementation", "Public procurement", "Applications", "Aviation", "Projects", "Insights", "About", "Contact", "PL", "↑",
-    "Home", "/", "Aviation", "FLIGHT PLAN / CORE ROUTE 03", "Aviation", AVIATION_PAGE_CONTRACT.en.lead,
+    "Home", "/", "Aviation", "AVIATION", "Aviation", AVIATION_PAGE_CONTRACT.en.lead, "Discuss an aviation project", "View projects",
     "01", "OPS", "Operations", "Decisions recorded in procedure.", "The scope starts with roles, conditions and decision points. Their sequence determines the working method.", "Licence", "PPL(H)", "Licence", "PPL(A)",
     "02", "SAFE", "Training and safety", "The standard comes before execution.", "Preparation covers criteria, communication and responsibility for each stage of work.", "Scope", "aerobatics rating", "Experience", "display pilot for the Diverse Extreme Team (2013)",
     "03", "MEDIA", "Media", "The image follows the task.", "Shot planning, assigned responsibility and execution form one working sequence.", "Photography", "Press photographer with Forum Agency", "Production", "air-to-air shoots, video and drone production",
     "04", "DATA", "Software", "The process transferred into a tool.", "Software organises data, consecutive states and responsibility. The interface follows the working process.", "INPUT", "Procedure", "FLOW", "Data and decisions", "OUTPUT", "Action trail",
-    "05", "LOG", "Projects", "Aviation venture register.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
-    "06", "COMMS", "Contact", "Set the scope and responsibility.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
-    "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact"
+    "05", "LOG", "Projects", "Aviation projects.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
+    "06", "COMMS", "Contact", "Let’s discuss your project.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
+    "© 2026 Paweł Mamcarz · mamcarz.com", "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
   ])
 });
 
@@ -6308,7 +6281,8 @@ function verifyAviationTextContract(path, parsedRoot, lang, body, errors) {
   const expectedLeaves = AVIATION_BODY_TEXT_LEAVES[lang].map(normalizeExactLiteral);
   const comments = documentNodeDescendants(parsedRoot)
     .filter((node) => node.type === "comment")
-    .map((node) => normalizeExactHtmlLiteral(node.value));
+    .map((node) => normalizeExactHtmlLiteral(node.value))
+    .filter(comment => !["email_off", "/email_off"].includes(comment));
   if (JSON.stringify(leaves) !== JSON.stringify(expectedLeaves)
     || JSON.stringify(comments) !== JSON.stringify(AVIATION_COMMENTS)) {
     error(errors, "aviation-text-contract", path, "requires the complete localized Task 3 text-leaf and comment inventory with no unowned factual copy");
@@ -6392,14 +6366,17 @@ function aviationExpectedAnchorHrefs(lang) {
   const navigation = AVIATION_NAVIGATION_CONTRACT[lang];
   const home = navigation.logoHref;
   const footer = lang === "pl"
-    ? ["/", "/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact"]
-    : ["/en/", "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact"];
+    ? ["/", "/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/prywatnosc/"]
+    : ["/en/", "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/en/prywatnosc/"];
   return [
     "#main", home,
     ...navigation.submenu.map(([href]) => href),
     ...navigation.primary.map(([href]) => href),
     navigation.languageHref,
     home,
+    AVIATION_PAGE_CONTRACT[lang].contactHref,
+    `${home}case-studies/#aviation`,
+    "https://akrobacja.com", "https://filmolot.pl",
     AVIATION_PAGE_CONTRACT[lang].contactHref,
     home,
     ...footer
@@ -6420,7 +6397,7 @@ function verifyAviationResourceCensus(path, parsedRoot, lang, body, footer, erro
     && exactApplicationResourceAttributes(scripts[0], { type: "application/ld+json" })
     && scripts[1]?.parent === body
     && bodyChildren.at(-1) === scripts[1]
-    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(scripts[1], { src: "/assets/js/main.js?v=20260904-quality-1", defer: null })
     && rawElementText(scripts[1]).trim() === "";
   const pictures = all.filter((element) => element.name === "picture");
   const sources = all.filter((element) => element.name === "source");
@@ -6532,7 +6509,7 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
       && Array.isArray(record?.surfaces)
       && record.surfaces.includes(path)
       && publishedStaticText(factElements[index]) === normalizeExactLiteral(display ?? "")
-      && directElementChildren(factElements[index], "a").length === 0;
+      && directElementChildren(factElements[index], "a").every(approvedPublicationAnchor);
   }
   if (!factsValid) {
     error(errors, "aviation-facts", path, "requires the exact ordered approved aviation fact surfaces and localized registry values as plain text");
@@ -6573,16 +6550,11 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
   const conversionControls = all.filter((element) => (element.name === "a" || element.name === "button")
     && ["btn-primary", "btn-secondary", "btn-ghost", "cta-link"].some((className) => elementHasClass(element, className)));
   const contact = directSections.find((section) => elementAttribute(section, "data-section") === "contact");
-  if (ctas.length !== 1
-    || mailtoAnchors.length !== 1
-    || conversionControls.length !== 1
-    || ctas[0] !== mailtoAnchors[0]
-    || ctas[0] !== conversionControls[0]
-    || ctas[0].name !== "a"
-    || !exactElementAttributes(ctas[0], { class: "btn-primary", href: expected.contactHref })
-    || publishedStaticText(ctas[0]) !== normalizeExactLiteral(lang === "pl" ? "Porozmawiaj o projekcie lotniczym" : "Discuss an aviation project")
-    || !elementIsWithin(ctas[0], contact)) {
-    error(errors, "aviation-contact", path, "requires exactly one localized mailto CTA inside contact");
+  if (ctas.length !== 2 || mailtoAnchors.length !== 2 || conversionControls.length !== 3
+    || !ctas.every(cta => exactElementAttributes(cta, { class: "btn-primary", href: expected.contactHref })
+      && publishedStaticText(cta) === normalizeExactLiteral(lang === "pl" ? "Porozmawiaj o projekcie lotniczym" : "Discuss an aviation project"))
+    || !elementHasClass(ctas[0]?.parent, "page-actions") || !elementIsWithin(ctas[1], contact)) {
+    error(errors, "aviation-contact", path, "requires the exact localized hero and contact mail CTAs plus the projects shortcut");
   }
 
   const forbidden = /warsaw[\s-]*flight[\s-]*safety|pasja\s+po\s+godzinach|po\s+godzinach|outside\s+work|beyond\s+work|after[ -]?hours?|side[ -]?project|\binstruktor\b|\binstructor\b|\bato\b|\boperator\b|commercial[ -]?pilot|pilot\s+komercyjny|\bszko(?:ła|ły|le)\b|\bschool\b|\bavailab(?:le|ility)\b|\bdostępn|\bpric(?:e|es|ing)\b|\bcen(?:a|y|nik)\b|market[ -]?leader|lider\s+rynku/;
@@ -6590,7 +6562,7 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
     error(errors, "aviation-forbidden-copy", path, "contains retired, side-activity or unsupported aviation claim language");
   }
   const anchors = all.filter((element) => element.name === "a");
-  if (anchors.some((anchor) => /^https?:\/\//i.test(browserNormalizedUrl(elementAttribute(anchor, "href")) ?? ""))) {
+  if (anchors.some((anchor) => /^https?:\/\//i.test(browserNormalizedUrl(elementAttribute(anchor, "href")) ?? "") && !approvedPublicationAnchor(anchor))) {
     error(errors, "aviation-external-link", path, "aviation pages may not invent or publish an external venture URL");
   }
   verifyAviationShell(path, parsedRoot, lang, body, main, aviationNav, errors);
@@ -6605,13 +6577,13 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     ctaHref: "/#contact",
     ctaLabel: "Przejdź do kontaktu",
     breadcrumbLabel: "Okruszki", breadcrumbHomeHref: "/", breadcrumbHome: "Strona główna",
-    kicker: "RESEARCH INDEX / 02 ENTRIES", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
+    kicker: "MATERIAŁY", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
     contactLabel: "KONTAKT / NASTĘPNY KROK", contactCopy: "Jeśli materiał dotyczy decyzji, nad którą pracujesz, przejdź do rozmowy.",
     ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna", home: "/", logoLabel: "Paweł Mamcarz, strona główna",
     advisory: "Doradztwo", paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
     submenu: Object.freeze([["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]]),
     primary: Object.freeze([["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]]),
-    footer: Object.freeze([["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"]]),
+    footer: Object.freeze([["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"], ["/prywatnosc/", "Prywatność"]]),
     resources: Object.freeze([
       Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Model interaktywny", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null }),
       Object.freeze({ href: "/wystapienia/", title: "Wystąpienia i wykłady", type: "Wystąpienia i wykłady", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null })
@@ -6624,15 +6596,15 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     ctaHref: "/en/#contact",
     ctaLabel: "Go to contact",
     breadcrumbLabel: "Breadcrumb", breadcrumbHomeHref: "/en/", breadcrumbHome: "Home",
-    kicker: "RESEARCH INDEX / 03 ENTRIES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
+    kicker: "RESOURCES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
     contactLabel: "CONTACT / NEXT STEP", contactCopy: "If a resource relates to a decision you are working on, continue to the conversation.",
     ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation", home: "/en/", logoLabel: "Paweł Mamcarz, homepage",
     advisory: "Advisory", paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", back: "Back to top",
     submenu: Object.freeze([["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]]),
     primary: Object.freeze([["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]]),
-    footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"]]),
+    footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"], ["/en/prywatnosc/", "Privacy"]]),
     resources: Object.freeze([
-      Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement process reference model and scenario lenses", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
+      Object.freeze({ href: "/diagrams/infographic", title: "Procurement process reference model and scenario lenses", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
       Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
       Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Interactive model", language: "Polish", status: "Polish-language resource", inLanguage: "pl", lang: "pl" })
     ])
@@ -6642,19 +6614,19 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
 const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
   pl: Object.freeze([
     "https://mamcarz.com/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260904-quality-1",
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
     "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
     "/procurement-2026/", "/wystapienia/", "/#contact", "/", "/assets/img/signature.png", "/", "/uslugi/transformacja-zakupow/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/prywatnosc/", "/assets/js/main.js?v=20260904-quality-1"
   ]),
   en: Object.freeze([
     "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
-    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260825-flightplan-3",
+    "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", "/assets/css/style.css?v=20260904-quality-1",
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
     "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
-    "/infographic_procurement_2026_EN.html", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
-    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/assets/js/main.js?v=20260825-flightplan-3"
+    "/diagrams/infographic", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", "/assets/img/signature.png", "/en/",
+    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/en/prywatnosc/", "/assets/js/main.js?v=20260904-quality-1"
   ])
 });
 
@@ -6699,7 +6671,7 @@ function knowledgeDocumentMarkup(contract, lang) {
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const alternateLocale = lang === "pl" ? "en_US" : "pl_PL";
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></body></html>`;
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -6945,9 +6917,9 @@ function knowledgeHasDateBoundaryViolation(parsedRoot) {
     "Procurement Process 2026"
   ]);
   const approvedUrls = new Set([
-    "https://mamcarz.com/infographic_procurement_2026_EN.html",
+    "https://mamcarz.com/diagrams/infographic",
     "https://mamcarz.com/procurement-2026/",
-    "/infographic_procurement_2026_EN.html",
+    "/diagrams/infographic",
     "/procurement-2026/"
   ]);
   const approvedSchemaLiterals = [...approvedTitles, ...approvedUrls];
@@ -7049,7 +7021,7 @@ function verifyKnowledgeBoundary(path, parsedRoot, errors) {
     || [...element.attributes.keys()].some((name) => /^(?:datetime|datepublished|datemodified|data-date)$/i.test(name)));
   const extraScripts = elements.filter((element) => element.name === "script"
     && elementAttribute(element, "type") !== "application/ld+json"
-    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260825-flightplan-3");
+    && elementAttribute(element, "src") !== "/assets/js/main.js?v=20260904-quality-1");
   const inactiveUrlViolation = knowledgeInactiveUrlViolation(parsedRoot);
   const bannedRoute = knowledgeUrlPropertyViolation(parsedRoot) || inactiveUrlViolation;
   if (bannedRoute) {
@@ -7240,10 +7212,13 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"portfolio.filmolot_pl.type","value":"aviation photography and video","display_pl":"Lotnictwo · fotografia i wideo","display_en":"Aviation · photography and video","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"})
 ]);
 const PROJECT_PAGE_CONTRACT = Object.freeze({
-  pl: Object.freeze({ title: "Projekty", lead: "Rejestr projektów i produktów oparty na zatwierdzonych rolach, zakresach i faktach. Jeśli wynik lub status nie ma potwierdzenia, nie pojawia się na tej stronie.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
-  en: Object.freeze({ title: "Projects", lead: "A register of projects and products built from approved roles, scopes and facts. If an outcome or status is not verified, it does not appear here.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
+  pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
+  en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "58d57aeaaaeb1df6f4e6a55ad546db65d73a940b5bc17cba9b6981ff1529dc22", en: "13ba10e60708b2379f4ed1faf67819c7817526e6c2f8bd611fee8ea18ae46fa3" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({
+  "pl": "59e9ffebee031f8f60993a3cd5e85a5649e34a918bf0566a85b194e3b42f8c22",
+  "en": "a6536f379679cb32e412b50e9312ea3e5b2c6e20db78ffb097a34ea8e8bd1594"
+});
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7312,10 +7287,10 @@ function verifyProjectResourceCensus(path, parsedRoot, contract, errors) {
   const scripts = elements.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   const invalidAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
-    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref);
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref && !approvedPublicationAnchor(anchor));
   });
   const images = elements.filter((element) => element.name === "img");
   const signatureValid = images.length === 1
@@ -7348,6 +7323,18 @@ function verifyProjectClaimBoundary(path, parsedRoot, errors) {
   if (forbidden.some((pattern) => pattern.test(corpus)) || /warsawflightsafety|polpharma/i.test(compact)) {
     error(errors, "project-claim-boundary", path, "forbids retired brands, blocked clients, review-only numbers, rankings, organization facts, inferred outcomes/status and AI-tell sales copy across active and inactive source");
   }
+}
+
+function exactContextualControls(controls, contract, parsedRoot, secondary = null) {
+  const actions = elementDescendants(parsedRoot, "div").filter(node => elementHasClass(node, "page-actions"));
+  if (actions.length !== 1 || controls.length !== (secondary ? 3 : 2)) return false;
+  const heroLinks = directElementChildren(actions[0], "a");
+  const mail = controls.filter(node => elementAttribute(node, "href") === contract.ctaHref);
+  return heroLinks.length === (secondary ? 2 : 1) && mail.length === 2 && heroLinks[0] === mail[0]
+    && mail.every(node => exactElementAttributes(node, {class: "btn-primary", href: contract.ctaHref})
+      && publishedStaticText(node) === normalizeExactLiteral(contract.ctaLabel))
+    && !elementIsWithin(mail[1], actions[0])
+    && (!secondary || exactElementAttributes(heroLinks[1], {class: "btn-ghost", href: secondary}));
 }
 
 function verifyProjectPage(path, parsedRoot, lang, factData, errors) {
@@ -7405,8 +7392,8 @@ function verifyProjectPage(path, parsedRoot, lang, factData, errors) {
 
   const controls = all.filter((element) => (element.name === "a" || element.name === "button")
     && (elementHasClass(element, "btn-primary") || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
-  if (controls.length !== 1 || controls[0].name !== "a" || elementAttribute(controls[0], "href") !== contract.ctaHref || publishedStaticText(controls[0]) !== normalizeExactLiteral(contract.ctaLabel)) {
-    error(errors, "project-controls", path, "requires one exact contextual mail CTA and no extra conversion control");
+  if (!exactContextualControls(controls, contract, parsedRoot)) {
+    error(errors, "project-controls", path, "requires exact contextual mail CTAs in the hero and closing contact");
   }
 
   const current = all.filter((element) => element.name === "a" && elementAttribute(element, "aria-current") === "page");
@@ -7461,7 +7448,7 @@ const SERVICE_CONTRACTS = Object.freeze({
       lead: "Porządkuję model operacyjny zakupów: decyzje, role, procesy, dane i technologię. Efektem pracy jest uzgodniony projekt zmiany, który można wdrożyć i rozliczać.",
       description: "Projekt modelu operacyjnego zakupów obejmujący decyzje, role, procesy, dane i technologię.",
       url: "https://mamcarz.com/uslugi/transformacja-zakupow/",
-      sectionTitles: Object.freeze(["Model operacyjny przed narzędziem.", "Jasna decyzja po obu stronach.", "Rejestr projektowanej zmiany.", "Cztery zamknięcia decyzyjne.", "Doświadczenie zapisane faktami.", "Ustalmy projekt zmiany."]),
+      sectionTitles: Object.freeze(["Model operacyjny przed narzędziem.", "Od czego zaczynamy.", "Co obejmuje transformacja.", "Jak przebiega współpraca.", "Wybrane projekty.", "Ustalmy projekt zmiany."]),
       method: Object.freeze(["Diagnoza", "Projekt", "Sekwencja", "Governance"]),
       ctaHref: "mailto:pawel@mamcarz.com?subject=Transformacja%20zakup%C3%B3w",
       ctaLabel: "Porozmawiaj o transformacji zakupów"
@@ -7471,7 +7458,7 @@ const SERVICE_CONTRACTS = Object.freeze({
       lead: "I structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.",
       description: "Procurement operating-model design across decisions, roles, processes, data and technology.",
       url: "https://mamcarz.com/en/uslugi/transformacja-zakupow/",
-      sectionTitles: Object.freeze(["Operating model before tooling.", "A clear decision on both sides.", "Change-design register.", "Four decision closures.", "Experience recorded as facts.", "Define the change project."]),
+      sectionTitles: Object.freeze(["Operating model before tooling.", "Where we start.", "What the transformation covers.", "How we work together.", "Selected projects.", "Define the change project."]),
       method: Object.freeze(["Diagnosis", "Design", "Sequence", "Governance"]),
       ctaHref: "mailto:pawel@mamcarz.com?subject=Procurement%20transformation",
       ctaLabel: "Discuss procurement transformation"
@@ -7489,7 +7476,7 @@ const SERVICE_CONTRACTS = Object.freeze({
       lead: "Prowadzę wdrożenia SAP Ariba od decyzji procesowych i danych po konfigurację, integrację, testy i uruchomienie. Zakres wynika z realnego modelu zakupowego, a nie z listy funkcji systemu.",
       description: "Prowadzenie wdrożenia SAP Ariba od decyzji procesowych i danych po integrację, testy i uruchomienie.",
       url: "https://mamcarz.com/uslugi/wdrozenie-sap-ariba/",
-      sectionTitles: Object.freeze(["Proces wyznacza konfigurację.", "Wdrożenie potrzebuje właścicieli decyzji.", "Rejestr zakresu rozwiązania.", "Od decyzji do uruchomienia.", "Zakresy potwierdzone faktami.", "Ustalmy zakres wdrożenia."]),
+      sectionTitles: Object.freeze(["Proces wyznacza konfigurację.", "Co uzgadniamy przed wdrożeniem.", "Zakres wdrożenia.", "Od decyzji do uruchomienia.", "Przykłady wdrożeń.", "Ustalmy zakres wdrożenia."]),
       method: Object.freeze(["Decyzje procesowe", "Dane i integracja", "Testy", "Uruchomienie"]),
       ctaHref: "mailto:pawel@mamcarz.com?subject=Wdro%C5%BCenie%20SAP%20Ariba",
       ctaLabel: "Porozmawiaj o wdrożeniu SAP Ariba"
@@ -7499,7 +7486,7 @@ const SERVICE_CONTRACTS = Object.freeze({
       lead: "I lead SAP Ariba implementations from process and data decisions through configuration, integration, testing and launch. The scope follows the real procurement operating model, not a feature checklist.",
       description: "SAP Ariba implementation leadership from process and data decisions through integration, testing and launch.",
       url: "https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba/",
-      sectionTitles: Object.freeze(["Process determines configuration.", "Implementation needs decision owners.", "Solution scope register.", "From decisions to launch.", "Scopes confirmed by facts.", "Define the implementation scope."]),
+      sectionTitles: Object.freeze(["Process determines configuration.", "What we agree before implementation.", "Implementation scope.", "From decisions to launch.", "Implementation examples.", "Define the implementation scope."]),
       method: Object.freeze(["Process decisions", "Data and integration", "Testing", "Launch"]),
       ctaHref: "mailto:pawel@mamcarz.com?subject=SAP%20Ariba%20implementation",
       ctaLabel: "Discuss an SAP Ariba implementation"
@@ -7513,7 +7500,7 @@ const SERVICE_CONTRACTS = Object.freeze({
       lead: "Pomagam uporządkować strategię postępowania, odpowiedzialności, dokumenty i decyzje w projektach objętych zamówieniami publicznymi. Pracuję na styku zakupów, technologii i zarządzania projektem, z wyraźną granicą odpowiedzialności prawnej.",
       description: "Porządkowanie strategii postępowania, odpowiedzialności, dokumentów i decyzji w projektach zamówień publicznych.",
       url: "https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne/",
-      sectionTitles: Object.freeze(["Decyzje przed dokumentami.", "Granica odpowiedzialności jest częścią zakresu.", "Rejestr pracy doradczej.", "Porządek postępowania.", "Doświadczenie zawodowe.", "Ustalmy zakres doradztwa."]),
+      sectionTitles: Object.freeze(["Decyzje przed dokumentami.", "Granica odpowiedzialności jest częścią zakresu.", "Zakres doradztwa.", "Porządek postępowania.", "Doświadczenie zawodowe.", "Ustalmy zakres doradztwa."]),
       method: Object.freeze(["Strategia", "Role", "Dokumenty robocze", "Governance"]),
       ctaHref: "mailto:pawel@mamcarz.com?subject=Zam%C3%B3wienia%20publiczne",
       ctaLabel: "Porozmawiaj o zamówieniach publicznych"
@@ -7523,7 +7510,7 @@ const SERVICE_CONTRACTS = Object.freeze({
       lead: "I help structure procedure strategy, responsibilities, documents and decisions in public procurement projects. I work across procurement, technology and project governance, with a clear boundary around legal responsibility.",
       description: "Structuring procedure strategy, responsibilities, documents and decisions in public procurement projects.",
       url: "https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne/",
-      sectionTitles: Object.freeze(["Decisions before documents.", "The responsibility boundary is part of scope.", "Advisory work register.", "Procedure working order.", "Professional experience.", "Define the advisory scope."]),
+      sectionTitles: Object.freeze(["Decisions before documents.", "The responsibility boundary is part of scope.", "Advisory scope.", "Procedure working order.", "Professional experience.", "Define the advisory scope."]),
       method: Object.freeze(["Strategy", "Roles", "Working documents", "Governance"]),
       ctaHref: "mailto:pawel@mamcarz.com?subject=Public%20procurement%20advisory",
       ctaLabel: "Discuss public procurement advisory"
@@ -7608,9 +7595,18 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "6f95f286b5e8975418ef587dafdaeaea11df006f963ee4bce5a94c1806f4ae60", en: "314fea33c827a9ae0465b653ef8c1f9beb006a3eda1d07d56b2838cb5fc53e31" }),
-  ariba: Object.freeze({ pl: "73d75ff44382f05e5f0b2b80f8a3839cf51ff6e7135cdb434ca8f681aff3b685", en: "88c42d6e762b0f157d4500bca917e0ecf5bca84f62ae004b6dd83737152f57f9" }),
-  publicProcurement: Object.freeze({ pl: "411e129e8b2db8cf4920e9c0c74ea7a037e4838b5770aac2b0db5dfdf072e83e", en: "24c327fa2c0716a3ed558d1dd21fb2dfd1cb3272d342e5ece14270cd4e31b877" })
+  "transformation": {
+    "pl": "340581928545af2a20f5fa6421c05b37a442a3798a5f9a4314118ba5224a3ece",
+    "en": "1dc8ef5af63c6d6589422adbbc9b7d15307736fba1f804e48e2a5b49b1fecbfa"
+  },
+  "ariba": {
+    "pl": "6203a3581793e2fe10e7119bb65332a59d9ef792a6c6e74e08c381b63a6744fa",
+    "en": "c2c3d51d69fbbd71e542835c38ae7ab9a88bc77832295f5b433c9003c530aef2"
+  },
+  "publicProcurement": {
+    "pl": "6368b70ba9815407cfbd9a7cb924ddae389376b0d3a40445e0933dc372863a10",
+    "en": "4e98bbc16eae645f7fccd4d36dabb6714a87b87ff6749e654f96147c53d98f1b"
+  }
 });
 
 function serviceKeyForPath(path) {
@@ -7681,7 +7677,7 @@ function verifyServiceResourceCensus(path, parsedRoot, lang, contract, errors) {
   const extraExecutable = elements.filter((element) => element.name === "script").some((script) => {
     const type = elementAttribute(script, "type");
     const src = elementAttribute(script, "src");
-    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")));
+    return !((type === "application/ld+json" && !src) || (src === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer")));
   });
   const externalAnchors = elements.filter((element) => element.name === "a").filter((anchor) => {
     const href = browserNormalizedUrl(elementAttribute(anchor, "href"));
@@ -7755,10 +7751,9 @@ function verifyServicePage(path, parsedRoot, lang, factData, errors) {
     && (["btn-primary", "btn-secondary", "btn-ghost", "cta-link"].some((className) => elementHasClass(element, className))
       || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
   const contact = sectionMarkers.find((section) => elementAttribute(section, "data-section") === "contact");
-  const cta = controls[0];
-  if (controls.length !== 1 || cta?.name !== "a" || !elementIsWithin(cta, contact)
-    || elementAttribute(cta, "href") !== contract.ctaHref || publishedStaticText(cta) !== normalizeExactLiteral(contract.ctaLabel)) {
-    error(errors, "service-controls", path, "requires one contextual localized mail CTA and no other conversion control");
+  if (!exactContextualControls(controls, contract, parsedRoot, `${lang === "en" ? "/en" : ""}/case-studies/#advisory`)
+    || !elementIsWithin(controls.at(-1), contact)) {
+    error(errors, "service-controls", path, "requires exact hero and closing contact CTAs plus the project shortcut");
   }
 
   const nav = all.find((element) => element.name === "nav" && elementHasClass(element, "site-nav") && pageElementIsActive(element));
@@ -7796,6 +7791,8 @@ async function verifyAviationHomepageLinks(context) {
 
 function routeToFile(urlPath) {
   const clean = urlPath.split(/[?#]/)[0];
+  const entry = PUBLIC_PAGES.find(page => page.route === clean);
+  if (entry) return entry.file;
   if (clean === "/") return "index.html";
   if (clean.endsWith("/")) return `${clean.slice(1)}index.html`;
   return clean.slice(1);
@@ -7900,6 +7897,8 @@ function addDeferred(context, contract) {
 const SPEAKING_GROUP_ORDER = Object.freeze(["topics", "formats", "audience", "interview", "contact"]);
 const SPEAKING_INTERVIEW_URL = "https://www.youtube.com/watch?v=5KYUdTLlvvg";
 const SPEAKING_INTERVIEW_TITLE = "Procurement&Beyond, odcinek 8. Nawet najlepsze narzędzie nie uratuje złego wdrożenia.";
+const SPEAKING_PODCAST_URL = "https://www.youtube.com/watch?v=PNcy5YZgnWE";
+const SPEAKING_PODCAST_TITLE = "Paweł Mamcarz: Dla mnie pieniądze są funkcją czasu | Inwestorium #020";
 const SPEAKING_CONTRACT = Object.freeze({
   pl: Object.freeze({
     title: "Wystąpienia",
@@ -7920,7 +7919,7 @@ const SPEAKING_CONTRACT = Object.freeze({
       ["lecture", "Wykład", "Materiał osadzony w programie i poziomie przygotowania grupy."]
     ]),
     audiences: Object.freeze([["conferences", "Konferencje i fora branżowe"], ["teams", "Zespoły zakupowe i projektowe"], ["universities", "Uczelnie i programy executive"]]),
-    interviewHeading: "Rozmowa o wdrożeniach",
+    interviewHeading: "Podcasty i rozmowy",
     interviewSource: "YOUTUBE / PROCUREMENT&BEYOND",
     interviewSummary: "W rozmowie mówię o profesjonalizacji zakupów, odejściu od sztywnych procedur i roli wewnętrznego lidera wdrożenia. Pokazuję też Czym pojadę, kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania. Rozmowę zamyka pytanie, jak łączyć warsztat kupca z automatyzacją i analizą danych.",
     interviewCta: "Obejrzyj na YouTube",
@@ -7950,7 +7949,7 @@ const SPEAKING_CONTRACT = Object.freeze({
       ["lecture", "Lecture", "Material aligned with the programme and the group's level of preparation."]
     ]),
     audiences: Object.freeze([["conferences", "Industry conferences and forums"], ["teams", "Procurement and project teams"], ["universities", "Universities and executive programmes"]]),
-    interviewHeading: "A conversation about implementation",
+    interviewHeading: "Podcasts and interviews",
     interviewSource: "YOUTUBE / PROCUREMENT&BEYOND",
     interviewSummary: "In the conversation I discuss the professionalisation of procurement, moving beyond rigid procedures, and the role of an internal implementation leader. I also present Czym pojadę, a fleet TCO calculator using the Bielik model to analyse ownership costs. The final theme is how to combine procurement judgement with automation and data analysis.",
     interviewCta: "Watch on YouTube · Polish audio",
@@ -7989,10 +7988,26 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
     source_url: SPEAKING_INTERVIEW_URL,
     surfaces: SPEAKING_SURFACES,
     status: "approved"
+  }),
+  Object.freeze({
+    id: "speaking.inwestorium.title",
+    value: SPEAKING_PODCAST_TITLE,
+    display_pl: SPEAKING_PODCAST_TITLE,
+    display_en: SPEAKING_PODCAST_TITLE,
+    kind: "constant",
+    as_of: null,
+    source_type: "public_source",
+    source_label: "Owner-requested podcast; official YouTube oEmbed title inspected 2026-09-07, capitalization normalized",
+    source_url: SPEAKING_PODCAST_URL,
+    surfaces: SPEAKING_SURFACES,
+    status: "approved"
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "4d520eb2ec5a26f6f0138934c499fc3420a76fb8007cdd459d478c54b731d451", en: "c7a18036660bda80d22d8e1f5f0b8f001dfee209f376d34b6ccd81e34ece634f" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({
+  "pl": "7c85bf6132a20ff65d3912f5237ca9b4a99ecbbaeb185f73d134605a7de9c2d7",
+  "en": "2c37f4f48d568358645550a0494a2e8e109f17603fbe989a8334a6798cdfd0f2"
+});
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8088,7 +8103,7 @@ function verifySpeakingInterview(path, section, contract, errors) {
   const cta = bodyChildren[3];
   const titleBreaks = title ? directElementChildren(title) : [];
 
-  const exactStructure = direct.length === 2
+  const exactStructure = direct.length === 3
     && exactElementAttributes(header, { class: "speaking-group__head" })
     && headerChildren.length === 2
     && exactElementAttributes(label, { class: "section-label" })
@@ -8157,6 +8172,38 @@ function verifySpeakingInterview(path, section, contract, errors) {
   if (!exactStructure) {
     error(errors, "speaking-interview", path, "requires the exact bilingual owner-approved interview, local visual, evidence copy and safe canonical YouTube link");
   }
+  verifySpeakingPodcast(path, direct[2], errors);
+}
+
+function verifySpeakingPodcast(path, entry, errors) {
+  const [link] = directElementChildren(entry);
+  const [play, body] = directElementChildren(link);
+  const [source, title, cta] = directElementChildren(body);
+  const expectedCta = path.startsWith("en/") ? "Watch on YouTube" : "Obejrzyj na YouTube";
+  const valid = entry?.name === "article"
+    && exactElementAttributes(entry, { class: "speaking-recording__entry", id: "inwestorium" })
+    && directElementChildren(entry).length === 1
+    && link?.name === "a"
+    && exactElementAttributes(link, { class: "speaking-recording__link", href: SPEAKING_PODCAST_URL, target: "_blank", rel: "noopener noreferrer" })
+    && directElementChildren(link).length === 2
+    && play?.name === "span"
+    && exactElementAttributes(play, { class: "speaking-recording__play", "aria-hidden": "true" })
+    && publishedStaticText(play) === "PLAY"
+    && body?.name === "div"
+    && exactElementAttributes(body, { class: "speaking-recording__body" })
+    && directElementChildren(body).length === 3
+    && source?.name === "span"
+    && exactElementAttributes(source, { class: "speaking-recording__source" })
+    && publishedStaticText(source) === "YOUTUBE / INWESTORIUM"
+    && title?.name === "h3"
+    && exactElementAttributes(title, { "data-fact-id": "speaking.inwestorium.title", lang: "pl" })
+    && directElementChildren(title).length === 0
+    && publishedStaticText(title) === normalizeExactLiteral(SPEAKING_PODCAST_TITLE)
+    && cta?.name === "span"
+    && exactElementAttributes(cta, { class: "speaking-recording__cta" })
+    && publishedStaticText(cta) === expectedCta
+    && pageElementIsActive(entry) && pageElementIsActive(link);
+  if (!valid) error(errors, "speaking-podcast", path, "requires the owner-requested Inwestorium podcast, verified Polish title and safe canonical YouTube link");
 }
 
 function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
@@ -8164,6 +8211,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const forbiddenTags = new Set(["audio", "base", "embed", "form", "iframe", "object", "style", "video"]);
   const signatureImages = all.filter((element) => element.name === "img" && elementIsWithin(element, all.find((candidate) => elementHasClass(candidate, "footer-sign"))));
   const recording = all.find((element) => elementHasClass(element, "speaking-recording__entry"));
+  const podcast = all.find((element) => elementAttribute(element, "id") === "inwestorium");
   const recordingImages = all.filter((element) => element.name === "img" && elementIsWithin(element, recording));
   const recordingPictures = all.filter((element) => element.name === "picture" && elementIsWithin(element, recording));
   const recordingSources = all.filter((element) => element.name === "source" && elementIsWithin(element, recording));
@@ -8186,14 +8234,17 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
     const exactInterview = href === SPEAKING_INTERVIEW_URL
       && exactElementAttributes(anchor, { class: "speaking-recording__link", href: SPEAKING_INTERVIEW_URL, target: "_blank", rel: "noopener noreferrer" })
       && elementIsWithin(anchor, recording);
-    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref && !exactInterview);
+    const exactPodcast = href === SPEAKING_PODCAST_URL
+      && exactElementAttributes(anchor, { class: "speaking-recording__link", href: SPEAKING_PODCAST_URL, target: "_blank", rel: "noopener noreferrer" })
+      && elementIsWithin(anchor, podcast);
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref && !exactInterview && !exactPodcast);
   });
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature || !validRecordingAssets) {
-    error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and canonical YouTube link; forbids embeds, forms, inline styles, extra scripts or controls");
+    error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and two approved YouTube links; forbids embeds, forms, inline styles, extra scripts or controls");
   }
 }
 
@@ -8229,9 +8280,8 @@ function verifySpeakingPage(path, parsedRoot, lang, errors) {
   }
   const controls = all.filter((element) => (element.name === "a" || element.name === "button")
     && (elementHasClass(element, "btn-primary") || /^mailto:/i.test(browserNormalizedUrl(elementAttribute(element, "href")) ?? "")));
-  if (controls.length !== 1 || controls[0].name !== "a" || !elementIsWithin(controls[0], contact)
-    || elementAttribute(controls[0], "href") !== contract.ctaHref || publishedStaticText(controls[0]) !== normalizeExactLiteral(contract.ctaLabel)) {
-    error(errors, "speaking-controls", path, "requires one exact localized contextual mail CTA");
+  if (!exactContextualControls(controls, contract, parsedRoot) || !elementIsWithin(controls.at(-1), contact)) {
+    error(errors, "speaking-controls", path, "requires exact localized hero and closing contact mail CTAs");
   }
   const factNodes = all.filter((element) => element.attributes.has("data-fact-id"));
   const expectedFacts = SPEAKING_FACT_CONTRACT.map((record) => record.id);
@@ -8250,17 +8300,17 @@ function verifySpeakingPage(path, parsedRoot, lang, errors) {
 
 const PROCUREMENT_PARENT = Object.freeze({
   title: "Procurement Process 2026",
-  lead: "Interaktywny model procesu zakupowego. Poniżej znajdują się cztery materiały tworzące jego strukturę.",
+  lead: "Model procesu zakupowego z mapą etapów, powiązaniami z SAP i przykładową oceną dojrzałości. Wprowadzenie jest po polsku; cztery materiały są po angielsku.",
   url: "https://mamcarz.com/procurement-2026/",
   ctaHref: "mailto:pawel@mamcarz.com?subject=Procurement%20Process%202026",
   iframes: Object.freeze([
-    ["/diagrams/infographic.html", "Procurement 2026 · infographic", "Infografika: od cyklu do orkiestracji", "Materiał w języku angielskim"],
-    ["/diagrams/diagram1_universal.html", "Procurement Process 2026 · interaktywny diagram", "Diagram procesu zakupowego", null],
-    ["/diagrams/diagram2_ariba.html", "SAP Ariba Module Mapping", "Mapowanie modułów SAP Ariba", null],
-    ["/diagrams/diagram3_maturity.html", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", null]
+    ["/diagrams/infographic", "Procurement 2026 · infographic", "Infografika: od cyklu do orkiestracji", "Materiał po angielsku · rozwiń"],
+    ["/diagrams/diagram1_universal", "Procurement Process 2026 · interaktywny diagram", "Diagram procesu zakupowego", "Materiał po angielsku · rozwiń"],
+    ["/diagrams/diagram2_ariba", "SAP Ariba Module Mapping", "Mapowanie modułów SAP Ariba", "Materiał po angielsku · rozwiń"],
+    ["/diagrams/diagram3_maturity", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", "Materiał po angielsku · rozwiń"]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "4877bac0b1fa68631923a2167ed23a8e0d4e6df54cd76c3b49bb18a9902636d2";
+const PROCUREMENT_DOCUMENT_MANIFEST = "757e06f583980b58b5c67caafbe2038cc2578323e724476bf231ab4f57555fef";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -8335,7 +8385,7 @@ async function verifyProcurementParent(_factData, context) {
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
-    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260825-flightplan-3" && script.attributes.has("defer")).length === 1;
+    && scripts.filter((script) => elementAttribute(script, "src") === "/assets/js/main.js?v=20260904-quality-1" && script.attributes.has("defer")).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name)))
     || invalidAnchor || !validScripts || !validSignature || frames.length !== 4) error(context.errors, "procurement-resource-census", path, "forbids inline styles, external/extra resources, controls and executable drift while allowing exactly four frames plus the exact footer signature image");
   verifyProcurementSchema(parsedRoot, context.errors);
@@ -8353,7 +8403,7 @@ const ARTIFACT_FILES = Object.freeze([
 ]);
 const ARTIFACT_COMMON_DISCLAIMER = "This is a conceptual procurement operating model. Capability descriptions and scores are illustrative target-state assumptions, not claims about current product availability, legal compliance or a measured organisation.";
 const ARTIFACT_PRODUCT_DISCLAIMER = "Product names are model labels. Verify availability, scope and licensing for the relevant SAP landscape.";
-const ARTIFACT_TOOLBAR_LABEL = "Back to Insights";
+const ARTIFACT_TOOLBAR_LABEL = "Back to the model · Polish introduction";
 const ARTIFACT_FAVICON_PATH = "/favicon.svg";
 const ARTIFACT_HEADINGS = Object.freeze({
   "diagrams/diagram1_universal.html": "Procurement process reference model",
@@ -8881,7 +8931,7 @@ function verifyArtifactShared(path, html, expectedArtifact, context) {
   if (toolbars.length !== 1
     || !exactElementAttributes(toolbars[0], { class: "artifact-toolbar", "aria-label": "Artifact navigation" })
     || links.length !== 1 || allAnchors.length !== 1
-    || !exactElementAttributes(links[0], { href: "/en/wiedza/", target: "_top" })
+    || !exactElementAttributes(links[0], { href: "/procurement-2026/", target: "_top" })
     || publishedStaticText(links[0]) !== ARTIFACT_TOOLBAR_LABEL) {
     error(context.errors, "artifact-toolbar", path, "requires one visible exact return toolbar to the English Insights index");
   }
@@ -9236,8 +9286,8 @@ async function verifyArtifacts(_factData, context) {
   if (embeddedInfographic?.body) verifyInfographicArtifact("diagrams/infographic.html", embeddedInfographic, context.errors);
   if (standaloneInfographic?.body) verifyInfographicArtifact("infographic_procurement_2026_EN.html", standaloneInfographic, context.errors);
   const normalizeInfographicSelf = (source) => source
-    .replaceAll("https://mamcarz.com/diagrams/infographic.html", "https://mamcarz.com/{INFOGRAPHIC_SELF}")
-    .replaceAll("https://mamcarz.com/infographic_procurement_2026_EN.html", "https://mamcarz.com/{INFOGRAPHIC_SELF}");
+    .replaceAll("https://mamcarz.com/diagrams/infographic", "https://mamcarz.com/{INFOGRAPHIC_SELF}")
+    .replaceAll("https://mamcarz.com/diagrams/infographic", "https://mamcarz.com/{INFOGRAPHIC_SELF}");
   if (normalizeInfographicSelf(files.get("diagrams/infographic.html")) !== normalizeInfographicSelf(files.get("infographic_procurement_2026_EN.html"))) {
     error(context.errors, "infographic-parity", "diagrams/infographic.html", "embedded and standalone infographic files must be identical apart from their truthful self canonical URLs");
   }
@@ -9283,7 +9333,7 @@ const SITE_SHELL_COPY = Object.freeze({
       Object.freeze(["/", "Strona główna"]), Object.freeze(["/uslugi/transformacja-zakupow/", "Doradztwo"]),
       Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#contact", "Kontakt"])
+      Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
     ])
   }),
   en: Object.freeze({
@@ -9303,7 +9353,7 @@ const SITE_SHELL_COPY = Object.freeze({
       Object.freeze(["/en/", "Home"]), Object.freeze(["/en/uslugi/transformacja-zakupow/", "Advisory"]),
       Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#contact", "Contact"])
+      Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
     ])
   })
 });
@@ -9495,10 +9545,10 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
   const sharedScripts = scripts.filter((element) => element.attributes.has("src") || (elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js"));
   const inlineExecutable = scripts.filter((element) => !element.attributes.has("src") && normalize(elementAttribute(element, "type") ?? "") !== "application/ld+json");
   const resourceValid = stylesheets.length === 1
-    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260825-flightplan-3" })
+    && exactApplicationResourceAttributes(stylesheets[0], { rel: "stylesheet", href: "/assets/css/style.css?v=20260904-quality-1" })
     && elementIsActiveResource(stylesheets[0])
     && sharedScripts.length === 1
-    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260825-flightplan-3", defer: null })
+    && exactApplicationResourceAttributes(sharedScripts[0], { src: "/assets/js/main.js?v=20260904-quality-1", defer: null })
     && elementIsActiveResource(sharedScripts[0])
     && rawElementText(sharedScripts[0]).trim() === ""
     && elementDescendants(parsedRoot, "style").length === 0
@@ -9725,6 +9775,9 @@ function plan3FactState(factData, context) {
       if (!plan3DirectHttpsUrl(fact.source_url)) error(context.errors, "fact-source-url", path, `facts[${index}] approved public_source requires a direct HTTPS source_url`);
     } else if (fact.source_url !== null && !plan3DirectHttpsUrl(fact.source_url)) {
       error(context.errors, "fact-source-url", path, `facts[${index}] source_url must be null or a direct HTTPS URL`);
+    }
+    if (Object.hasOwn(fact, "publication_url") && (fact.status !== "approved" || fact.publication_url !== PUBLICATION_URLS[fact.id])) {
+      error(context.errors, "fact-publication-url", path, `${fact.id}: publication URL must match the reviewed existing homepage destination`);
     }
     const closedStatus = fact.status === "review" || fact.status === "retired";
     if (!Array.isArray(fact.surfaces) || (!closedStatus && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
@@ -10268,6 +10321,10 @@ function plan3AncestorHasClass(element, className) {
 function plan3ReviewedStaticNumber(path, unit, token) {
   const owner = unit.element;
   const ownerText = unit.text;
+  if (["prywatnosc/index.html", "en/prywatnosc/index.html"].includes(path)
+    && owner.name === "p" && elementHasClass(owner, "legal-updated")
+    && ["Ostatnia aktualizacja: 4 września 2026", "Last updated: 4 September 2026"].includes(ownerText)
+    && ["4", "2026"].includes(token.value)) return true;
   if (token.value === "2026"
     && elementHasClass(owner, "footer-copy")
     && ownerText === "© 2026 Paweł Mamcarz · mamcarz.com") return true;
@@ -10279,7 +10336,7 @@ function plan3ReviewedStaticNumber(path, unit, token) {
   if (PROJECT_SURFACES.includes(path)) {
     if (elementHasClass(owner, "projects-kicker")
       && token.value === "12"
-      && new Set(["EVIDENCE REGISTER / 12 POZYCJI", "EVIDENCE REGISTER / 12 ENTRIES"]).has(ownerText)) return true;
+      && new Set(["PROJEKTY I PRODUKTY", "PROJECTS AND PRODUCTS"]).has(ownerText)) return true;
     if (elementHasClass(owner, "project-row__rail")
       && /^(?:A-0[1-5]|P-0[1-5]|L-0[1-2])$/.test(token.value)
       && ownerText === token.value) return true;
@@ -10303,14 +10360,14 @@ function plan3ReviewedStaticNumber(path, unit, token) {
 
   if (new Set(["wiedza/index.html", "en/wiedza/index.html"]).has(path)) {
     if (elementHasClass(owner, "knowledge-kicker")
-      && new Set(["RESEARCH INDEX / 02 ENTRIES", "RESEARCH INDEX / 03 ENTRIES"]).has(ownerText)
+      && new Set(["MATERIAŁY", "RESOURCES"]).has(ownerText)
       && new Set(["02", "03"]).has(token.value)) return true;
     if (token.value === "2026" && ownerText === "Procurement Process 2026" && owner.name === "a") return true;
   }
 
   if (path === "procurement-2026/index.html") {
     if (token.value === "2026" && ownerText === "Procurement Process 2026") return true;
-    if (token.value === "04" && elementHasClass(owner, "procurement-kicker") && ownerText === "ARTIFACT DOSSIER / 04 MATERIAŁY") return true;
+    if (token.value === "04" && elementHasClass(owner, "procurement-kicker") && ownerText === "MODEL PROCESU ZAKUPOWEGO") return true;
   }
   return false;
 }
@@ -10650,8 +10707,8 @@ function plan3VerifyConservativeSchema(entry, roots, parsedRoot, identity, error
     return;
   }
 
-  if (mainType === "CollectionPage") {
-    const expected = { "@type": "CollectionPage", name: identity.h1, url: expectedCanonical, description: identity.description, inLanguage: entry.lang };
+  if (mainType === "CollectionPage" || mainType === "WebPage") {
+    const expected = { "@type": mainType, name: identity.h1, url: expectedCanonical, description: identity.description, inLanguage: entry.lang };
     if (!plan3SchemaHasExactCore(main, expected)) fail("CollectionPage must match the localized visible route identity without inferred events or claims");
     return;
   }
@@ -10770,9 +10827,9 @@ async function verifyMetadata(factData, context) {
     if (!PLAN3_ARTIFACT_FILES.has(entry.file)) {
       const stylesheets = all.filter((element) => element.name === "link" && (elementAttributeTokens(element, "rel").includes("stylesheet") || (elementAttribute(element, "href") ?? "").startsWith("/assets/css/style.css")));
       const scripts = all.filter((element) => element.name === "script" && ((elementAttribute(element, "src") ?? "").startsWith("/assets/js/main.js") || element.attributes.has("src")));
-      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === "/assets/css/style.css?v=20260825-flightplan-3");
+      const validStyles = stylesheets.filter((element) => elementIsActiveResource(element) && elementAttribute(element, "href") === "/assets/css/style.css?v=20260904-quality-1");
       const validScripts = scripts.filter((element) => elementIsActiveResource(element)
-        && elementAttribute(element, "src") === "/assets/js/main.js?v=20260825-flightplan-3"
+        && elementAttribute(element, "src") === "/assets/js/main.js?v=20260904-quality-1"
         && element.attributes.has("defer"));
       if (stylesheets.length !== 1 || validStyles.length !== 1 || scripts.length !== 1 || validScripts.length !== 1) {
         error(context.errors, "metadata-assets", entry.file, "site shell requires exact Flight Plan 3 CSS and deferred JS assets");
@@ -10936,9 +10993,9 @@ async function verifyInstructions(context) {
 
   const redirects = await readRequired(context, "_redirects", "infrastructure-file");
   const redirectLines = redirects.split(/\r?\n/).map((line) => line.trim()).filter((line) => line !== "" && !line.startsWith("#"));
-  const exactRedirects = "# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.\n# No path redirects are currently defined.\n";
-  if (redirects !== exactRedirects || redirectLines.length !== 0) {
-    error(context.errors, "infrastructure-redirect", "_redirects", "must contain only the reviewed comment-only Pages contract; www to apex belongs to a separately verified Cloudflare Bulk Redirect");
+  const exactRedirects = "# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.\n# The legacy standalone infographic shares the canonical embedded resource.\n/infographic_procurement_2026_EN.html /diagrams/infographic 301\n/infographic_procurement_2026_EN /diagrams/infographic 301\n";
+  if (redirects !== exactRedirects || redirectLines.length !== 2) {
+    error(context.errors, "infrastructure-redirect", "_redirects", "must contain only the two reviewed legacy infographic redirects; www to apex belongs to a separately verified Cloudflare Bulk Redirect");
   }
 
   const headers = await readRequired(context, "_headers", "infrastructure-file");

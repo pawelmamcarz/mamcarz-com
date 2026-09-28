@@ -1,4 +1,5 @@
 import factRegistry from "../content/site-facts.json" with { type: "json" };
+import { ALLOWED_URLS, DESTINATIONS, navigationAnswer, replyLinks } from './navigation.js';
 
 export const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
@@ -41,7 +42,10 @@ Zasady bezpieczeństwa faktów:
 Zatwierdzone fakty nawigacyjne:
 ${approvedFactLines.join("\n")}
 
-Kontakt bezpośredni: mailto:pawel@mamcarz.com`;
+Kontakt bezpośredni: mailto:pawel@mamcarz.com
+
+Mapa stron (wybieraj wyłącznie istniejące adresy):
+${DESTINATIONS.map(item => `${item.pl}: https://mamcarz.com/${item.path} | ${item.en}: https://mamcarz.com/en/${item.path}`).join("\n")}`;
 
 const HIGH_RISK_PL = /\b(klient|wynik|rezultat|licencj|uprawnien|certyfikat|nagrod|wyróżnien|ile|liczb|wartość|wydajno|pojemno|sklep|rafineri|pracował|stanowisk|rola|aktywn|działa obecnie|aktualn)\w*/iu;
 const HIGH_RISK_EN = /\b(client|result|licen[cs]e|qualification|certificate|award|how many|number|value|capacity|throughput|stores?|refiner|worked|position|role|active|currently|current status)\w*/iu;
@@ -200,16 +204,7 @@ function isHighRiskInput(content) {
 }
 
 function hasApprovedUrl(value) {
-  if (value.toLowerCase().startsWith("mailto:")) return value.toLowerCase() === "mailto:pawel@mamcarz.com";
-  try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase();
-    if (host === "mamcarz.com" || host.endsWith(".mamcarz.com")) return true;
-    return (host === "linkedin.com" || host === "www.linkedin.com")
-      && (url.pathname === "/in/pawelmamcarz" || url.pathname.startsWith("/in/pawelmamcarz/"));
-  } catch {
-    return false;
-  }
+  return ALLOWED_URLS.has(value);
 }
 
 function unsafeAiReply(reply) {
@@ -278,12 +273,27 @@ export default {
         return json({ error: genericError(429, language) }, 429, cors, requestId, { "Retry-After": "60" });
       }
 
-      if (isHighRiskInput(finalUserContent)) {
-        return json({ reply: noConfirmation(language) }, 200, cors, requestId);
+      const network = request.headers.get('CF-Connecting-IP');
+      if (network) {
+        if (typeof env.CHAT_NETWORK_RATE_LIMITER?.limit !== 'function') throw new Error('network limiter unavailable');
+        const key = await rateKeyFor(`${new Date().toISOString().slice(0, 10)}:${network}`);
+        const limited = await env.CHAT_NETWORK_RATE_LIMITER.limit({ key });
+        if (!limited || typeof limited.success !== "boolean") throw new Error("invalid network limiter result");
+        if (!limited.success) return json({ error: genericError(429, language) }, 429, cors, requestId, { 'Retry-After': '60' });
       }
+
+      if (isHighRiskInput(finalUserContent)) {
+        const reply = noConfirmation(language);
+        return json({ reply, links: replyLinks(reply) }, 200, cors, requestId);
+      }
+      const navigation = navigationAnswer(finalUserContent, language);
+      if (navigation) return json(navigation, 200, cors, requestId);
       if (typeof env.AI?.run !== "function") throw new Error("AI binding unavailable");
+      const languageInstruction = language === "en"
+        ? "For this conversation, reply only in English and use the /en/ versions of website links."
+        : "W tej rozmowie odpowiadaj wyłącznie po polsku i używaj polskich adresów stron.";
       const response = await env.AI.run(MODEL, {
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+        messages: [{ role: "system", content: `${SYSTEM_PROMPT}\n\n${languageInstruction}` }, ...messages],
         max_tokens: 500,
         temperature: 0.2
       });
@@ -291,7 +301,8 @@ export default {
         throw new Error("invalid AI response");
       }
       const reply = response.response.trim();
-      return json({ reply: unsafeAiReply(reply) ? noConfirmation(language) : reply }, 200, cors, requestId);
+      const safeReply = unsafeAiReply(reply) ? noConfirmation(language) : reply;
+      return json({ reply: safeReply, links: replyLinks(safeReply) }, 200, cors, requestId);
     } catch (error) {
       if (error instanceof RequestBoundaryError) {
         return json({ error: genericError(error.status, language) }, error.status, cors, requestId);

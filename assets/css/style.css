@@ -1,3 +1,4 @@
+/* Flight Plan public UI. Reviewed changes: docs/releases/2026-09-04-quality.md */
 /* 01 Fonts and tokens */
 @font-face {
   font-family: 'Barlow Semi Condensed';
@@ -2821,4 +2822,37 @@ footer :focus-visible,
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+/* Quality review: clear actions, compact reading and progressive enhancement. */
+[hidden] { display: none !important; }
+.page-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.chat-actions { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 0; }
+.chat-actions button { background: transparent; color: var(--runway-ink); border: 1px solid var(--ink-secondary); padding: 10px 14px; min-height: 44px; cursor: pointer; font: inherit; }
+.chat-actions button:focus-visible { outline: 3px solid var(--signal-dark); outline-offset: 3px; }
+.chat-destination { display: block; margin-top: 10px; text-decoration: underline; text-underline-offset: 3px; }
+.chat-privacy { font-size: 0.85rem; line-height: 1.55; margin-top: 12px; }
+.chat-privacy a { text-decoration: underline; }
+.evidence-row__title a, .project-row__body h3 a, .aviation-project h3 a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+#products { scroll-margin-top: calc(var(--nav-height) + 24px); }
+.hero-portrait img { object-fit: contain; object-position: center; }
+.hero-portrait { background: var(--sky-band); }
+.procurement-artifact > details { border-top: var(--line-strong); }
+.procurement-artifact summary { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; cursor: pointer; padding: 24px 0; }
+.procurement-artifact summary::after { content: '+'; font-size: 2rem; margin-left: auto; }
+.procurement-artifact details[open] > summary::after { content: '−'; }
+.procurement-artifact summary h2 { margin: 0; }
+.procurement-artifact summary:focus-visible { outline: 3px solid var(--signal-dark); outline-offset: 4px; }
+.procurement-artifact details > p a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; }
+@media (max-width: 759px) {
+  .applications-section, .service-section, .aviation-section { padding-block: 36px; }
+  .applications-heading, .service-section__grid { gap: 20px; }
+  .page-hero { padding-block: 40px; }
+  .page-actions { gap: 10px; }
+  .page-actions a { width: 100%; justify-content: center; text-align: center; }
+  .route-sequence__step { padding-block: 20px; }
+  .projects-group__head { padding-top: 36px; }
+  .project-row__body h3 { padding-block: 18px; }
+  .procurement-artifact summary { gap: 10px; }
+  .procurement-artifact summary h2 { flex-basis: calc(100% - 50px); }
 }

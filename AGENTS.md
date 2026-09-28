@@ -15,12 +15,12 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 ## Hosting i wydanie
 
 - Hosting: Cloudflare Pages, projekt `mamcarz-com` (nie Vercel).
-- Podgląd: `wrangler pages dev .` albo dowolny statyczny serwer.
-- Wydanie strony: `wrangler pages deploy . --project-name mamcarz-com --branch main --commit-dirty=true`.
-- Lokalny `./deploy.sh` najpierw wykonuje push, potem deploy; jest w `.gitignore` i może nie istnieć w świeżym klonie.
+- Podgląd: `npm run package:site && wrangler pages dev .public` albo dowolny statyczny serwer.
+- Wydanie strony: `npm run deploy:pages` (pakuje wyłącznie publiczne pliki do `.public/`, sprawdza paczkę i wdraża ten katalog; nigdy root repozytorium).
+- Lokalny `./deploy.sh` jest w `.gitignore` i może nie istnieć w świeżym klonie. Wywołuje `npm run deploy:pages` bez automatycznego push; obowiązującą ścieżką publikacji Pages jest `npm run deploy:pages`.
 - Worker czatu w `worker/` jest osobnym wdrożeniem: `cd worker && wrangler deploy`.
 - Push, merge, deploy Pages i deploy Workera są osobnymi bramkami. Nie wykonuj żadnej z nich bez odpowiedniego zatwierdzenia.
-- `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i obecnie nie zawiera aktywnych reguł. Redirect `www` na apex jest konfiguracją Cloudflare Bulk Redirect poza repozytorium; przed wydaniem trzeba osobno odczytać jego stan i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
+- `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i przekierowuje dawny adres samodzielnej infografiki na `/diagrams/infographic`. Redirect `www` na apex jest konfiguracją Cloudflare Bulk Redirect poza repozytorium; przed wydaniem trzeba osobno odczytać jego stan i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
 
 ## Struktura i manifest tras
 
@@ -29,10 +29,11 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 - `aplikacje-operacyjne/`, `en/aplikacje-operacyjne/` — aplikacje operacyjne.
 - `lotnictwo/`, `en/lotnictwo/` — działalność lotnicza.
 - `case-studies/`, `wiedza/`, `wystapienia/` oraz ich odpowiedniki `en/` — projekty, wiedza i wystąpienia.
-- `procurement-2026/`, `diagrams/`, `infographic_procurement_2026_EN.html` — samodzielne materiały pomocnicze; nie podlegają automatycznie regule par PL/EN.
+- `procurement-2026/`, `diagrams/` — samodzielne materiały pomocnicze; nie podlegają automatycznie regule par PL/EN. Trasy diagramów nie mają rozszerzenia `.html`. `infographic_procurement_2026_EN.html` pozostaje lokalną kopią historyczną, wyłączoną z publikacji.
+- `prywatnosc/`, `en/prywatnosc/` — informacje o prywatności, dostępne ze stopki i czatu.
 - `assets/css/style.css` — wspólny arkusz; `assets/js/main.js` — nawigacja, chat i drobne interakcje; `assets/img/` i `assets/fonts/` — zasoby.
 - `content/site-facts.json` — rejestr zatwierdzonych faktów i powierzchni publikacji.
-- `scripts/verify-site.mjs` — manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 24 publicznych dokumentów.
+- `scripts/verify-site.mjs` — manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 25 publicznych dokumentów.
 - `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, `404.html` — powierzchnie discovery i błędów.
 
 `PUBLIC_PAGES` w `scripts/verify-site.mjs` jest normatywnym manifestem tras. Przy dodaniu lub usunięciu strony aktualizuj razem manifest, sitemapę, odpowiednią parę językową i kontrolowane indeksy llms.
@@ -46,7 +47,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Kierunek: „Flight Plan” — redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
 - Fonty: Barlow Semi Condensed dla nagłówków, DM Sans dla tekstu, DM Mono dla etykiet i danych.
 - Główne tokeny w `:root`: `--runway-ink`, `--signal`, `--signal-dark`, `--sky-band`, `--ink-secondary`, `--line`, `--line-strong`.
-- Wspólna wersja zasobów w publicznych dokumentach: `20260825-flightplan-3`.
+- Wspólna wersja zasobów w publicznych dokumentach: `20260904-quality-1`.
 - Nie przywracaj Playfair Display, generycznych kart, przypadkowych gradientów, dekoracyjnych wykresów ani narracji udającej fakty.
 - Zachowuj semantyczny HTML, jeden `main`, jeden `h1`, widoczny focus, działanie bez JavaScriptu i obsługę `prefers-reduced-motion`.
 - `404.html` jest jednym dokumentem PL/EN: PL działa domyślnie bez JS, ma `noindex`, nie ma canonicala, a wczesny skrypt może zmienić wyłącznie `lang`, `title` i istniejący opis.
@@ -84,6 +85,9 @@ npm run verify:facts
 npm run verify:site
 npm run test:verify-site
 npm run test:worker
+npm run test:quality
+npm run package:site
+npm run verify:release
 node --check assets/js/main.js
 node --check worker/index.js
 cmp -s AGENTS.md CLAUDE.md

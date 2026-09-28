@@ -218,25 +218,25 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "d3aa4e7a515745efc7c7225896acf741e187ff49b0cec9c52de36117b6b3f834",
-  "en/index.html": "fa3de435913e6e3ddda65e79a0683469697b1f37b04f638a2335fac4a5f03f05",
-  "uslugi/transformacja-zakupow/index.html": "aed3ecc755910dbf61ec6f74f3ac91ef3fd6928b017c3af8e5a2b2c3b177f9d3",
-  "en/uslugi/transformacja-zakupow/index.html": "aa4306ca8eded0a9f3abe124a322cff05412a75c7c38ad969b26f26c625459d4",
-  "uslugi/wdrozenie-sap-ariba/index.html": "771726a6b6756400553f5acb3bc368b744e02a1e949ce3e8c3fb326b98ee9db0",
-  "en/uslugi/wdrozenie-sap-ariba/index.html": "d95877ab82f2168495be252d63fabad892a8a4362727be55d00f08088e350e2e",
-  "uslugi/doradztwo-zamowienia-publiczne/index.html": "ef2b81271888f56b89309a072b60845a8ebada1c65c7d089766f5f04769b3bf2",
-  "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "8340055950d73a3c4753f97d63654c270d7857d0d17f668a68f2b47b8c88ca40",
-  "aplikacje-operacyjne/index.html": "a708e697c34d8ec29067472c1452f0d323977aac317b3c87b43b3c64962acbff",
-  "en/aplikacje-operacyjne/index.html": "9bcc65302c996a9e00cf17d39376769c708182b9da3b7f941358c5ab9ed412da",
-  "lotnictwo/index.html": "6ca4adea7ab3232c31f5f96894734376b73043b856ab0c69bb66e26faa706d0b",
-  "en/lotnictwo/index.html": "0823777ace817d243ed8dbe68ad4f0819141886dac7aebeabf627c541b9068f1",
-  "case-studies/index.html": "2b625df6c188032b8d91845dfc0193f24a110fb991bab34a1e0a462752ce6f75",
-  "en/case-studies/index.html": "c2ec2ae6ab45f02969707045f38ab715d1e1ab21f58143e6094767c136476969",
-  "wiedza/index.html": "01e3ff51f0ea944751df396bc604d879ad1bd994f154a0162a781c5bcda84235",
-  "en/wiedza/index.html": "ecfc2ac93e5baca1290a06bde5c11064bbcb4b2750d04ab6ad6d3f74971f0b0f",
-  "wystapienia/index.html": "6aa5850a51f4d2583ace3db4983bfa2f5cebd9ed6f65f4f2924765429c3ee7e9",
-  "en/wystapienia/index.html": "25bce5bb1478d6e0ea7875866c8d952fa7e1bb1be5f3a7d84d42f7b4a7e7e5b6",
-  "procurement-2026/index.html": "81e3cc05c2ba55df668a79a257b150ac2398ffbf1b09c4e9634886fed7815827"
+  "index.html": "31243f9cc349f97076e0ea14068235fd63edfc3c74cd131b9f8f969c110a975c",
+  "en/index.html": "bcd8aae0b77b42ec3ffd62f4e1f976036e274d49ee0a7876942c6100e1e89387",
+  "uslugi/transformacja-zakupow/index.html": "fffac19ec9b11b530ba8b0c471573252ee723bda3797f182d16d8baae2399dd1",
+  "en/uslugi/transformacja-zakupow/index.html": "4bed2ac8b3630a4bb68fd3f87f4411ac38a6ce6e990ff1c2f353f1af127a9b15",
+  "uslugi/wdrozenie-sap-ariba/index.html": "6472aa640f740db4d67d74eb22a935d72510407a44178de8a76eeeeb4630ac2b",
+  "en/uslugi/wdrozenie-sap-ariba/index.html": "85d8f3c84ddfe470db16597bf812090f2b9243921802a1e23f49f4822aa577f7",
+  "uslugi/doradztwo-zamowienia-publiczne/index.html": "14433b66c911fb5aa9d6a2f7ce28c30ddc0e5f161f6bb4c1c2578dc491f00c76",
+  "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "e33ce670c9509813f85a90620d1070226eb6cbca24efac9335bac0a1092fa1d1",
+  "aplikacje-operacyjne/index.html": "d4e054a68aa0fbcd604a3a2ee8b2a2f080026d3232db9587fa47277d76891ea2",
+  "en/aplikacje-operacyjne/index.html": "09ad001033474c6c2a97ce48240c97e9f2c0865c4e73c9705a0e4652521497cb",
+  "lotnictwo/index.html": "6ad6b3287758a32e316ca9a07087e6cf8d54ffd5dc5efa5da977cf06d64c6e89",
+  "en/lotnictwo/index.html": "62f07c136afce5c5dd84e4cc9f3d8c65ad6aa58704d737ca89c9ccf60a0540c1",
+  "case-studies/index.html": "148ce67d913ed6507034f7ac0b00cb108f820fa04c075ef2430ee5b2bd743a98",
+  "en/case-studies/index.html": "05cc9fbb00e40fc3b1bbdff6b9a91bc4f4e3053a9093603cce71dc3f630e7426",
+  "wiedza/index.html": "fd920733c688241ce880b421b46bf88f9f9bba701f8c51656b5913fdaa19941f",
+  "en/wiedza/index.html": "c4438cc5b631215e6c85fbd6c83c9a41e75bd5f2bbc2d664309f89d214ab96ca",
+  "wystapienia/index.html": "5e543e7bfdcc5f1d0c6237ef594577fb6a949f1b3a25679d66c709f44b30f026",
+  "en/wystapienia/index.html": "60d9df0b5851cde8314952ce2154d25012e23940150055207ada169914181070",
+  "procurement-2026/index.html": "b243841e71a5e0e03763efbd004024ad1404cc76b3a7eaea08dd0912546e462e"
 });
 
 const task9ShellCopy = Object.freeze({
@@ -257,7 +257,7 @@ const task9ShellCopy = Object.freeze({
       Object.freeze(["/", "Strona główna"]), Object.freeze(["/uslugi/transformacja-zakupow/", "Doradztwo"]),
       Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#contact", "Kontakt"])
+      Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
     ])
   }),
   en: Object.freeze({
@@ -277,7 +277,7 @@ const task9ShellCopy = Object.freeze({
       Object.freeze(["/en/", "Home"]), Object.freeze(["/en/uslugi/transformacja-zakupow/", "Advisory"]),
       Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#contact", "Contact"])
+      Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
     ])
   })
 });
@@ -299,11 +299,11 @@ function task9ExpectedShell(entry) {
 function task9CanonicalHtml(entry, html = task9SiteShellProductHtml[entry.path]) {
   const shell = task9ExpectedShell(entry);
   return html
-    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260825-flightplan-3")
+    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260904-quality-1")
     .replace(/<nav class="site-nav"[\s\S]*?<\/nav>/, shell.nav)
     .replace(/<div class="nav-overlay"[\s\S]*?<\/div>\s*<button class="back-to-top"[\s\S]*?<\/button>/, shell.controls)
     .replace(/<footer(?: class="site-footer")?>[\s\S]*?<\/footer>/, shell.footer)
-    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>');
+    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>');
 }
 
 function task9ProtectedContent(html) {
@@ -417,7 +417,7 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}">
     <link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}">
     <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
     ${head}
   </head><body data-page="${dataPage}">
     <a class="skip-link" href="#main">Skip</a>
@@ -425,7 +425,7 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
     <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
   </body></html>`;
 }
 
@@ -486,6 +486,8 @@ async function pageArchitectureFixture({ files, facts, public_claim_surfaces, ex
     enHtml,
     serviceHtml,
     extraFiles: {
+      "prywatnosc/index.html": await readFile(resolve("prywatnosc/index.html"), "utf8"),
+      "en/prywatnosc/index.html": await readFile(resolve("en/prywatnosc/index.html"), "utf8"),
       "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
       "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
       "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
@@ -634,7 +636,7 @@ function homepageFixture(lang, content) {
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite"},{"@type":"Person"}]}</script>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
   </head><body>
     <a href="#main" class="skip-link">${skipLabel}</a>
     ${navigationFixture[lang]}<main id="main">
@@ -644,15 +646,15 @@ function homepageFixture(lang, content) {
     <aside data-cta-after="process"></aside>
     <section id="cases"></section>
     <aside data-cta-after="cases"></aside>
+    <section id="skills"><article class="evidence-row" data-domain="applications"><h3>${lang === "pl" ? "Aplikacje operacyjne" : "Operational applications"}</h3><dl><div><dt>Problem</dt><dd>One</dd></div><div><dt>${lang === "pl" ? "Działanie" : "Action"}</dt><dd>Two</dd></div><div><dt>${lang === "pl" ? "Możliwy wynik" : "Possible outcome"}</dt><dd>Three</dd></div></dl></article>${publicProcurementSkillsFixture(lang)}</section>
     <section id="about">${controlledAboutFixture(lang)}</section>
     <section id="education"></section>
     <section id="resume"></section>
-    <section id="skills"><article class="evidence-row" data-domain="applications"><h3>${lang === "pl" ? "Aplikacje operacyjne" : "Operational applications"}</h3><dl><div><dt>Problem</dt><dd>One</dd></div><div><dt>${lang === "pl" ? "Działanie" : "Action"}</dt><dd>Two</dd></div><div><dt>${lang === "pl" ? "Możliwy wynik" : "Possible outcome"}</dt><dd>Three</dd></div></dl></article>${publicProcurementSkillsFixture(lang)}</section>
     <section id="portfolio"></section>
     <section id="clients"></section>
     <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
-  </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><input id="chat-input" maxlength="2000">
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+  </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><div id="ai-chat" hidden><input id="chat-input" maxlength="2000"></div><p data-chat-fallback>Email contact is available.</p>
+    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
   </body></html>`;
 }
 
@@ -1013,7 +1015,7 @@ const knowledgeContract = Object.freeze({
     ctaHref: "/en/#contact",
     ctaLabel: "Go to contact",
     resources: Object.freeze([
-      Object.freeze({ href: "/infographic_procurement_2026_EN.html", title: "Procurement process reference model and scenario lenses", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en" }),
+      Object.freeze({ href: "/diagrams/infographic", title: "Procurement process reference model and scenario lenses", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en" }),
       Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en" }),
       Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Interactive model", language: "Polish", status: "Polish-language resource", inLanguage: "pl", lang: "pl" })
     ])
@@ -1048,18 +1050,18 @@ function knowledgePageFixture(lang) {
     submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
     primary: [["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]],
     paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", breadcrumbLabel: "Okruszki", breadcrumbHome: "Strona główna",
-    kicker: "RESEARCH INDEX / 02 ENTRIES", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
+    kicker: "MATERIAŁY", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
     contactLabel: "KONTAKT / NASTĘPNY KROK", contactCopy: "Jeśli materiał dotyczy decyzji, nad którą pracujesz, przejdź do rozmowy.",
-    footer: [["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"]]
+    footer: [["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"], ["/prywatnosc/", "Prywatność"]]
   } : {
     description: contract.purpose, ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation",
     home: "/en/", logoLabel: "Paweł Mamcarz, homepage", advisory: "Advisory",
     submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
     primary: [["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]],
     paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", breadcrumbLabel: "Breadcrumb", breadcrumbHome: "Home",
-    kicker: "RESEARCH INDEX / 03 ENTRIES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
+    kicker: "RESOURCES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
     contactLabel: "CONTACT / NEXT STEP", contactCopy: "If a resource relates to a decision you are working on, continue to the conversation.",
-    footer: [["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"]]
+    footer: [["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"], ["/en/prywatnosc/", "Privacy"]]
   };
   const submenu = copy.submenu.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const primary = copy.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
@@ -1070,14 +1072,14 @@ function knowledgePageFixture(lang) {
     <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
     <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
   </head><body class="knowledge-page" data-page="knowledge">
     <a href="#main" class="skip-link">${copy.skip}</a>
     <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
     <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
     <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
   </body></html>`;
 }
 
@@ -1132,6 +1134,7 @@ function applicationFactRecords() {
   const surfaces = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
   return applicationEvidenceFacts.map(([id, displayPl, displayEn]) => fact({
     id,
+    ...({"portfolio.czympojade_pl":"https://czympojade.pl","portfolio.przypominamy_com":"https://przypominamy.com","portfolio.procuracost":"https://procuracost.com"}[id] ? {publication_url: {"portfolio.czympojade_pl":"https://czympojade.pl","portfolio.przypominamy_com":"https://przypominamy.com","portfolio.procuracost":"https://procuracost.com"}[id]} : {}),
     value: displayEn,
     display_pl: displayPl,
     display_en: displayEn,
@@ -1352,24 +1355,24 @@ test("Plan 2 Task 1 requires exact canonical, real hreflang and paired language 
 test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside site-nav", async () => {
   const mutations = [
     ["stylesheet template decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></template>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></template>'
     )],
     ["stylesheet hidden decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" hidden>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" hidden>'
     )],
     ["script noscript decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><noscript><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></noscript>'
+      '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
+      '<script src="/assets/js/main.js?v=20260904-quality-1"></script><noscript><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></noscript>'
     )],
     ["script template decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><template><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></template>'
+      '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
+      '<script src="/assets/js/main.js?v=20260904-quality-1"></script><template><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></template>'
     )],
     ["script hidden decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-      '<script src="/assets/js/main.js?v=20260825-flightplan-3"></script><script src="/assets/js/main.js?v=20260825-flightplan-3" defer hidden></script>'
+      '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
+      '<script src="/assets/js/main.js?v=20260904-quality-1"></script><script src="/assets/js/main.js?v=20260904-quality-1" defer hidden></script>'
     )],
     ["route outside navigation", "page-navigation", (html) => html
       .replace('<a href="/lotnictwo/">Lotnictwo</a>', '<a href="/usunieta-trasa/">Lotnictwo</a>')
@@ -1964,7 +1967,7 @@ test("Plan 2 Task 2 binds every evidence row to approved paired surfaces and loc
   assert.ok(errorIds(surfaceResult).includes("application-evidence-surface"), surfaceResult.errors.join("\n"));
 
   const wrongDisplay = await applicationPageMutation({
-    mutate: (html) => html.replace(">czympojade.pl</h3>", ">Transport tool</h3>")
+    mutate: (html) => html.replace(">czympojade.pl</a></h3>", ">Transport tool</a></h3>")
   });
   assert.ok(errorIds(wrongDisplay).includes("application-evidence-value"), wrongDisplay.errors.join("\n"));
 });
@@ -2060,7 +2063,7 @@ test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner
       "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.</dd><p>Dodatkowy element.</p>"
     )],
     ["registry-coordinated display drift", { facts: [fact(), driftFact] }, (html) => html.replace(
-      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
       '<h3 class="evidence-row__title">Transport Registry Drift</h3>'
     )]
   ];
@@ -2076,7 +2079,7 @@ test("Plan 2 Task 2 fix round 1 pins immutable evidence rows, ID pairs and owner
 test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts only its exact registered URL", async () => {
   const linkTitle = (href) => `<h3 class="evidence-row__title"><a href="${href}">czympojade.pl</a></h3>`;
   const unapproved = await applicationPageMutation({
-    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle("https://example.com/unapproved"))
+    mutate: (html) => html.replace('<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>', linkTitle("https://example.com/unapproved"))
   });
   assert.ok(errorIds(unapproved).includes("application-evidence-link"), unapproved.errors.join("\n"));
 
@@ -2087,11 +2090,12 @@ test("Plan 2 Task 2 fix round 1 rejects an unregistered product link and accepts
     display_pl: "czympojade.pl",
     display_en: "czympojade.pl",
     source_url: approvedUrl,
+    publication_url: "https://czympojade.pl",
     surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
   });
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
-    mutate: (html) => html.replace('<h3 class="evidence-row__title">czympojade.pl</h3>', linkTitle(approvedUrl))
+    mutate: (html) => html.replace('<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>', linkTitle(approvedUrl))
   });
   assert.deepEqual(approved.errors, []);
 });
@@ -2315,12 +2319,13 @@ test("Plan 2 Task 2 fix round 3 exempts anchors only inside the three owned evid
     display_pl: "czympojade.pl",
     display_en: "czympojade.pl",
     source_url: approvedUrl,
+    publication_url: "https://czympojade.pl",
     surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
   });
   const approved = await applicationPageMutation({
     facts: [fact(), approvedFact],
     mutate: (html) => html.replace(
-      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
       `<h3 class="evidence-row__title"><a href="${approvedUrl}">czympojade.pl</a></h3>`
     )
   });
@@ -2456,12 +2461,13 @@ test("Plan 2 Task 2 fix round 4 rejects every unapproved attribute on active and
     display_pl: "czympojade.pl",
     display_en: "czympojade.pl",
     source_url: approvedUrl,
+    publication_url: "https://czympojade.pl",
     surfaces: ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"]
   });
   const duplicateEvidenceHref = await applicationPageMutation({
     facts: [fact(), approvedFact],
     mutate: (html) => html.replace(
-      '<h3 class="evidence-row__title">czympojade.pl</h3>',
+      '<h3 class="evidence-row__title"><a href="https://czympojade.pl">czympojade.pl</a></h3>',
       `<h3 class="evidence-row__title"><a href="${approvedUrl}" href="https://example.com/unapproved">czympojade.pl</a></h3>`
     )
   });
@@ -2601,7 +2607,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["paragraph", (html) => html.replace('<p class="section-label">01 / Problem</p>', '<p class="section-label"/>')],
     ["details", (html) => html.replace('<details class="nav-group">', '<details class="nav-group"/>')],
     ["summary", (html) => html.replace("<summary>Doradztwo</summary>", "<summary/>")],
-    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>', '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer/>')],
+    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>', '<script src="/assets/js/main.js?v=20260904-quality-1" defer/>')],
     ["style", (html) => html.replace("</footer>", "<style/></style></footer>")]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
@@ -2992,7 +2998,7 @@ test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actio
     ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
     ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png"', 'img data="/assets/img/signature.png"')],
     ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
-    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></body>')],
+    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></body>')],
     ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
     ["unapproved event handler", (html) => html.replace('class="footer-sign"', 'class="footer-sign" onfocus="location.href=\'/#contact\'"')]
   ];
@@ -3130,8 +3136,8 @@ test("Plan 2 Task 2 fix round 5 independently inventories executable, style and 
 
   const duplicateStylesheetHref = await applicationPageMutation({
     mutate: (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" href="/assets/css/style.css?v=20260825-flightplan-3">'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" href="/assets/css/style.css?v=20260904-quality-1">'
     )
   });
   assert.ok(errorIds(duplicateStylesheetHref).includes("application-resource-census"), duplicateStylesheetHref.errors.join("\n"));
@@ -3196,13 +3202,13 @@ test("Plan 2 Task 2 fix round 1 positive control accepts the unchanged PL and EN
 test("Plan 2 Task 6 rejects identity, group, evidence, status, schema, resource and forbidden-claim drift", async () => {
   const cases = [
     ["legacy H1", "pl", "project-h1", (html) => html.replace('<h1 class="page-title">Projekty</h1>', '<h1 class="page-title">Case studies</h1>')],
-    ["claim-inflating lead", "en", "project-lead", (html) => html.replace('<p class="page-lead">A register of projects and products built from approved roles, scopes and facts.', '<p class="page-lead">A register of successful projects and products built from approved roles, scopes and facts.')],
+    ["claim-inflating lead", "en", "project-lead", (html) => html.replace('<p class="page-lead">Selected implementations and products: my role, scope of work and the solutions used.', '<p class="page-lead">A register of successful projects and products built from approved roles, scopes and facts.')],
     ["duplicate group", "pl", "project-groups", (html) => html.replace('data-section="applications"', 'data-section="advisory"')],
     ["reordered project identity", "en", "project-evidence", (html) => html.replace('data-project-id="zabka"', 'data-project-id="orlen"')],
     ["swapped role fact", "pl", "project-evidence", (html) => html.replace('data-fact-id="project.orlen.role"', 'data-fact-id="project.orlen.platform_scope"')],
     ["hidden Akrobacja status", "en", "project-evidence", (html) => html.replace('<span data-fact-id="portfolio.akrobacja_com.current_status">', '<span hidden data-fact-id="portfolio.akrobacja_com.current_status">')],
     ["invented schema result", "pl", "project-schema", (html) => html.replace('"mainEntity":', '"result":"Success","mainEntity":')],
-    ["external project link", "en", "project-resource-census", (html) => html.replace('<h3 data-fact-id="portfolio.procuracost">ProcuraCost</h3>', '<h3 data-fact-id="portfolio.procuracost"><a href="https://example.com/claim">ProcuraCost</a></h3>')],
+    ["external project link", "en", "project-resource-census", (html) => html.replace('<h3 data-fact-id="portfolio.procuracost"><a href="https://procuracost.com">ProcuraCost</a></h3>', '<h3 data-fact-id="portfolio.procuracost"><a href="https://example.com/claim">ProcuraCost</a></h3>')],
     ["project image", "pl", "project-resource-census", (html) => html.replace('</main>', '<img src="/assets/img/claim.jpg" alt="ORLEN"></main>')],
     ["entity-smuggled retired venture", "en", "project-claim-boundary", (html) => html.replace('</footer>', '<!-- WarsawFlight&#83;afety --></footer>')],
     ["blocked client", "pl", "project-claim-boundary", (html) => html.replace('</footer>', '<template>Pol<span>pharma</span></template></footer>')],
@@ -3342,6 +3348,40 @@ const procurementBeyondInterview = Object.freeze({
   summaryEn: "In the conversation I discuss the professionalisation of procurement, moving beyond rigid procedures, and the role of an internal implementation leader. I also present Czym pojadę, a fleet TCO calculator using the Bielik model to analyse ownership costs. The final theme is how to combine procurement judgement with automation and data analysis."
 });
 
+test("Owner-requested Inwestorium podcast uses its verified title and canonical link in PL and EN", async () => {
+  const title = "Paweł Mamcarz: Dla mnie pieniądze są funkcją czasu | Inwestorium #020";
+  const href = "https://www.youtube.com/watch?v=PNcy5YZgnWE";
+  const fact = (await readFacts()).facts.find((record) => record.id === "speaking.inwestorium.title");
+  assert.deepEqual(fact, {
+    id: "speaking.inwestorium.title", value: title, display_pl: title, display_en: title,
+    kind: "constant", as_of: null, source_type: "public_source",
+    source_label: "Owner-requested podcast; official YouTube oEmbed title inspected 2026-09-07, capitalization normalized",
+    source_url: href, surfaces: ["wystapienia/index.html", "en/wystapienia/index.html"], status: "approved"
+  });
+  for (const [lang, html] of Object.entries(speakingProductHtml)) {
+    assert.equal(html.split(href).length - 1, 1, `${lang}: one podcast link`);
+    assert.ok(html.includes(`data-fact-id="speaking.inwestorium.title" lang="pl">${title}</h3>`));
+    assert.ok(html.indexOf(href) > html.indexOf(procurementBeyondInterview.href), `${lang}: existing interview is retained first`);
+    assert.doesNotMatch(html, /<iframe\b|i\.ytimg\.com/i);
+  }
+});
+
+test("Speaking verifier rejects Inwestorium link, title, visibility and approval drift", async () => {
+  for (const [label, lang, mutate] of [
+    ["wrong video", "pl", (html) => html.replace("PNcy5YZgnWE", "otherVideo")],
+    ["unverified title", "en", (html) => html.replace("Dla mnie pieniądze są funkcją czasu", "Guaranteed investment returns")],
+    ["hidden entry", "pl", (html) => html.replace('id="inwestorium"', 'id="inwestorium" hidden')],
+    ["missing link protection", "en", (html) => html.replace('href="https://www.youtube.com/watch?v=PNcy5YZgnWE" target="_blank" rel="noopener noreferrer"', 'href="https://www.youtube.com/watch?v=PNcy5YZgnWE" target="_blank"')]
+  ]) {
+    const result = await speakingPageMutation({ lang, mutate });
+    assert.ok(errorIds(result).includes("speaking-podcast"), `${label}: ${result.errors.join("\n")}`);
+  }
+  const result = await speakingPageMutation({
+    mutateFacts: (facts) => facts.map((fact) => fact.id === "speaking.inwestorium.title" ? { ...fact, status: "review" } : fact)
+  });
+  assert.ok(errorIds(result).includes("speaking-registry-inventory"), result.errors.join("\n"));
+});
+
 test("Owner-approved Procurement&Beyond interview is an exact bilingual YouTube resource", async () => {
   const factData = await readFacts();
   const titleFact = factData.facts.find((fact) => fact.id === "speaking.procurement_beyond.title");
@@ -3443,6 +3483,7 @@ test("Owner correction updates Czym pojadę from timetable wording to the fleet 
     source_type: "owner_verified",
     source_label: sourceLabel,
     source_url: procurementBeyondInterview.href,
+    publication_url: "https://czympojade.pl",
     surfaces: ["index.html", "en/index.html", "aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html", "case-studies/index.html", "en/case-studies/index.html", "llms-full.txt"],
     status: "approved"
   });
@@ -3485,9 +3526,9 @@ test("Plan 2 Task 7 rejects Procurement route, hreflang and iframe inventory dri
     ["EN hreflang", "procurement-hreflang", (html) => html.replace('<link rel="alternate" hreflang="x-default"', '<link rel="alternate" hreflang="en" href="https://mamcarz.com/en/procurement-2026/">\n<link rel="alternate" hreflang="x-default"')],
     ["language-link hreflang", "procurement-language-link", (html) => html.replace('href="/en/wiedza/" class="nav-lang"', 'href="/en/wiedza/" hreflang="en" class="nav-lang"')],
     ["changed iframe title", "procurement-iframes", (html) => html.replace('title="SAP Ariba Module Mapping"', 'title="Ariba mapping"')],
-    ["reordered iframe", "procurement-iframes", (html) => html.replace('/diagrams/diagram1_universal.html', '/diagrams/diagram2_ariba.html')],
+    ["reordered iframe", "procurement-iframes", (html) => html.replace('src="/diagrams/diagram1_universal"', 'src="/diagrams/diagram2_ariba"')],
     ["missing iframe", "procurement-iframes", (html) => html.replace(/<iframe class="procurement-frame procurement-frame--maturity"[^>]*><\/iframe>/, '')],
-    ["extra iframe", "procurement-resource-census", (html) => html.replace("</main>", '<iframe src="/diagrams/infographic.html" title="Extra"></iframe></main>')],
+    ["extra iframe", "procurement-resource-census", (html) => html.replace("</main>", '<iframe src="/diagrams/infographic" title="Extra"></iframe></main>')],
     ["inline style", "procurement-resource-census", (html) => html.replace('<section class="procurement-artifacts"', '<section style="display:block" class="procurement-artifacts"')]
   ];
   for (const [label, expectedId, mutateProcurement] of cases) {
@@ -4177,7 +4218,7 @@ function notFoundContractFixture() {
     <title>404 · Strona nie istnieje | mamcarz.com</title>
     <meta name="description" content="Pod tym adresem nie ma strony.">
     <meta name="robots" content="noindex, follow">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">
     <style>[data-lang="en"]{display:none}html[lang="en"] [data-lang="pl"]{display:none}html[lang="en"] [data-lang="en"]{display:revert}</style>
     <script>(function(){var english=location.pathname.indexOf("/en/")===0;if(!english)return;document.documentElement.lang="en";document.title="404 · Page not found | mamcarz.com";var meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute("content","There is no page at this address.");})();</script>
   </head><body>
@@ -4187,7 +4228,7 @@ function notFoundContractFixture() {
       <a href="/" data-lang="pl">Strona główna</a><a href="/#contact" data-lang="pl">Kontakt</a>
       <a href="/en/" data-lang="en">Home</a><a href="/en/#contact" data-lang="en">Contact</a>
     </main><footer class="site-footer">mamcarz.com</footer>
-    <script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>
+    <script src="/assets/js/main.js?v=20260904-quality-1" defer></script>
   </body></html>`;
 }
 
@@ -4200,7 +4241,7 @@ test("Plan 3 Task 5 requires one no-JS-safe bilingual 404 document", async (t) =
     ["second h1", "not-found-h1", (html) => html.replace("</main>", "<h1>Duplicate</h1></main>")],
     ["second main", "not-found-main", (html) => html.replace("</footer>", "<main></main></footer>")],
     ["indexable error", "not-found-robots", (html) => html.replace("noindex, follow", "index, follow")],
-    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260825-flightplan-3", "stale")],
+    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260904-quality-1", "stale")],
     ["missing English contact", "not-found-links", (html) => html.replace('href="/en/#contact"', 'href="/en/"')],
     ["duplicate id", "not-found-ids", (html) => html.replace("</main>", '<span id="main"></span></main>')],
     ["English default", "not-found-default", (html) => html.replace('<html lang="pl">', '<html lang="en">')],
@@ -5869,8 +5910,8 @@ const task7HomeMutations = [
   ["missing hero image width", "home-hero-image", (html) => html.replace(' width="960"', "")],
   ["missing hero image height", "home-hero-image", (html) => html.replace(' height="1280"', "")],
   ["missing high-priority hero fetch", "home-hero-image", (html) => html.replace(' fetchpriority="high"', "")],
-  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260825-flightplan-3', 'style.css?v=stale')],
-  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260825-flightplan-3', 'main.js?v=stale')],
+  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260904-quality-1', 'style.css?v=stale')],
+  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260904-quality-1', 'main.js?v=stale')],
   ["inline presentation style", "home-inline-style", (html) => html.replace('<section id="hero">', '<section id="hero" style="display:block">')]
 ];
 
@@ -5885,36 +5926,36 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round3ExactResourceMutations = [
   ["alternate stylesheet rel", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260904-quality-1">'
   )],
   ["stylesheet title attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" title="decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" title="decoy">'
   )],
   ["stylesheet integrity attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" integrity="sha256-decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" integrity="sha256-decoy">'
   )],
   ["stylesheet data decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" data-decoy="true">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" data-decoy="true">'
   )],
   ["deferred async browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer async>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer async>'
   )],
   ["typed browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer type="text/javascript">'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer type="text/javascript">'
   )],
   ["browser script integrity attribute", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer integrity="sha256-decoy">'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer integrity="sha256-decoy">'
   )],
   ["browser script data decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer data-decoy="true">'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer data-decoy="true">'
   )],
   ["disabled latin font preload", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6024,12 +6065,12 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round2ActiveResourceMutations = [
   ["stylesheet with inactive media", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" media="not all">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" media="not all">'
   )],
   ["disabled stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" disabled>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" disabled>'
   )],
   ["latin font preload with inactive media", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6040,12 +6081,12 @@ const task7Round2ActiveResourceMutations = [
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin media="not all">'
   )],
   ["nomodule browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer nomodule>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer nomodule>'
   )],
   ["stylesheet inside noscript", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></noscript>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></noscript>'
   )],
   ["latin font preload inside noscript", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6056,12 +6097,12 @@ const task7Round2ActiveResourceMutations = [
     '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></noscript>'
   )],
   ["browser script inside noscript", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<noscript><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></noscript>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
+    '<noscript><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></noscript>'
   )],
   ["stylesheet inside template", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></template>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></template>'
   )],
   ["latin font preload inside template", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6072,20 +6113,20 @@ const task7Round2ActiveResourceMutations = [
     '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></template>'
   )],
   ["browser script inside template", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<template><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></template>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
+    '<template><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></template>'
   )],
   ["stylesheet inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></div>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></div>'
   )],
   ["font preload inside hidden ancestor", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
     '<div hidden><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></div>'
   )],
   ["browser script inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></div>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
+    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260904-quality-1" defer></script></div>'
   )]
 ];
 
@@ -6116,36 +6157,36 @@ const task7ReviewHomeSemanticMutations = [
     '<div hidden><input id="chat-input" maxlength="2000"></div>'
   )],
   ["stylesheet changed to a style preload", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260904-quality-1">'
   )],
   ["hidden stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3" hidden>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1" hidden>'
   )],
   ["stylesheet attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">'
   )],
   ["additional active stylesheet", "home-cache-version", (html) => html.replace(
     "</head>",
     '<link rel="stylesheet" href="/assets/css/extra.css">\n  </head>'
   )],
   ["non-executable JSON browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" type="application/json" defer>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1" type="application/json" defer>'
   )],
   ["browser script without defer", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3">'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1">'
   )],
   ["hidden browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer>',
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer hidden>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer>',
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer hidden>'
   )],
   ["browser-script attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>',
-    '<meta src="/assets/js/main.js?v=20260825-flightplan-3" defer>'
+    '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>',
+    '<meta src="/assets/js/main.js?v=20260904-quality-1" defer>'
   )],
   ["additional executable browser script", "home-cache-version", (html) => html.replace(
     "</body>",
@@ -6160,8 +6201,8 @@ const task7ReviewHomeSemanticMutations = [
     '/assets/fonts/dmsans-latext.woff2'
   )],
   ["third font preload", "home-font-preload", (html) => html.replace(
-    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">',
-    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">'
+    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">',
+    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">'
   )],
   ["font preload with the wrong rel", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6257,7 +6298,7 @@ test("Plan 2 Task 8 accepts the exact five-artifact family without a deferred co
 test("Plan 2 Task 8 independently enforces the shared artifact shell, resources, safety and claims", async () => {
   const cases = [
     ["artifact identity", "artifact-manifest", "diagrams/diagram1_universal.html", (html) => html.replace('data-artifact="process"', 'data-artifact="process-map"')],
-    ["toolbar destination", "artifact-toolbar", "diagrams/diagram1_universal.html", (html) => html.replace('href="/en/wiedza/" target="_top"', 'href="/" target="_top"')],
+    ["toolbar destination", "artifact-toolbar", "diagrams/diagram1_universal.html", (html) => html.replace('href="/procurement-2026/" target="_top"', 'href="/" target="_top"')],
     ["visual token", "artifact-style", "diagrams/diagram1_universal.html", (html) => html.replace('--artifact-signal: #D94B2B;', '--artifact-signal: #D94B2C;')],
     ["external resource", "artifact-resource", "diagrams/diagram1_universal.html", (html) => html.replace('</style>', '@import url("https://example.com/font.css");</style>')],
     ["inline style", "artifact-safety", "diagrams/diagram1_universal.html", (html) => html.replace('<main class="artifact-shell">', '<main class="artifact-shell" style="display:block">')],
@@ -6981,10 +7022,10 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
     ["external footer link", task9Mutate("index.html", (html) => html.replace('href="/wiedza/">Wiedza</a></li><li><a href="/#contact"', 'href="https://example.com/">Wiedza</a></li><li><a href="/#contact"'))],
     ["signature asset swapped", task9Mutate("index.html", (html) => html.replace("/assets/img/signature.png", "/assets/img/og.jpg"))],
     ["signature dimensions removed", task9Mutate("index.html", (html) => html.replace(' width="160" height="50"', ""))],
-    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260825-flightplan-3", "style.css?v=20260825-flightplan-1"))],
-    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260825-flightplan-3", "main.js?v=20260825-flightplan-1"))],
-    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3"></head>'))],
-    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script></body>'))],
+    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260904-quality-1", "style.css?v=20260825-flightplan-1"))],
+    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260904-quality-1", "main.js?v=20260825-flightplan-1"))],
+    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1"></head>'))],
+    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260904-quality-1" defer></script></body>'))],
     ["wrapper inside direct navigation text anchor", task9Mutate("index.html", (html) => html.replace(
       '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
       '<a href="/aplikacje-operacyjne/"><span>Aplikacje</span></a>'
@@ -7105,7 +7146,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "82fa61d632f0cc98921e818bca2a2089ba6d8eb8840eb49cfdca0e55766ff21f",
+    "9f0bff0740a1be7095636cc0925957a5ef6ae60931bd510793da1f1d2d9e6294",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });
@@ -7246,12 +7287,13 @@ const plan3ExpectedPublicPages = Object.freeze([
   { file: "en/wiedza/index.html", route: "/en/wiedza/", lang: "en", pair: "/wiedza/", schema: ["CollectionPage"] },
   { file: "wystapienia/index.html", route: "/wystapienia/", lang: "pl", pair: "/en/wystapienia/", schema: ["CollectionPage"] },
   { file: "en/wystapienia/index.html", route: "/en/wystapienia/", lang: "en", pair: "/wystapienia/", schema: ["CollectionPage"] },
+  { file: "prywatnosc/index.html", route: "/prywatnosc/", lang: "pl", pair: "/en/prywatnosc/", schema: ["WebPage"] },
+  { file: "en/prywatnosc/index.html", route: "/en/prywatnosc/", lang: "en", pair: "/prywatnosc/", schema: ["WebPage"] },
   { file: "procurement-2026/index.html", route: "/procurement-2026/", lang: "pl", pair: null, schema: ["Article"] },
-  { file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal.html", lang: "en", pair: null, schema: ["CreativeWork"] },
-  { file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba.html", lang: "en", pair: null, schema: ["CreativeWork"] },
-  { file: "diagrams/diagram3_maturity.html", route: "/diagrams/diagram3_maturity.html", lang: "en", pair: null, schema: ["CreativeWork"] },
-  { file: "diagrams/infographic.html", route: "/diagrams/infographic.html", lang: "en", pair: null, schema: ["CreativeWork"] },
-  { file: "infographic_procurement_2026_EN.html", route: "/infographic_procurement_2026_EN.html", lang: "en", pair: null, schema: ["CreativeWork"] }
+  { file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/diagram3_maturity.html", route: "/diagrams/diagram3_maturity", lang: "en", pair: null, schema: ["CreativeWork"] },
+  { file: "diagrams/infographic.html", route: "/diagrams/infographic", lang: "en", pair: null, schema: ["CreativeWork"] },
 ]);
 
 const plan3ProductPageHtml = Object.freeze(Object.fromEntries(await Promise.all(
@@ -7268,7 +7310,7 @@ async function plan3ProductMetadataRoot(files = {}) {
   });
 }
 
-const plan3ShellFiles = new Set(plan3ExpectedPublicPages.slice(0, 19).map(({ file }) => file));
+const plan3ShellFiles = new Set(plan3ExpectedPublicPages.filter(entry => entry.pair || entry.file === "procurement-2026/index.html").map(({ file }) => file));
 
 function plan3Fact(overrides = {}) {
   return {
@@ -7331,7 +7373,7 @@ function plan3Schema(entry, shape = "graph") {
 
 function plan3Page(entry, { body, head = "", schema = plan3Schema(entry), hreflang = plan3Hreflang(entry), assets = null } = {}) {
   const shellAssets = assets ?? (plan3ShellFiles.has(entry.file)
-    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260825-flightplan-3">\n<script src="/assets/js/main.js?v=20260825-flightplan-3" defer></script>'
+    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260904-quality-1">\n<script src="/assets/js/main.js?v=20260904-quality-1" defer></script>'
     : "");
   const content = body ?? (entry.file === "index.html" ? '<p data-fact-id="fixture.claim">Verified claim</p>' : "Page copy");
   const locale = entry.lang === "pl" ? "pl_PL" : "en_US";
@@ -7359,7 +7401,7 @@ function plan3RealPresentationBody() {
   return `<p data-fact-id="fixture.claim">Verified claim</p>
     <section class="service-section" data-section="problem"><div class="section-shell"><p class="section-label">01 / Problem</p><h2>Problem</h2></div></section>
     <section class="applications-section" data-section="delivery"><div class="section-shell"><div class="route-sequence"><article class="route-sequence__step" data-step="discovery"><p class="section-index">01 / Discovery</p><h3>Discovery</h3></article></div></div></section>
-    <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">DOSSIER / ADVISORY 01</p><h2>Service</h2></div></header>
+    <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">01 / Advisory</p><h2>Service</h2></div></header>
     <section class="applications-section application-evidence" data-section="evidence"><div class="section-shell"><div class="applications-evidence-list"><article class="evidence-row"><p class="evidence-row__context">Product / 01</p><h3>Product</h3></article></div></div></section>
     <header class="page-hero aviation-hero"><div class="page-hero-content"><p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 01</p><h2>Aviation</h2></div></header>
     <section class="knowledge-index" data-section="resources"><article class="knowledge-entry" data-resource><span class="knowledge-entry__number" aria-hidden="true">01</span><h2>Resource</h2></article></section>
@@ -7372,15 +7414,16 @@ function plan3RealPresentationBody() {
 }
 
 function plan3Sitemap() {
-  const blocks = plan3ExpectedPublicPages.map((entry, index) => {
+  const blocks = plan3ExpectedPublicPages.map((entry) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = index < 19 ? "2026-08-27" : "2026-08-26";
+    const lastmod = ["/", "/en/"].includes(entry.route) ? "2026-09-28"
+      : ["/wystapienia/", "/en/wystapienia/"].includes(entry.route) ? "2026-09-07" : "2026-09-04";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
   });
   return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
 }
 
-async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"], factData = null, agents = "same instructions\n", claude = "same instructions\n", redirects = "# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.\n# No path redirects are currently defined.\n", headers = null, sitemap = plan3Sitemap(), llms = null } = {}) {
+async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"], factData = null, agents = "same instructions\n", claude = "same instructions\n", redirects = "# Hostname redirects are managed in Cloudflare Bulk Redirects, not Pages _redirects.\n# The legacy standalone infographic shares the canonical embedded resource.\n/infographic_procurement_2026_EN.html /diagrams/infographic 301\n/infographic_procurement_2026_EN /diagrams/infographic 301\n", headers = null, sitemap = plan3Sitemap(), llms = null } = {}) {
   const root = await mkdtemp(resolve(tmpdir(), "verify-site-plan3-"));
   const pageFiles = Object.fromEntries(plan3ExpectedPublicPages.map((entry) => [entry.file, plan3Page(entry)]));
   const completeHeaders = headers ?? `/*
@@ -7430,8 +7473,8 @@ async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurface
   return root;
 }
 
-test("Plan 3 Task 1 accepts the exact independent 24-route metadata manifest", async () => {
-  assert.equal(plan3ExpectedPublicPages.length, 24);
+test("Plan 3 Task 1 accepts the exact independent 25-route metadata manifest", async () => {
+  assert.equal(plan3ExpectedPublicPages.length, 25);
   assert.deepEqual(PUBLIC_PAGES, plan3ExpectedPublicPages);
   const root = await plan3Root();
   const result = await runVerification({ root, scope: "metadata" });
@@ -7600,7 +7643,7 @@ test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and 
     ["duplicate ids", [plan3Fact(), plan3Fact()], "fact-duplicate-id"],
     ["duplicate surfaces", [plan3Fact({ surfaces: ["index.html", "index.html"] })], "fact-duplicate-surface"],
     ["unsupported enum", [plan3Fact({ status: "published" })], "fact-status"],
-    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-08-28" })], "fact-as-of-future"],
+    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-09-29" })], "fact-as-of-future"],
     ["malformed date", [plan3Fact({ kind: "dated", as_of: "2026-02-30" })], "fact-as-of"],
     ["public source without HTTPS", [plan3Fact({ source_type: "public_source", source_url: "http://example.com/source" })], "fact-source-url"],
     ["secret-like nested key", [plan3Fact({ evidence: { api_token: "do-not-publish" } })], "fact-secret-key"],
@@ -7747,7 +7790,7 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
   });
   await t.test("sitemap comments cannot replace a real route", async () => {
     const original = plan3Sitemap();
-    const block = original.match(/<url><loc>https:\/\/mamcarz\.com\/infographic_procurement_2026_EN\.html<\/loc>[\s\S]*?<\/url>/)?.[0];
+    const block = original.match(/<url><loc>https:\/\/mamcarz\.com\/diagrams\/infographic<\/loc>[\s\S]*?<\/url>/)?.[0];
     assert.ok(block);
     const changedRoot = await plan3Root({ sitemap: original.replace(block, `<!--${block}-->`) });
     const result = await runVerification({ root: changedRoot, scope: "discovery" });
@@ -7755,10 +7798,10 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
   });
   await t.test("sitemap pins one exact content-change date per route", async () => {
     const cases = [
-      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-25</lastmod>")],
-      ["future date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-28</lastmod>")],
-      ["missing date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "")],
-      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-08-27</lastmod>", "<lastmod>2026-08-27</lastmod><lastmod>2026-08-27</lastmod>")]
+      ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "<lastmod>2026-08-25</lastmod>")],
+      ["future date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "<lastmod>2026-09-29</lastmod>")],
+      ["missing date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "")],
+      ["duplicate date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "<lastmod>2026-09-04</lastmod><lastmod>2026-09-04</lastmod>")]
     ];
     for (const [label, sitemap] of cases) {
       const changedRoot = await plan3Root({ sitemap });
@@ -8331,7 +8374,7 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
   });
   await t.test("unreviewed presentation shapes remain factual while literal 404 stays exempt", async () => {
     const body = `<p data-fact-id="fixture.claim">Verified claim</p>
-      <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">DOSSIER / ADVISORY 01</p></div></header>
+      <header class="page-hero service-hero"><div class="page-hero-content"><p class="service-dossier-code">01 / Advisory</p></div></header>
       <section class="service-section" data-section="diagnosis"><div class="section-shell"><p class="section-label">01 / Diagnosis</p></div></section>
       <section id="process"><div class="container"><div class="route-sequence"><article class="route-sequence__step"><p class="section-index">01 / Stage</p></article></div></div></section>
       <span class="knowledge-entry__number" aria-hidden="true">11</span><p>404</p>`;
@@ -8353,7 +8396,7 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
   });
 });
 
-test("Plan 3 Task 1 fix round 1 derives exactly nine bilingual pairs from the public manifest", async () => {
+test("Plan 3 Task 1 fix round 1 derives exactly ten bilingual pairs from the public manifest", async () => {
   const verifier = await import("./verify-site.mjs");
   const expected = [
     ["index.html", "en/index.html", "/", "/en/"],
@@ -8364,7 +8407,8 @@ test("Plan 3 Task 1 fix round 1 derives exactly nine bilingual pairs from the pu
     ["lotnictwo/index.html", "en/lotnictwo/index.html", "/lotnictwo/", "/en/lotnictwo/"],
     ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/"],
     ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/"],
-    ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/"]
+    ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/"],
+    ["prywatnosc/index.html", "en/prywatnosc/index.html", "/prywatnosc/", "/en/prywatnosc/"]
   ];
   assert.deepEqual(verifier.PUBLIC_PAGE_PAIRS, expected);
   assert.equal(expected.some((pair) => pair.flat().some((value) => value.includes("procurement-2026") || value.includes("diagram"))), false);
@@ -9069,7 +9113,7 @@ test("Plan 3 Task 1 fix round 6 closes presentation-index class spoofing", async
 
   const presentationSpoofs = [
     ["section label", '<p class="section-label">01 / Model</p>'],
-    ["service dossier", '<p class="service-dossier-code">DOSSIER / ADVISORY 01</p>'],
+    ["service dossier", '<p class="service-dossier-code">01 / Advisory</p>'],
     ["application evidence", '<p class="evidence-row__context">Product / 01</p>'],
     ["aviation call sign", '<p class="aviation-call-sign">FLIGHT PLAN / CORE ROUTE 01</p>'],
     ["projects index", '<div class="projects-index"><a><span>01</span>Advisory</a></div>'],
@@ -9138,7 +9182,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   const verifier = await import("./verify-site.mjs");
   const entries = verifier.PRESENTATION_INDEX_OCCURRENCES;
   assert.ok(Array.isArray(entries), "the verifier must export the reviewed occurrence manifest");
-  assert.equal(entries.length, 153, "every reviewed presentation index in the 24 public pages is inventoried");
+  assert.equal(entries.length, 145, "every reviewed presentation index in the 25 public pages is inventoried");
 
   const canonical = JSON.stringify([...entries].sort((left, right) => [
     left.file,
@@ -9155,7 +9199,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   ].join("\0"))));
   assert.equal(
     createHash("sha256").update(canonical).digest("hex"),
-    "881a57835cc5508552711e26a582b835327689ce1619f3722240e88c9116880f",
+    "a3d4b82c660c995bff7ee5d0528725e53ca496ae3f8dd978df1eeda12da10b4c",
     "presentation markup changes require an explicit inventory audit and baseline refresh"
   );
 });

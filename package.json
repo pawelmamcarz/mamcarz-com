@@ -15,7 +15,11 @@
     "verify:discovery": "node scripts/verify-site.mjs --scope=discovery",
     "verify:seo": "node scripts/verify-site.mjs --scope=seo",
     "test:verify-site": "node --test scripts/verify-site.test.mjs",
-    "test:worker": "node --test worker/index.test.mjs"
+    "test:worker": "node --test worker/index.test.mjs",
+    "package:site": "node scripts/package-site.mjs",
+    "verify:release": "node scripts/verify-release.mjs",
+    "deploy:pages": "npm run package:site && npm run verify:release && wrangler pages deploy .public --project-name mamcarz-com --branch main --commit-dirty=true",
+    "test:quality": "node --test scripts/quality.test.mjs"
   },
   "devDependencies": {
     "sharp": "^0.33.5"

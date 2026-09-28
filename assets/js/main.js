@@ -98,6 +98,26 @@ function getChatClientId() {
   }
 }
 
+function chatRequestHistory(history, text) {
+  const messages = [...history, { role: "user", content: text }].slice(-20);
+  const bytes = () => new TextEncoder().encode(JSON.stringify({ messages })).length;
+  const points = () => messages.reduce((sum, item) => sum + [...item.content].length, 0);
+  while (messages.length > 1 && (bytes() > 16000 || points() > 12000 || messages[0].role === "assistant")) messages.shift();
+  return messages;
+}
+
+function safeChatLink(value) {
+  if (value === "mailto:pawel@mamcarz.com") return true;
+  try {
+    const url = new URL(value);
+    if (["https://www.linkedin.com/in/pawelmamcarz/", "https://linkedin.com/in/pawelmamcarz/"].includes(value)) return true;
+    if (url.origin !== "https://mamcarz.com" || url.search || url.username || url.password) return false;
+    const path = url.pathname.replace(/^\/en(?=\/)/, "");
+    if (path === "/") return ["", "#about", "#contact"].includes(url.hash);
+    return !url.hash && ["/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/wystapienia/", "/prywatnosc/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/"].includes(path);
+  } catch { return false; }
+}
+
 function initChat() {
   const chatMessages = document.getElementById("chat-messages");
   const chatInput = document.getElementById("chat-input");
@@ -105,7 +125,12 @@ function initChat() {
   if (!chatMessages || !chatInput || !chatSendButton) return;
 
   const CHAT_API = "https://mamcarz-chat-api.pawel-767.workers.dev";
-  const chatHistory = [];
+  let chatHistory = [];
+  let pendingRequest = null;
+  let generation = 0;
+  let retryText = "";
+  const retryButton = document.getElementById("chat-retry");
+  const resetButton = document.getElementById("chat-reset");
   let chatBusy = false;
 
   const language = (document.documentElement.lang || "pl").toLowerCase().startsWith("en") ? "en" : "pl";
@@ -174,8 +199,13 @@ function initChat() {
     chatInput.value = "";
     setChatBusy(true);
 
-    chatHistory.push({ role: "user", content: text });
-    if (chatHistory.length > 20) chatHistory.splice(0, chatHistory.length - 20);
+    const messages = chatRequestHistory(chatHistory, text);
+    const requestGeneration = generation;
+    const controller = new AbortController();
+    pendingRequest = controller;
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    retryText = text;
+    if (retryButton) retryButton.hidden = true;
 
     const thinking = addChatMessage("", "bot");
     const status = document.createElement("span");
@@ -189,28 +219,48 @@ function initChat() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept-Language": language,
           "X-Chat-Client": getChatClientId()
         },
-        body: JSON.stringify({ messages: chatHistory })
+        body: JSON.stringify({ messages }),
+        signal: controller.signal
       });
+      if (requestGeneration !== generation) return;
       if (!response.ok) {
         const before = copy.httpErrorBefore[response.status] ?? copy.httpErrorBefore[500];
         showFallback(thinking, before, copy.fallbackAfter);
         return;
       }
       const data = await response.json();
+      if (requestGeneration !== generation) return;
 
       if (typeof data.reply === "string" && data.reply.trim()) {
         thinking.textContent = data.reply;
-        chatHistory.push({ role: "assistant", content: data.reply });
+        const links = Array.isArray(data.links) ? data.links.slice(0, 4) : [];
+        for (const link of links) {
+          if (!link || typeof link.label !== "string" || !safeChatLink(link.url)) continue;
+          const anchor = document.createElement("a");
+          anchor.href = link.url;
+          anchor.textContent = link.label;
+          anchor.className = "chat-destination";
+          thinking.append(anchor);
+        }
+        chatHistory = [...messages, { role: "assistant", content: [...data.reply].slice(0, 2000).join("") }];
+        retryText = "";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       } else {
         showFallback(thinking, copy.httpErrorBefore[500], copy.fallbackAfter);
       }
     } catch {
-      showFallback(thinking, copy.netErrorBefore, copy.netErrorAfter);
+      if (requestGeneration === generation) showFallback(thinking, copy.netErrorBefore, copy.netErrorAfter);
     } finally {
-      setChatBusy(false);
-      chatInput.focus();
+      clearTimeout(timeout);
+      if (requestGeneration === generation) {
+        pendingRequest = null;
+        setChatBusy(false);
+        if (retryButton) retryButton.hidden = !retryText;
+        chatInput.focus();
+      }
     }
   }
 
@@ -219,7 +269,28 @@ function initChat() {
     if (event.key === "Enter") sendMessage();
   });
 
-  setTimeout(() => addChatMessage(copy.greeting, "bot"), 300);
+  retryButton?.addEventListener("click", () => {
+    if (chatBusy || !retryText) return;
+    chatInput.value = retryText;
+    sendMessage();
+  });
+  resetButton?.addEventListener("click", () => {
+    generation += 1;
+    pendingRequest?.abort();
+    pendingRequest = null;
+    chatHistory = [];
+    retryText = "";
+    chatInput.value = "";
+    chatMessages.replaceChildren();
+    if (retryButton) retryButton.hidden = true;
+    setChatBusy(false);
+    addChatMessage(copy.greeting, "bot");
+    chatInput.focus();
+  });
+  addChatMessage(copy.greeting, "bot");
+  const widget = document.getElementById("ai-chat");
+  if (widget) widget.hidden = false;
+  document.querySelectorAll("[data-chat-fallback]").forEach(element => { element.hidden = true; });
 }
 
 initNavigation();
