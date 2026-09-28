@@ -16,9 +16,9 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 
 - Hosting: Cloudflare Pages, projekt `mamcarz-com` (nie Vercel).
 - Podgląd: `npm run package:site && wrangler pages dev .public` albo dowolny statyczny serwer.
-- Wydanie strony: `npm run deploy:pages` (pakuje wyłącznie publiczne pliki do `.public/`, sprawdza paczkę i wdraża ten katalog; nigdy root repozytorium).
+- Wydanie strony: `npm run deploy:pages` (używa lokalnego Wranglera przypiętego w `package.json`, pakuje wyłącznie publiczne pliki do `.public/`, sprawdza paczkę i wdraża ten katalog; nigdy root repozytorium).
 - Lokalny `./deploy.sh` jest w `.gitignore` i może nie istnieć w świeżym klonie. Wywołuje `npm run deploy:pages` bez automatycznego push; obowiązującą ścieżką publikacji Pages jest `npm run deploy:pages`.
-- Worker czatu w `worker/` jest osobnym wdrożeniem: `cd worker && wrangler deploy`.
+- Worker czatu w `worker/` jest osobnym wdrożeniem: `npm run deploy:worker` (lokalny Wrangler przypięty w `package.json`).
 - Push, merge, deploy Pages i deploy Workera są osobnymi bramkami. Nie wykonuj żadnej z nich bez odpowiedniego zatwierdzenia.
 - `_headers` definiuje nagłówki bezpieczeństwa i cache. `_redirects` jest zarezerwowany dla reguł ścieżkowych Pages i przekierowuje dawny adres samodzielnej infografiki na `/diagrams/infographic`. Redirect `www` na apex jest konfiguracją Cloudflare Bulk Redirect poza repozytorium; przed wydaniem trzeba osobno odczytać jego stan i potwierdzić `301` z zachowaniem ścieżki oraz query. Nie dodawaj spekulatywnego CSP bez audytu wszystkich zasobów.
 
