@@ -1412,6 +1412,21 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 .contact-info { min-width: 0; grid-column: 1 / span 5; }
 .contact-form { min-width: 0; grid-column: 7 / -1; }
 
+/* Portret jest kadrowany na łokciach: dolna krawędź obrazu leży na dolnej krawędzi sekcji. */
+.contact-form--chat { display: flex; flex-direction: column; }
+
+.contact-portrait {
+  width: min(100%, 26rem);
+  margin: auto auto calc(-1 * var(--section-space));
+  padding-top: clamp(32px, 5vw, 56px);
+}
+
+.contact-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .contact-details {
   display: grid;
   gap: 0;
@@ -1642,7 +1657,7 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 
 /* AVIATION DISPATCH DOSSIER */
 .aviation-hero { border-bottom: var(--line-strong); }
-.aviation-call-sign { margin: 0 0 1.25rem; color: var(--signal); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; }
+.aviation-call-sign { margin: 0 0 1.25rem; color: var(--signal-dark); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; }
 .aviation-sector { border-bottom: var(--line); background: var(--white); }
 .aviation-sector--band { background: var(--sky-band); }
 .aviation-sector__grid { display: grid; grid-template-columns: 112px minmax(0, 1fr) minmax(320px, 0.92fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; padding-block: clamp(4rem, 8vw, 7rem); }
@@ -2327,6 +2342,8 @@ footer :focus-visible,
 
 .service-section--band { background: var(--sky-band); }
 .service-section--panel { background: var(--panel); color: var(--white); }
+.service-section--panel .section-label { color: color-mix(in srgb, var(--white) 72%, transparent); }
+.service-section--panel .section-label::after { background: color-mix(in srgb, var(--white) 45%, transparent); }
 
 .service-section__grid,
 .service-contact__inner {
@@ -2421,9 +2438,9 @@ footer :focus-visible,
 
 .service-evidence-ledger strong { font-weight: 500; }
 .service-contact { background: var(--signal-dark); color: var(--white); }
-.service-contact .section-label { color: color-mix(in srgb, var(--white) 72%, transparent); }
+.service-contact .section-label { color: color-mix(in srgb, var(--white) 88%, transparent); }
 .service-contact .section-label::after { background: color-mix(in srgb, var(--white) 48%, transparent); }
-.service-contact p { color: color-mix(in srgb, var(--white) 78%, transparent); }
+.service-contact p { color: color-mix(in srgb, var(--white) 88%, transparent); }
 .service-contact .btn-primary { border-color: var(--white); background: var(--white); color: var(--runway-ink); }
 
 @media (prefers-reduced-motion: reduce) {

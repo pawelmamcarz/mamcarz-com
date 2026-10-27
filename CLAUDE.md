@@ -30,20 +30,20 @@ Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny to
 
 ## Struktura i manifest tras
 
-- `index.html`, `en/index.html` — strony główne.
-- `uslugi/*/index.html`, `en/uslugi/*/index.html` — trzy usługi doradcze.
-- `aplikacje-operacyjne/`, `en/aplikacje-operacyjne/` — aplikacje operacyjne.
-- `lotnictwo/`, `en/lotnictwo/` — działalność lotnicza.
-- `case-studies/`, `wiedza/`, `wystapienia/` oraz ich odpowiedniki `en/` — projekty, wiedza i wystąpienia.
-- `procurement-2026/`, `diagrams/` — samodzielne materiały pomocnicze; nie podlegają automatycznie regule par PL/EN. Trasy diagramów nie mają rozszerzenia `.html`. `infographic_procurement_2026_EN.html` pozostaje lokalną kopią historyczną, wyłączoną z publikacji.
-- `prywatnosc/`, `en/prywatnosc/` — informacje o prywatności, dostępne ze stopki i czatu.
-- `assets/css/style.css` — wspólny arkusz; `assets/js/main.js` — nawigacja, chat i drobne interakcje; `assets/img/` i `assets/fonts/` — zasoby.
-- `version.js` — kanoniczna wersja produktu (`VERSION`) i token cache-bust zasobów (`ASSET_CACHE_VERSION`).
-- `CHANGELOG.md` — dziennik wydań z perspektywy właściciela strony.
-- `content/site-facts.json` — rejestr zatwierdzonych faktów i powierzchni publikacji.
-- `worker/index.js` — czat; `worker/jev-policy.js` — pytania, kryteria i progi TypeSafe Jev; `worker/jev.js` — cienka osłona `typesafe/jev` przez `env.AI`.
-- `scripts/verify-site.mjs` — manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 25 publicznych dokumentów.
-- `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, `404.html` — powierzchnie discovery i błędów.
+- `index.html`, `en/index.html`: strony główne.
+- `uslugi/*/index.html`, `en/uslugi/*/index.html`: trzy usługi doradcze.
+- `aplikacje-operacyjne/`, `en/aplikacje-operacyjne/`: aplikacje operacyjne.
+- `lotnictwo/`, `en/lotnictwo/`: działalność lotnicza.
+- `case-studies/`, `wiedza/`, `wystapienia/` oraz ich odpowiedniki `en/`: projekty, wiedza i wystąpienia.
+- `procurement-2026/`, `diagrams/`: samodzielne materiały pomocnicze; nie podlegają automatycznie regule par PL/EN. Trasy diagramów nie mają rozszerzenia `.html`. `infographic_procurement_2026_EN.html` pozostaje lokalną kopią historyczną, wyłączoną z publikacji.
+- `prywatnosc/`, `en/prywatnosc/`: informacje o prywatności, dostępne ze stopki i czatu.
+- `assets/css/style.css`: wspólny arkusz; `assets/js/main.js`: nawigacja, chat i drobne interakcje; `assets/img/` i `assets/fonts/`: zasoby.
+- `version.js`: kanoniczna wersja produktu (`VERSION`) i token cache-bust zasobów (`ASSET_CACHE_VERSION`).
+- `CHANGELOG.md`: dziennik wydań z perspektywy właściciela strony.
+- `content/site-facts.json`: rejestr zatwierdzonych faktów i powierzchni publikacji.
+- `worker/index.js`: czat; `worker/jev-policy.js`: pytania, kryteria i progi TypeSafe Jev; `worker/jev.js`: cienka osłona `typesafe/jev` przez `env.AI`.
+- `scripts/verify-site.mjs`: manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 25 publicznych dokumentów.
+- `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, `404.html`: powierzchnie discovery i błędów.
 
 `PUBLIC_PAGES` w `scripts/verify-site.mjs` jest normatywnym manifestem tras. Przy dodaniu lub usunięciu strony aktualizuj razem manifest, sitemapę, odpowiednią parę językową i kontrolowane indeksy llms.
 
@@ -53,7 +53,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 
 ## System wizualny i UI
 
-- Kierunek: „Flight Plan” — redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
+- Kierunek: „Flight Plan”: redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
 - Fonty: Barlow Semi Condensed dla nagłówków, DM Sans dla tekstu, DM Mono dla etykiet i danych.
 - Główne tokeny w `:root`: `--runway-ink`, `--signal`, `--signal-dark`, `--sky-band`, `--ink-secondary`, `--line`, `--line-strong`.
 - Wspólna wersja zasobów w publicznych dokumentach: `20260921-flightplan-4` (cache-bust powiązany z wydaniem produktu `2026.39.1`).
@@ -69,6 +69,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Zatwierdzona statystyka to 25+ lat doświadczenia w zakupach.
 - Dawna nazwa WarsawFlightSafety jest wycofana. Według potwierdzenia właściciela z 2026-08-26 aktualną marką przedsięwzięcia lotniczego jest `akrobacja.com`; nie przedstawiaj ich jako dwóch bieżących przedsięwzięć.
 - Ton jest premium, rzeczowy i spokojny. Unikaj superlatywów bez dowodu, obietnic SLA, nachalnego języka, myślników używanych mechanicznie i stylistycznych „AI tells”.
+- Właściciel zabrania znaku em dash (U+2014) w treściach serwisu i w dokumentacji. W zakresach dat używaj półpauzy (–), w zdaniach przecinka, dwukropka albo nowego zdania.
 - Przy zmianie faktów audytuj wszystkie powierzchnie z rejestru, w tym `worker/index.js`, `assets/js/main.js`, `llms.txt` i `llms-full.txt`. Worker nie jest „pełnym CV”; jego prompt ma używać tylko zatwierdzonego, potrzebnego zakresu.
 - Worker używa modelu `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Przed Llama Worker może raz wywołać `typesafe/jev` przez istniejące wiązanie `env.AI` (bez osobnego `TYPESAFE_API_KEY`) do typowanego routingu, osłon jailbreak/spam i sond faktów; błąd, timeout lub brak odpowiedzi Jev nie blokuje ścieżki klienta. Jev nie generuje treści dla użytkownika. Frontend wywołuje `https://mamcarz-chat-api.pawel-767.workers.dev`; zmianę nazwy lub URL trzeba zsynchronizować i przetestować po obu stronach.
 

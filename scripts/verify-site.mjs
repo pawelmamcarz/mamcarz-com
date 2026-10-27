@@ -10,6 +10,12 @@ const SHARED_STYLESHEET_HREF = `/assets/css/style.css?v=${ASSET_CACHE_VERSION}`;
 const SHARED_SCRIPT_SRC = `/assets/js/main.js?v=${ASSET_CACHE_VERSION}`;
 const SHARED_SIGNATURE_SRC = `/assets/img/signature.png?v=${ASSET_CACHE_VERSION}`;
 const FOOTER_OWNER_LINE = "© 1993–2026 Paweł Mamcarz · mamcarz.com";
+const CONTACT_PORTRAIT_SIZES = "(max-width: 759px) 88vw, 416px";
+const CONTACT_PORTRAIT = Object.freeze({
+  source: Object.freeze({ type: "image/webp", srcset: "/assets/img/pawel-thumbsup-480.webp 480w, /assets/img/pawel-thumbsup-960.webp 960w", sizes: CONTACT_PORTRAIT_SIZES }),
+  img: Object.freeze({ src: "/assets/img/pawel-thumbsup-480.png", srcset: "/assets/img/pawel-thumbsup-480.png 480w, /assets/img/pawel-thumbsup-960.png 960w", sizes: CONTACT_PORTRAIT_SIZES, width: "960", height: "666", loading: "lazy", decoding: "async" }),
+  alt: Object.freeze({ pl: "Paweł Mamcarz z uniesionym kciukiem", en: "Paweł Mamcarz with a thumbs-up" })
+});
 const factKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "surfaces", "status"];
 const kinds = new Set(["constant", "dated"]);
 const sourceTypes = new Set(["owner_verified", "public_source", "internal_evidence"]);
@@ -24,7 +30,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "9f0bff0740a1be7095636cc0925957a5ef6ae60931bd510793da1f1d2d9e6294";
+const TASK10_REVIEWED_CSS_SHA256 = "1bf45914de6101f52af8552c24f5d1c8cbd3ff61c7a7ad1a3863ef7b489aad03";
 const PUBLICATION_URLS = Object.freeze({"portfolio.akrobacja_com": "https://akrobacja.com", "portfolio.filmolot_pl": "https://filmolot.pl", "portfolio.czympojade_pl": "https://czympojade.pl", "portfolio.przypominamy_com": "https://przypominamy.com", "portfolio.procurement_process_2026": "/procurement-2026/", "portfolio.silence_tax": "https://silence-tax.com", "portfolio.procuracost": "https://procuracost.com"});
 
 function approvedPublicationAnchor(anchor) {
@@ -391,8 +397,8 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>div[1]>p[1]",
     "token": "03",
     "occurrence": 1,
-    "ownerText": "03 / Evidence",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Evidence Selected products.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Evidence\"],[\"h2{class=\\\"section-title\\\"}\",\"Selected products.\"]]"
+    "ownerText": "03 / Products",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Products Selected products.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Products\"],[\"h2{class=\\\"section-title\\\"}\",\"Selected products.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -2302,6 +2308,17 @@ function verifyHomeStructures(activeBody, page, errors) {
       .filter(([href]) => href?.startsWith("mailto:pawel@mamcarz.com?subject="));
     const valid = intents.length === expectedIntents.length && expectedIntents.every(([href, label], index) => intents[index]?.[0] === href && intents[index]?.[1] === normalize(label));
     if (!valid) error(errors, "home-contact-intents", page.path, "Contact requires the exact ordered localized Advisory, Operational application and Aviation mailto intents");
+
+    const figures = tagBlocks(contact.full, "figure").filter((block) => hasClass(block.opening, "contact-portrait"));
+    const sources = figures.length === 1 ? openingTags(figures[0].full, "source") : [];
+    const images = figures.length === 1 ? openingTags(figures[0].full, "img") : [];
+    const expected = { ...CONTACT_PORTRAIT.img, alt: CONTACT_PORTRAIT.alt[page.lang] };
+    const validPortrait = figures.length === 1 && sources.length === 1 && images.length === 1
+      && Object.entries(CONTACT_PORTRAIT.source).every(([name, value]) => attributeValue(sources[0], name) === value)
+      && Object.entries(expected).every(([name, value]) => attributeValue(images[0], name) === value);
+    if (!validPortrait) {
+      error(errors, "home-contact-portrait", page.path, "Contact requires one figure.contact-portrait with the optimized WebP/PNG derivatives, explicit 960x666 dimensions, lazy async loading and the localized alt text");
+    }
   }
 }
 
@@ -4838,7 +4855,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operacja", "Uruchomienie", "Przygotowanie danych, odbiór procesu i wejście do codziennej pracy."
       ]),
       evidence: Object.freeze([
-    "03 / Produkty", "Wybrane produkty.", "Wybrane zakresy pokazane przez ich zatwierdzone znaczenie produktowe. fnp.silence-tax.com to publiczny wariant na silniku Silence Tax, nie osobna marka.",
+    "03 / Produkty", "Wybrane produkty.", "Przy każdym produkcie podaję jego funkcję. fnp.silence-tax.com to publiczny wariant na silniku Silence Tax, nie osobna marka.",
         "Produkt / 01", "czympojade.pl", "Funkcja", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
         "Produkt / 02", "Przypominamy.com", "Funkcja", "Platforma powiadomień dla organizacji.",
         "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych.",
@@ -4919,7 +4936,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operation", "Launch", "Data preparation, process acceptance and entry into day-to-day work."
       ]),
       evidence: Object.freeze([
-        "03 / Evidence", "Selected products.", "Selected scopes, shown through their approved product meaning. fnp.silence-tax.com is a public Silence Tax variant on the same engine, not a third brand.",
+        "03 / Products", "Selected products.", "Each product is listed with its function. fnp.silence-tax.com is a public Silence Tax variant on the same engine, not a separate brand.",
         "Product / 01", "czympojade.pl", "Function", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
         "Product / 02", "Przypominamy.com", "Function", "Notification platform for organisations.",
         "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator.",

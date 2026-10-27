@@ -218,16 +218,16 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "fc616eb15d61bceffb4aa5e7f9214c06c852fc98f7381e15f8a1a614faa25e09",
-  "en/index.html": "7d57c81058b58194ab3ca50fda9bd00c4b3f66d54d116e69a8c0055c49c07831",
+  "index.html": "77f44a9c006977204e44ac9563705903e2c998ae0c730b07d65fd2a0f21bbda3",
+  "en/index.html": "2a97cf15c22157a73fb32dabbbc581879bde3d068c84f923596892a98281edcf",
   "uslugi/transformacja-zakupow/index.html": "fffac19ec9b11b530ba8b0c471573252ee723bda3797f182d16d8baae2399dd1",
   "en/uslugi/transformacja-zakupow/index.html": "4bed2ac8b3630a4bb68fd3f87f4411ac38a6ce6e990ff1c2f353f1af127a9b15",
   "uslugi/wdrozenie-sap-ariba/index.html": "6472aa640f740db4d67d74eb22a935d72510407a44178de8a76eeeeb4630ac2b",
   "en/uslugi/wdrozenie-sap-ariba/index.html": "85d8f3c84ddfe470db16597bf812090f2b9243921802a1e23f49f4822aa577f7",
   "uslugi/doradztwo-zamowienia-publiczne/index.html": "14433b66c911fb5aa9d6a2f7ce28c30ddc0e5f161f6bb4c1c2578dc491f00c76",
   "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "e33ce670c9509813f85a90620d1070226eb6cbca24efac9335bac0a1092fa1d1",
-  "aplikacje-operacyjne/index.html": "8b95bc8f54ea399eb01df8e7be8d7e3f2c63d45c47d74e339e54bd0625553e8d",
-  "en/aplikacje-operacyjne/index.html": "d5ec96748fcd1941274482d9e05b8a304f857f47977a48d9b34b26e61b0e5ed9",
+  "aplikacje-operacyjne/index.html": "9069869909dbeae3dae7194abc672cd004009cca60aff58438e9c5a3c164b79d",
+  "en/aplikacje-operacyjne/index.html": "4aa1e33382b4a0e2a8ad7c0f8f8e452285df3b6dd0e4de2703c14c1d976e8077",
   "lotnictwo/index.html": "6ad6b3287758a32e316ca9a07087e6cf8d54ffd5dc5efa5da977cf06d64c6e89",
   "en/lotnictwo/index.html": "62f07c136afce5c5dd84e4cc9f3d8c65ad6aa58704d737ca89c9ccf60a0540c1",
   "case-studies/index.html": "8f4fa424061d5f79315e232c8fd74b4aeef708033afd7b4b5a55055c55015c9b",
@@ -622,6 +622,12 @@ function replaceHomepageSection(html, sectionId, replacement) {
   return html.replace(new RegExp(`<section id="${sectionId}">[\\s\\S]*?<\\/section>`), replacement);
 }
 
+function contactPortraitFixture(lang) {
+  const sizes = "(max-width: 759px) 88vw, 416px";
+  const alt = lang === "pl" ? "Paweł Mamcarz z uniesionym kciukiem" : "Paweł Mamcarz with a thumbs-up";
+  return `<figure class="contact-portrait"><picture><source type="image/webp" srcset="/assets/img/pawel-thumbsup-480.webp 480w, /assets/img/pawel-thumbsup-960.webp 960w" sizes="${sizes}"><img src="/assets/img/pawel-thumbsup-480.png" srcset="/assets/img/pawel-thumbsup-480.png 480w, /assets/img/pawel-thumbsup-960.png 960w" sizes="${sizes}" alt="${alt}" width="960" height="666" loading="lazy" decoding="async"></picture></figure>`;
+}
+
 function homepageFixture(lang, content) {
   const projectsHref = lang === "pl" ? "/case-studies/" : "/en/case-studies/";
   const projectsLabel = lang === "pl" ? "Projekty" : "Projects";
@@ -652,7 +658,7 @@ function homepageFixture(lang, content) {
     <section id="resume"></section>
     <section id="portfolio"></section>
     <section id="clients"></section>
-    <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
+    <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>${contactPortraitFixture(lang)}</section>
   </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><div id="ai-chat" hidden><input id="chat-input" maxlength="2000"></div><p data-chat-fallback>Email contact is available.</p>
     <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
@@ -3697,7 +3703,7 @@ test("registry keeps responsibility facts atomic and Polish-English meanings ali
   const byId = new Map(facts.map((record) => [record.id, record]));
   const expectedResponsibilities = {
     "career.all_for_one.responsibility": ["Kontynuuję rolę w apsolut po przejęciu apsolut przez All for One.", "I continue the apsolut role after All for One acquired apsolut."],
-    "career.apsolut.responsibility": ["Rozwijam działalność w regionie CEE.", "I develop the business in the CEE region."],
+    "career.apsolut.responsibility": ["Rozwijałem działalność w regionie CEE.", "I developed the business in the CEE region."],
     "career.sap.responsibility": ["Rozwijałem rynek SAP Ariba w Polsce i regionie CEE.", "I developed the SAP Ariba market in Poland and the CEE region."],
     "career.pzu.responsibility": ["Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model."],
     "career.pwc.responsibility": ["Pracowałem z metodyką CAPP (Complete & Agile Procurement).", "I worked with the CAPP (Complete & Agile Procurement) methodology."],
@@ -5917,6 +5923,31 @@ test("home scope requires the exact ordered English contact intents", async () =
   assert.ok(errorIds(result).includes("home-contact-intents"));
 });
 
+for (const [name, lang, mutate] of [
+  ["eager loading", "pl", (html) => html.replace(' loading="lazy" decoding="async"></picture>', ' decoding="async"></picture>')],
+  ["the raw supplied PNG", "pl", (html) => html.replace('src="/assets/img/pawel-thumbsup-480.png"', 'src="/uploads/pawel-thumbsup.png"')],
+  ["missing intrinsic height", "en", (html) => html.replace(' height="666"', "")],
+  ["untranslated alt text", "en", (html) => html.replace('alt="Paweł Mamcarz with a thumbs-up"', 'alt="Paweł Mamcarz z uniesionym kciukiem"')],
+  ["a missing WebP source", "en", (html) => html.replace(/<source type="image\/webp"[^>]*>/, "")]
+]) {
+  test(`home scope rejects a contact portrait with ${name}`, async () => {
+    const valid = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
+    const mutated = mutate(valid);
+    assert.notEqual(mutated, valid);
+    const root = await fixture({ [`${lang}Html`]: mutated });
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(errorIds(result).includes("home-contact-portrait"), result.errors.join("\n"));
+  });
+}
+
+test("home scope accepts the optimized contact portrait in both languages", async () => {
+  const root = await fixture();
+  for (const lang of ["pl", "en"]) {
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.equal(errorIds(result).includes("home-contact-portrait"), false, result.errors.join("\n"));
+  }
+});
+
 async function task7HomeMutation(lang, mutate) {
   const valid = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
   const mutated = mutate(valid);
@@ -7171,7 +7202,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "9f0bff0740a1be7095636cc0925957a5ef6ae60931bd510793da1f1d2d9e6294",
+    "1bf45914de6101f52af8552c24f5d1c8cbd3ff61c7a7ad1a3863ef7b489aad03",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });
@@ -9224,7 +9255,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   ].join("\0"))));
   assert.equal(
     createHash("sha256").update(canonical).digest("hex"),
-    "92458fcad0d422ff88a9088d0bec0d560907be504a4685519ab791a32ba16103",
+    "31048a9f803fbd70287e1cc95c98934bb157bbc689a486a935a3359116e38cbe",
     "presentation markup changes require an explicit inventory audit and baseline refresh"
   );
 });
