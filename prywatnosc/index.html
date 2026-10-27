@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="Prywatność · Paweł Mamcarz">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Prywatność · Paweł Mamcarz">
-<meta name="twitter:description" content="Co ten serwis robi z danymi: bez ciasteczek, bez analityki i bez zewnętrznych osadzeń. Opis dotyczy wyłącznie mechanizmów faktycznie działających w kodzie.">
+<meta name="twitter:description" content="Co ten serwis robi z danymi: bez ciasteczek i bez pikseli śledzących, z pomiarem ruchu przez Cloudflare Web Analytics. Opis dotyczy wyłącznie mechanizmów faktycznie działających w serwisie.">
 <meta name="twitter:image" content="https://mamcarz.com/assets/img/og.jpg">
 <meta property="og:locale" content="pl_PL">
 <meta property="og:locale:alternate" content="en_US">
@@ -57,18 +57,22 @@
     <h2>Czego ten serwis nie robi</h2>
     <ul>
       <li>Nie zapisuje ciasteczek.</li>
-      <li>Nie korzysta z narzędzi analitycznych ani z pikseli śledzących.</li>
-      <li>Nie osadza treści z zewnętrznych domen. Odnośniki do serwisów zewnętrznych, w tym do YouTube i LinkedIn, są zwykłymi linkami. Nic nie ładuje się stamtąd, dopóki ich nie klikniesz.</li>
+      <li>Nie korzysta z pikseli śledzących.</li>
+      <li>Nie osadza treści z zewnętrznych domen. Jedynym zasobem spoza tej domeny jest skrypt pomiaru ruchu Cloudflare opisany niżej. Odnośniki do serwisów zewnętrznych, w tym do YouTube, LinkedIn i Cal.com, są zwykłymi linkami. Nic nie ładuje się stamtąd, dopóki ich nie klikniesz.</li>
       <li>Nie wczytuje fontów z zewnętrznych dostawców. Wszystkie kroje są serwowane z tej domeny.</li>
       <li>Nie prowadzi newslettera ani formularzy zapisu.</li>
     </ul>
+
+    <h2>Pomiar ruchu</h2>
+    <p>Serwis korzysta z Cloudflare Web Analytics. Cloudflare dodaje do stron skrypt pobierany z domeny static.cloudflareinsights.com. Skrypt mierzy wyświetlenia stron, odwiedziny i szybkość ładowania stron za pomocą interfejsu Performance API przeglądarki, a wyniki wysyła do Cloudflare.</p>
+    <p>Według dokumentacji Cloudflare narzędzie nie używa ciasteczek ani pamięci lokalnej przeglądarki i nie identyfikuje odwiedzających (tzw. fingerprinting) na podstawie adresu IP, nagłówka User-Agent ani innych danych. Cloudflare deklaruje też, że nie tworzy z tych danych profili odwiedzających na potrzeby reklamy. Opis narzędzia: <a href="https://www.cloudflare.com/web-analytics/">cloudflare.com/web-analytics</a>.</p>
 
     <h2>Czat na stronie kontaktu</h2>
     <p>Czat przetwarza wysłane wiadomości. Działa tak:</p>
     <ul>
       <li><strong>Identyfikator techniczny.</strong> Przy pierwszym użyciu przeglądarka zapisuje w pamięci lokalnej losowy identyfikator. Nie zawiera on imienia, adresu e-mail ani danych urządzenia: to losowy ciąg wygenerowany na Twoim komputerze.</li>
       <li><strong>Do czego służy.</strong> Wyłącznie do ograniczania nadużyć, czyli limitu dziesięciu wiadomości na minutę. Do mechanizmu limitującego trafia jedynie nieodwracalny skrót kryptograficzny tego identyfikatora, a nie on sam.</li>
-      <li><strong>Treść rozmowy.</strong> Wiadomości, które wyślesz, trafiają do Cloudflare Worker. Typowe pytania o nawigację otrzymują odpowiedź z mapy serwisu; pozostałe mogą trafić do Cloudflare Workers AI. Nie wpisuj tam danych, których nie chcesz przekazywać do przetwarzania.</li>
+      <li><strong>Treść rozmowy.</strong> Wiadomości, które wyślesz, trafiają do Cloudflare Worker. Niektóre otrzymują od razu stałą odpowiedź i nie trafiają do żadnego modelu. Pozostałe najpierw ocenia model Jev (TypeSafe) uruchamiany w Cloudflare Workers AI: dostaje ostatnie pytanie i do czterech wcześniejszych wiadomości z rozmowy, aby rozpoznać temat, spam albo próbę obejścia zasad czatu. Typowe pytania o nawigację otrzymują potem odpowiedź z mapy serwisu, a pozostałe trafiają razem z historią rozmowy do modelu językowego w Cloudflare Workers AI. Nie wpisuj tam danych, których nie chcesz przekazywać do przetwarzania.</li>
       <li><strong>Logi.</strong> Przy błędzie zapisywany jest identyfikator żądania, ścieżka i klasa błędu. Treść wiadomości nie trafia do logów.</li>
     </ul>
     <p>Identyfikator czatu usuniesz, czyszcząc dane witryny mamcarz.com w ustawieniach przeglądarki. Czat będzie działać dalej: przy następnym użyciu powstanie nowy losowy identyfikator.</p>
@@ -77,13 +81,16 @@
     <h2>Hosting</h2>
     <p>Serwis działa na Cloudflare Pages, a czat na Cloudflare Workers. Cloudflare jako dostawca infrastruktury przetwarza techniczne dane żądań, w tym adres IP, w zakresie niezbędnym do dostarczenia strony i ochrony przed nadużyciami. Odbywa się to na poziomie platformy, niezależnie od kodu tego serwisu.</p>
 
+    <h2>Umawianie rozmowy</h2>
+    <p>Odnośnik „Umów rozmowę” na stronie głównej prowadzi do Cal.com, zewnętrznego serwisu rezerwacji spotkań. Jeśli umówisz rozmowę, dane podane przy rezerwacji przetwarza Cal.com zgodnie z własną polityką prywatności, a ja otrzymuję szczegóły umówionego spotkania.</p>
+
     <h2>Kontakt e-mailowy</h2>
     <p>Jeśli napiszesz na <!--email_off--><a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a><!--/email_off-->, treść wiadomości i adres nadawcy przechowuję tak długo, jak wymaga tego prowadzona korespondencja.</p>
 
     <h2>Twoje uprawnienia</h2>
     <p>Możesz zapytać, jakie dane Cię dotyczą, poprosić o ich poprawienie lub usunięcie, albo sprzeciwić się przetwarzaniu. Napisz na <!--email_off--><a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a><!--/email_off-->.</p>
 
-    <p class="legal-updated">Ostatnia aktualizacja: 4 września 2026</p>
+    <p class="legal-updated">Ostatnia aktualizacja: 27 października 2026</p>
   </section>
 </main>
 

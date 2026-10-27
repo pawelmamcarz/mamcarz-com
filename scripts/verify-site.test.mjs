@@ -7349,7 +7349,7 @@ function plan3RealPresentationBody() {
 function plan3Sitemap() {
   const blocks = plan3ExpectedPublicPages.map((entry) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = ["/", "/en/", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/"].includes(entry.route) ? "2026-10-27"
+    const lastmod = ["/", "/en/", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/", "/prywatnosc/", "/en/prywatnosc/"].includes(entry.route) ? "2026-10-27"
       : ["/o-mnie/", "/en/o-mnie/"].includes(entry.route) ? "2026-10-18"
       : ["/wystapienia/", "/en/wystapienia/"].includes(entry.route) ? "2026-09-07" : "2026-09-04";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;

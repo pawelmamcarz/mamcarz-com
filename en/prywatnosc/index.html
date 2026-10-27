@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="Privacy · Paweł Mamcarz">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Privacy · Paweł Mamcarz">
-<meta name="twitter:description" content="What this site does with data: no cookies, no analytics and no third-party embeds. It describes only the mechanisms that actually run in the code.">
+<meta name="twitter:description" content="What this site does with data: no cookies and no tracking pixels, with traffic measured by Cloudflare Web Analytics. It describes only the mechanisms that actually run on the site.">
 <meta name="twitter:image" content="https://mamcarz.com/assets/img/og.jpg">
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="pl_PL">
@@ -57,18 +57,22 @@
     <h2>What this site does not do</h2>
     <ul>
       <li>It sets no cookies.</li>
-      <li>It uses no analytics tools and no tracking pixels.</li>
-      <li>It embeds nothing from third-party domains. Links to external sites, including YouTube and LinkedIn, are plain links. Nothing loads from them until you click.</li>
+      <li>It uses no tracking pixels.</li>
+      <li>It embeds nothing from third-party domains. The only resource loaded from outside this domain is the Cloudflare traffic measurement script described below. Links to external sites, including YouTube, LinkedIn and Cal.com, are plain links. Nothing loads from them until you click.</li>
       <li>It loads no fonts from third-party providers. Every typeface is served from this domain.</li>
       <li>It runs no newsletter and no sign-up forms.</li>
     </ul>
+
+    <h2>Traffic measurement</h2>
+    <p>This site uses Cloudflare Web Analytics. Cloudflare adds a script to the pages, loaded from static.cloudflareinsights.com. The script measures page views, visits and page load speed using the browser Performance API, and sends the results to Cloudflare.</p>
+    <p>According to Cloudflare documentation, the tool uses no cookies or browser local storage and does not identify visitors (so-called fingerprinting) by IP address, User-Agent header or any other data. Cloudflare also states that it does not build visitor profiles from this data for advertising. About the tool: <a href="https://www.cloudflare.com/web-analytics/">cloudflare.com/web-analytics</a>.</p>
 
     <h2>The chat on the contact section</h2>
     <p>The chat processes the messages you send. It works as follows:</p>
     <ul>
       <li><strong>Technical identifier.</strong> On first use your browser stores a random identifier in local storage. It contains no name, no email address and no device data: it is a random string generated on your own machine.</li>
       <li><strong>What it is for.</strong> Abuse limiting only, namely a cap of ten messages per minute. The limiter receives only a one-way cryptographic digest of that identifier, never the identifier itself.</li>
-      <li><strong>Message content.</strong> Messages you send go to a Cloudflare Worker. Common navigation questions receive an answer from the site map; other questions may be sent to Cloudflare Workers AI. Do not enter anything you would rather not have processed.</li>
+      <li><strong>Message content.</strong> Messages you send go to a Cloudflare Worker. Some receive a fixed reply straight away and are not sent to any model. The others are first assessed by the Jev model (TypeSafe) running on Cloudflare Workers AI: it receives your latest question and up to four earlier messages from the conversation to recognise the topic, spam or an attempt to bypass the chat rules. Common navigation questions then receive an answer from the site map; the others are sent with the conversation history to a language model on Cloudflare Workers AI. Do not enter anything you would rather not have processed.</li>
       <li><strong>Logs.</strong> On failure the service records a request identifier, the path and the error class. Message content is not written to logs.</li>
     </ul>
     <p>You can remove the chat identifier by clearing site data for mamcarz.com in your browser settings. The chat keeps working: a new random identifier is created on next use.</p>
@@ -77,13 +81,16 @@
     <h2>Hosting</h2>
     <p>The site runs on Cloudflare Pages and the chat on Cloudflare Workers. As the infrastructure provider, Cloudflare processes technical request data, including IP addresses, to the extent needed to serve the site and protect it from abuse. This happens at platform level, independently of this site's code.</p>
 
+    <h2>Booking a call</h2>
+    <p>The “Book a call” link on the homepage leads to Cal.com, an external meeting booking service. If you book a call, the data you enter when booking is processed by Cal.com under its own privacy policy, and I receive the details of the booked meeting.</p>
+
     <h2>Email contact</h2>
     <p>If you write to <!--email_off--><a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a><!--/email_off-->, I keep the message and the sender address for as long as the correspondence requires.</p>
 
     <h2>Your rights</h2>
     <p>You may ask what data concerns you, request correction or deletion, or object to processing. Write to <!--email_off--><a href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a><!--/email_off-->.</p>
 
-    <p class="legal-updated">Last updated: 4 September 2026</p>
+    <p class="legal-updated">Last updated: 27 October 2026</p>
   </section>
 </main>
 
