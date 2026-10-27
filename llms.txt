@@ -4,6 +4,9 @@ This file is a navigation index. The three core areas have equal status: Advisor
 ### Home
 - PL | Home: https://mamcarz.com/
 - EN | Home: https://mamcarz.com/en/
+### About
+- PL | About: https://mamcarz.com/o-mnie/
+- EN | About: https://mamcarz.com/en/o-mnie/
 ### Advisory / Doradztwo
 - PL | Procurement transformation: https://mamcarz.com/uslugi/transformacja-zakupow/
 - EN | Procurement transformation: https://mamcarz.com/en/uslugi/transformacja-zakupow/
