@@ -20,6 +20,14 @@ const factKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "s
 const kinds = new Set(["constant", "dated"]);
 const sourceTypes = new Set(["owner_verified", "public_source", "internal_evidence"]);
 const statuses = new Set(["approved", "review", "retired"]);
+// An approved fact stays true when a redesign stops showing it; it may then carry no surfaces
+// only with an explicit ISO unpublished_since date, so the omission is reviewable.
+function approvedUnpublished(fact) {
+  return fact.status === "approved" && Object.hasOwn(fact, "unpublished_since")
+    && nonEmptyString(fact.unpublished_since) && isIsoDate(fact.unpublished_since)
+    && fact.unpublished_since <= PLAN3_VALIDATION_DATE
+    && Array.isArray(fact.surfaces) && fact.surfaces.length === 0;
+}
 const blockedKeys = ["id", "pattern", "forbidden_contexts", "reason"];
 const requiredPublicClaimSurfaces = ["index.html", "en/index.html", "llms.txt", "llms-full.txt", "worker/index.js", "assets/js/main.js"];
 const unsupportedLlmsFullClauses = Object.freeze([
@@ -30,7 +38,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "1bf45914de6101f52af8552c24f5d1c8cbd3ff61c7a7ad1a3863ef7b489aad03";
+const TASK10_REVIEWED_CSS_SHA256 = "497bcb7b0892cda757ba8eb4158a68615ceceb5568fa42b0130e136bb2b2e286";
 const PUBLICATION_URLS = Object.freeze({"portfolio.akrobacja_com": "https://akrobacja.com", "portfolio.filmolot_pl": "https://filmolot.pl", "portfolio.czympojade_pl": "https://czympojade.pl", "portfolio.przypominamy_com": "https://przypominamy.com", "portfolio.procurement_process_2026": "/procurement-2026/", "portfolio.silence_tax": "https://silence-tax.com", "portfolio.procuracost": "https://procuracost.com"});
 
 function approvedPublicationAnchor(anchor) {
@@ -42,7 +50,7 @@ function approvedPublicationAnchor(anchor) {
 
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
-const PLAN3_VALIDATION_DATE = "2026-09-28";
+const PLAN3_VALIDATION_DATE = "2026-10-27";
 
 export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: Object.freeze(["Person", "WebSite"]) }),
@@ -65,6 +73,8 @@ export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "en/wystapienia/index.html", route: "/en/wystapienia/", lang: "en", pair: "/wystapienia/", schema: Object.freeze(["CollectionPage"]) }),
   Object.freeze({ file: "prywatnosc/index.html", route: "/prywatnosc/", lang: "pl", pair: "/en/prywatnosc/", schema: Object.freeze(["WebPage"]) }),
   Object.freeze({ file: "en/prywatnosc/index.html", route: "/en/prywatnosc/", lang: "en", pair: "/prywatnosc/", schema: Object.freeze(["WebPage"]) }),
+  Object.freeze({ file: "o-mnie/index.html", route: "/o-mnie/", lang: "pl", pair: "/en/o-mnie/", schema: Object.freeze(["WebPage"]) }),
+  Object.freeze({ file: "en/o-mnie/index.html", route: "/en/o-mnie/", lang: "en", pair: "/o-mnie/", schema: Object.freeze(["WebPage"]) }),
   Object.freeze({ file: "procurement-2026/index.html", route: "/procurement-2026/", lang: "pl", pair: null, schema: Object.freeze(["Article"]) }),
   Object.freeze({ file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
   Object.freeze({ file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba", lang: "en", pair: null, schema: Object.freeze(["CreativeWork"]) }),
@@ -73,16 +83,16 @@ export const PUBLIC_PAGES = Object.freeze([
 ]);
 
 const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
-  "/": "2026-09-28",
-  "/en/": "2026-09-28",
+  "/": "2026-10-27",
+  "/en/": "2026-10-27",
   "/uslugi/transformacja-zakupow/": "2026-09-04",
   "/en/uslugi/transformacja-zakupow/": "2026-09-04",
   "/uslugi/wdrozenie-sap-ariba/": "2026-09-04",
   "/en/uslugi/wdrozenie-sap-ariba/": "2026-09-04",
   "/uslugi/doradztwo-zamowienia-publiczne/": "2026-09-04",
   "/en/uslugi/doradztwo-zamowienia-publiczne/": "2026-09-04",
-  "/aplikacje-operacyjne/": "2026-09-04",
-  "/en/aplikacje-operacyjne/": "2026-09-04",
+  "/aplikacje-operacyjne/": "2026-10-27",
+  "/en/aplikacje-operacyjne/": "2026-10-27",
   "/lotnictwo/": "2026-09-04",
   "/en/lotnictwo/": "2026-09-04",
   "/case-studies/": "2026-09-04",
@@ -98,6 +108,8 @@ const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
   "/diagrams/infographic": "2026-09-04",
   "/prywatnosc/": "2026-09-04",
   "/en/prywatnosc/": "2026-09-04",
+  "/o-mnie/": "2026-10-18",
+  "/en/o-mnie/": "2026-10-18",
 });
 
 const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
@@ -107,6 +119,9 @@ const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
   "### Home",
   "- PL | Home: https://mamcarz.com/",
   "- EN | Home: https://mamcarz.com/en/",
+  "### About",
+  "- PL | About: https://mamcarz.com/o-mnie/",
+  "- EN | About: https://mamcarz.com/en/o-mnie/",
   "### Advisory / Doradztwo",
   "- PL | Procurement transformation: https://mamcarz.com/uslugi/transformacja-zakupow/",
   "- EN | Procurement transformation: https://mamcarz.com/en/uslugi/transformacja-zakupow/",
@@ -507,42 +522,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "03 / Aviation",
     "containerSignature": "body{class=\"projects-page\",data-page=\"projects\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"projects-group\",data-section=\"aviation\",id=\"aviation\"}>header{class=\"projects-group__head\"}>p{class=\"section-label\"}|parentText=\"03 / AviationAviation products\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Aviation\"],[\"h2{}\",\"Aviation products\"]]"
-  },
-  {
-    "file": "en/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
-    "token": "01",
-    "occurrence": 1,
-    "ownerText": "01 / Diagnosis",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"01 / Diagnosis Diagnosis I establish the problem, stakeholders, constraints and state of the data. Artifact: Decision map\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"01 / Diagnosis\"],[\"h3{}\",\"Diagnosis\"],[\"p{}\",\"I establish the problem, stakeholders, constraints and state of the data.\"],[\"p{}\",\"Artifact: Decision map\"]]"
-  },
-  {
-    "file": "en/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
-    "token": "02",
-    "occurrence": 1,
-    "ownerText": "02 / Strategy",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"02 / Strategy Strategy I define the target model, priorities and sequence of changes. Artifact: Operational plan\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"02 / Strategy\"],[\"h3{}\",\"Strategy\"],[\"p{}\",\"I define the target model, priorities and sequence of changes.\"],[\"p{}\",\"Artifact: Operational plan\"]]"
-  },
-  {
-    "file": "en/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
-    "token": "03",
-    "occurrence": 1,
-    "ownerText": "03 / Implementation",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"03 / Implementation Implementation I connect the process, people, data and technology in an operational solution. Artifact: Operational system\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"03 / Implementation\"],[\"h3{}\",\"Implementation\"],[\"p{}\",\"I connect the process, people, data and technology in an operational solution.\"],[\"p{}\",\"Artifact: Operational system\"]]"
-  },
-  {
-    "file": "en/index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
-    "token": "04",
-    "occurrence": 1,
-    "ownerText": "04 / Value",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Engagement process\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"04 / Value Value I examine use, results and the next development decisions. Artifact: Measurement and iteration\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"04 / Value\"],[\"h3{}\",\"Value\"],[\"p{}\",\"I examine use, results and the next development decisions.\"],[\"p{}\",\"Artifact: Measurement and iteration\"]]"
   },
   {
     "file": "en/lotnictwo/index.html",
@@ -984,42 +963,6 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "occurrence": 1,
     "ownerText": "05 / Contact",
     "containerSignature": "body{class=\"speaking-page\",data-page=\"speaking\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"speaking-group speaking-contact\",data-section=\"contact\",id=\"contact\"}>div{}>p{class=\"section-label\"}|parentText=\"05 / ContactContext first\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"05 / Contact\"],[\"h2{}\",\"Context first\"]]"
-  },
-  {
-    "file": "index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[1]>p[1]",
-    "token": "01",
-    "occurrence": 1,
-    "ownerText": "01 / Diagnoza",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"01 / Diagnoza Diagnoza Ustalam problem, interesariuszy, ograniczenia i stan danych. Artefakt: Mapa decyzji\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"01 / Diagnoza\"],[\"h3{}\",\"Diagnoza\"],[\"p{}\",\"Ustalam problem, interesariuszy, ograniczenia i stan danych.\"],[\"p{}\",\"Artefakt: Mapa decyzji\"]]"
-  },
-  {
-    "file": "index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[2]>p[1]",
-    "token": "02",
-    "occurrence": 1,
-    "ownerText": "02 / Strategia",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"02 / Strategia Strategia Wybieram docelowy model, priorytety i kolejność zmian. Artefakt: Plan operacyjny\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"02 / Strategia\"],[\"h3{}\",\"Strategia\"],[\"p{}\",\"Wybieram docelowy model, priorytety i kolejność zmian.\"],[\"p{}\",\"Artefakt: Plan operacyjny\"]]"
-  },
-  {
-    "file": "index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[3]>p[1]",
-    "token": "03",
-    "occurrence": 1,
-    "ownerText": "03 / Wdrożenie",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"03 / Wdrożenie Wdrożenie Łączę proces, ludzi, dane i technologię w działającym rozwiązaniu. Artefakt: Uruchomiony system\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"03 / Wdrożenie\"],[\"h3{}\",\"Wdrożenie\"],[\"p{}\",\"Łączę proces, ludzi, dane i technologię w działającym rozwiązaniu.\"],[\"p{}\",\"Artefakt: Uruchomiony system\"]]"
-  },
-  {
-    "file": "index.html",
-    "sourcePath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
-    "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>article[4]>p[1]",
-    "token": "04",
-    "occurrence": 1,
-    "ownerText": "04 / Wartość",
-    "containerSignature": "body{class=\"home-page\"}>main{id=\"main\",tabindex=\"-1\"}>section{id=\"process\"}>div{class=\"container\"}>div{aria-label=\"Proces współpracy\",class=\"route-sequence\"}>article{class=\"route-sequence__step\"}>p{class=\"section-index\"}|parentText=\"04 / Wartość Wartość Sprawdzam użycie, wynik i kolejne decyzje rozwojowe. Artefakt: Pomiar i iteracja\"|parentChildren=[[\"p{class=\\\"section-index\\\"}\",\"04 / Wartość\"],[\"h3{}\",\"Wartość\"],[\"p{}\",\"Sprawdzam użycie, wynik i kolejne decyzje rozwojowe.\"],[\"p{}\",\"Artefakt: Pomiar i iteracja\"]]"
   },
   {
     "file": "lotnictwo/index.html",
@@ -2023,17 +1966,8 @@ function homepageBody(html) {
 
 const homepageMarkers = [
   'id="hero"',
-  'data-section="trust"',
-  'id="process"',
-  'data-cta-after="process"',
-  'id="cases"',
-  'data-cta-after="cases"',
-  'id="skills"',
+  'id="work"',
   'id="about"',
-  'id="education"',
-  'id="resume"',
-  'id="portfolio"',
-  'id="clients"',
   'id="contact"'
 ];
 
@@ -2048,30 +1982,15 @@ const homeFactTags = ["a", "dd", "div", "h1", "h3", "li", "p", "span", "strong"]
 
 const homeFactPatterns = [
   { section: "hero", tag: "h1", prefix: "brand." },
-  { section: "hero", tag: "div", className: "stat-num", prefix: "hero." },
-  { sectionAttribute: ["data-section", "trust"], tag: "span", className: "trust-bar-name", prefix: "client." },
-  { section: "cases", tag: "h3", className: "evidence-row__title", prefix: "client." },
-  { section: "cases", tag: "dd", prefix: "project." },
-  { section: "about", tag: "li", prefix: "aviation." },
-  { section: "education", tag: "div", className: "resume-edu-year", prefix: "education." },
-  { section: "education", tag: "strong", prefix: "education." },
-  { section: "education", tag: "span", prefix: "education." },
-  { section: "resume", tag: "div", className: "timeline-year", prefix: "career." },
-  { section: "resume", tag: "div", className: "timeline-company", prefix: "career." },
-  { section: "resume", tag: "p", className: "timeline-role", prefix: "career." },
-  { section: "resume", tag: "p", className: "timeline-desc", prefix: "career." },
-  { section: "portfolio", tag: "div", className: "pcard__tag", prefix: "portfolio." },
-  { section: "portfolio", tag: "div", className: "pcard__title", prefix: "portfolio." },
-  { section: "portfolio", tag: "div", className: "pcard__desc", prefix: "portfolio." },
-  { section: "portfolio", tag: "p", className: "evidence-row__context", prefix: "portfolio." },
-  { section: "portfolio", tag: "h3", className: "evidence-row__title", prefix: "portfolio." },
-  { section: "portfolio", tag: "dd", prefix: "portfolio." },
-  { section: "clients", tag: "div", className: "client-item", prefix: "client." }
+  { section: "hero", tag: "span", className: "hero-proof__number", prefix: "hero." },
+  { section: "work", tag: "p", className: "home-domain__proof", prefix: ["project.", "portfolio."] },
+  { section: "about", tag: "span", prefix: "portrait." }
 ];
 
 const aboutCopyContracts = {
   pl: {
     label: "O mnie",
+    profileLink: "Pełny profil i wybrane doświadczenie",
     narratives: [
       ["decision-before-tool", "Zaczynam od ustalenia, kto podejmuje decyzję, na jakich danych i w jakich ograniczeniach. Dopiero potem wybieram proces, technologię i sposób wdrożenia."],
       ["responsibility-across-domains", "W zakupach pracuję z odpowiedzialnością za pieniądze, ryzyko i interesariuszy. W aplikacjach przekładam te decyzje na przepływ pracy, dane i kontrolę. Lotnictwo wnosi dyscyplinę procedur oraz jasny podział odpowiedzialności."]
@@ -2079,6 +1998,7 @@ const aboutCopyContracts = {
   },
   en: {
     label: "About me",
+    profileLink: "Full profile and selected experience",
     narratives: [
       ["decision-before-tool", "I begin by establishing who makes the decision, what data they use and what constraints apply. Only then do I choose the process, technology and implementation approach."],
       ["responsibility-across-domains", "In procurement, I take responsibility for money, risk and stakeholders. In applications, I translate those decisions into workflows, data and controls. Aviation brings procedural discipline and a clear division of responsibility."]
@@ -2086,21 +2006,15 @@ const aboutCopyContracts = {
   }
 };
 
-const aboutAviationFactOrder = [
-  "aviation.ppl_h",
-  "aviation.ppl_a",
-  "aviation.aerobatics_rating",
-  "aviation.diverse_extreme_team",
-  "aviation.forum_photographer",
-  "aviation.air_to_air_media"
-];
+const homeDomainOrder = ["advisory", "applications", "aviation"];
 
 const localizedHomeRoutes = new Map([
   ["/prywatnosc/", "/en/prywatnosc/"],
   ["/", "/en/"],
-  ["/#about", "/en/#about"],
+  ["/o-mnie/", "/en/o-mnie/"],
   ["/#contact", "/en/#contact"],
   ["#main", "#main"],
+  ["#work", "#work"],
   ["#contact", "#contact"],
   ["/uslugi/transformacja-zakupow/", "/en/uslugi/transformacja-zakupow/"],
   ["/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/wdrozenie-sap-ariba/"],
@@ -2117,7 +2031,6 @@ const localizedHomeRoutes = new Map([
 const englishHomeContract = {
   headline: "From decision to an operational system.",
   lead: "I lead procurement transformations, build operational applications and develop aviation ventures. I take work from a defined problem to a solution used in day-to-day operations.",
-  process: ["Diagnosis", "Strategy", "Implementation", "Value"],
   domains: [
     ["/en/uslugi/transformacja-zakupow/", "Advisory"],
     ["/en/aplikacje-operacyjne/", "Operational applications"],
@@ -2128,7 +2041,7 @@ const englishHomeContract = {
     ["/en/lotnictwo/", "Aviation"],
     ["/en/case-studies/", "Projects"],
     ["/en/wiedza/", "Insights"],
-    ["/en/#about", "About"],
+    ["/en/o-mnie/", "About"],
     ["/en/#contact", "Contact"]
   ]
 };
@@ -2165,8 +2078,9 @@ function verifyHomeFactPatterns(activeBody, page, errors) {
     const blocks = tagBlocks(section.full, pattern.tag).filter((block) => !pattern.className || hasClass(block.opening, pattern.className));
     for (const block of blocks) {
       const factId = attributeValue(block.opening, "data-fact-id");
-      if (factId === null || !factId.startsWith(pattern.prefix)) {
-        error(errors, "home-fact-annotation", page.path, `${pattern.section ?? pattern.sectionAttribute[1]} ${pattern.tag}${pattern.className ? `.${pattern.className}` : ""} requires a ${pattern.prefix} data-fact-id`);
+      const prefixes = [pattern.prefix].flat();
+      if (factId === null || !prefixes.some((prefix) => factId.startsWith(prefix))) {
+        error(errors, "home-fact-annotation", page.path, `${pattern.section ?? pattern.sectionAttribute[1]} ${pattern.tag}${pattern.className ? `.${pattern.className}` : ""} requires a ${prefixes.join(" or ")} data-fact-id`);
       }
     }
   }
@@ -2201,32 +2115,22 @@ function verifyAboutStructure(activeBody, page, errors) {
     }
   }
 
-  if (tagBlocks(about.full, "span").length > 0) problems.push("unsupported span inside About");
-
-  const allOpeningTags = openingTags(about.full, "[a-z][a-z0-9:-]*");
-  const items = tagBlocks(about.full, "li");
-  const aboutFactTags = allOpeningTags.filter((tag) => hasClass(tag, "about-fact"));
-  const annotatedTags = allOpeningTags.filter((tag) => attributeValue(tag, "data-fact-id") !== null);
-  if (items.length !== aboutAviationFactOrder.length || aboutFactTags.length !== aboutAviationFactOrder.length || annotatedTags.length !== aboutAviationFactOrder.length) {
-    problems.push(`expected six About li, .about-fact and data-fact-id uses; found ${items.length}, ${aboutFactTags.length} and ${annotatedTags.length}`);
-  }
-  if (aboutFactTags.some((tag) => !/^<li\b/i.test(tag) || attributeValue(tag, "data-fact-id") === null)) {
-    problems.push("every .about-fact must be an annotated li");
+  const profileRoute = page.lang === "pl" ? "/o-mnie/" : "/en/o-mnie/";
+  const links = tagBlocks(aboutText.full, "a");
+  if (links.length !== 1 || attributeValue(links[0].opening, "href") !== profileRoute || renderedText(links[0].content) !== normalize(contract.profileLink)) {
+    problems.push(`About requires one ${profileRoute} profile link labelled ${contract.profileLink}`);
   }
 
-  const aboutFactContainers = allOpeningTags.filter((tag) => hasClass(tag, "about-facts"));
-  const aboutFactLists = tagBlocks(about.full, "ul").filter((block) => hasClass(block.opening, "about-facts"));
-  if (aboutFactContainers.length !== 1 || aboutFactLists.length !== 1) {
-    problems.push(`expected one ul.about-facts; found ${aboutFactContainers.length}`);
-  } else {
-    const listItems = tagBlocks(aboutFactLists[0].full, "li");
-    if (listItems.length !== aboutAviationFactOrder.length) problems.push(`expected ${aboutAviationFactOrder.length} facts in ul.about-facts; found ${listItems.length}`);
-    for (const [index, factId] of aboutAviationFactOrder.entries()) {
-      const item = items[index];
-      if (!item || !hasClass(item.opening, "about-fact") || attributeValue(item.opening, "data-fact-id") !== factId) {
-        problems.push(`About fact ${index + 1} must be ${factId}`);
-      }
-    }
+  const annotatedTags = openingTags(about.full, "[a-z][a-z0-9:-]*").filter((tag) => attributeValue(tag, "data-fact-id") !== null);
+  const photos = tagBlocks(about.full, "figure").filter((block) => hasClass(block.opening, "about-photo"));
+  const photoImages = photos.length === 1 ? openingTags(photos[0].full, "img") : [];
+  if (photos.length !== 1 || photoImages.length !== 1
+    || !/^\d+$/.test(attributeValue(photoImages[0], "width") ?? "") || !/^\d+$/.test(attributeValue(photoImages[0], "height") ?? "")
+    || attributeValue(photoImages[0], "loading") !== "lazy" || !nonEmptyString(attributeValue(photoImages[0], "alt") ?? "")) {
+    problems.push("About requires one figure.about-photo with one lazy image, explicit dimensions and alt text");
+  }
+  if (annotatedTags.length !== 1 || attributeValue(annotatedTags[0], "data-fact-id") !== "portrait.credit") {
+    problems.push("About may annotate only the portrait.credit caption");
   }
 
   if (problems.length > 0) error(errors, "home-about-structure", page.path, problems.join("; "));
@@ -2234,56 +2138,16 @@ function verifyAboutStructure(activeBody, page, errors) {
 
 function verifyHomeStructures(activeBody, page, errors) {
   verifyAboutStructure(activeBody, page, errors);
-  const process = sectionBlock(activeBody, { section: "process" });
-  if (process) {
-    const steps = tagBlocks(process.full, "article").filter((block) => hasClass(block.opening, "route-sequence__step"));
-    const routeSteps = steps.length;
-    const articleClosings = (process.full.match(/<\/article\s*>/gi) ?? []).length;
-    if (routeSteps !== 4 || articleClosings !== 4) {
-      error(errors, "home-process-structure", page.path, `Process requires four matched route steps; found ${routeSteps} openings and ${articleClosings} closings`);
-    }
-    const expectedLabels = page.lang === "pl" ? ["Diagnoza", "Strategia", "Wdrożenie", "Wartość"] : englishHomeContract.process;
-    const labels = steps.map((step) => tagBlocks(step.full, "h3").map((heading) => renderedText(heading.content)));
-    const indexes = steps.map((step) => {
-      const label = tagBlocks(step.full, "p").find((paragraph) => hasClass(paragraph.opening, "section-index"));
-      return /^(\d{2})\s*\//.exec(renderedText(label?.content ?? ""))?.[1] ?? null;
-    });
-    const expectedIndexes = ["01", "02", "03", "04"];
-    if (labels.length !== expectedLabels.length
-      || labels.some((headings, index) => headings.length !== 1 || headings[0] !== normalize(expectedLabels[index]))
-      || indexes.some((value, index) => value !== expectedIndexes[index])) {
-      error(errors, "home-process-structure", page.path, "Process requires the exact localized ordered step labels and 01-04 indexes");
-    }
-  }
-
-  const skills = sectionBlock(activeBody, { section: "skills" });
-  if (skills) {
-    const genericCards = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => hasClass(tag, "skill-card"));
-    if (genericCards.length > 0) error(errors, "home-skills-structure", page.path, "Skills must use the route/evidence system instead of skill-card");
-    const localized = page.lang === "pl"
-      ? { path: "/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Działanie", "Możliwy wynik"], name: "Zamówienia publiczne" }
-      : { path: "/en/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Action", "Possible outcome"], name: "Public procurement" };
-    const evidenceRows = tagBlocks(skills.full, "article").filter((block) => hasClass(block.opening, "evidence-row"));
-    for (const [index, row] of evidenceRows.entries()) {
-      const labels = tagBlocks(row.full, "dt").map((block) => renderedText(block.content));
-      const expectedLabels = localized.labels.map(normalize);
-      if (labels.length !== expectedLabels.length || labels.some((label, labelIndex) => label !== expectedLabels[labelIndex])) {
-        error(errors, "home-skills-structure", page.path, `Skills evidence row ${index + 1} requires the exact ordered ledger labels: ${localized.labels.join(", ")}`);
-      }
-    }
-    const serviceMarkers = openingTags(skills.full, "[a-z][a-z0-9:-]*").filter((tag) => attributeValue(tag, "data-service") === "public-procurement");
-    const serviceArticles = tagBlocks(skills.full, "article").filter((block) => attributeValue(block.opening, "data-service") === "public-procurement");
-    if (serviceMarkers.length !== 1 || serviceArticles.length !== 1) {
-      error(errors, "home-skills-structure", page.path, `${localized.name} requires exactly one article[data-service=public-procurement]; found ${serviceMarkers.length} markers and ${serviceArticles.length} articles`);
-    } else {
-      const links = tagBlocks(serviceArticles[0].full, "a");
-      const exactRoute = links.length === 1 && attributeValue(links[0].opening, "href") === localized.path;
-      if (!exactRoute) error(errors, "home-skills-structure", page.path, `${localized.name} must use the exact localized ${localized.path} route`);
-      const labels = tagBlocks(serviceArticles[0].full, "dt").map((block) => renderedText(block.content));
-      const expectedLabels = localized.labels.map(normalize);
-      if (labels.length !== expectedLabels.length || labels.some((label, index) => label !== expectedLabels[index])) {
-        error(errors, "home-skills-structure", page.path, `${localized.name} requires the exact ordered ledger labels: ${localized.labels.join(", ")}`);
-      }
+  const work = sectionBlock(activeBody, { section: "work" });
+  if (work) {
+    const domains = tagBlocks(work.full, "article").filter((block) => hasClass(block.opening, "home-domain"));
+    const order = domains.map((block) => attributeValue(block.opening, "data-domain"));
+    const proofs = domains.map((block) => tagBlocks(block.full, "p").filter((paragraph) => hasClass(paragraph.opening, "home-domain__proof")).length);
+    const images = openingTags(work.full, "img");
+    const imagesValid = images.every((image) => /^\d+$/.test(attributeValue(image, "width") ?? "") && /^\d+$/.test(attributeValue(image, "height") ?? "")
+      && attributeValue(image, "loading") === "lazy" && attributeValue(image, "decoding") === "async");
+    if (!exactSequence(homeDomainOrder, order) || proofs.some((count) => count !== 1) || !imagesValid) {
+      error(errors, "home-work-structure", page.path, "Work requires the advisory, applications and aviation domains in order, one annotated proof each and lazy images with explicit dimensions");
     }
   }
 
@@ -2336,7 +2200,7 @@ function verifyHomepageContent(body, parsedBody, page, errors) {
   }
   const actualMarkers = homepageMarkerSequence(activeBody);
   if (!exactSequence(homepageMarkers, actualMarkers)) {
-    error(errors, "home-section-order", page.path, "homepage requires exactly the 11 ordered sections and two ordered CTA markers");
+    error(errors, "home-section-order", page.path, "homepage requires exactly the four ordered sections: hero, work, about and contact");
   }
 
   const visible = staticVisibleText(parsedBody);
@@ -2468,7 +2332,7 @@ function exactSequence(first, second) {
 
 function homepageMarkerSequence(activeBody) {
   const markers = [];
-  const sectionIds = new Set(["hero", "process", "cases", "about", "education", "resume", "skills", "portfolio", "clients", "contact"]);
+  const sectionIds = new Set(["hero", "work", "about", "contact"]);
   for (const tag of openingTags(activeBody, "[a-z][a-z0-9:-]*")) {
     const tagName = /^<([a-z][a-z0-9:-]*)/i.exec(tag)?.[1].toLowerCase();
     if (tagName !== "section" && tagName !== "aside") continue;
@@ -2476,8 +2340,7 @@ function homepageMarkerSequence(activeBody) {
     const section = attributeValue(tag, "data-section");
     const cta = attributeValue(tag, "data-cta-after");
     if (sectionIds.has(id)) markers.push(`id="${id}"`);
-    else if (section === "trust") markers.push('data-section="trust"');
-    else if (cta === "process" || cta === "cases") markers.push(`data-cta-after="${cta}"`);
+    else if (section !== null || cta !== null) markers.push(`unsupported:${section ?? cta}`);
   }
   return markers;
 }
@@ -2488,41 +2351,10 @@ function annotatedFactSequence(activeBody) {
     .filter(nonEmptyString);
 }
 
-function processStepSequence(activeBody) {
-  const process = sectionBlock(activeBody, { section: "process" });
-  if (!process) return [];
-  return tagBlocks(process.full, "article")
-    .filter((block) => hasClass(block.opening, "route-sequence__step"))
-    .map((step) => {
-      const index = tagBlocks(step.full, "p").find((paragraph) => hasClass(paragraph.opening, "section-index"));
-      return /^(\d{2})\s*\//.exec(renderedText(index?.content ?? ""))?.[1] ?? "missing";
-    });
-}
-
-function evidenceRowSequence(activeBody) {
+function homeDomainSequence(activeBody) {
   return tagBlocks(activeBody, "article")
-    .filter((block) => hasClass(block.opening, "evidence-row"))
-    .map((row) => JSON.stringify({
-      domain: attributeValue(row.opening, "data-domain") ?? "",
-      service: attributeValue(row.opening, "data-service") ?? "",
-      facts: annotatedFactSequence(row.full)
-    }));
-}
-
-function portfolioItemSequence(activeBody) {
-  const portfolio = sectionBlock(activeBody, { section: "portfolio" });
-  if (!portfolio) return [];
-  return tagBlocks(portfolio.full, "a")
-    .filter((block) => hasClass(block.opening, "pcard"))
-    .map((item) => annotatedFactSequence(item.full).join("|"));
-}
-
-function clientItemSequence(activeBody) {
-  const clients = sectionBlock(activeBody, { section: "clients" });
-  if (!clients) return [];
-  return openingTags(clients.full, "div")
-    .filter((tag) => hasClass(tag, "client-item"))
-    .map((tag) => attributeValue(tag, "data-fact-id") ?? "missing");
+    .filter((block) => hasClass(block.opening, "home-domain"))
+    .map((block) => JSON.stringify({ domain: attributeValue(block.opening, "data-domain") ?? "", facts: annotatedFactSequence(block.full) }));
 }
 
 function pairedLinkSequence(parsedBody) {
@@ -2567,7 +2399,7 @@ function verifyEnglishHomeContract(activeBody, page, errors) {
   const lead = hero ? tagBlocks(hero.full, "p").filter((paragraph) => hasClass(paragraph.opening, "hero-lead")) : [];
   if (headline.length !== 1 || renderedText(headline[0]?.content ?? "") !== normalize(englishHomeContract.headline)) problems.push("hero headline");
   if (lead.length !== 1 || renderedText(lead[0]?.content ?? "") !== normalize(englishHomeContract.lead)) problems.push("hero lead");
-  const domainNav = hero ? tagBlocks(hero.full, "nav").find((nav) => hasClass(nav.opening, "hero-tag")) : null;
+  const domainNav = hero ? tagBlocks(hero.full, "nav").find((nav) => hasClass(nav.opening, "hero-domains")) : null;
   const domainLinks = domainNav ? tagBlocks(domainNav.full, "a").map((link) => [attributeValue(link.opening, "href"), renderedText(link.content)]) : [];
   if (domainLinks.length !== englishHomeContract.domains.length || englishHomeContract.domains.some(([href, label], index) => domainLinks[index]?.[0] !== href || domainLinks[index]?.[1] !== normalize(label))) problems.push("three equal domain routes");
   const navigation = tagBlocks(activeBody, "nav").find((nav) => hasClass(nav.opening, "site-nav"));
@@ -2585,10 +2417,7 @@ function verifyHomepageParity(plBody, enBody, plParsedBody, enParsedBody, errors
   const comparisons = [
     ["home-parity-sections", "section markers", homepageMarkerSequence(plBody), homepageMarkerSequence(enBody)],
     ["home-parity-facts", "data-fact-id sequence", annotatedFactSequence(plBody), annotatedFactSequence(enBody)],
-    ["home-parity-process", "Process steps", processStepSequence(plBody), processStepSequence(enBody)],
-    ["home-parity-evidence-rows", "evidence rows", evidenceRowSequence(plBody), evidenceRowSequence(enBody)],
-    ["home-parity-portfolio", "Portfolio items", portfolioItemSequence(plBody), portfolioItemSequence(enBody)],
-    ["home-parity-clients", "Client items", clientItemSequence(plBody), clientItemSequence(enBody)]
+    ["home-parity-domains", "work domains", homeDomainSequence(plBody), homeDomainSequence(enBody)]
   ];
   for (const [id, label, plSequence, enSequence] of comparisons) {
     if (!exactSequence(plSequence, enSequence)) error(errors, id, "en/index.html", `${label} must exactly match the ordered Polish sequence`);
@@ -3277,7 +3106,10 @@ function verifyFactSchema(factData, publicSurfaces, errors) {
       error(errors, "fact-publication-url", path, `${fact.id}: publication URL must match the reviewed existing homepage destination`);
     }
     const closedStatus = fact.status === "review" || fact.status === "retired";
-    if (!Array.isArray(fact.surfaces) || (!closedStatus && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
+    if (Object.hasOwn(fact, "unpublished_since") && !approvedUnpublished(fact)) {
+      error(errors, "fact-unpublished", path, `facts[${index}] unpublished_since requires an approved fact, a past YYYY-MM-DD date and no surfaces`);
+    }
+    if (!Array.isArray(fact.surfaces) || (!closedStatus && !approvedUnpublished(fact) && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
       error(errors, "fact-surfaces", path, `facts[${index}] approved surfaces must be non-empty; review and retired surfaces must be an empty string array`);
     } else if (closedStatus && fact.surfaces.length > 0) {
       error(errors, "fact-surfaces", path, `facts[${index}] ${fact.status} facts must have no public surfaces`);
@@ -4048,7 +3880,7 @@ function verifyHomepageNavigation(html, page, errors) {
   }
 
   const config = page.lang === "pl" ? {
-    routes: ["/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact"],
+    routes: ["/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/o-mnie/", "/#contact"],
     pairedHomepage: "/en/",
     summary: "Doradztwo",
     submenu: [
@@ -4057,7 +3889,7 @@ function verifyHomepageNavigation(html, page, errors) {
       ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]
     ]
   } : {
-    routes: ["/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact"],
+    routes: ["/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/o-mnie/", "/en/#contact"],
     pairedHomepage: "/",
     summary: "Advisory",
     submenu: [
@@ -4601,7 +4433,7 @@ function expectedPageNavigation(lang) {
     "/lotnictwo/",
     "/case-studies/",
     "/wiedza/",
-    "/#about",
+    "/o-mnie/",
     "/#contact"
   ] : [
     "/en/uslugi/transformacja-zakupow/",
@@ -4611,7 +4443,7 @@ function expectedPageNavigation(lang) {
     "/en/lotnictwo/",
     "/en/case-studies/",
     "/en/wiedza/",
-    "/en/#about",
+    "/en/o-mnie/",
     "/en/#contact"
   ];
 }
@@ -4826,7 +4658,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         Object.freeze(["/lotnictwo/", "Lotnictwo", false]),
         Object.freeze(["/case-studies/", "Projekty", false]),
         Object.freeze(["/wiedza/", "Wiedza", false]),
-        Object.freeze(["/#about", "O mnie", false]),
+        Object.freeze(["/o-mnie/", "O mnie", false]),
         Object.freeze(["/#contact", "Kontakt", false])
       ]),
       languageHref: "/en/aplikacje-operacyjne/",
@@ -4876,7 +4708,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
+      FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "O mnie", "Kontakt", "Prywatność"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/", "Strona główna"]),
@@ -4885,7 +4717,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]),
       Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
+      Object.freeze(["/o-mnie/", "O mnie"]), Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
     ])
   }),
   en: Object.freeze({
@@ -4907,7 +4739,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         Object.freeze(["/en/lotnictwo/", "Aviation", false]),
         Object.freeze(["/en/case-studies/", "Projects", false]),
         Object.freeze(["/en/wiedza/", "Insights", false]),
-        Object.freeze(["/en/#about", "About", false]),
+        Object.freeze(["/en/o-mnie/", "About", false]),
         Object.freeze(["/en/#contact", "Contact", false])
       ]),
       languageHref: "/aplikacje-operacyjne/",
@@ -4957,7 +4789,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       ])
     }),
     footer: Object.freeze([
-      FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
+      FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "About", "Contact", "Privacy"
     ]),
     footerLinks: Object.freeze([
       Object.freeze(["/en/", "Home"]),
@@ -4966,7 +4798,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
       Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]),
       Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
+      Object.freeze(["/en/o-mnie/", "About"]), Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
     ])
   })
 });
@@ -4989,7 +4821,7 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "nav-primary-1", href: "/lotnictwo/", label: "Lotnictwo", kind: "text", attributes: { href: "/lotnictwo/" } },
     { role: "nav-primary-2", href: "/case-studies/", label: "Projekty", kind: "text", attributes: { href: "/case-studies/" } },
     { role: "nav-primary-3", href: "/wiedza/", label: "Wiedza", kind: "text", attributes: { href: "/wiedza/" } },
-    { role: "nav-primary-4", href: "/#about", label: "O mnie", kind: "text", attributes: { href: "/#about" } },
+    { role: "nav-primary-4", href: "/o-mnie/", label: "O mnie", kind: "text", attributes: { href: "/o-mnie/" } },
     { role: "nav-primary-5", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } },
     { role: "nav-language", href: "/en/aplikacje-operacyjne/", label: "EN", kind: "text", attributes: { href: "/en/aplikacje-operacyjne/", class: "nav-lang" } },
     { role: "breadcrumb-home", href: "/", label: "Strona główna", kind: "text", attributes: { href: "/" } },
@@ -5003,8 +4835,9 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "footer-link-3", href: "/lotnictwo/", label: "Lotnictwo", kind: "text", attributes: { href: "/lotnictwo/" } },
     { role: "footer-link-4", href: "/case-studies/", label: "Projekty", kind: "text", attributes: { href: "/case-studies/" } },
     { role: "footer-link-5", href: "/wiedza/", label: "Wiedza", kind: "text", attributes: { href: "/wiedza/" } },
-    { role: "footer-link-6", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } },
-    {"role": "footer-link-7", "href": "/prywatnosc/", "label": "Prywatność", "kind": "text", "attributes": {"href": "/prywatnosc/"}}
+    { role: "footer-link-6", href: "/o-mnie/", label: "O mnie", kind: "text", attributes: { href: "/o-mnie/" } },
+    { role: "footer-link-7", href: "/#contact", label: "Kontakt", kind: "text", attributes: { href: "/#contact" } },
+    {"role": "footer-link-8", "href": "/prywatnosc/", "label": "Prywatność", "kind": "text", "attributes": {"href": "/prywatnosc/"}}
   ]),
   en: freezeApplicationManifest([
     { role: "skip", href: "#main", label: "Skip to content", kind: "text", attributes: { href: "#main", class: "skip-link" } },
@@ -5016,7 +4849,7 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "nav-primary-1", href: "/en/lotnictwo/", label: "Aviation", kind: "text", attributes: { href: "/en/lotnictwo/" } },
     { role: "nav-primary-2", href: "/en/case-studies/", label: "Projects", kind: "text", attributes: { href: "/en/case-studies/" } },
     { role: "nav-primary-3", href: "/en/wiedza/", label: "Insights", kind: "text", attributes: { href: "/en/wiedza/" } },
-    { role: "nav-primary-4", href: "/en/#about", label: "About", kind: "text", attributes: { href: "/en/#about" } },
+    { role: "nav-primary-4", href: "/en/o-mnie/", label: "About", kind: "text", attributes: { href: "/en/o-mnie/" } },
     { role: "nav-primary-5", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } },
     { role: "nav-language", href: "/aplikacje-operacyjne/", label: "PL", kind: "text", attributes: { href: "/aplikacje-operacyjne/", class: "nav-lang" } },
     { role: "breadcrumb-home", href: "/en/", label: "Home", kind: "text", attributes: { href: "/en/" } },
@@ -5030,8 +4863,9 @@ const APPLICATION_ANCHOR_MANIFEST = Object.freeze({
     { role: "footer-link-3", href: "/en/lotnictwo/", label: "Aviation", kind: "text", attributes: { href: "/en/lotnictwo/" } },
     { role: "footer-link-4", href: "/en/case-studies/", label: "Projects", kind: "text", attributes: { href: "/en/case-studies/" } },
     { role: "footer-link-5", href: "/en/wiedza/", label: "Insights", kind: "text", attributes: { href: "/en/wiedza/" } },
-    { role: "footer-link-6", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } },
-    {"role": "footer-link-7", "href": "/en/prywatnosc/", "label": "Privacy", "kind": "text", "attributes": {"href": "/en/prywatnosc/"}}
+    { role: "footer-link-6", href: "/en/o-mnie/", label: "About", kind: "text", attributes: { href: "/en/o-mnie/" } },
+    { role: "footer-link-7", href: "/en/#contact", label: "Contact", kind: "text", attributes: { href: "/en/#contact" } },
+    {"role": "footer-link-8", "href": "/en/prywatnosc/", "label": "Privacy", "kind": "text", "attributes": {"href": "/en/prywatnosc/"}}
   ])
 });
 
@@ -5078,8 +4912,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 201, digest: "54b0826a406e00e8f4e3398f276a9b2021dea9247079cd0850967740cdcd7b7e" }),
-  en: Object.freeze({ elementCount: 201, digest: "c87a5f97402c76c65d1149262716267f20abb6e8e8eea29a4cae0090e01b87bf" })
+  pl: Object.freeze({ elementCount: 203, digest: "04c6bc08804630bc04a741183c63778c191ff1e8526aef1e5c1f393e63063831" }),
+  en: Object.freeze({ elementCount: 203, digest: "25935b4a0f995f1a7db9de7f047c648fb202d8f92024b03b58858555b1ad1289" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -6192,30 +6026,30 @@ const AVIATION_FACT_ORDER = Object.freeze([
 
 const AVIATION_SURFACES = Object.freeze(["lotnictwo/index.html", "en/lotnictwo/index.html"]);
 const AVIATION_FACT_CONTRACT = Object.freeze([
-  Object.freeze({ id: "aviation.ppl_h", value: "PPL(H)", display_pl: "PPL(H)", display_en: "PPL(H)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
-  Object.freeze({ id: "aviation.ppl_a", value: "PPL(A)", display_pl: "PPL(A)", display_en: "PPL(A)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
-  Object.freeze({ id: "aviation.aerobatics_rating", value: "aerobatics rating", display_pl: "uprawnienia do akrobacji", display_en: "aerobatics rating", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
-  Object.freeze({ id: "aviation.diverse_extreme_team", value: "Demonstration pilot, Diverse Extreme Team, 2013", display_pl: "pilot pokazowy Diverse Extreme Team (2013)", display_en: "display pilot for the Diverse Extreme Team (2013)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
-  Object.freeze({ id: "aviation.forum_photographer", value: "Press photographer for Forum Agency", display_pl: "fotograf prasowy agencji Forum", display_en: "Press photographer with Forum Agency", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
-  Object.freeze({ id: "aviation.air_to_air_media", value: "air-to-air, video and drone production", display_pl: "sesje air-to-air, realizacje wideo i dronem", display_en: "air-to-air shoots, video and drone production", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 aviation history, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES], status: "approved" }),
+  Object.freeze({ id: "aviation.ppl_h", value: "PPL(H)", display_pl: "PPL(H)", display_en: "PPL(H)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["o-mnie/index.html", "en/o-mnie/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "aviation.ppl_a", value: "PPL(A)", display_pl: "PPL(A)", display_en: "PPL(A)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: ["o-mnie/index.html", "en/o-mnie/index.html", ...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "aviation.aerobatics_rating", value: "aerobatics rating", display_pl: "uprawnienia do akrobacji", display_en: "aerobatics rating", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: [...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "aviation.diverse_extreme_team", value: "Demonstration pilot, Diverse Extreme Team, 2013", display_pl: "pilot pokazowy Diverse Extreme Team (2013)", display_en: "display pilot for the Diverse Extreme Team (2013)", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: [...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "aviation.forum_photographer", value: "Press photographer for Forum Agency", display_pl: "fotograf prasowy agencji Forum", display_en: "Press photographer with Forum Agency", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed aviation fact, 2026-08-25", source_url: null, surfaces: [...AVIATION_SURFACES, "llms-full.txt"], status: "approved" }),
+  Object.freeze({ id: "aviation.air_to_air_media", value: "air-to-air, video and drone production", display_pl: "sesje air-to-air, realizacje wideo i dronem", display_en: "air-to-air shoots, video and drone production", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 aviation history, 2026-08-26", source_url: null, surfaces: [...AVIATION_SURFACES], status: "approved" }),
   Object.freeze({ id: "portfolio.akrobacja_com", value: "akrobacja.com", display_pl: "akrobacja.com", display_en: "akrobacja.com", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt",  ...PROJECT_SURFACES], status: "approved" }),
-  Object.freeze({ id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt",  ...PROJECT_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.akrobacja_com.current_status", value: "active aviation venture as of 2026-08-26", display_pl: "Aktualna marka działalności lotniczej", display_en: "Current aviation venture", kind: "dated", as_of: "2026-08-26", source_type: "owner_verified", source_label: "Owner correction, 2026-08-26: akrobacja.com is the active aviation venture", source_url: null, surfaces: [...AVIATION_SURFACES, "llms-full.txt",  ...PROJECT_SURFACES], status: "approved" }),
   Object.freeze({ id: "portfolio.akrobacja_com.type", value: "aerobatic-flight voucher sales platform", display_pl: "Platforma sprzedaży voucherów na loty akrobacyjne.", display_en: "Voucher sales platform for aerobatic flights.", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, "llms-full.txt",  ...PROJECT_SURFACES], status: "approved" }),
-  Object.freeze({ id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed portfolio project, 2026-08-25", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" }),
-  Object.freeze({ id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: ["index.html", "en/index.html", ...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" })
+  Object.freeze({ id: "portfolio.filmolot_pl", value: "FilmoLot.pl aviation photography and video project", display_pl: "FilmoLot.pl", display_en: "FilmoLot.pl", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner confirmed portfolio project, 2026-08-25", source_url: null, surfaces: [...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" }),
+  Object.freeze({ id: "portfolio.filmolot_pl.type", value: "aviation photography and video", display_pl: "Lotnictwo · fotografia i wideo", display_en: "Aviation · photography and video", kind: "constant", as_of: null, source_type: "owner_verified", source_label: "Owner-confirmed pre-Task-5 portfolio description, 2026-08-26", source_url: null, surfaces: [...AVIATION_SURFACES, ...PROJECT_SURFACES], status: "approved" })
 ]);
 
 const AVIATION_NAVIGATION_CONTRACT = Object.freeze({
   pl: Object.freeze({
     ariaLabel: "Nawigacja główna", logoHref: "/", advisory: "Doradztwo",
     submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
-    primary: [["/aplikacje-operacyjne/", "Aplikacje", false], ["/lotnictwo/", "Lotnictwo", true], ["/case-studies/", "Projekty", false], ["/wiedza/", "Wiedza", false], ["/#about", "O mnie", false], ["/#contact", "Kontakt", false]],
+    primary: [["/aplikacje-operacyjne/", "Aplikacje", false], ["/lotnictwo/", "Lotnictwo", true], ["/case-studies/", "Projekty", false], ["/wiedza/", "Wiedza", false], ["/o-mnie/", "O mnie", false], ["/#contact", "Kontakt", false]],
     languageHref: "/en/lotnictwo/", languageLabel: "EN", toggleLabel: "Menu nawigacyjne"
   }),
   en: Object.freeze({
     ariaLabel: "Main navigation", logoHref: "/en/", advisory: "Advisory",
     submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
-    primary: [["/en/aplikacje-operacyjne/", "Applications", false], ["/en/lotnictwo/", "Aviation", true], ["/en/case-studies/", "Projects", false], ["/en/wiedza/", "Insights", false], ["/en/#about", "About", false], ["/en/#contact", "Contact", false]],
+    primary: [["/en/aplikacje-operacyjne/", "Applications", false], ["/en/lotnictwo/", "Aviation", true], ["/en/case-studies/", "Projects", false], ["/en/wiedza/", "Insights", false], ["/en/o-mnie/", "About", false], ["/en/#contact", "Contact", false]],
     languageHref: "/lotnictwo/", languageLabel: "PL", toggleLabel: "Navigation menu"
   })
 });
@@ -6244,8 +6078,8 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 198, digest: "f96a2d816719628815d93a0ef9d960d8018bc649b263385c59ccae34861d313e" }),
-  en: Object.freeze({ elementCount: 198, digest: "d8fcd739b57c151589fe05322f266d29580917b18260dc084ff8cd1063a384b8" })
+  pl: Object.freeze({ elementCount: 200, digest: "b9df68274c6e74c198bd20d1fc5c400d5e562aef9bd24be672660ffd7525df30" }),
+  en: Object.freeze({ elementCount: 200, digest: "a2d36ee83fc2cc5a9da2c2f424027f741fab359a09cb0d932281681cc6884575" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -6258,7 +6092,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "Proces przeniesiony do narzędzia.", "Software porządkuje dane, kolejne stany i odpowiedzialność. Interfejs wynika z przebiegu pracy.", "WEJŚCIE", "Procedura", "PRZEPŁYW", "Dane i decyzje", "WYJŚCIE", "Ślad działania",
     "05", "LOG", "Projekty", "Projekty lotnicze.", "PROJECT / A01", "akrobacja.com", "Aktualna marka działalności lotniczej", "Stan na 2026-08-26", "Platforma sprzedaży voucherów na loty akrobacyjne.", "PROJECT / M02", "FilmoLot.pl", "Lotnictwo · fotografia i wideo",
     "06", "COMMS", "Kontakt", "Porozmawiajmy o projekcie.", "Opisz projekt, proces albo decyzję, od której ma zacząć się rozmowa.", "Porozmawiaj o projekcie lotniczym",
-    FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "Kontakt", "Prywatność"
+    FOOTER_OWNER_LINE, "Strona główna", "Doradztwo", "Aplikacje", "Lotnictwo", "Projekty", "Wiedza", "O mnie", "Kontakt", "Prywatność"
   ]),
   en: Object.freeze([
     "Skip to content", "PM", "· Mamcarz.com", "Advisory", "Procurement transformation", "SAP Ariba implementation", "Public procurement", "Applications", "Aviation", "Projects", "Insights", "About", "Contact", "PL", "↑",
@@ -6269,7 +6103,7 @@ const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
     "04", "DATA", "Software", "The process transferred into a tool.", "Software organises data, consecutive states and responsibility. The interface follows the working process.", "INPUT", "Procedure", "FLOW", "Data and decisions", "OUTPUT", "Action trail",
     "05", "LOG", "Projects", "Aviation projects.", "PROJECT / A01", "akrobacja.com", "Current aviation venture", "As of 2026-08-26", "Voucher sales platform for aerobatic flights.", "PROJECT / M02", "FilmoLot.pl", "Aviation · photography and video",
     "06", "COMMS", "Contact", "Let’s discuss your project.", "Describe the project, process or decision that should begin the conversation.", "Discuss an aviation project",
-    FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "Contact", "Privacy"
+    FOOTER_OWNER_LINE, "Home", "Advisory", "Applications", "Aviation", "Projects", "Insights", "About", "Contact", "Privacy"
   ])
 });
 
@@ -6417,8 +6251,8 @@ function aviationExpectedAnchorHrefs(lang) {
   const navigation = AVIATION_NAVIGATION_CONTRACT[lang];
   const home = navigation.logoHref;
   const footer = lang === "pl"
-    ? ["/", "/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/prywatnosc/"]
-    : ["/en/", "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/en/prywatnosc/"];
+    ? ["/", "/uslugi/transformacja-zakupow/", "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/o-mnie/", "/#contact", "/prywatnosc/"]
+    : ["/en/", "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/o-mnie/", "/en/#contact", "/en/prywatnosc/"];
   return [
     "#main", home,
     ...navigation.submenu.map(([href]) => href),
@@ -6633,8 +6467,8 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna", home: "/", logoLabel: "Paweł Mamcarz, strona główna",
     advisory: "Doradztwo", paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
     submenu: Object.freeze([["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]]),
-    primary: Object.freeze([["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]]),
-    footer: Object.freeze([["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"], ["/prywatnosc/", "Prywatność"]]),
+    primary: Object.freeze([["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/o-mnie/", "O mnie"], ["/#contact", "Kontakt"]]),
+    footer: Object.freeze([["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/o-mnie/", "O mnie"], ["/#contact", "Kontakt"], ["/prywatnosc/", "Prywatność"]]),
     resources: Object.freeze([
       Object.freeze({ href: "/procurement-2026/", title: "Procurement Process 2026", type: "Model interaktywny", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null }),
       Object.freeze({ href: "/wystapienia/", title: "Wystąpienia i wykłady", type: "Wystąpienia i wykłady", language: "Polski", status: "Zasób w serwisie", inLanguage: "pl", lang: null })
@@ -6652,8 +6486,8 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
     ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation", home: "/en/", logoLabel: "Paweł Mamcarz, homepage",
     advisory: "Advisory", paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", back: "Back to top",
     submenu: Object.freeze([["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]]),
-    primary: Object.freeze([["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]]),
-    footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"], ["/en/prywatnosc/", "Privacy"]]),
+    primary: Object.freeze([["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/o-mnie/", "About"], ["/en/#contact", "Contact"]]),
+    footer: Object.freeze([["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/o-mnie/", "About"], ["/en/#contact", "Contact"], ["/en/prywatnosc/", "Privacy"]]),
     resources: Object.freeze([
       Object.freeze({ href: "/diagrams/infographic", title: "Procurement process reference model and scenario lenses", type: "Infographic", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
       Object.freeze({ href: "/en/wystapienia/", title: "Speaking & Lectures", type: "Talks and lectures", language: "English", status: "On-site resource", inLanguage: "en", lang: null }),
@@ -6667,17 +6501,17 @@ const KNOWLEDGE_URL_SEQUENCE = Object.freeze({
     "https://mamcarz.com/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
     "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/", "/uslugi/transformacja-zakupow/", "/uslugi/wdrozenie-sap-ariba/", "/uslugi/doradztwo-zamowienia-publiczne/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#about", "/#contact", "/en/wiedza/", "/",
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/o-mnie/", "/#contact", "/en/wiedza/", "/",
     "/procurement-2026/", "/wystapienia/", "/#contact", "/", SHARED_SIGNATURE_SRC, "/", "/uslugi/transformacja-zakupow/",
-    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/#contact", "/prywatnosc/", SHARED_SCRIPT_SRC
+    "/aplikacje-operacyjne/", "/lotnictwo/", "/case-studies/", "/wiedza/", "/o-mnie/", "/#contact", "/prywatnosc/", SHARED_SCRIPT_SRC
   ]),
   en: Object.freeze([
     "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/", "https://mamcarz.com/en/wiedza/", "https://mamcarz.com/wiedza/",
     "/favicon.svg", "/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2", "/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2", SHARED_STYLESHEET_HREF,
     "#main", "/en/", "/en/uslugi/transformacja-zakupow/", "/en/uslugi/wdrozenie-sap-ariba/", "/en/uslugi/doradztwo-zamowienia-publiczne/",
-    "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#about", "/en/#contact", "/wiedza/", "/en/",
+    "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/o-mnie/", "/en/#contact", "/wiedza/", "/en/",
     "/diagrams/infographic", "/en/wystapienia/", "/procurement-2026/", "/en/#contact", "/en/", SHARED_SIGNATURE_SRC, "/en/",
-    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/#contact", "/en/prywatnosc/", SHARED_SCRIPT_SRC
+    "/en/uslugi/transformacja-zakupow/", "/en/aplikacje-operacyjne/", "/en/lotnictwo/", "/en/case-studies/", "/en/wiedza/", "/en/o-mnie/", "/en/#contact", "/en/prywatnosc/", SHARED_SCRIPT_SRC
   ])
 });
 
@@ -7234,39 +7068,39 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"project.orlen.role","value":"CONNECT project manager","display_pl":"Kierownik projektu CONNECT","display_en":"CONNECT Project Manager","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project role, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/transformacja-zakupow/index.html","en/uslugi/transformacja-zakupow/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"project.orlen.platform_scope","value":"Central sourcing platform for the ORLEN Group","display_pl":"Centralna platforma sourcingowa dla Grupy ORLEN","display_en":"Central sourcing platform for the ORLEN Group","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project scope, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/transformacja-zakupow/index.html","en/uslugi/transformacja-zakupow/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"project.orlen.connect_scope","value":"CONNECT sourcing platform for 15 ORLEN Group entities in 4 countries with a 60-person delivery team","display_pl":"15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół","display_en":"15 ORLEN Group entities across 4 countries, 60-person team","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","uslugi/transformacja-zakupow/index.html","en/uslugi/transformacja-zakupow/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"client.zabka_polska","value":"Żabka Polska","display_pl":"Żabka Polska","display_en":"Żabka Polska","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"project.zabka.role","value":"SAP Ariba implementation-delivery responsibility","display_pl":"Realizacja wdrożenia SAP Ariba","display_en":"Delivery of the SAP Ariba implementation","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"project.zabka.implementation","value":"Procurement, supplier risk and sourcing functional scope","display_pl":"Zakupy, ryzyko dostawców i sourcing","display_en":"Procurement, supplier risk and sourcing","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 functional scope, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"project.zabka.proof","value":"SAP Ariba Buying, Supplier Risk and sourcing","display_pl":"SAP Ariba Buying, Supplier Risk i sourcing","display_en":"SAP Ariba Buying, Supplier Risk and sourcing","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 implementation proof, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"client.kghm","value":"KGHM","display_pl":"KGHM","display_en":"KGHM","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"project.kghm.role","value":"Implementation and integration delivery","display_pl":"Realizacja wdrożenia i integracji","display_en":"Implementation and integration delivery","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project role, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"project.kghm.scope","value":"Sourcing and external workforce management","display_pl":"Sourcing i obsługa pracowników zewnętrznych","display_en":"Sourcing and external workforce management","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project scope, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"project.kghm.integration","value":"SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA","display_pl":"SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA","display_en":"SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"client.pll_lot","value":"PLL LOT","display_pl":"PLL LOT","display_en":"PLL LOT","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.zabka_polska","value":"Żabka Polska","display_pl":"Żabka Polska","display_en":"Żabka Polska","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.zabka.role","value":"SAP Ariba implementation-delivery responsibility","display_pl":"Realizacja wdrożenia SAP Ariba","display_en":"Delivery of the SAP Ariba implementation","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26","source_url":null,"surfaces":["uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.zabka.implementation","value":"Procurement, supplier risk and sourcing functional scope","display_pl":"Zakupy, ryzyko dostawców i sourcing","display_en":"Procurement, supplier risk and sourcing","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 functional scope, 2026-08-26","source_url":null,"surfaces":["llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.zabka.proof","value":"SAP Ariba Buying, Supplier Risk and sourcing","display_pl":"SAP Ariba Buying, Supplier Risk i sourcing","display_en":"SAP Ariba Buying, Supplier Risk and sourcing","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 implementation proof, 2026-08-26","source_url":null,"surfaces":["uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.kghm","value":"KGHM","display_pl":"KGHM","display_en":"KGHM","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.kghm.role","value":"Implementation and integration delivery","display_pl":"Realizacja wdrożenia i integracji","display_en":"Implementation and integration delivery","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project role, 2026-08-26","source_url":null,"surfaces":["uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.kghm.scope","value":"Sourcing and external workforce management","display_pl":"Sourcing i obsługa pracowników zewnętrznych","display_en":"Sourcing and external workforce management","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 project scope, 2026-08-26","source_url":null,"surfaces":["uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"project.kghm.integration","value":"SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA","display_pl":"SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA","display_en":"SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.pll_lot","value":"PLL LOT","display_pl":"PLL LOT","display_en":"PLL LOT","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"project.lot.implementation","value":"SAP Ariba implementation for PLL LOT","display_pl":"Wdrożenie SAP Ariba dla PLL LOT","display_en":"SAP Ariba implementation for PLL LOT","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"client.motor_oil_hellas","value":"Motor Oil Hellas","display_pl":"Motor Oil Hellas","display_en":"Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"client.motor_oil_hellas","value":"Motor Oil Hellas","display_pl":"Motor Oil Hellas","display_en":"Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed client relationship, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"project.motor_oil.implementation","value":"SAP procurement implementation for Motor Oil Hellas","display_pl":"Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas","display_en":"SAP procurement implementation for Motor Oil Hellas","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed project scope, 2026-08-25","source_url":null,"surfaces":["llms.txt","llms-full.txt","uslugi/wdrozenie-sap-ariba/index.html","en/uslugi/wdrozenie-sap-ariba/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.czympojade_pl","value":"czympojade.pl fleet TCO calculator","display_pl":"czympojade.pl","display_en":"czympojade.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://czympojade.pl","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.czympojade_pl.type","value":"fleet TCO calculator using the Bielik model for ownership-cost analysis","display_pl":"Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.","display_en":"Fleet TCO calculator using the Bielik model to analyse total cost of ownership.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction supplied with Procurement&Beyond interview summary, 2026-08-27","source_url":"https://www.youtube.com/watch?v=5KYUdTLlvvg","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved","surface_rules":{"llms-full.txt":{"approved_any":["czympojade.pl: Fleet TCO calculator using the Bielik model to analyse total cost of ownership."]}}}),
-  Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://przypominamy.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://procuracost.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procuracost.type","value":"procurement procedure cost calculator","display_pl":"Kalkulator kosztów procedur zakupowych.","display_en":"Procurement procedure cost calculator.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procurement_process_2026","value":"Procurement Process 2026 interactive model","display_pl":"Procurement Process 2026","display_en":"Procurement Process 2026","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.procurement_process_2026.type","value":"interactive procurement process model","display_pl":"Interaktywny model procesu zakupowego.","display_en":"Interactive procurement process model.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.silence_tax","value":"silence-tax.com calculator","display_pl":"silence-tax.com","display_en":"silence-tax.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://silence-tax.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.silence_tax.type","value":"organisational silence cost calculator","display_pl":"Kalkulator kosztów milczenia w organizacji.","display_en":"Calculator for the cost of silence in an organisation.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":"https://silence-tax.com","surfaces":["index.html","en/index.html","aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com","value":"Przypominamy.com notification platform","display_pl":"Przypominamy.com","display_en":"Przypominamy.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://przypominamy.com","surfaces":["aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.przypominamy_com.type","value":"notification platform for organisations","display_pl":"Platforma powiadomień dla organizacji.","display_en":"Notification platform for organisations.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost","value":"ProcuraCost calculator","display_pl":"ProcuraCost","display_en":"ProcuraCost","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://procuracost.com","surfaces":["aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procuracost.type","value":"procurement procedure cost calculator","display_pl":"Kalkulator kosztów procedur zakupowych.","display_en":"Procurement procedure cost calculator.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procurement_process_2026","value":"Procurement Process 2026 interactive model","display_pl":"Procurement Process 2026","display_en":"Procurement Process 2026","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.procurement_process_2026.type","value":"interactive procurement process model","display_pl":"Interaktywny model procesu zakupowego.","display_en":"Interactive procurement process model.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax","value":"silence-tax.com calculator","display_pl":"silence-tax.com","display_en":"silence-tax.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":"https://silence-tax.com","surfaces":["aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.silence_tax.type","value":"organisational silence cost calculator","display_pl":"Kalkulator kosztów milczenia w organizacji.","display_en":"Calculator for the cost of silence in an organisation.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":"https://silence-tax.com","surfaces":["aplikacje-operacyjne/index.html","en/aplikacje-operacyjne/index.html","case-studies/index.html","en/case-studies/index.html","llms-full.txt"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com","value":"akrobacja.com","display_pl":"akrobacja.com","display_en":"akrobacja.com","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture and succeeds the former WarsawFlightSafety name","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.akrobacja_com.current_status","value":"active aviation venture as of 2026-08-26","display_pl":"Aktualna marka działalności lotniczej","display_en":"Current aviation venture","kind":"dated","as_of":"2026-08-26","source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.akrobacja_com.current_status","value":"active aviation venture as of 2026-08-26","display_pl":"Aktualna marka działalności lotniczej","display_en":"Current aviation venture","kind":"dated","as_of":"2026-08-26","source_type":"owner_verified","source_label":"Owner correction, 2026-08-26: akrobacja.com is the active aviation venture","source_url":null,"surfaces":["lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
   Object.freeze({"id":"portfolio.akrobacja_com.type","value":"aerobatic-flight voucher sales platform","display_pl":"Platforma sprzedaży voucherów na loty akrobacyjne.","display_en":"Voucher sales platform for aerobatic flights.","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","llms-full.txt","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.filmolot_pl","value":"FilmoLot.pl aviation photography and video project","display_pl":"FilmoLot.pl","display_en":"FilmoLot.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
-  Object.freeze({"id":"portfolio.filmolot_pl.type","value":"aviation photography and video","display_pl":"Lotnictwo · fotografia i wideo","display_en":"Aviation · photography and video","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["index.html","en/index.html","lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"})
+  Object.freeze({"id":"portfolio.filmolot_pl","value":"FilmoLot.pl aviation photography and video project","display_pl":"FilmoLot.pl","display_en":"FilmoLot.pl","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner confirmed portfolio project, 2026-08-25","source_url":null,"surfaces":["lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"}),
+  Object.freeze({"id":"portfolio.filmolot_pl.type","value":"aviation photography and video","display_pl":"Lotnictwo · fotografia i wideo","display_en":"Aviation · photography and video","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"})
 ]);
 const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "6565f5e79145c2d5893cbf5d16f8a6013a16d2d753b71a95cfab0cc80168c05d", en: "9d56cd4ce6dae78567b5e44bf65ce39a6e6d3e8e874c0f6a2367deced3aaba32" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "f964fde07507d5d9328cbd53fb9c782ab1fb5498879f191ed0f5ee61c9fa7ebb", en: "0f7113e8cfea19554804e331d5691708a5d9b6b27fbb00f8875d319d64d7e189" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7469,6 +7303,8 @@ const SERVICE_SURFACE_LIST = Object.freeze(Object.values(SERVICE_SURFACES).flat(
 const SERVICE_PUBLIC_SURFACE_CONTRACT = Object.freeze([
   "index.html",
   "en/index.html",
+  "o-mnie/index.html",
+  "en/o-mnie/index.html",
   "aplikacje-operacyjne/index.html",
   "en/aplikacje-operacyjne/index.html",
   "lotnictwo/index.html",
@@ -7567,28 +7403,28 @@ const SERVICE_CONTRACTS = Object.freeze({
 });
 
 const SERVICE_FACT_CONTRACT = Object.freeze([
-  ["career.pzu.organization", "PZU S.A.", "PZU S.A.", "PZU S.A.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["career.pzu.title", "Strategic Project Director", "Dyrektor Projektu Strategicznego", "Strategic Project Director", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["career.pzu.responsibility", "Procurement transformation from spend analysis to target operating model", "Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["career.pwc.organization", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["career.pwc.title", "Associate Director, Advisory / Procurement Expert", "Wicedyrektor w Advisory / Procurement Expert", "Associate Director, Advisory / Procurement Expert", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
-  ["career.pwc.responsibility", "Work with the CAPP methodology", "Pracowałem z metodyką CAPP (Complete & Agile Procurement).", "I worked with the CAPP (Complete & Agile Procurement) methodology.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation]],
+  ["career.pzu.organization", "PZU S.A.", "PZU S.A.", "PZU S.A.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", [...SERVICE_SURFACES.transformation]],
+  ["career.pzu.title", "Strategic Project Director", "Dyrektor Projektu Strategicznego", "Strategic Project Director", "Owner-confirmed pre-Task-5 career title, 2026-08-26", [...SERVICE_SURFACES.transformation]],
+  ["career.pzu.responsibility", "Procurement transformation from spend analysis to target operating model", "Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", [...SERVICE_SURFACES.transformation]],
+  ["career.pwc.organization", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "PwC Polska Sp. z o.o.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", [...SERVICE_SURFACES.transformation]],
+  ["career.pwc.title", "Associate Director, Advisory / Procurement Expert", "Wicedyrektor w Advisory / Procurement Expert", "Associate Director, Advisory / Procurement Expert", "Owner-confirmed pre-Task-5 career title, 2026-08-26", [...SERVICE_SURFACES.transformation]],
+  ["career.pwc.responsibility", "Work with the CAPP methodology", "Pracowałem z metodyką CAPP (Complete & Agile Procurement).", "I worked with the CAPP (Complete & Agile Procurement) methodology.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", [...SERVICE_SURFACES.transformation]],
   ["project.orlen.role", "CONNECT project manager", "Kierownik projektu CONNECT", "CONNECT Project Manager", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation, ...PROJECT_SURFACES]],
   ["project.orlen.platform_scope", "Central sourcing platform for the ORLEN Group", "Centralna platforma sourcingowa dla Grupy ORLEN", "Central sourcing platform for the ORLEN Group", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.transformation, ...PROJECT_SURFACES]],
   ["project.orlen.connect_scope", "CONNECT sourcing platform for 15 ORLEN Group entities in 4 countries with a 60-person delivery team", "15 spółek Grupy ORLEN w 4 krajach, 60-osobowy zespół", "15 ORLEN Group entities across 4 countries, 60-person team", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt",  ...SERVICE_SURFACES.transformation, ...PROJECT_SURFACES]],
-  ["hero.implementations", "20+ SAP Ariba implementations", "20+", "20+", "Owner confirmation, 2026-08-25: 20+ SAP Ariba implementations", ["index.html", "en/index.html", "llms.txt", "llms-full.txt",  ...SERVICE_SURFACES.ariba]],
-  ["project.kghm.role", "Implementation and integration delivery", "Realizacja wdrożenia i integracji", "Implementation and integration delivery", "Owner-confirmed pre-Task-5 project role, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
-  ["project.kghm.scope", "Sourcing and external workforce management", "Sourcing i obsługa pracowników zewnętrznych", "Sourcing and external workforce management", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
-  ["project.kghm.integration", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "Owner confirmed project scope, 2026-08-25", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
-  ["project.zabka.role", "SAP Ariba implementation-delivery responsibility", "Realizacja wdrożenia SAP Ariba", "Delivery of the SAP Ariba implementation", "Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
-  ["project.zabka.implementation", "Procurement, supplier risk and sourcing functional scope", "Zakupy, ryzyko dostawców i sourcing", "Procurement, supplier risk and sourcing", "Owner-confirmed pre-Task-5 functional scope, 2026-08-26", ["index.html", "en/index.html", "llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
-  ["project.zabka.proof", "SAP Ariba Buying, Supplier Risk and sourcing", "SAP Ariba Buying, Supplier Risk i sourcing", "SAP Ariba Buying, Supplier Risk and sourcing", "Owner-confirmed pre-Task-5 implementation proof, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["hero.implementations", "20+ SAP Ariba implementations", "20+", "20+", "Owner confirmation, 2026-08-25: 20+ SAP Ariba implementations", ["llms.txt", "llms-full.txt",  ...SERVICE_SURFACES.ariba]],
+  ["project.kghm.role", "Implementation and integration delivery", "Realizacja wdrożenia i integracji", "Implementation and integration delivery", "Owner-confirmed pre-Task-5 project role, 2026-08-26", [...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.kghm.scope", "Sourcing and external workforce management", "Sourcing i obsługa pracowników zewnętrznych", "Sourcing and external workforce management", "Owner-confirmed pre-Task-5 project scope, 2026-08-26", [...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.kghm.integration", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "SAP Ariba Sourcing i Fieldglass zintegrowane z SAP S/4HANA", "SAP Ariba Sourcing and Fieldglass integrated with SAP S/4HANA", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.zabka.role", "SAP Ariba implementation-delivery responsibility", "Realizacja wdrożenia SAP Ariba", "Delivery of the SAP Ariba implementation", "Owner-confirmed pre-Task-5 implementation-delivery responsibility, 2026-08-26", [...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.zabka.implementation", "Procurement, supplier risk and sourcing functional scope", "Zakupy, ryzyko dostawców i sourcing", "Procurement, supplier risk and sourcing", "Owner-confirmed pre-Task-5 functional scope, 2026-08-26", ["llms.txt", "llms-full.txt", ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
+  ["project.zabka.proof", "SAP Ariba Buying, Supplier Risk and sourcing", "SAP Ariba Buying, Supplier Risk i sourcing", "SAP Ariba Buying, Supplier Risk and sourcing", "Owner-confirmed pre-Task-5 implementation proof, 2026-08-26", [...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
   ["project.lot.implementation", "SAP Ariba implementation for PLL LOT", "Wdrożenie SAP Ariba dla PLL LOT", "SAP Ariba implementation for PLL LOT", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt",  ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
   ["project.motor_oil.implementation", "SAP procurement implementation for Motor Oil Hellas", "Wdrożenie SAP w obszarze zakupów dla Motor Oil Hellas", "SAP procurement implementation for Motor Oil Hellas", "Owner confirmed project scope, 2026-08-25", ["llms.txt", "llms-full.txt",  ...SERVICE_SURFACES.ariba, ...PROJECT_SURFACES]],
-  ["career.pkp_plk.organization", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
-  ["career.pkp_plk.dates", "June 2013 to September 2015", "06.2013 – 09.2015", "06.2013 – 09.2015", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
-  ["career.pkp_plk.title", "Board Advisor", "Doradca Zarządu", "Board Advisor", "Owner-confirmed pre-Task-5 career title, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]],
-  ["career.pkp_plk.responsibility", "SAP AG framework agreement negotiation for the PKP Group", "Negocjowałem umowę ramową z SAP AG dla grupy PKP.", "I negotiated an SAP AG framework agreement for the PKP Group.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", ["index.html", "en/index.html", ...SERVICE_SURFACES.publicProcurement]]
+  ["career.pkp_plk.organization", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "PKP Polskie Linie Kolejowe S.A.", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", [...SERVICE_SURFACES.publicProcurement]],
+  ["career.pkp_plk.dates", "June 2013 to September 2015", "06.2013 – 09.2015", "06.2013 – 09.2015", "Owner-confirmed pre-Task-5 career chronology, 2026-08-26", [...SERVICE_SURFACES.publicProcurement]],
+  ["career.pkp_plk.title", "Board Advisor", "Doradca Zarządu", "Board Advisor", "Owner-confirmed pre-Task-5 career title, 2026-08-26", [...SERVICE_SURFACES.publicProcurement]],
+  ["career.pkp_plk.responsibility", "SAP AG framework agreement negotiation for the PKP Group", "Negocjowałem umowę ramową z SAP AG dla grupy PKP.", "I negotiated an SAP AG framework agreement for the PKP Group.", "Owner-confirmed pre-Task-5 responsibility, 2026-08-26", [...SERVICE_SURFACES.publicProcurement]]
 ].map(([id, value, display_pl, display_en, source_label, surfaces]) => Object.freeze({ id, value, display_pl, display_en, kind: "constant", as_of: null, source_type: "owner_verified", source_label, source_url: null, surfaces: Object.freeze(surfaces), status: "approved" })));
 
 function verifyServiceRegistryInventory(factData, errors, { required = false } = {}) {
@@ -7643,9 +7479,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "41b9df7bf965dc26a47f7068b9f5c946799730a1290e22361b110333bcdc4eef", en: "ebf80296d7f5fabd0d4664ceb39d87b09b69beb8d325c0a6fb700a3b310d7f73" }),
-  ariba: Object.freeze({ pl: "33b20769fb9ae52d05ae156476bec43901fcc2c5eb16fd74d5b64095f476e59c", en: "2c5355b1b598fa4fe3d29ccb6e561016fdaec66b826a45d44a7902b5364cbe42" }),
-  publicProcurement: Object.freeze({ pl: "75fbc5a42eb49d8d8ba7162c9b31aa7773a72672329554bd17f3f1fdbb5be599", en: "b74912a9b832ba16bc1b1ca546bd1194c9c40cd096609f8b0c3a78e336efae08" })
+  transformation: Object.freeze({ pl: "9156814e160349bd7e518cef8c7c786fddc94da9ca38b323214300253216e1a0", en: "a82e1c17e76588f8681c55f4a9ff2a71e93919b35f2ff5f4309f219bb4f1f6a9" }),
+  ariba: Object.freeze({ pl: "56f5bc68a1d1db8d03f7383fc594cbe79876441734b3ce197a7584927356c8ef", en: "041912a354483d8b370929bee338979d7c467b6bd05aab5860d5864649fc0236" }),
+  publicProcurement: Object.freeze({ pl: "d2c52dba87ccdbc52ebd60a191b86e6a56772829c857494a5666ee20468bd2bd", en: "04b4f7ab4389b340d7f17d137382161a08c39491a7c71e6d04e1288d45a33fdb" })
 });
 
 function serviceKeyForPath(path) {
@@ -8043,7 +7879,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "c9f5a15546fcea831f4fa919c0a78d01ca7637c9464617c7a0deb970fd95f29a", en: "174a2fd9f2ebb5cef48fa111e8ee734d4f95fd7ecdd54d1b55826f5ad5716312" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "054013f0de8c6f60aa22e506a6fcac1b108729f6330057105228bc41b7ddfa47", en: "a82f4ffbb3a83a5ecdda1d771afd8a7212e9d5dac4da1b629e55f0c6c9d79702" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8346,7 +8182,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", "Materiał po angielsku · rozwiń"]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "8b6d80d7d57068e2be2defb39e133070ac4de411a9fb2b3353b4f1f0c427d63b";
+const PROCUREMENT_DOCUMENT_MANIFEST = "1bebabef836f7bd94f4a7dba7338baa220bf99797acf9e746c5f3e3bd4729e02";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
@@ -9362,14 +9198,14 @@ const SITE_SHELL_COPY = Object.freeze({
     primary: Object.freeze([
       Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#about", "O mnie"]), Object.freeze(["/#contact", "Kontakt"])
+      Object.freeze(["/o-mnie/", "O mnie"]), Object.freeze(["/#contact", "Kontakt"])
     ]),
     language: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
     footer: Object.freeze([
       Object.freeze(["/", "Strona główna"]), Object.freeze(["/uslugi/transformacja-zakupow/", "Doradztwo"]),
       Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
+      Object.freeze(["/o-mnie/", "O mnie"]), Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
     ])
   }),
   en: Object.freeze({
@@ -9382,14 +9218,14 @@ const SITE_SHELL_COPY = Object.freeze({
     primary: Object.freeze([
       Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#about", "About"]), Object.freeze(["/en/#contact", "Contact"])
+      Object.freeze(["/en/o-mnie/", "About"]), Object.freeze(["/en/#contact", "Contact"])
     ]),
     language: "PL", toggle: "Navigation menu", back: "Back to top",
     footer: Object.freeze([
       Object.freeze(["/en/", "Home"]), Object.freeze(["/en/uslugi/transformacja-zakupow/", "Advisory"]),
       Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
+      Object.freeze(["/en/o-mnie/", "About"]), Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
     ])
   })
 });
@@ -9571,7 +9407,7 @@ function verifySiteShellPage(entry, html, parsedRoot, errors) {
     && footerList?.name === "ul"
     && exactApplicationResourceAttributes(footerList, { class: "footer-links" })
     && exactShellListLinks(footerList, copy.footer, null);
-  if (!footerValid) error(errors, "site-shell-footer", entry.path, "requires the exact signature, 1993–2026 owner line and ordered localized seven-link footer");
+  if (!footerValid) error(errors, "site-shell-footer", entry.path, "requires the exact signature, 1993–2026 owner line and ordered localized eight-link footer");
 
   const stylesheets = all.filter((element) => element.name === "link" && (
     elementAttributeTokens(element, "rel").includes("stylesheet")
@@ -9816,7 +9652,10 @@ function plan3FactState(factData, context) {
       error(context.errors, "fact-publication-url", path, `${fact.id}: publication URL must match the reviewed existing homepage destination`);
     }
     const closedStatus = fact.status === "review" || fact.status === "retired";
-    if (!Array.isArray(fact.surfaces) || (!closedStatus && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
+    if (Object.hasOwn(fact, "unpublished_since") && !approvedUnpublished(fact)) {
+      error(context.errors, "fact-unpublished", path, `facts[${index}] unpublished_since requires an approved fact, a past YYYY-MM-DD date and no surfaces`);
+    }
+    if (!Array.isArray(fact.surfaces) || (!closedStatus && !approvedUnpublished(fact) && fact.surfaces.length === 0) || !fact.surfaces.every(nonEmptyString)) {
       error(context.errors, "fact-surfaces", path, `facts[${index}] surfaces must be a string array; approved facts require at least one surface`);
     } else {
       if (new Set(fact.surfaces).size !== fact.surfaces.length) {

@@ -20,7 +20,8 @@ test('public scheduling link is approved and identical on both home pages', asyn
   assert.equal(fact.source_url, fact.value);
   for (const [path, label] of [['index.html', fact.display_pl], ['en/index.html', fact.display_en]]) {
     const html = await readFile(resolve(path), 'utf8');
-    assert(html.includes(`<a href="${fact.value}" target="_blank" rel="noopener noreferrer" class="contact-detail">\n          <span data-fact-id="${fact.id}">${label}</span>`));
+    const escape = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    assert.match(html, new RegExp(`<a href="${escape(fact.value)}" target="_blank" rel="noopener noreferrer" class="contact-detail">\\s*<span data-fact-id="${escape(fact.id)}">${escape(label)}</span>`));
   }
 });
 

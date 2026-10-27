@@ -4,6 +4,24 @@ Wersje mamcarz.com numerujemy jako **ROK.TYDZIEŃ.KOLEJNE-WYDANIE** (tydzień IS
 
 Konkretny build wskazujemy skrótem commita w runbooku albo tutaj, nie w HTML strony.
 
+## Wersja 2026.44.1 z dnia 27 października 2026
+
+Wydanie wyrównuje repozytorium z produkcją. Wersja opublikowana na mamcarz.com 18 października 2026 (nowa strona główna i profil „O mnie”) nie miała źródeł w `main`. To wydanie odtwarza je z publicznej strony i łączy z poprawkami z PR #20.
+
+### Strona
+
+- Strona główna po polsku i angielsku ma układ z produkcji: obietnica marki z portretem, trzy obszary pracy (doradztwo, aplikacje operacyjne, lotnictwo) z jednym potwierdzonym przykładem każdy, krótkie „O mnie” i kontakt.
+- Są osobne strony `/o-mnie/` i `/en/o-mnie/` z profilem, wybranym doświadczeniem, wykształceniem i licencjami lotniczymi. Link „O mnie” (EN: „About”) jest w menu i stopce wszystkich stron.
+- W sekcji kontaktu jest zdjęcie z uniesionym kciukiem z PR #20.
+- Zostają poprawki z PR #20: czytelniejsze kolory etykiet, tekst zastępczy czatu bez JavaScriptu pisany w pierwszej osobie i prostszy wstęp do listy aplikacji.
+
+### Pod spodem
+
+- Nowy token zasobów `20261027-flightplan-5`. Produkcja serwowała inny arkusz stylów pod starym tokenem, więc nowy token wymusza pobranie aktualnego CSS.
+- Rejestr faktów opisuje, gdzie każdy fakt jest dziś publikowany. Fakty zdjęte ze strony głównej przy przebudowie mają datę `unpublished_since` zamiast fałszywej powierzchni publikacji.
+
+To cięcie nie wdraża Cloudflare Pages ani Workera.
+
 ## Wersja 2026.39.1 z dnia 21 września 2026
 
 Pierwsze wydanie w numeracji produktowej. Zbiera to, co weszło na `main` po redesignie Flight Plan, w tym warstwę Jev w czacie (PR #14).

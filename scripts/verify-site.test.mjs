@@ -218,8 +218,8 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "77f44a9c006977204e44ac9563705903e2c998ae0c730b07d65fd2a0f21bbda3",
-  "en/index.html": "2a97cf15c22157a73fb32dabbbc581879bde3d068c84f923596892a98281edcf",
+  "index.html": "3f3c9a2b57472149282cffa807cc62e14f03c28c5715217ae7fde100d47426b6",
+  "en/index.html": "46945bb9ed256108d59fa48a6dee9461d9138ab833763bde9c52b3dc876f3476",
   "uslugi/transformacja-zakupow/index.html": "fffac19ec9b11b530ba8b0c471573252ee723bda3797f182d16d8baae2399dd1",
   "en/uslugi/transformacja-zakupow/index.html": "4bed2ac8b3630a4bb68fd3f87f4411ac38a6ce6e990ff1c2f353f1af127a9b15",
   "uslugi/wdrozenie-sap-ariba/index.html": "6472aa640f740db4d67d74eb22a935d72510407a44178de8a76eeeeb4630ac2b",
@@ -250,14 +250,14 @@ const task9ShellCopy = Object.freeze({
     primary: Object.freeze([
       Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#about", "O mnie"]), Object.freeze(["/#contact", "Kontakt"])
+      Object.freeze(["/o-mnie/", "O mnie"]), Object.freeze(["/#contact", "Kontakt"])
     ]),
     language: "EN", toggle: "Menu nawigacyjne", back: "Wróć na górę",
     footer: Object.freeze([
       Object.freeze(["/", "Strona główna"]), Object.freeze(["/uslugi/transformacja-zakupow/", "Doradztwo"]),
       Object.freeze(["/aplikacje-operacyjne/", "Aplikacje"]), Object.freeze(["/lotnictwo/", "Lotnictwo"]),
       Object.freeze(["/case-studies/", "Projekty"]), Object.freeze(["/wiedza/", "Wiedza"]),
-      Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
+      Object.freeze(["/o-mnie/", "O mnie"]), Object.freeze(["/#contact", "Kontakt"]), Object.freeze(["/prywatnosc/", "Prywatność"])
     ])
   }),
   en: Object.freeze({
@@ -270,14 +270,14 @@ const task9ShellCopy = Object.freeze({
     primary: Object.freeze([
       Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#about", "About"]), Object.freeze(["/en/#contact", "Contact"])
+      Object.freeze(["/en/o-mnie/", "About"]), Object.freeze(["/en/#contact", "Contact"])
     ]),
     language: "PL", toggle: "Navigation menu", back: "Back to top",
     footer: Object.freeze([
       Object.freeze(["/en/", "Home"]), Object.freeze(["/en/uslugi/transformacja-zakupow/", "Advisory"]),
       Object.freeze(["/en/aplikacje-operacyjne/", "Applications"]), Object.freeze(["/en/lotnictwo/", "Aviation"]),
       Object.freeze(["/en/case-studies/", "Projects"]), Object.freeze(["/en/wiedza/", "Insights"]),
-      Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
+      Object.freeze(["/en/o-mnie/", "About"]), Object.freeze(["/en/#contact", "Contact"]), Object.freeze(["/en/prywatnosc/", "Privacy"])
     ])
   })
 });
@@ -292,18 +292,18 @@ function task9ExpectedShell(entry) {
   return Object.freeze({
     nav: `<nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"${logoCurrent}><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.group}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${entry.counterpart}" class="nav-lang">${copy.language}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>`,
     controls: `<div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${copy.back}">↑</button>`,
-    footer: `<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>`
+    footer: `<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20261027-flightplan-5" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>`
   });
 }
 
 function task9CanonicalHtml(entry, html = task9SiteShellProductHtml[entry.path]) {
   const shell = task9ExpectedShell(entry);
   return html
-    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20260921-flightplan-4")
+    .replace(/\/assets\/css\/style\.css\?v=[^"']+/g, "/assets/css/style.css?v=20261027-flightplan-5")
     .replace(/<nav class="site-nav"[\s\S]*?<\/nav>/, shell.nav)
     .replace(/<div class="nav-overlay"[\s\S]*?<\/div>\s*<button class="back-to-top"[\s\S]*?<\/button>/, shell.controls)
     .replace(/<footer(?: class="site-footer")?>[\s\S]*?<\/footer>/, shell.footer)
-    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>');
+    .replace(/<script src="\/assets\/js\/main\.js\?v=[^"]+" defer><\/script>/, '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>');
 }
 
 function task9ProtectedContent(html) {
@@ -352,7 +352,7 @@ const navigationFixture = {
         <li><a href="/lotnictwo/">Lotnictwo</a></li>
         <li><a href="/case-studies/">Projekty</a></li>
         <li><a href="/wiedza/">Wiedza</a></li>
-        <li><a href="/#about">O mnie</a></li>
+        <li><a href="/o-mnie/">O mnie</a></li>
         <li><a href="/#contact">Kontakt</a></li>
       </ul>
       <a href="/en/" class="nav-lang">EN</a>
@@ -372,7 +372,7 @@ const navigationFixture = {
         <li><a href="/en/lotnictwo/">Aviation</a></li>
         <li><a href="/en/case-studies/">Projects</a></li>
         <li><a href="/en/wiedza/">Insights</a></li>
-        <li><a href="/en/#about">About</a></li>
+        <li><a href="/en/o-mnie/">About</a></li>
         <li><a href="/en/#contact">Contact</a></li>
       </ul>
       <a href="/" class="nav-lang">PL</a>
@@ -417,15 +417,15 @@ function pageShellFixture({ lang, plRoute, enRoute, body = "", head = "", title 
     <link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}">
     <link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}">
     <link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">
     ${head}
   </head><body data-page="${dataPage}">
     <a class="skip-link" href="#main">Skip</a>
     ${pageNavigationFixture(lang, pairedRoute, route)}
     <button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero"><h1>${title}</h1>${lead ? `<p class="page-lead">${lead}</p>` : ""}</header>${body}</main>
-    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
-    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${lang === "pl" ? "/" : "/en/"}" aria-label="${lang === "pl" ? "Paweł Mamcarz, strona główna" : "Paweł Mamcarz, homepage"}"><img src="/assets/img/signature.png?v=20261027-flightplan-5" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${(lang === "pl" ? task9ShellCopy.pl.footer : task9ShellCopy.en.footer).map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("")}</ul></footer>
+    <script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>
   </body></html>`;
 }
 
@@ -488,6 +488,13 @@ async function pageArchitectureFixture({ files, facts, public_claim_surfaces, ex
     extraFiles: {
       "prywatnosc/index.html": await readFile(resolve("prywatnosc/index.html"), "utf8"),
       "en/prywatnosc/index.html": await readFile(resolve("en/prywatnosc/index.html"), "utf8"),
+      "o-mnie/index.html": await readFile(resolve("o-mnie/index.html"), "utf8"),
+      "en/o-mnie/index.html": await readFile(resolve("en/o-mnie/index.html"), "utf8"),
+      "assets/img/about-portrait-760.jpg": "fixture-jpg",
+      "assets/img/about-portrait-480.webp": "fixture-webp",
+      "assets/img/about-portrait-760.webp": "fixture-webp",
+      "assets/img/portrait-og.jpg": "fixture-jpg",
+      "logo.png": "fixture-png",
       "favicon.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
       "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2": "fixture-font",
       "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2": "fixture-font",
@@ -586,36 +593,33 @@ const controlledAboutCopy = {
   }
 };
 
+const controlledAboutCopy_profile = {
+  pl: ["/o-mnie/", "Pełny profil i wybrane doświadczenie"],
+  en: ["/en/o-mnie/", "Full profile and selected experience"]
+};
+
 const controlledAboutFacts = [
-  ["aviation.ppl_h", "PPL(H)", "PPL(H)"],
-  ["aviation.ppl_a", "PPL(A)", "PPL(A)"],
-  ["aviation.aerobatics_rating", "uprawnienia do akrobacji", "aerobatics rating"],
-  ["aviation.diverse_extreme_team", "pilot pokazowy Diverse Extreme Team (2013)", "display pilot for the Diverse Extreme Team (2013)"],
-  ["aviation.forum_photographer", "fotograf prasowy agencji Forum", "Press photographer with Forum Agency"],
-  ["aviation.air_to_air_media", "sesje air-to-air, realizacje wideo i dronem", "air-to-air shoots, video and drone production"]
+  ["portrait.credit", "Robakowski studio", "Robakowski studio"],
+  ["project.alpha.role", "Kierownik projektu Alpha", "Alpha project manager"],
+  ["portfolio.beta", "beta.example", "beta.example"],
+  ["portfolio.gamma", "gamma.example", "gamma.example"]
 ];
 
 function controlledAboutFixture(lang) {
   const copy = controlledAboutCopy[lang];
-  const factItems = controlledAboutFacts.map(([id, displayPl, displayEn]) => `
-        <li class="about-fact" data-fact-id="${id}">${lang === "pl" ? displayPl : displayEn}</li>`).join("");
-  return `<div class="about-text">
+  const [profileHref, profileLabel] = controlledAboutCopy_profile[lang];
+  return `<figure class="about-photo"><picture><img src="/assets/img/about-portrait-760.jpg" alt="Paweł Mamcarz" width="760" height="950" decoding="async" loading="lazy"></picture><figcaption><span data-fact-id="portrait.credit">Robakowski studio</span></figcaption></figure>
+    <div class="about-text">
       <p class="section-label">${copy.label}</p>
       <h2>Controlled About</h2>
       ${copy.narratives.map(([id, text]) => `<p data-about-copy="${id}">${text}</p>`).join("\n      ")}
-      <ul class="about-facts">${factItems}
-      </ul>
-      <div class="expertise-list"><div class="expertise-item">Decision</div><div class="expertise-item">Process</div><div class="expertise-item">Delivery</div></div>
+      <a class="text-link" href="${profileHref}">${profileLabel}</a>
     </div>`;
 }
 
-function publicProcurementSkillsFixture(lang, { href, labels, outcome } = {}) {
-  const localized = lang === "pl"
-    ? { href: "/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Działanie", "Możliwy wynik"], title: "Zamówienia publiczne" }
-    : { href: "/en/uslugi/doradztwo-zamowienia-publiczne/", labels: ["Problem", "Action", "Possible outcome"], title: "Public procurement" };
-  const ledgerLabels = labels ?? [localized.labels[0], localized.labels[1], outcome ?? localized.labels[2]];
-  const ledger = ledgerLabels.map((label) => `<div><dt>${label}</dt><dd>One</dd></div>`).join("");
-  return `<article class="evidence-row" data-domain="advisory" data-service="public-procurement"><h3><a href="${href ?? localized.href}">${localized.title}</a></h3><dl>${ledger}</dl></article>`;
+function homeWorkFixture(lang) {
+  const domain = (name, id, pl, en, image = "") => `<article class="home-domain" data-domain="${name}">${image}<p class="home-domain__proof" data-fact-id="${id}">${lang === "pl" ? pl : en}</p></article>`;
+  return `<div class="home-domains">${domain("advisory", "project.alpha.role", "Kierownik projektu Alpha", "Alpha project manager")}${domain("applications", "portfolio.beta", "beta.example", "beta.example", '<img src="/assets/img/portfolio/czympojade.webp" alt="" width="1400" height="597" loading="lazy" decoding="async">')}${domain("aviation", "portfolio.gamma", "gamma.example", "gamma.example")}</div>`;
 }
 
 function replaceHomepageSection(html, sectionId, replacement) {
@@ -631,9 +635,6 @@ function contactPortraitFixture(lang) {
 function homepageFixture(lang, content) {
   const projectsHref = lang === "pl" ? "/case-studies/" : "/en/case-studies/";
   const projectsLabel = lang === "pl" ? "Projekty" : "Projects";
-  const processLabels = lang === "pl"
-    ? ["Diagnoza", "Strategia", "Wdrożenie", "Wartość"]
-    : ["Diagnosis", "Strategy", "Implementation", "Value"];
   const contactIntents = lang === "pl"
     ? [["Doradztwo", "Doradztwo"], ["Aplikacja operacyjna", "Aplikacja%20operacyjna"], ["Lotnictwo", "Lotnictwo"]]
     : [["Advisory", "Advisory"], ["Operational application", "Operational%20application"], ["Aviation", "Aviation"]];
@@ -642,34 +643,21 @@ function homepageFixture(lang, content) {
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite"},{"@type":"Person"}]}</script>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin>
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">
   </head><body>
     <a href="#main" class="skip-link">${skipLabel}</a>
     ${navigationFixture[lang]}<main id="main">
     <section id="hero"><h1 data-fact-id="brand.promise">${content}</h1><img src="/assets/img/IMG_3284-480.webp" alt="" width="960" height="1280" fetchpriority="high"></section>
-    <section data-section="trust"></section>
-    <section id="process">${processLabels.map((label, index) => `<article class="route-sequence__step"><p class="section-index">0${index + 1} / ${label}</p><h3>${label}</h3></article>`).join("")}</section>
-    <aside data-cta-after="process"></aside>
-    <section id="cases"></section>
-    <aside data-cta-after="cases"></aside>
-    <section id="skills"><article class="evidence-row" data-domain="applications"><h3>${lang === "pl" ? "Aplikacje operacyjne" : "Operational applications"}</h3><dl><div><dt>Problem</dt><dd>One</dd></div><div><dt>${lang === "pl" ? "Działanie" : "Action"}</dt><dd>Two</dd></div><div><dt>${lang === "pl" ? "Możliwy wynik" : "Possible outcome"}</dt><dd>Three</dd></div></dl></article>${publicProcurementSkillsFixture(lang)}</section>
+    <section id="work">${homeWorkFixture(lang)}</section>
     <section id="about">${controlledAboutFixture(lang)}</section>
-    <section id="education"></section>
-    <section id="resume"></section>
-    <section id="portfolio"></section>
-    <section id="clients"></section>
     <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>${contactPortraitFixture(lang)}</section>
   </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><div id="ai-chat" hidden><input id="chat-input" maxlength="2000"></div><p data-chat-fallback>Email contact is available.</p>
-    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
+    <script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>
   </body></html>`;
 }
 
 function parityInventoryFixture(lang) {
-  const title = (id, value) => `<div class="pcard__title" data-fact-id="${id}">${value}</div>`;
-  const client = (id, value) => `<div class="client-item" data-fact-id="${id}">${value}</div>`;
-  return homepageFixture(lang, lang === "pl" ? "Marka" : "Brand")
-    .replace('<section id="portfolio"></section>', `<section id="portfolio"><div class="portfolio-cards"><a class="pcard" href="https://alpha.example">${title("portfolio.alpha", "Alpha")}</a><a class="pcard" href="https://beta.example">${title("portfolio.beta", "Beta")}</a></div></section>`)
-    .replace('<section id="clients"></section>', `<section id="clients">${client("client.alpha", "Alpha Client")}${client("client.beta", "Beta Client")}</section>`);
+  return homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
 }
 
 function fact(overrides = {}) {
@@ -737,11 +725,17 @@ async function fixture({ facts = [fact()], blocked_claims = [blockedClaim()], pu
   return root;
 }
 
-async function currentHomepageMutationFixture(lang, mutate) {
+const procurementAnchorSeeds = {
+  pl: '<div class="portfolio-cards"><a href="https://example.com/" class="pcard"><div class="pcard__link">Otwórz projekt</div></a><a href="/procurement-2026/" class="pcard"><div class="pcard__link">Otwórz projekt</div></a></div>',
+  en: '<div class="portfolio-cards"><a href="https://example.com/" class="pcard"><div class="pcard__link">Open project</div></a><a href="/procurement-2026/" lang="pl" class="pcard"><div class="pcard__link">Open project in Polish</div></a></div>'
+};
+
+async function currentHomepageMutationFixture(lang, mutate, { seedProcurementAnchor = false } = {}) {
+  const seed = (html, seedLang) => seedProcurementAnchor ? html.replace("</main>", `${procurementAnchorSeeds[seedLang]}</main>`) : html;
   const [factData, plHtml, enHtml] = await Promise.all([
     readFacts(),
-    readFile(resolve("index.html"), "utf8"),
-    readFile(resolve("en/index.html"), "utf8")
+    readFile(resolve("index.html"), "utf8").then((html) => seed(html, "pl")),
+    readFile(resolve("en/index.html"), "utf8").then((html) => seed(html, "en"))
   ]);
   const current = lang === "pl" ? plHtml : enHtml;
   const mutated = mutate(current);
@@ -854,6 +848,8 @@ async function productionRegistryFixture(overrides = {}) {
       "en/case-studies/index.html": projectProductHtml.en,
       "wystapienia/index.html": speakingProductHtml.pl,
       "en/wystapienia/index.html": speakingProductHtml.en,
+      "o-mnie/index.html": await readFile(resolve("o-mnie/index.html"), "utf8"),
+      "en/o-mnie/index.html": await readFile(resolve("en/o-mnie/index.html"), "utf8"),
       "assets/img/portfolio/akrobacja.webp": "fixture-webp",
       "assets/img/portfolio/akrobacja.jpg": "fixture-jpg",
       ...speakingProductAssets,
@@ -1057,20 +1053,20 @@ function knowledgePageFixture(lang) {
     description: contract.purpose, ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna",
     home: "/", logoLabel: "Paweł Mamcarz, strona główna", advisory: "Doradztwo",
     submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
-    primary: [["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/#about", "O mnie"], ["/#contact", "Kontakt"]],
+    primary: [["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/o-mnie/", "O mnie"], ["/#contact", "Kontakt"]],
     paired: "/en/wiedza/", pairedLabel: "EN", toggle: "Menu nawigacyjne", breadcrumbLabel: "Okruszki", breadcrumbHome: "Strona główna",
     kicker: "MATERIAŁY", catalogue: "Katalog", catalogueCopy: "Materiały dostępne bezpośrednio w tym serwisie.",
     contactLabel: "KONTAKT / NASTĘPNY KROK", contactCopy: "Jeśli materiał dotyczy decyzji, nad którą pracujesz, przejdź do rozmowy.",
-    footer: [["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/#contact", "Kontakt"], ["/prywatnosc/", "Prywatność"]]
+    footer: [["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/o-mnie/", "O mnie"], ["/#contact", "Kontakt"], ["/prywatnosc/", "Prywatność"]]
   } : {
     description: contract.purpose, ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation",
     home: "/en/", logoLabel: "Paweł Mamcarz, homepage", advisory: "Advisory",
     submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
-    primary: [["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/#about", "About"], ["/en/#contact", "Contact"]],
+    primary: [["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/o-mnie/", "About"], ["/en/#contact", "Contact"]],
     paired: "/wiedza/", pairedLabel: "PL", toggle: "Navigation menu", breadcrumbLabel: "Breadcrumb", breadcrumbHome: "Home",
     kicker: "RESOURCES", catalogue: "Catalogue", catalogueCopy: "Materials available directly on this site.",
     contactLabel: "CONTACT / NEXT STEP", contactCopy: "If a resource relates to a decision you are working on, continue to the conversation.",
-    footer: [["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/#contact", "Contact"], ["/en/prywatnosc/", "Privacy"]]
+    footer: [["/en/", "Home"], ["/en/uslugi/transformacja-zakupow/", "Advisory"], ["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights"], ["/en/o-mnie/", "About"], ["/en/#contact", "Contact"], ["/en/prywatnosc/", "Privacy"]]
   };
   const submenu = copy.submenu.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const primary = copy.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
@@ -1081,14 +1077,14 @@ function knowledgePageFixture(lang) {
     <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
     <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">
   </head><body class="knowledge-page" data-page="knowledge">
     <a href="#main" class="skip-link">${copy.skip}</a>
     <nav class="site-nav" aria-label="${copy.navLabel}"><a href="${copy.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${copy.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${copy.paired}" class="nav-lang">${copy.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${copy.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav>
     <div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${lang === "pl" ? "Wróć na górę" : "Back to top"}">↑</button>
     <main id="main" tabindex="-1"><header class="page-hero knowledge-hero"><div class="page-hero-content"><nav class="breadcrumb" aria-label="${copy.breadcrumbLabel}"><a href="${copy.home}">${copy.breadcrumbHome}</a><span aria-hidden="true">/</span><span aria-current="page">${contract.title}</span></nav><p class="knowledge-kicker">${copy.kicker}</p><h1 class="page-title">${contract.title}</h1><p class="page-lead">${contract.purpose}</p></div></header><section class="knowledge-index" data-section="resources"><div class="section-shell knowledge-index__head"><p class="section-label">${copy.catalogue}</p><p>${copy.catalogueCopy}</p></div>${resources}</section><aside class="knowledge-contact"><div class="section-shell knowledge-contact__inner"><p class="knowledge-contact__label">${copy.contactLabel}</p><p>${copy.contactCopy}</p><a class="btn-primary" href="${contract.ctaHref}">${contract.ctaLabel}</a></div></aside></main>
-    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
-    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
+    <footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${copy.home}" aria-label="${copy.logoLabel}"><img src="/assets/img/signature.png?v=20261027-flightplan-5" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">© 1993–2026 Paweł Mamcarz · mamcarz.com</div></div><ul class="footer-links">${footer}</ul></footer>
+    <script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>
   </body></html>`;
 }
 
@@ -1374,24 +1370,24 @@ test("Plan 2 Task 1 requires exact canonical, real hreflang and paired language 
 test("Plan 2 Task 1 rejects inactive asset decoys and navigation routes outside site-nav", async () => {
   const mutations = [
     ["stylesheet template decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></template>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><template><link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5"></template>'
     )],
     ["stylesheet hidden decoy", "page-stylesheet", (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" hidden>'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+      '<link rel="stylesheet" href="/assets/css/wrong.css"><link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" hidden>'
     )],
     ["script noscript decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
-      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><noscript><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></noscript>'
+      '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>',
+      '<script src="/assets/js/main.js?v=20261027-flightplan-5"></script><noscript><script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script></noscript>'
     )],
     ["script template decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
-      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><template><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></template>'
+      '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>',
+      '<script src="/assets/js/main.js?v=20261027-flightplan-5"></script><template><script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script></template>'
     )],
     ["script hidden decoy", "page-script", (html) => html.replace(
-      '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
-      '<script src="/assets/js/main.js?v=20260921-flightplan-4"></script><script src="/assets/js/main.js?v=20260921-flightplan-4" defer hidden></script>'
+      '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>',
+      '<script src="/assets/js/main.js?v=20261027-flightplan-5"></script><script src="/assets/js/main.js?v=20261027-flightplan-5" defer hidden></script>'
     )],
     ["route outside navigation", "page-navigation", (html) => html
       .replace('<a href="/lotnictwo/">Lotnictwo</a>', '<a href="/usunieta-trasa/">Lotnictwo</a>')
@@ -2635,7 +2631,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["paragraph", (html) => html.replace('<p class="section-label">01 / Problem</p>', '<p class="section-label"/>')],
     ["details", (html) => html.replace('<details class="nav-group">', '<details class="nav-group"/>')],
     ["summary", (html) => html.replace("<summary>Doradztwo</summary>", "<summary/>")],
-    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>', '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer/>')],
+    ["script", (html) => html.replace('<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>', '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer/>')],
     ["style", (html) => html.replace("</footer>", "<style/></style></footer>")]
   ];
   const outcomes = await Promise.all(cases.map(async ([label, mutate]) => ({
@@ -2655,7 +2651,7 @@ test("Plan 2 Task 2 fix round 5 rejects self-closing syntax on every non-void HT
     ["attributes on a closing tag", (html) => html.replace("<span></span>", "<span></span claim>")],
     ["stray closing tag", (html) => html.replace("</footer>", "</claim></footer>")],
     ["stray opening tag", (html) => html.replace("</footer>", "<span></footer>")],
-    ["closing tag for a void element", (html) => html.replace('<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async">', '<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></img>')],
+    ["closing tag for a void element", (html) => html.replace('<img src="/assets/img/signature.png?v=20261027-flightplan-5" alt="" width="160" height="50" loading="lazy" decoding="async">', '<img src="/assets/img/signature.png?v=20261027-flightplan-5" alt="" width="160" height="50" loading="lazy" decoding="async"></img>')],
     ["mismatched nesting", (html) => html.replace("</footer>", "<div><span></div></span></footer>")],
     ["slash before stray opening-tag content", (html) => html.replace("<span></span>", "<span / claim></span>")]
   ];
@@ -3024,9 +3020,9 @@ test("Plan 2 Task 4 fix round 2 owns URL-valued metadata, itemid and statically 
 test("Plan 2 Task 4 fix round 2 pins full-document resources, metadata and actionable controls", async () => {
   const cases = [
     ["external OG image", (html) => html.replace('content="https://mamcarz.com/assets/img/og.jpg"', 'content="https://example.com/og.jpg"')],
-    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png?v=20260921-flightplan-4"', 'img data="/assets/img/signature.png?v=20260921-flightplan-4"')],
+    ["signature URL attribute name drift", (html) => html.replace('img src="/assets/img/signature.png?v=20261027-flightplan-5"', 'img data="/assets/img/signature.png?v=20261027-flightplan-5"')],
     ["actionable footer button", (html) => html.replace("</footer>", '<button onclick="location.href=\'/#contact\'">Contact</button></footer>')],
-    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></body>')],
+    ["stylesheet location drift", (html) => html.replace('<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">', '').replace("</body>", '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5"></body>')],
     ["inactive resource extra", (html) => html.replace("</footer>", '<template><img src="https://example.com/hidden.png" alt=""></template></footer>')],
     ["unapproved event handler", (html) => html.replace('class="footer-sign"', 'class="footer-sign" onfocus="location.href=\'/#contact\'"')]
   ];
@@ -3164,8 +3160,8 @@ test("Plan 2 Task 2 fix round 5 independently inventories executable, style and 
 
   const duplicateStylesheetHref = await applicationPageMutation({
     mutate: (html) => html.replace(
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-      '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" href="/assets/css/style.css?v=20260921-flightplan-4">'
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+      '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" href="/assets/css/style.css?v=20261027-flightplan-5">'
     )
   });
   assert.ok(errorIds(duplicateStylesheetHref).includes("application-resource-census"), duplicateStylesheetHref.errors.join("\n"));
@@ -4248,7 +4244,7 @@ function notFoundContractFixture() {
     <title>404 · Strona nie istnieje | mamcarz.com</title>
     <meta name="description" content="Pod tym adresem nie ma strony.">
     <meta name="robots" content="noindex, follow">
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">
     <style>[data-lang="en"]{display:none}html[lang="en"] [data-lang="pl"]{display:none}html[lang="en"] [data-lang="en"]{display:revert}</style>
     <script>(function(){var english=location.pathname.indexOf("/en/")===0;if(!english)return;document.documentElement.lang="en";document.title="404 · Page not found | mamcarz.com";var meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute("content","There is no page at this address.");})();</script>
   </head><body>
@@ -4258,7 +4254,7 @@ function notFoundContractFixture() {
       <a href="/" data-lang="pl">Strona główna</a><a href="/#contact" data-lang="pl">Kontakt</a>
       <a href="/en/" data-lang="en">Home</a><a href="/en/#contact" data-lang="en">Contact</a>
     </main><footer class="site-footer">mamcarz.com</footer>
-    <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
+    <script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>
   </body></html>`;
 }
 
@@ -4271,7 +4267,7 @@ test("Plan 3 Task 5 requires one no-JS-safe bilingual 404 document", async (t) =
     ["second h1", "not-found-h1", (html) => html.replace("</main>", "<h1>Duplicate</h1></main>")],
     ["second main", "not-found-main", (html) => html.replace("</footer>", "<main></main></footer>")],
     ["indexable error", "not-found-robots", (html) => html.replace("noindex, follow", "index, follow")],
-    ["stale asset", "not-found-assets", (html) => html.replaceAll("20260921-flightplan-4", "stale")],
+    ["stale asset", "not-found-assets", (html) => html.replaceAll("20261027-flightplan-5", "stale")],
     ["missing English contact", "not-found-links", (html) => html.replace('href="/en/#contact"', 'href="/en/"')],
     ["duplicate id", "not-found-ids", (html) => html.replace("</main>", '<span id="main"></span></main>')],
     ["English default", "not-found-default", (html) => html.replace('<html lang="pl">', '<html lang="en">')],
@@ -5197,22 +5193,22 @@ test("home scope rejects a visible em dash encoded as an HTML entity", async () 
 });
 
 test("home scope does not accept a required section marker inside a script", async () => {
-  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<script>const fake = \'<section id="clients"></section>\';</script>');
+  const html = homepageFixture("pl", "Marka").replace(/<section id="about">[\s\S]*?<\/section>/, '<script>const fake = \'<section id="about"></section>\';</script>');
   const root = await fixture({ plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-section-order"));
 });
 
 test("home scope rejects a fact-bearing item with a missing annotation", async () => {
-  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
-  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item">Acme</div></section>');
-  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const project = fact({ id: "project.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<div class="home-domains">', '<div class="home-domains"><p class="home-domain__proof">Acme</p>');
+  const root = await fixture({ facts: [fact(), project], plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-fact-annotation"));
 });
 
 test("home scope rejects an unknown fact id annotation", async () => {
-  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.unknown">Unknown Client</div></section>');
+  const html = homepageFixture("pl", "Marka").replace('<div class="home-domains">', '<div class="home-domains"><p class="home-domain__proof" data-fact-id="project.unknown">Unknown Client</p>');
   const root = await fixture({ plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-fact-unknown"));
@@ -5220,9 +5216,9 @@ test("home scope rejects an unknown fact id annotation", async () => {
 
 for (const status of ["review", "retired"]) {
   test(`home scope rejects a ${status} fact id annotation`, async () => {
-    const client = fact({ id: `client.${status}`, value: status, display_pl: status, display_en: status, status });
-    const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', `<section id="clients"><div class="client-item" data-fact-id="client.${status}">${status}</div></section>`);
-    const root = await fixture({ facts: [fact(), client], plHtml: html });
+    const project = fact({ id: `project.${status}`, value: status, display_pl: status, display_en: status, status });
+    const html = homepageFixture("pl", "Marka").replace('<div class="home-domains">', `<div class="home-domains"><p class="home-domain__proof" data-fact-id="project.${status}">${status}</p>`);
+    const root = await fixture({ facts: [fact(), project], plHtml: html });
     const result = await runVerification({ root, scope: "home", lang: "pl" });
     assert.ok(errorIds(result).includes("home-fact-status"));
   });
@@ -5326,34 +5322,36 @@ for (const [malformedState, malformedHtml] of [
 }
 
 test("home scope rejects an approved fact annotation with the wrong localized value", async () => {
-  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
-  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Wrong client</div></section>');
-  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const project = fact({ id: "project.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<div class="home-domains">', '<div class="home-domains"><p class="home-domain__proof" data-fact-id="project.acme">Wrong client</p>');
+  const root = await fixture({ facts: [fact(), project], plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-fact-value"));
 });
 
 test("home scope rejects an approved fact followed by an invented assertion in the same annotated leaf", async () => {
-  const client = fact({ id: "client.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
-  const html = homepageFixture("pl", "Marka").replace('<section id="clients"></section>', '<section id="clients"><div class="client-item" data-fact-id="client.acme">Acme. Niepotwierdzony lider rynku.</div></section>');
-  const root = await fixture({ facts: [fact(), client], plHtml: html });
+  const project = fact({ id: "project.acme", value: "Acme", display_pl: "Acme", display_en: "Acme" });
+  const html = homepageFixture("pl", "Marka").replace('<div class="home-domains">', '<div class="home-domains"><p class="home-domain__proof" data-fact-id="project.acme">Acme. Niepotwierdzony lider rynku.</p>');
+  const root = await fixture({ facts: [fact(), project], plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
   assert.ok(errorIds(result).includes("home-fact-value"));
 });
 
-test("home scope rejects an unannotated injected About aviation fact", async () => {
-  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"><li>Niepotwierdzone uprawnienie lotnicze</li>');
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-fact-annotation"));
+test("home scope accepts the controlled About and Work fixtures in both languages", async () => {
+  const root = await fixture();
+  for (const lang of ["pl", "en"]) {
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(!errorIds(result).includes("home-about-structure"), result.errors.join("\n"));
+    assert.ok(!errorIds(result).includes("home-work-structure"), result.errors.join("\n"));
+  }
 });
 
 for (const [element, injected] of [
-  ["paragraph", '<p class="about-fact">Niepotwierdzona informacja</p>'],
-  ["span", "<span>Niepotwierdzona informacja</span>"]
+  ["paragraph", "<p>Niepotwierdzona informacja</p>"],
+  ["annotated span", '<span data-fact-id="brand.promise">Marka</span>']
 ]) {
   test(`home scope rejects an unsupported About ${element}`, async () => {
-    const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', `${injected}<ul class="about-facts">`);
+    const html = homepageFixture("pl", "Marka").replace('<a class="text-link" href="/o-mnie/">', `${injected}<a class="text-link" href="/o-mnie/">`);
     const root = await fixture({ plHtml: html });
     const result = await runVerification({ root, scope: "home", lang: "pl" });
     assert.ok(errorIds(result).includes("home-about-structure"));
@@ -5381,179 +5379,82 @@ test("home scope requires stable About narrative IDs", async () => {
   assert.ok(errorIds(result).includes("home-about-structure"));
 });
 
-test("home scope requires exactly one About aviation facts list", async () => {
-  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"></ul><ul class="about-facts">');
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-about-structure"));
-});
+for (const [name, lang, mutate] of [
+  ["a missing profile link", "pl", (html) => html.replace(/<a class="text-link" href="\/o-mnie\/">[^<]*<\/a>/, "")],
+  ["a Polish profile route on the English homepage", "en", (html) => html.replace('href="/en/o-mnie/">Full profile', 'href="/o-mnie/">Full profile')],
+  ["an untranslated profile label", "en", (html) => html.replace("Full profile and selected experience", "Pełny profil i wybrane doświadczenie")],
+  ["a second profile link", "pl", (html) => html.replace('<a class="text-link" href="/o-mnie/">', '<a href="/o-mnie/">Profil</a><a class="text-link" href="/o-mnie/">')]
+]) {
+  test(`home scope rejects About with ${name}`, async () => {
+    const valid = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
+    const mutated = mutate(valid);
+    assert.notEqual(mutated, valid);
+    const root = await fixture({ [`${lang}Html`]: mutated });
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(errorIds(result).includes("home-about-structure"));
+  });
+}
 
-test("home scope rejects a missing About aviation fact item", async () => {
-  const html = homepageFixture("pl", "Marka").replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', "");
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-about-structure"));
-});
-
-test("home scope rejects reordered About aviation fact items", async () => {
-  const valid = homepageFixture("pl", "Marka");
-  const first = '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>';
-  const second = '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>';
-  const html = valid.replace(`${first}\n        ${second}`, `${second}\n        ${first}`);
-  assert.notEqual(html, valid);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-about-structure"));
-});
-
-test("home scope rejects an extra annotated About aviation fact item", async () => {
-  const html = homepageFixture("pl", "Marka").replace('<ul class="about-facts">', '<ul class="about-facts"><li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>');
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-about-structure"));
-});
-
-test("home scope rejects an unsupported sibling paragraph anywhere in About", async () => {
-  const about = `<section id="about">${controlledAboutFixture("pl")}<p>Niepotwierdzona informacja</p></section>`;
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "about", about);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-about-structure"));
-});
-
-test("home scope rejects a seventh annotated About fact in a sibling list", async () => {
-  const duplicate = '<ul class="about-facts"><li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li></ul>';
-  const about = `<section id="about">${controlledAboutFixture("pl")}${duplicate}</section>`;
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "about", about);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-about-structure"));
-});
+for (const [name, mutate] of [
+  ["an eager About photo", (html) => html.replace(' decoding="async" loading="lazy"></picture><figcaption>', ' decoding="async"></picture><figcaption>')],
+  ["an About photo without intrinsic height", (html) => html.replace('width="760" height="950"', 'width="760"')],
+  ["an About photo without alt text", (html) => html.replace('alt="Paweł Mamcarz" width="760"', 'alt="" width="760"')],
+  ["a missing portrait credit annotation", (html) => html.replace('<span data-fact-id="portrait.credit">Robakowski studio</span>', "Robakowski studio")]
+]) {
+  test(`home scope rejects ${name}`, async () => {
+    const valid = homepageFixture("pl", "Marka");
+    const mutated = mutate(valid);
+    assert.notEqual(mutated, valid);
+    const root = await fixture({ plHtml: mutated });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-about-structure"));
+  });
+}
 
 test("home scope fails closed when English About control markers are absent", async () => {
-  const uncontrolledAbout = controlledAboutFixture("en")
-    .replaceAll(/ data-about-copy="[^"]+"/g, "")
-    .replace(' class="about-facts"', "");
-  const about = `<section id="about">${uncontrolledAbout}</section>`;
-  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "about", about);
+  const uncontrolledAbout = controlledAboutFixture("en").replaceAll(/ data-about-copy="[^"]+"/g, "");
+  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "about", `<section id="about">${uncontrolledAbout}</section>`);
   const root = await fixture({ enHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(errorIds(result).includes("home-about-structure"));
 });
 
-const unannotatedHomeClaims = [
-  ["resume", '<p class="timeline-role">Unregistered role</p>'],
-  ["portfolio", '<div class="pcard__title">Unregistered project</div>'],
-  ["clients", '<div class="client-item">Unregistered client</div>'],
-  ["cases", "<dl><div><dt>Zakres</dt><dd>Unregistered project scope</dd></div></dl>"]
-];
-
-for (const [sectionId, claim] of unannotatedHomeClaims) {
-  test(`home scope rejects an unannotated injected ${sectionId} claim`, async () => {
-    const html = homepageFixture("pl", "Marka").replace(`<section id="${sectionId}"></section>`, `<section id="${sectionId}">${claim}</section>`);
-    const root = await fixture({ plHtml: html });
-    const result = await runVerification({ root, scope: "home", lang: "pl" });
-    assert.ok(errorIds(result).includes("home-fact-annotation"));
-  });
-}
-
-test("home scope rejects an unmatched Process article closing tag", async () => {
-  const process = '<section id="process"><article class="route-sequence__step"></article><article class="route-sequence__step"></article><article class="route-sequence__step"></article></article><article class="route-sequence__step"></article></section>';
-  const html = homepageFixture("pl", "Marka").replace(/<section id="process">[\s\S]*?<\/section>/, process);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-process-structure"));
-});
-
-test("home scope rejects a duplicate public-procurement possible-result row", async () => {
-  const skills = '<section id="skills"><article data-service="public-procurement"><h3><a href="/uslugi/doradztwo-zamowienia-publiczne/">Zamówienia publiczne</a></h3><dl><div><dt>Możliwy wynik</dt><dd>One</dd></div><div><dt>Możliwy wynik</dt><dd>Two</dd></div></dl></article></section>';
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope accepts the localized English public-procurement Skills structure", async () => {
-  const skills = `<section id="skills">${publicProcurementSkillsFixture("en")}</section>`;
-  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
-  const root = await fixture({ enHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "en" });
-  assert.ok(!errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope rejects mixed-language public-procurement ledger labels", async () => {
-  const article = publicProcurementSkillsFixture("pl", { labels: ["Problem", "Działanie", "Możliwy wynik", "Possible outcome"] });
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope rejects an extra unknown public-procurement ledger label", async () => {
-  const article = publicProcurementSkillsFixture("pl", { labels: ["Problem", "Działanie", "Możliwy wynik", "Ryzyko"] });
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope rejects reordered public-procurement ledger labels", async () => {
-  const article = publicProcurementSkillsFixture("pl", { labels: ["Działanie", "Problem", "Możliwy wynik"] });
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", `<section id="skills">${article}</section>`);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope rejects a missing public-procurement service item", async () => {
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", '<section id="skills"></section>');
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope rejects a public-procurement service item without its marker", async () => {
-  const html = homepageFixture("pl", "Marka").replace(' data-service="public-procurement"', "");
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope rejects an unknown English public-procurement href", async () => {
-  const skills = `<section id="skills">${publicProcurementSkillsFixture("en", { href: "/en/uslugi/typo/" })}</section>`;
-  const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
-  const root = await fixture({ enHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "en" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-test("home scope rejects a duplicate public-procurement service marker on another route", async () => {
-  const skills = `<section id="skills">${publicProcurementSkillsFixture("pl")}<article data-service="public-procurement"><a href="/uslugi/typo/">Other</a></article></section>`;
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
-  const root = await fixture({ plHtml: html });
-  const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
-});
-
-for (const [variant, options] of [
-  ["Polish path", { href: "/uslugi/doradztwo-zamowienia-publiczne/" }],
-  ["Polish outcome label", { outcome: "Możliwy wynik" }]
+for (const [name, mutate] of [
+  ["reordered domains", (html) => html.replace('data-domain="advisory"', 'data-domain="swap"').replace('data-domain="aviation"', 'data-domain="advisory"').replace('data-domain="swap"', 'data-domain="aviation"')],
+  ["a missing domain proof", (html) => html.replace(/<p class="home-domain__proof" data-fact-id="portfolio\.gamma">[^<]*<\/p>/, "")],
+  ["a second proof in one domain", (html) => html.replace('<p class="home-domain__proof" data-fact-id="portfolio.gamma">', '<p class="home-domain__proof" data-fact-id="portfolio.beta">beta.example</p><p class="home-domain__proof" data-fact-id="portfolio.gamma">')],
+  ["an eager domain image", (html) => html.replace('height="597" loading="lazy" decoding="async"', 'height="597" decoding="async"')],
+  ["a domain image without intrinsic height", (html) => html.replace('width="1400" height="597"', 'width="1400"')]
 ]) {
-  test(`home scope rejects the ${variant} on the English homepage`, async () => {
-    const skills = `<section id="skills">${publicProcurementSkillsFixture("en", options)}</section>`;
-    const html = replaceHomepageSection(homepageFixture("en", "Brand"), "skills", skills);
-    const root = await fixture({ enHtml: html });
-    const result = await runVerification({ root, scope: "home", lang: "en" });
-    assert.ok(errorIds(result).includes("home-skills-structure"));
+  test(`home scope rejects Work with ${name}`, async () => {
+    const valid = homepageFixture("pl", "Marka");
+    const mutated = mutate(valid);
+    assert.notEqual(mutated, valid);
+    const root = await fixture({ plHtml: mutated });
+    const result = await runVerification({ root, scope: "home", lang: "pl" });
+    assert.ok(errorIds(result).includes("home-work-structure"));
   });
 }
 
-test("home scope rejects the generic skill-card pattern", async () => {
-  const skills = '<section id="skills"><article class="skill-card"><h3>Generic area</h3></article></section>';
-  const html = replaceHomepageSection(homepageFixture("pl", "Marka"), "skills", skills);
+test("home scope rejects a domain proof annotated with a fact outside the project and portfolio registries", async () => {
+  const html = homepageFixture("pl", "Marka").replace('data-fact-id="portfolio.gamma">gamma.example', 'data-fact-id="brand.promise">Marka');
   const root = await fixture({ plHtml: html });
   const result = await runVerification({ root, scope: "home", lang: "pl" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
+  assert.ok(errorIds(result).includes("home-fact-annotation"));
+});
+
+test("home scope rejects an unannotated injected Work proof", async () => {
+  const html = homepageFixture("pl", "Marka").replace(' data-fact-id="portfolio.gamma"', "");
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-fact-annotation"));
+});
+
+test("home scope rejects a retired homepage section reintroduced beside the four live sections", async () => {
+  const html = homepageFixture("pl", "Marka").replace('<section id="contact">', '<section data-section="process"></section><section id="contact">');
+  const root = await fixture({ plHtml: html });
+  const result = await runVerification({ root, scope: "home", lang: "pl" });
+  assert.ok(errorIds(result).includes("home-section-order"));
 });
 
 for (const surface of ["navigation", "footer"]) {
@@ -5577,6 +5478,21 @@ for (const surface of ["navigation", "footer"]) {
     const root = await fixture({ enHtml: html });
     const result = await runVerification({ root, scope: "home", lang: "en" });
     assert.ok(errorIds(result).includes("home-en-ia"));
+  });
+}
+
+for (const [label, overrides, accepted] of [
+  ["accepts an approved fact withdrawn from every surface with its unpublished date", { surfaces: [], unpublished_since: "2026-10-18" }, true],
+  ["rejects an approved fact withdrawn from every surface without an unpublished date", { surfaces: [] }, false],
+  ["rejects an unpublished date beside public surfaces", { unpublished_since: "2026-10-18" }, false]
+]) {
+  test(`facts scope ${label}`, async () => {
+    const withdrawn = fact({ id: "career.withdrawn.role", value: "Withdrawn role", display_pl: "Wycofana rola", display_en: "Withdrawn role", ...overrides });
+    const root = await fixture({ facts: [fact(), withdrawn] });
+    const result = await runVerification({ root, scope: "facts" });
+    const registryErrors = errorIds(result).filter((errorId) => errorId === "fact-surfaces" || errorId === "fact-unpublished");
+    if (accepted) assert.deepEqual(registryErrors, [], result.errors.join("\n"));
+    else assert.ok(registryErrors.length > 0, result.errors.join("\n"));
   });
 }
 
@@ -5642,36 +5558,27 @@ for (const [id, display_pl, display_en, pl, en] of heroes) {
 }
 
 test("home parity rejects an extra English section marker", async () => {
-  const enHtml = homepageFixture("en", "Brand").replace(
-    '<section data-section="trust"></section>',
-    '<section data-section="trust"></section><section data-section="trust"></section>'
-  );
+  const enHtml = homepageFixture("en", "Brand").replace('<section id="contact">', '<section id="work"></section><section id="contact">');
   const root = await fixture({ enHtml });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(errorIds(result).includes("home-parity-sections"));
 });
 
 test("home scope rejects the same duplicate section marker on both languages", async () => {
-  const duplicateTrust = (html) => html.replace(
-    '<section data-section="trust"></section>',
-    '<section data-section="trust"></section><section data-section="trust"></section>'
-  );
+  const duplicateTrust = (html) => html.replace('<section id="contact">', '<section id="work"></section><section id="contact">');
   const root = await fixture({ plHtml: duplicateTrust(homepageFixture("pl", "Marka")), enHtml: duplicateTrust(homepageFixture("en", "Brand")) });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(errorIds(result).includes("home-section-order"));
 });
 
 const factSequenceMutations = {
-  missing: (html) => html.replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', ""),
+  missing: (html) => html.replace(' data-fact-id="portfolio.gamma"', ""),
   extra: (html) => html.replace('<section id="contact">', '<section id="contact"><span data-fact-id="brand.promise">Brand</span>'),
   reordered: (html) => html
-    .replace('<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>', "__PPL_H__")
-    .replace('<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>', '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>')
-    .replace("__PPL_H__", '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>'),
-  different: (html) => html.replace(
-    '<li class="about-fact" data-fact-id="aviation.ppl_h">PPL(H)</li>',
-    '<li class="about-fact" data-fact-id="aviation.ppl_a">PPL(A)</li>'
-  )
+    .replace('data-fact-id="portfolio.beta"', "__BETA__")
+    .replace('data-fact-id="portfolio.gamma"', 'data-fact-id="portfolio.beta"')
+    .replace("__BETA__", 'data-fact-id="portfolio.gamma"'),
+  different: (html) => html.replace('data-fact-id="portfolio.gamma"', 'data-fact-id="portfolio.beta"')
 };
 
 for (const [mutation, mutate] of Object.entries(factSequenceMutations)) {
@@ -5682,48 +5589,20 @@ for (const [mutation, mutate] of Object.entries(factSequenceMutations)) {
   });
 }
 
-test("home parity rejects reordered Process step identities", async () => {
-  const enHtml = homepageFixture("en", "Brand").replace("01 / Diagnosis", "02 / Diagnosis");
-  const root = await fixture({ enHtml });
-  const result = await runVerification({ root, scope: "home" });
-  assert.ok(errorIds(result).includes("home-parity-process"));
-});
-
-test("home parity rejects a changed evidence-row sequence", async () => {
+test("home parity rejects a changed work-domain sequence", async () => {
   const enHtml = homepageFixture("en", "Brand").replace('data-domain="applications"', 'data-domain="aviation"');
   const root = await fixture({ enHtml });
   const result = await runVerification({ root, scope: "home" });
-  assert.ok(errorIds(result).includes("home-parity-evidence-rows"));
+  assert.ok(errorIds(result).includes("home-parity-domains"));
 });
-
-for (const [inventory, first, second, errorId] of [
-  ["portfolio", '<a class="pcard" href="https://alpha.example"><div class="pcard__title" data-fact-id="portfolio.alpha">Alpha</div></a>', '<a class="pcard" href="https://beta.example"><div class="pcard__title" data-fact-id="portfolio.beta">Beta</div></a>', "home-parity-portfolio"],
-  ["clients", '<div class="client-item" data-fact-id="client.alpha">Alpha Client</div>', '<div class="client-item" data-fact-id="client.beta">Beta Client</div>', "home-parity-clients"]
-]) {
-  test(`home parity rejects reordered ${inventory} items`, async () => {
-    const valid = parityInventoryFixture("en");
-    const enHtml = valid.replace(first, "__FIRST__").replace(second, first).replace("__FIRST__", second);
-    assert.notEqual(enHtml, valid);
-    const inventoryFacts = [
-      fact(),
-      fact({ id: "portfolio.alpha", value: "Alpha", display_pl: "Alpha", display_en: "Alpha" }),
-      fact({ id: "portfolio.beta", value: "Beta", display_pl: "Beta", display_en: "Beta" }),
-      fact({ id: "client.alpha", value: "Alpha Client", display_pl: "Alpha Client", display_en: "Alpha Client" }),
-      fact({ id: "client.beta", value: "Beta Client", display_pl: "Beta Client", display_en: "Beta Client" })
-    ];
-    const root = await fixture({ facts: inventoryFacts, plHtml: parityInventoryFixture("pl"), enHtml });
-    const result = await runVerification({ root, scope: "home" });
-    assert.ok(errorIds(result).includes(errorId));
-  });
-}
 
 for (const [variant, enHref] of [
   ["Polish route", "/lotnictwo/"],
   ["invented translation", "/en/aviation/"]
 ]) {
   test(`home parity rejects a ${variant} on an English direct link`, async () => {
-    const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/lotnictwo/">Lotnictwo</a></section>');
-    const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', `<section id="portfolio"><a href="${enHref}">Aviation</a></section>`);
+    const plHtml = homepageFixture("pl", "Marka").replace("</main>", '<p><a href="/lotnictwo/">Lotnictwo</a></p></main>');
+    const enHtml = homepageFixture("en", "Brand").replace("</main>", `<p><a href="${enHref}">Aviation</a></p></main>`);
     const root = await fixture({ plHtml, enHtml });
     const result = await runVerification({ root, scope: "home" });
     assert.ok(errorIds(result).includes("home-parity-links"));
@@ -5731,8 +5610,8 @@ for (const [variant, enHref] of [
 }
 
 test("home parity permits only the labelled Polish-only Procurement 2026 route", async () => {
-  const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a class="pcard" href="/procurement-2026/"><div class="pcard__link">Otwórz projekt</div></a></section>');
-  const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', '<section id="portfolio"><a class="pcard" href="/procurement-2026/" lang="pl"><div class="pcard__link">Open project in Polish</div></a></section>');
+  const plHtml = homepageFixture("pl", "Marka").replace("</main>", '<div><a class="pcard" href="/procurement-2026/"><div class="pcard__link">Otwórz projekt</div></a></div></main>');
+  const enHtml = homepageFixture("en", "Brand").replace("</main>", '<div><a class="pcard" href="/procurement-2026/" lang="pl"><div class="pcard__link">Open project in Polish</div></a></div></main>');
   const root = await fixture({ plHtml, enHtml });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(!errorIds(result).includes("home-parity-links"));
@@ -5740,7 +5619,7 @@ test("home parity permits only the labelled Polish-only Procurement 2026 route",
 });
 
 test("home review hardening rejects a generic label on the current English Procurement 2026 anchor", async () => {
-  const root = await currentHomepageMutationFixture("en", (html) => html.replace("Open project in Polish", "Open project"));
+  const root = await currentHomepageMutationFixture("en", (html) => html.replace("Open project in Polish", "Open project"), { seedProcurementAnchor: true });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(errorIds(result).includes("home-en-pl-only-link"));
 });
@@ -5762,7 +5641,7 @@ for (const [location, mutate] of [
     .replace('<div class="pcard__link">Open project</div>', '<div class="pcard__link">Open project in Polish</div>')]
 ]) {
   test(`home review hardening does not accept the Polish disclosure from ${location}`, async () => {
-    const root = await currentHomepageMutationFixture("en", mutate);
+    const root = await currentHomepageMutationFixture("en", mutate, { seedProcurementAnchor: true });
     const result = await runVerification({ root, scope: "home" });
     assert.ok(errorIds(result).includes("home-en-pl-only-link"));
   });
@@ -5796,7 +5675,7 @@ for (const [hiddenKind, mutate] of [
   ["hidden ancestor", (html) => html.replace('<div class="portfolio-cards">', '<div class="portfolio-cards" hidden>')]
 ]) {
   test(`home visibility hardening rejects the Polish-only disclosure with a ${hiddenKind}`, async () => {
-    const root = await currentHomepageMutationFixture("en", mutate);
+    const root = await currentHomepageMutationFixture("en", mutate, { seedProcurementAnchor: true });
     const result = await runVerification({ root, scope: "home" });
     assert.ok(errorIds(result).includes("home-en-pl-only-link"));
   });
@@ -5806,7 +5685,7 @@ test("home visibility hardening does not treat aria-hidden false or data-hidden 
   const root = await currentHomepageMutationFixture("en", (html) => html.replace(
     '<a href="/procurement-2026/" lang="pl" class="pcard">',
     '<a href="/procurement-2026/" lang="pl" aria-hidden="false" data-hidden="fixture" class="pcard">'
-  ));
+  ), { seedProcurementAnchor: true });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
 });
@@ -5824,7 +5703,7 @@ test("home visibility hardening resists an aria-hidden disclosure decoy beside a
   const root = await currentHomepageMutationFixture("en", (html) => html.replace(
     '<div class="pcard__link">Open project in Polish</div>',
     '<div aria-hidden=" TRUE "><div class="pcard__link">Open project in Polish</div></div><div class="pcard__link">Open project</div>'
-  ));
+  ), { seedProcurementAnchor: true });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(errorIds(result).includes("home-en-pl-only-link"));
 });
@@ -5833,7 +5712,7 @@ test("home parser hardening reads Procurement href only from the real anchor att
   const root = await currentHomepageMutationFixture("en", (html) => html.replace(
     '<a href="/procurement-2026/" lang="pl" class="pcard">',
     '<a title=\'href="/procurement-2026/"\' href="/en/procurement-2026/" lang="pl" class="pcard">'
-  ));
+  ), { seedProcurementAnchor: true });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(errorIds(result).includes("home-en-pl-only-link"));
   assert.ok(errorIds(result).includes("home-parity-links"));
@@ -5843,7 +5722,7 @@ test("home parser hardening preserves a valid Procurement href after a quoted gr
   const root = await currentHomepageMutationFixture("en", (html) => html.replace(
     '<a href="/procurement-2026/" lang="pl" class="pcard">',
     '<a title="Decision > tool" href="/procurement-2026/" lang="pl" class="pcard">'
-  ));
+  ), { seedProcurementAnchor: true });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(!errorIds(result).includes("home-en-pl-only-link"));
   assert.ok(!errorIds(result).includes("home-parity-links"));
@@ -5854,7 +5733,7 @@ test("home parser hardening resists comment and anchor decoys inside raw script 
   const root = await currentHomepageMutationFixture("en", (html) => html.replace(
     "</main>",
     `<script>const decoy = '<a href="/en/procurement-2026/"> <!--';</script><p>WarsawFlight<strong>Safety</strong></p></main>`
-  ));
+  ), { seedProcurementAnchor: true });
   const result = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(errorIds(result).includes("home-retired-aviation-name"));
   assert.ok(!errorIds(result).includes("home-html-syntax"));
@@ -5864,7 +5743,7 @@ test("home parser hardening resists fake routes in multiple quoted attributes", 
   const root = await currentHomepageMutationFixture("en", (html) => html.replace(
     '<a href="/procurement-2026/" lang="pl" class="pcard">',
     '<a title="Decision > href=\'/procurement-2026/\'" data-route=\'href="/procurement-2026/"\' href="/en/procurement-2026/" lang="pl" class="pcard">'
-  ));
+  ), { seedProcurementAnchor: true });
   const result = await runVerification({ root, scope: "home" });
   assert.ok(errorIds(result).includes("home-en-pl-only-link"));
   assert.ok(errorIds(result).includes("home-parity-links"));
@@ -5884,8 +5763,8 @@ for (const [variant, anchor] of [
   ["missing language disclosure", '<a href="/procurement-2026/">Procurement Process 2026</a>']
 ]) {
   test(`home parity rejects the Procurement 2026 ${variant}`, async () => {
-    const plHtml = homepageFixture("pl", "Marka").replace('<section id="portfolio"></section>', '<section id="portfolio"><a href="/procurement-2026/">Procurement Process 2026</a></section>');
-    const enHtml = homepageFixture("en", "Brand").replace('<section id="portfolio"></section>', `<section id="portfolio">${anchor}</section>`);
+    const plHtml = homepageFixture("pl", "Marka").replace("</main>", '<p><a href="/procurement-2026/">Procurement Process 2026</a></p></main>');
+    const enHtml = homepageFixture("en", "Brand").replace("</main>", `<p>${anchor}</p></main>`);
     const root = await fixture({ plHtml, enHtml });
     const result = await runVerification({ root, scope: "home" });
     assert.ok(errorIds(result).includes(variant === "fake English route" ? "home-parity-links" : "home-en-pl-only-link"));
@@ -5907,13 +5786,6 @@ test("home scope requires the exact English Insights navigation label", async ()
   const root = await fixture({ enHtml });
   const result = await runVerification({ root, scope: "home", lang: "en" });
   assert.ok(errorIds(result).includes("home-en-contract"));
-});
-
-test("home scope requires every English Skills evidence row to use the exact ledger labels", async () => {
-  const enHtml = homepageFixture("en", "Brand").replace("<dt>Action</dt>", "<dt>Approach</dt>");
-  const root = await fixture({ enHtml });
-  const result = await runVerification({ root, scope: "home", lang: "en" });
-  assert.ok(errorIds(result).includes("home-skills-structure"));
 });
 
 test("home scope requires the exact ordered English contact intents", async () => {
@@ -5965,8 +5837,8 @@ const task7HomeMutations = [
   ["missing hero image width", "home-hero-image", (html) => html.replace(' width="960"', "")],
   ["missing hero image height", "home-hero-image", (html) => html.replace(' height="1280"', "")],
   ["missing high-priority hero fetch", "home-hero-image", (html) => html.replace(' fetchpriority="high"', "")],
-  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20260921-flightplan-4', 'style.css?v=stale')],
-  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20260921-flightplan-4', 'main.js?v=stale')],
+  ["stale stylesheet cache version", "home-cache-version", (html) => html.replace('style.css?v=20261027-flightplan-5', 'style.css?v=stale')],
+  ["stale browser-script cache version", "home-cache-version", (html) => html.replace('main.js?v=20261027-flightplan-5', 'main.js?v=stale')],
   ["inline presentation style", "home-inline-style", (html) => html.replace('<section id="hero">', '<section id="hero" style="display:block">')]
 ];
 
@@ -5981,36 +5853,36 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round3ExactResourceMutations = [
   ["alternate stylesheet rel", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="alternate stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">'
   )],
   ["stylesheet title attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" title="decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" title="decoy">'
   )],
   ["stylesheet integrity attribute", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" integrity="sha256-decoy">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" integrity="sha256-decoy">'
   )],
   ["stylesheet data decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" data-decoy="true">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" data-decoy="true">'
   )],
   ["deferred async browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer async>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer async>'
   )],
   ["typed browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer type="text/javascript">'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer type="text/javascript">'
   )],
   ["browser script integrity attribute", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer integrity="sha256-decoy">'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer integrity="sha256-decoy">'
   )],
   ["browser script data decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer data-decoy="true">'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer data-decoy="true">'
   )],
   ["disabled latin font preload", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6120,12 +5992,12 @@ for (const lang of ["pl", "en"]) {
 
 const task7Round2ActiveResourceMutations = [
   ["stylesheet with inactive media", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" media="not all">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" media="not all">'
   )],
   ["disabled stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" disabled>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" disabled>'
   )],
   ["latin font preload with inactive media", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6136,12 +6008,12 @@ const task7Round2ActiveResourceMutations = [
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin media="not all">'
   )],
   ["nomodule browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer nomodule>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer nomodule>'
   )],
   ["stylesheet inside noscript", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></noscript>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<noscript><link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5"></noscript>'
   )],
   ["latin font preload inside noscript", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6152,12 +6024,12 @@ const task7Round2ActiveResourceMutations = [
     '<noscript><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></noscript>'
   )],
   ["browser script inside noscript", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
-    '<noscript><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></noscript>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>',
+    '<noscript><script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script></noscript>'
   )],
   ["stylesheet inside template", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></template>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<template><link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5"></template>'
   )],
   ["latin font preload inside template", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -6168,20 +6040,20 @@ const task7Round2ActiveResourceMutations = [
     '<template><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin></template>'
   )],
   ["browser script inside template", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
-    '<template><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></template>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>',
+    '<template><script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script></template>'
   )],
   ["stylesheet inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></div>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<div aria-hidden="true"><link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5"></div>'
   )],
   ["font preload inside hidden ancestor", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
     '<div hidden><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin></div>'
   )],
   ["browser script inside aria-hidden ancestor", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
-    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></div>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>',
+    '<div aria-hidden="true"><script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script></div>'
   )]
 ];
 
@@ -6212,36 +6084,36 @@ const task7ReviewHomeSemanticMutations = [
     '<div hidden><input id="chat-input" maxlength="2000"></div>'
   )],
   ["stylesheet changed to a style preload", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="preload" as="style" href="/assets/css/style.css?v=20260921-flightplan-4">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="preload" as="style" href="/assets/css/style.css?v=20261027-flightplan-5">'
   )],
   ["hidden stylesheet", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4" hidden>'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5" hidden>'
   )],
   ["stylesheet attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '<meta rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
+    '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '<meta rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">'
   )],
   ["additional active stylesheet", "home-cache-version", (html) => html.replace(
     "</head>",
     '<link rel="stylesheet" href="/assets/css/extra.css">\n  </head>'
   )],
   ["non-executable JSON browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" type="application/json" defer>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" type="application/json" defer>'
   )],
   ["browser script without defer", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4">'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5">'
   )],
   ["hidden browser script", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer>',
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer hidden>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer>',
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer hidden>'
   )],
   ["browser-script attributes on a meta decoy", "home-cache-version", (html) => html.replace(
-    '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>',
-    '<meta src="/assets/js/main.js?v=20260921-flightplan-4" defer>'
+    '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>',
+    '<meta src="/assets/js/main.js?v=20261027-flightplan-5" defer>'
   )],
   ["additional executable browser script", "home-cache-version", (html) => html.replace(
     "</body>",
@@ -6256,8 +6128,8 @@ const task7ReviewHomeSemanticMutations = [
     '/assets/fonts/dmsans-latext.woff2'
   )],
   ["third font preload", "home-font-preload", (html) => html.replace(
-    '    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">',
-    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">'
+    '    <link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">',
+    '    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dmmono-latin.woff2" crossorigin>\n    <link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">'
   )],
   ["font preload with the wrong rel", "home-font-preload", (html) => html.replace(
     '<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin>',
@@ -7074,13 +6946,16 @@ test("Plan 2 Task 9 rejects required nav language footer asset and coordinated s
       '<li><a href="/lotnictwo/">Lotnictwo</a></li><li><a href="/case-studies/">Projekty</a></li>',
       '<li><a href="/case-studies/">Projekty</a></li><li><a href="/lotnictwo/">Lotnictwo</a></li>'
     ))],
-    ["external footer link", task9Mutate("index.html", (html) => html.replace('href="/wiedza/">Wiedza</a></li><li><a href="/#contact"', 'href="https://example.com/">Wiedza</a></li><li><a href="/#contact"'))],
+    ["external footer link", task9Mutate("index.html", (html) => {
+      const footerAt = html.lastIndexOf('href="/wiedza/">Wiedza</a>');
+      return `${html.slice(0, footerAt)}href="https://example.com/">Wiedza</a>${html.slice(footerAt + 'href="/wiedza/">Wiedza</a>'.length)}`;
+    })],
     ["signature asset swapped", task9Mutate("index.html", (html) => html.replace("/assets/img/signature.png", "/assets/img/og.jpg"))],
     ["signature dimensions removed", task9Mutate("index.html", (html) => html.replace(' width="160" height="50"', ""))],
-    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20260921-flightplan-4", "style.css?v=20260825-flightplan-1"))],
-    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20260921-flightplan-4", "main.js?v=20260825-flightplan-1"))],
-    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4"></head>'))],
-    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script></body>'))],
+    ["stylesheet version changed", task9Mutate("index.html", (html) => html.replace("style.css?v=20261027-flightplan-5", "style.css?v=20260825-flightplan-1"))],
+    ["script version changed", task9Mutate("index.html", (html) => html.replace("main.js?v=20261027-flightplan-5", "main.js?v=20260825-flightplan-1"))],
+    ["duplicate stylesheet", task9Mutate("index.html", (html) => html.replace("</head>", '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5"></head>'))],
+    ["duplicate script", task9Mutate("index.html", (html) => html.replace("</body>", '<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script></body>'))],
     ["wrapper inside direct navigation text anchor", task9Mutate("index.html", (html) => html.replace(
       '<a href="/aplikacje-operacyjne/">Aplikacje</a>',
       '<a href="/aplikacje-operacyjne/"><span>Aplikacje</span></a>'
@@ -7141,7 +7016,7 @@ test("Plan 2 Task 9 permits formatting whitespace and comments in exact shell to
     .replace('<span></span><span></span><span></span></button>', '<span>\n<!-- bar --></span><span></span><span></span></button>')
     .replace('<div class="nav-overlay" id="nav-overlay"></div>', '<div class="nav-overlay" id="nav-overlay">\n<!-- overlay -->\n</div>')
     .replace('aria-label="Wróć na górę">↑</button>', 'aria-label="Wróć na górę">\n<!-- back -->↑\n</button>')
-    .replace('<img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png?v=20260921-flightplan-4" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
+    .replace('<img src="/assets/img/signature.png?v=20261027-flightplan-5" alt="" width="160" height="50" loading="lazy" decoding="async"></a>', '\n<!-- signature --><img src="/assets/img/signature.png?v=20261027-flightplan-5" alt="" width="160" height="50" loading="lazy" decoding="async">\n</a>')
     .replace('© 1993–2026 Paweł Mamcarz · mamcarz.com</div>', '\n<!-- owner -->© 1993–2026 Paweł Mamcarz · mamcarz.com\n</div>')
     .replace('<ul class="footer-links">', '<ul class="footer-links">\n<!-- links -->'));
   const root = await task9SiteShellRoot(overrides);
@@ -7202,7 +7077,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "1bf45914de6101f52af8552c24f5d1c8cbd3ff61c7a7ad1a3863ef7b489aad03",
+    "497bcb7b0892cda757ba8eb4158a68615ceceb5568fa42b0130e136bb2b2e286",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });
@@ -7345,6 +7220,8 @@ const plan3ExpectedPublicPages = Object.freeze([
   { file: "en/wystapienia/index.html", route: "/en/wystapienia/", lang: "en", pair: "/wystapienia/", schema: ["CollectionPage"] },
   { file: "prywatnosc/index.html", route: "/prywatnosc/", lang: "pl", pair: "/en/prywatnosc/", schema: ["WebPage"] },
   { file: "en/prywatnosc/index.html", route: "/en/prywatnosc/", lang: "en", pair: "/prywatnosc/", schema: ["WebPage"] },
+  { file: "o-mnie/index.html", route: "/o-mnie/", lang: "pl", pair: "/en/o-mnie/", schema: ["WebPage"] },
+  { file: "en/o-mnie/index.html", route: "/en/o-mnie/", lang: "en", pair: "/o-mnie/", schema: ["WebPage"] },
   { file: "procurement-2026/index.html", route: "/procurement-2026/", lang: "pl", pair: null, schema: ["Article"] },
   { file: "diagrams/diagram1_universal.html", route: "/diagrams/diagram1_universal", lang: "en", pair: null, schema: ["CreativeWork"] },
   { file: "diagrams/diagram2_ariba.html", route: "/diagrams/diagram2_ariba", lang: "en", pair: null, schema: ["CreativeWork"] },
@@ -7429,7 +7306,7 @@ function plan3Schema(entry, shape = "graph") {
 
 function plan3Page(entry, { body, head = "", schema = plan3Schema(entry), hreflang = plan3Hreflang(entry), assets = null } = {}) {
   const shellAssets = assets ?? (plan3ShellFiles.has(entry.file)
-    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20260921-flightplan-4">\n<script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>'
+    ? '<link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">\n<script src="/assets/js/main.js?v=20261027-flightplan-5" defer></script>'
     : "");
   const content = body ?? (entry.file === "index.html" ? '<p data-fact-id="fixture.claim">Verified claim</p>' : "Page copy");
   const locale = entry.lang === "pl" ? "pl_PL" : "en_US";
@@ -7472,7 +7349,8 @@ function plan3RealPresentationBody() {
 function plan3Sitemap() {
   const blocks = plan3ExpectedPublicPages.map((entry) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = ["/", "/en/"].includes(entry.route) ? "2026-09-28"
+    const lastmod = ["/", "/en/", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/"].includes(entry.route) ? "2026-10-27"
+      : ["/o-mnie/", "/en/o-mnie/"].includes(entry.route) ? "2026-10-18"
       : ["/wystapienia/", "/en/wystapienia/"].includes(entry.route) ? "2026-09-07" : "2026-09-04";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
   });
@@ -7529,13 +7407,13 @@ async function plan3Root({ files = {}, facts = [plan3Fact()], publicClaimSurface
   return root;
 }
 
-test("Plan 3 Task 1 accepts the exact independent 25-route metadata manifest", async () => {
-  assert.equal(plan3ExpectedPublicPages.length, 25);
+test("Plan 3 Task 1 accepts the exact independent 27-route metadata manifest", async () => {
+  assert.equal(plan3ExpectedPublicPages.length, 27);
   assert.deepEqual(PUBLIC_PAGES, plan3ExpectedPublicPages);
   const root = await plan3Root();
   const result = await runVerification({ root, scope: "metadata" });
   const presentation = result.errors.filter((item) => item.startsWith("ERROR presentation-index-manifest "));
-  assert.equal(presentation.length, 19, "synthetic route fixtures must not impersonate the 19 reviewed presentation-index files");
+  assert.equal(presentation.length, 17, "synthetic route fixtures must not impersonate the 17 reviewed presentation-index files");
   assert.deepEqual(result.errors.filter((item) => !item.startsWith("ERROR presentation-index-manifest ")), []);
 });
 
@@ -7699,16 +7577,27 @@ test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and 
     ["duplicate ids", [plan3Fact(), plan3Fact()], "fact-duplicate-id"],
     ["duplicate surfaces", [plan3Fact({ surfaces: ["index.html", "index.html"] })], "fact-duplicate-surface"],
     ["unsupported enum", [plan3Fact({ status: "published" })], "fact-status"],
-    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-09-29" })], "fact-as-of-future"],
+    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-10-28" })], "fact-as-of-future"],
     ["malformed date", [plan3Fact({ kind: "dated", as_of: "2026-02-30" })], "fact-as-of"],
     ["public source without HTTPS", [plan3Fact({ source_type: "public_source", source_url: "http://example.com/source" })], "fact-source-url"],
     ["secret-like nested key", [plan3Fact({ evidence: { api_token: "do-not-publish" } })], "fact-secret-key"],
-    ["private path material", [plan3Fact({ source_label: "/Users/person/private/cv.pdf" })], "fact-private-material"]
+    ["private path material", [plan3Fact({ source_label: "/Users/person/private/cv.pdf" })], "fact-private-material"],
+    ["approved fact without surfaces or an unpublished date", [plan3Fact({ surfaces: [] })], "fact-surfaces"],
+    ["unpublished fact that still declares surfaces", [plan3Fact({ unpublished_since: "2026-10-18" })], "fact-unpublished"],
+    ["future unpublished date", [plan3Fact({ surfaces: [], unpublished_since: "2026-10-28" })], "fact-unpublished"],
+    ["malformed unpublished date", [plan3Fact({ surfaces: [], unpublished_since: "2026-02-30" })], "fact-unpublished"],
+    ["unpublished date on a review fact", [plan3Fact({ status: "review", surfaces: [], unpublished_since: "2026-10-18" })], "fact-unpublished"]
   ];
   for (const [label, facts, expected] of cases) await t.test(label, async () => {
     const root = await plan3Root({ facts });
     const result = await runVerification({ root, scope: "metadata" });
     assert.ok(errorIds(result).includes(expected), result.errors.join("\n"));
+  });
+  await t.test("an approved fact withdrawn from every surface may record its unpublished date", async () => {
+    const root = await plan3Root({ facts: [plan3Fact({ surfaces: [], unpublished_since: "2026-10-18" })] });
+    const result = await runVerification({ root, scope: "metadata" });
+    assert.equal(errorIds(result).includes("fact-unpublished"), false, result.errors.join("\n"));
+    assert.equal(errorIds(result).includes("fact-surfaces"), false, result.errors.join("\n"));
   });
   await t.test("closed public-source candidates may remain without a URL", async () => {
     const candidate = plan3Fact({
@@ -7855,7 +7744,7 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
   await t.test("sitemap pins one exact content-change date per route", async () => {
     const cases = [
       ["wrong reviewed date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "<lastmod>2026-08-25</lastmod>")],
-      ["future date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "<lastmod>2026-09-29</lastmod>")],
+      ["future date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "<lastmod>2026-10-28</lastmod>")],
       ["missing date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "")],
       ["duplicate date", plan3Sitemap().replace("<lastmod>2026-09-04</lastmod>", "<lastmod>2026-09-04</lastmod><lastmod>2026-09-04</lastmod>")]
     ];
@@ -8452,7 +8341,7 @@ test("Plan 3 Task 1 fix round 1 groups numeric findings by actionable element lo
   });
 });
 
-test("Plan 3 Task 1 fix round 1 derives exactly ten bilingual pairs from the public manifest", async () => {
+test("Plan 3 Task 1 fix round 1 derives exactly eleven bilingual pairs from the public manifest", async () => {
   const verifier = await import("./verify-site.mjs");
   const expected = [
     ["index.html", "en/index.html", "/", "/en/"],
@@ -8464,7 +8353,8 @@ test("Plan 3 Task 1 fix round 1 derives exactly ten bilingual pairs from the pub
     ["case-studies/index.html", "en/case-studies/index.html", "/case-studies/", "/en/case-studies/"],
     ["wiedza/index.html", "en/wiedza/index.html", "/wiedza/", "/en/wiedza/"],
     ["wystapienia/index.html", "en/wystapienia/index.html", "/wystapienia/", "/en/wystapienia/"],
-    ["prywatnosc/index.html", "en/prywatnosc/index.html", "/prywatnosc/", "/en/prywatnosc/"]
+    ["prywatnosc/index.html", "en/prywatnosc/index.html", "/prywatnosc/", "/en/prywatnosc/"],
+    ["o-mnie/index.html", "en/o-mnie/index.html", "/o-mnie/", "/en/o-mnie/"]
   ];
   assert.deepEqual(verifier.PUBLIC_PAGE_PAIRS, expected);
   assert.equal(expected.some((pair) => pair.flat().some((value) => value.includes("procurement-2026") || value.includes("diagram"))), false);
@@ -9238,7 +9128,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   const verifier = await import("./verify-site.mjs");
   const entries = verifier.PRESENTATION_INDEX_OCCURRENCES;
   assert.ok(Array.isArray(entries), "the verifier must export the reviewed occurrence manifest");
-  assert.equal(entries.length, 147, "every reviewed presentation index in the 25 public pages is inventoried");
+  assert.equal(entries.length, 139, "every reviewed presentation index in the 27 public pages is inventoried");
 
   const canonical = JSON.stringify([...entries].sort((left, right) => [
     left.file,
@@ -9255,7 +9145,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   ].join("\0"))));
   assert.equal(
     createHash("sha256").update(canonical).digest("hex"),
-    "31048a9f803fbd70287e1cc95c98934bb157bbc689a486a935a3359116e38cbe",
+    "f6c9fb51bbf504ed466b7f1fc68e9364876277bae3fdcf9a86781ba760db11b2",
     "presentation markup changes require an explicit inventory audit and baseline refresh"
   );
 });
@@ -9286,22 +9176,22 @@ test("Plan 3 Task 1 fix round 7 consumes the unchanged real inventory exactly on
 });
 
 test("Plan 3 Task 1 fix round 7 rejects every reviewed identity mutation", async (t) => {
-  const original = plan3ProductPageHtml["index.html"];
-  const exact = '<p class="section-index">01 / Diagnoza</p>';
+  const original = plan3ProductPageHtml["aplikacje-operacyjne/index.html"];
+  const exact = '<p class="section-index">01 / Rozpoznanie</p>';
   assert.equal(original.split(exact).length, 2, "the reviewed source occurs exactly once");
   const mutations = [
     ["source path", original.replace(exact, `<div>${exact}</div>`), true],
-    ["token", original.replace(exact, '<p class="section-index">02 / Diagnoza</p>'), true],
+    ["token", original.replace(exact, '<p class="section-index">02 / Rozpoznanie</p>'), true],
     ["owner text", original.replace(exact, '<p class="section-index">01 / Model</p>'), true],
-    ["container signature", original.replace(exact, '<p class="section-index" data-review-spoof>01 / Diagnoza</p>'), true],
-    ["duplicate token in the same owner", original.replace(exact, '<p class="section-index">01 / Diagnoza 01</p>'), true],
+    ["container signature", original.replace(exact, '<p class="section-index" data-review-spoof>01 / Rozpoznanie</p>'), true],
+    ["duplicate token in the same owner", original.replace(exact, '<p class="section-index">01 / Rozpoznanie 01</p>'), true],
     ["missing reviewed index", original.replace(exact, ""), false]
   ];
   for (const [label, html, expectsNumeric] of mutations) await t.test(label, async () => {
-    const root = await plan3ProductMetadataRoot({ "index.html": html });
+    const root = await plan3ProductMetadataRoot({ "aplikacje-operacyjne/index.html": html });
     const result = await runVerification({ root, scope: "metadata" });
     assert.ok(errorIds(result).includes("presentation-index-manifest"), result.errors.join("\n"));
-    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number index.html:")
+    const numeric = result.errors.filter((item) => item.startsWith("ERROR fact-visible-number aplikacje-operacyjne/index.html:")
       && /numeric tokens: 0[12](?:, 01)?$/u.test(item));
     assert.equal(numeric.length > 0, expectsNumeric, `${label}\n${result.errors.join("\n")}`);
   });
