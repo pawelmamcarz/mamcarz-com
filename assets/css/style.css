@@ -1412,6 +1412,21 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
 .contact-info { min-width: 0; grid-column: 1 / span 5; }
 .contact-form { min-width: 0; grid-column: 7 / -1; }
 
+/* Portret jest kadrowany na łokciach: dolna krawędź obrazu leży na dolnej krawędzi sekcji. */
+.contact-form--chat { display: flex; flex-direction: column; }
+
+.contact-portrait {
+  width: min(100%, 26rem);
+  margin: auto auto calc(-1 * var(--section-space));
+  padding-top: clamp(32px, 5vw, 56px);
+}
+
+.contact-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .contact-details {
   display: grid;
   gap: 0;

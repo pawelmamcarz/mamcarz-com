@@ -218,8 +218,8 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "fc616eb15d61bceffb4aa5e7f9214c06c852fc98f7381e15f8a1a614faa25e09",
-  "en/index.html": "7d57c81058b58194ab3ca50fda9bd00c4b3f66d54d116e69a8c0055c49c07831",
+  "index.html": "8ba6ba25bb7fb491c13eedcd5ada8b79b237e66dcef716fe2608f280277e344c",
+  "en/index.html": "c8ef1000fcda76d76456c18e2e5ce0b4d3cd6da648015763e1905d0a563692b8",
   "uslugi/transformacja-zakupow/index.html": "fffac19ec9b11b530ba8b0c471573252ee723bda3797f182d16d8baae2399dd1",
   "en/uslugi/transformacja-zakupow/index.html": "4bed2ac8b3630a4bb68fd3f87f4411ac38a6ce6e990ff1c2f353f1af127a9b15",
   "uslugi/wdrozenie-sap-ariba/index.html": "6472aa640f740db4d67d74eb22a935d72510407a44178de8a76eeeeb4630ac2b",
@@ -622,6 +622,12 @@ function replaceHomepageSection(html, sectionId, replacement) {
   return html.replace(new RegExp(`<section id="${sectionId}">[\\s\\S]*?<\\/section>`), replacement);
 }
 
+function contactPortraitFixture(lang) {
+  const sizes = "(max-width: 759px) 88vw, 416px";
+  const alt = lang === "pl" ? "Paweł Mamcarz z uniesionym kciukiem" : "Paweł Mamcarz with a thumbs-up";
+  return `<figure class="contact-portrait"><picture><source type="image/webp" srcset="/assets/img/pawel-thumbsup-480.webp 480w, /assets/img/pawel-thumbsup-960.webp 960w" sizes="${sizes}"><img src="/assets/img/pawel-thumbsup-480.png" srcset="/assets/img/pawel-thumbsup-480.png 480w, /assets/img/pawel-thumbsup-960.png 960w" sizes="${sizes}" alt="${alt}" width="960" height="666" loading="lazy" decoding="async"></picture></figure>`;
+}
+
 function homepageFixture(lang, content) {
   const projectsHref = lang === "pl" ? "/case-studies/" : "/en/case-studies/";
   const projectsLabel = lang === "pl" ? "Projekty" : "Projects";
@@ -652,7 +658,7 @@ function homepageFixture(lang, content) {
     <section id="resume"></section>
     <section id="portfolio"></section>
     <section id="clients"></section>
-    <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a></section>
+    <section id="contact">${contactIntents.map(([label, subject]) => `<a class="contact-detail" href="mailto:pawel@mamcarz.com?subject=${subject}">${label}</a>`).join("")}<a class="js-email" href="mailto:pawel@mamcarz.com">pawel@mamcarz.com</a>${contactPortraitFixture(lang)}</section>
   </main><footer><a href="${projectsHref}">${projectsLabel}</a></footer><div id="ai-chat" hidden><input id="chat-input" maxlength="2000"></div><p data-chat-fallback>Email contact is available.</p>
     <script src="/assets/js/main.js?v=20260921-flightplan-4" defer></script>
   </body></html>`;
@@ -5917,6 +5923,31 @@ test("home scope requires the exact ordered English contact intents", async () =
   assert.ok(errorIds(result).includes("home-contact-intents"));
 });
 
+for (const [name, lang, mutate] of [
+  ["eager loading", "pl", (html) => html.replace(' loading="lazy" decoding="async"></picture>', ' decoding="async"></picture>')],
+  ["the raw supplied PNG", "pl", (html) => html.replace('src="/assets/img/pawel-thumbsup-480.png"', 'src="/uploads/pawel-thumbsup.png"')],
+  ["missing intrinsic height", "en", (html) => html.replace(' height="666"', "")],
+  ["untranslated alt text", "en", (html) => html.replace('alt="Paweł Mamcarz with a thumbs-up"', 'alt="Paweł Mamcarz z uniesionym kciukiem"')],
+  ["a missing WebP source", "en", (html) => html.replace(/<source type="image\/webp"[^>]*>/, "")]
+]) {
+  test(`home scope rejects a contact portrait with ${name}`, async () => {
+    const valid = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
+    const mutated = mutate(valid);
+    assert.notEqual(mutated, valid);
+    const root = await fixture({ [`${lang}Html`]: mutated });
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.ok(errorIds(result).includes("home-contact-portrait"), result.errors.join("\n"));
+  });
+}
+
+test("home scope accepts the optimized contact portrait in both languages", async () => {
+  const root = await fixture();
+  for (const lang of ["pl", "en"]) {
+    const result = await runVerification({ root, scope: "home", lang });
+    assert.equal(errorIds(result).includes("home-contact-portrait"), false, result.errors.join("\n"));
+  }
+});
+
 async function task7HomeMutation(lang, mutate) {
   const valid = homepageFixture(lang, lang === "pl" ? "Marka" : "Brand");
   const mutated = mutate(valid);
@@ -7171,7 +7202,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "9f0bff0740a1be7095636cc0925957a5ef6ae60931bd510793da1f1d2d9e6294",
+    "33f833e3946c40ebae1b66d9440ef98c94f03ae1a3f2fb3602f177e5f9e9fd47",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });

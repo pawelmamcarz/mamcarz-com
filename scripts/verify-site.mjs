@@ -10,6 +10,12 @@ const SHARED_STYLESHEET_HREF = `/assets/css/style.css?v=${ASSET_CACHE_VERSION}`;
 const SHARED_SCRIPT_SRC = `/assets/js/main.js?v=${ASSET_CACHE_VERSION}`;
 const SHARED_SIGNATURE_SRC = `/assets/img/signature.png?v=${ASSET_CACHE_VERSION}`;
 const FOOTER_OWNER_LINE = "© 1993–2026 Paweł Mamcarz · mamcarz.com";
+const CONTACT_PORTRAIT_SIZES = "(max-width: 759px) 88vw, 416px";
+const CONTACT_PORTRAIT = Object.freeze({
+  source: Object.freeze({ type: "image/webp", srcset: "/assets/img/pawel-thumbsup-480.webp 480w, /assets/img/pawel-thumbsup-960.webp 960w", sizes: CONTACT_PORTRAIT_SIZES }),
+  img: Object.freeze({ src: "/assets/img/pawel-thumbsup-480.png", srcset: "/assets/img/pawel-thumbsup-480.png 480w, /assets/img/pawel-thumbsup-960.png 960w", sizes: CONTACT_PORTRAIT_SIZES, width: "960", height: "666", loading: "lazy", decoding: "async" }),
+  alt: Object.freeze({ pl: "Paweł Mamcarz z uniesionym kciukiem", en: "Paweł Mamcarz with a thumbs-up" })
+});
 const factKeys = ["id", "value", "display_pl", "display_en", "kind", "as_of", "source_type", "source_label", "source_url", "surfaces", "status"];
 const kinds = new Set(["constant", "dated"]);
 const sourceTypes = new Set(["owner_verified", "public_source", "internal_evidence"]);
@@ -24,7 +30,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "9f0bff0740a1be7095636cc0925957a5ef6ae60931bd510793da1f1d2d9e6294";
+const TASK10_REVIEWED_CSS_SHA256 = "33f833e3946c40ebae1b66d9440ef98c94f03ae1a3f2fb3602f177e5f9e9fd47";
 const PUBLICATION_URLS = Object.freeze({"portfolio.akrobacja_com": "https://akrobacja.com", "portfolio.filmolot_pl": "https://filmolot.pl", "portfolio.czympojade_pl": "https://czympojade.pl", "portfolio.przypominamy_com": "https://przypominamy.com", "portfolio.procurement_process_2026": "/procurement-2026/", "portfolio.silence_tax": "https://silence-tax.com", "portfolio.procuracost": "https://procuracost.com"});
 
 function approvedPublicationAnchor(anchor) {
@@ -2302,6 +2308,17 @@ function verifyHomeStructures(activeBody, page, errors) {
       .filter(([href]) => href?.startsWith("mailto:pawel@mamcarz.com?subject="));
     const valid = intents.length === expectedIntents.length && expectedIntents.every(([href, label], index) => intents[index]?.[0] === href && intents[index]?.[1] === normalize(label));
     if (!valid) error(errors, "home-contact-intents", page.path, "Contact requires the exact ordered localized Advisory, Operational application and Aviation mailto intents");
+
+    const figures = tagBlocks(contact.full, "figure").filter((block) => hasClass(block.opening, "contact-portrait"));
+    const sources = figures.length === 1 ? openingTags(figures[0].full, "source") : [];
+    const images = figures.length === 1 ? openingTags(figures[0].full, "img") : [];
+    const expected = { ...CONTACT_PORTRAIT.img, alt: CONTACT_PORTRAIT.alt[page.lang] };
+    const validPortrait = figures.length === 1 && sources.length === 1 && images.length === 1
+      && Object.entries(CONTACT_PORTRAIT.source).every(([name, value]) => attributeValue(sources[0], name) === value)
+      && Object.entries(expected).every(([name, value]) => attributeValue(images[0], name) === value);
+    if (!validPortrait) {
+      error(errors, "home-contact-portrait", page.path, "Contact requires one figure.contact-portrait with the optimized WebP/PNG derivatives, explicit 960x666 dimensions, lazy async loading and the localized alt text");
+    }
   }
 }
 
