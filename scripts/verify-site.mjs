@@ -4912,8 +4912,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 203, digest: "e1ec4ae6dbd0595d6905cdd6e8d200103b055d39d945439b1a6b9e8f9b81298b" }),
-  en: Object.freeze({ elementCount: 203, digest: "92e42e67e5017fe24dedab38e6a549a7372f2aa23b597abed30b263e1fdd6d35" })
+  pl: Object.freeze({ elementCount: 203, digest: "04c6bc08804630bc04a741183c63778c191ff1e8526aef1e5c1f393e63063831" }),
+  en: Object.freeze({ elementCount: 203, digest: "25935b4a0f995f1a7db9de7f047c648fb202d8f92024b03b58858555b1ad1289" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -6078,8 +6078,8 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 200, digest: "4b9e3b32b2d1dbb04e85ab0d64469bb9c20813424392068c45ca7b172a47d9d7" }),
-  en: Object.freeze({ elementCount: 200, digest: "eda6b418ba216840777abb7dd049196bf2229a66df3721a6befa06e01aaade31" })
+  pl: Object.freeze({ elementCount: 200, digest: "b9df68274c6e74c198bd20d1fc5c400d5e562aef9bd24be672660ffd7525df30" }),
+  en: Object.freeze({ elementCount: 200, digest: "a2d36ee83fc2cc5a9da2c2f424027f741fab359a09cb0d932281681cc6884575" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -7100,7 +7100,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "7b38ac7278011089d1b974e00d10408662213b4c955909296f384fb684e03f6f", en: "748b4527c26fd2f004caeb32d40728ed11c229ca5e45544c0313fbee18410b2b" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "f964fde07507d5d9328cbd53fb9c782ab1fb5498879f191ed0f5ee61c9fa7ebb", en: "0f7113e8cfea19554804e331d5691708a5d9b6b27fbb00f8875d319d64d7e189" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7479,9 +7479,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "bd89b10d4a153a73952ae8da7798dc0b03580b9f95e0368b2942f95ed13104f5", en: "6fd8b4db23389793c6cd85f3ab39351bce18c6719b8020dfebbac5f138bcc250" }),
-  ariba: Object.freeze({ pl: "f7bd57d19c526b4aced37984e63e83a37dc699475ca6373497ebf1301047784e", en: "cb8af6833fe1e5525beb17006d3be1a87e3fec11117265c0fa6bbb7204923214" }),
-  publicProcurement: Object.freeze({ pl: "632da4875839d4ecfcb3faa044d92e4aae352b20c2838df21c10f59df306d669", en: "946533553a62a91efd074326be3ab61caed63a7a77753f343ecbe91392db9200" })
+  transformation: Object.freeze({ pl: "9156814e160349bd7e518cef8c7c786fddc94da9ca38b323214300253216e1a0", en: "a82e1c17e76588f8681c55f4a9ff2a71e93919b35f2ff5f4309f219bb4f1f6a9" }),
+  ariba: Object.freeze({ pl: "56f5bc68a1d1db8d03f7383fc594cbe79876441734b3ce197a7584927356c8ef", en: "041912a354483d8b370929bee338979d7c467b6bd05aab5860d5864649fc0236" }),
+  publicProcurement: Object.freeze({ pl: "d2c52dba87ccdbc52ebd60a191b86e6a56772829c857494a5666ee20468bd2bd", en: "04b4f7ab4389b340d7f17d137382161a08c39491a7c71e6d04e1288d45a33fdb" })
 });
 
 function serviceKeyForPath(path) {
@@ -7879,7 +7879,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "848017b9d461f1788caec3573e19a514f55a9a918c8cc9dbde8d41ae7bc1000a", en: "1074482f94e7608123fe149c8355ca290223580250abf21ab2fa4fcb1274fd82" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "054013f0de8c6f60aa22e506a6fcac1b108729f6330057105228bc41b7ddfa47", en: "a82f4ffbb3a83a5ecdda1d771afd8a7212e9d5dac4da1b629e55f0c6c9d79702" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8182,7 +8182,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", "Materiał po angielsku · rozwiń"]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "681d89ddf353ec09d95b2160c3a1ec05c08f6ff7ae2435b203a9f480accdb7aa";
+const PROCUREMENT_DOCUMENT_MANIFEST = "1bebabef836f7bd94f4a7dba7338baa220bf99797acf9e746c5f3e3bd4729e02";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
