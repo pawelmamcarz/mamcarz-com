@@ -218,16 +218,16 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "8ba6ba25bb7fb491c13eedcd5ada8b79b237e66dcef716fe2608f280277e344c",
-  "en/index.html": "c8ef1000fcda76d76456c18e2e5ce0b4d3cd6da648015763e1905d0a563692b8",
+  "index.html": "77f44a9c006977204e44ac9563705903e2c998ae0c730b07d65fd2a0f21bbda3",
+  "en/index.html": "2a97cf15c22157a73fb32dabbbc581879bde3d068c84f923596892a98281edcf",
   "uslugi/transformacja-zakupow/index.html": "fffac19ec9b11b530ba8b0c471573252ee723bda3797f182d16d8baae2399dd1",
   "en/uslugi/transformacja-zakupow/index.html": "4bed2ac8b3630a4bb68fd3f87f4411ac38a6ce6e990ff1c2f353f1af127a9b15",
   "uslugi/wdrozenie-sap-ariba/index.html": "6472aa640f740db4d67d74eb22a935d72510407a44178de8a76eeeeb4630ac2b",
   "en/uslugi/wdrozenie-sap-ariba/index.html": "85d8f3c84ddfe470db16597bf812090f2b9243921802a1e23f49f4822aa577f7",
   "uslugi/doradztwo-zamowienia-publiczne/index.html": "14433b66c911fb5aa9d6a2f7ce28c30ddc0e5f161f6bb4c1c2578dc491f00c76",
   "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "e33ce670c9509813f85a90620d1070226eb6cbca24efac9335bac0a1092fa1d1",
-  "aplikacje-operacyjne/index.html": "8b95bc8f54ea399eb01df8e7be8d7e3f2c63d45c47d74e339e54bd0625553e8d",
-  "en/aplikacje-operacyjne/index.html": "d5ec96748fcd1941274482d9e05b8a304f857f47977a48d9b34b26e61b0e5ed9",
+  "aplikacje-operacyjne/index.html": "9069869909dbeae3dae7194abc672cd004009cca60aff58438e9c5a3c164b79d",
+  "en/aplikacje-operacyjne/index.html": "4aa1e33382b4a0e2a8ad7c0f8f8e452285df3b6dd0e4de2703c14c1d976e8077",
   "lotnictwo/index.html": "6ad6b3287758a32e316ca9a07087e6cf8d54ffd5dc5efa5da977cf06d64c6e89",
   "en/lotnictwo/index.html": "62f07c136afce5c5dd84e4cc9f3d8c65ad6aa58704d737ca89c9ccf60a0540c1",
   "case-studies/index.html": "8f4fa424061d5f79315e232c8fd74b4aeef708033afd7b4b5a55055c55015c9b",
@@ -3703,7 +3703,7 @@ test("registry keeps responsibility facts atomic and Polish-English meanings ali
   const byId = new Map(facts.map((record) => [record.id, record]));
   const expectedResponsibilities = {
     "career.all_for_one.responsibility": ["Kontynuuję rolę w apsolut po przejęciu apsolut przez All for One.", "I continue the apsolut role after All for One acquired apsolut."],
-    "career.apsolut.responsibility": ["Rozwijam działalność w regionie CEE.", "I develop the business in the CEE region."],
+    "career.apsolut.responsibility": ["Rozwijałem działalność w regionie CEE.", "I developed the business in the CEE region."],
     "career.sap.responsibility": ["Rozwijałem rynek SAP Ariba w Polsce i regionie CEE.", "I developed the SAP Ariba market in Poland and the CEE region."],
     "career.pzu.responsibility": ["Prowadziłem projekt transformacji zakupów, od analizy wydatków do docelowego modelu operacyjnego.", "I led a procurement transformation project from spend analysis to the target operating model."],
     "career.pwc.responsibility": ["Pracowałem z metodyką CAPP (Complete & Agile Procurement).", "I worked with the CAPP (Complete & Agile Procurement) methodology."],
@@ -9255,7 +9255,7 @@ test("Plan 3 Task 1 fix round 7 pins the reviewed presentation-index manifest", 
   ].join("\0"))));
   assert.equal(
     createHash("sha256").update(canonical).digest("hex"),
-    "92458fcad0d422ff88a9088d0bec0d560907be504a4685519ab791a32ba16103",
+    "31048a9f803fbd70287e1cc95c98934bb157bbc689a486a935a3359116e38cbe",
     "presentation markup changes require an explicit inventory audit and baseline refresh"
   );
 });

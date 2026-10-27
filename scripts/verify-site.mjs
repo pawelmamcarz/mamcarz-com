@@ -397,8 +397,8 @@ const PRESENTATION_INDEX_OCCURRENCE_DATA = [
     "ownerPath": "html[1]>body[1]>main[1]>section[3]>div[1]>div[1]>div[1]>p[1]",
     "token": "03",
     "occurrence": 1,
-    "ownerText": "03 / Evidence",
-    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Evidence Selected products.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Evidence\"],[\"h2{class=\\\"section-title\\\"}\",\"Selected products.\"]]"
+    "ownerText": "03 / Products",
+    "containerSignature": "body{class=\"applications-page\",data-page=\"applications\"}>main{id=\"main\",tabindex=\"-1\"}>section{class=\"applications-section application-evidence\",data-section=\"evidence\",id=\"products\"}>div{class=\"section-shell\"}>div{class=\"applications-heading\"}>div{}>p{class=\"section-label\"}|parentText=\"03 / Products Selected products.\"|parentChildren=[[\"p{class=\\\"section-label\\\"}\",\"03 / Products\"],[\"h2{class=\\\"section-title\\\"}\",\"Selected products.\"]]"
   },
   {
     "file": "en/aplikacje-operacyjne/index.html",
@@ -4855,7 +4855,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operacja", "Uruchomienie", "Przygotowanie danych, odbiór procesu i wejście do codziennej pracy."
       ]),
       evidence: Object.freeze([
-    "03 / Produkty", "Wybrane produkty.", "Wybrane zakresy pokazane przez ich zatwierdzone znaczenie produktowe. fnp.silence-tax.com to publiczny wariant na silniku Silence Tax, nie osobna marka.",
+    "03 / Produkty", "Wybrane produkty.", "Przy każdym produkcie podaję jego funkcję. fnp.silence-tax.com to publiczny wariant na silniku Silence Tax, nie osobna marka.",
         "Produkt / 01", "czympojade.pl", "Funkcja", "Kalkulator TCO floty wykorzystujący model Bielik do analizy kosztów posiadania.",
         "Produkt / 02", "Przypominamy.com", "Funkcja", "Platforma powiadomień dla organizacji.",
         "Produkt / 03", "ProcuraCost", "Funkcja", "Kalkulator kosztów procedur zakupowych.",
@@ -4936,7 +4936,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
         "04 / Operation", "Launch", "Data preparation, process acceptance and entry into day-to-day work."
       ]),
       evidence: Object.freeze([
-        "03 / Evidence", "Selected products.", "Selected scopes, shown through their approved product meaning. fnp.silence-tax.com is a public Silence Tax variant on the same engine, not a third brand.",
+        "03 / Products", "Selected products.", "Each product is listed with its function. fnp.silence-tax.com is a public Silence Tax variant on the same engine, not a separate brand.",
         "Product / 01", "czympojade.pl", "Function", "Fleet TCO calculator using the Bielik model to analyse total cost of ownership.",
         "Product / 02", "Przypominamy.com", "Function", "Notification platform for organisations.",
         "Product / 03", "ProcuraCost", "Function", "Procurement procedure cost calculator.",
