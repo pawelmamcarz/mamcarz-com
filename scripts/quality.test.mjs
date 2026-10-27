@@ -25,6 +25,16 @@ test('public scheduling link is approved and identical on both home pages', asyn
   }
 });
 
+test('privacy pages disclose Web Analytics, the chat models and Cal.com without claiming no analytics', async () => {
+  for (const [path, heading] of [['prywatnosc/index.html', '<h2>Pomiar ruchu</h2>'], ['en/prywatnosc/index.html', '<h2>Traffic measurement</h2>']]) {
+    const html = await readFile(resolve(path), 'utf8');
+    assert.doesNotMatch(html, /bez analityki|narzędzi analitycznych|no analytics/iu, path);
+    for (const required of [heading, 'Cloudflare Web Analytics', 'static.cloudflareinsights.com', 'Jev', 'TypeSafe', 'Cloudflare Workers AI', 'Cal.com']) {
+      assert.ok(html.includes(required), `${path} must mention ${required}`);
+    }
+  }
+});
+
 function chatHarness(fetch) {
   const nodes = new Map();
   const element = () => ({

@@ -106,8 +106,8 @@ const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
   "/diagrams/diagram2_ariba": "2026-09-04",
   "/diagrams/diagram3_maturity": "2026-09-04",
   "/diagrams/infographic": "2026-09-04",
-  "/prywatnosc/": "2026-09-04",
-  "/en/prywatnosc/": "2026-09-04",
+  "/prywatnosc/": "2026-10-27",
+  "/en/prywatnosc/": "2026-10-27",
   "/o-mnie/": "2026-10-18",
   "/en/o-mnie/": "2026-10-18",
 });
@@ -10198,8 +10198,8 @@ function plan3ReviewedStaticNumber(path, unit, token) {
   const ownerText = unit.text;
   if (["prywatnosc/index.html", "en/prywatnosc/index.html"].includes(path)
     && owner.name === "p" && elementHasClass(owner, "legal-updated")
-    && ["Ostatnia aktualizacja: 4 września 2026", "Last updated: 4 September 2026"].includes(ownerText)
-    && ["4", "2026"].includes(token.value)) return true;
+    && ["Ostatnia aktualizacja: 27 października 2026", "Last updated: 27 October 2026"].includes(ownerText)
+    && ["27", "2026"].includes(token.value)) return true;
   if (token.value === "1993–2026"
     && elementHasClass(owner, "footer-copy")
     && ownerText === FOOTER_OWNER_LINE) return true;
