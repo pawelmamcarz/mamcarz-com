@@ -159,7 +159,7 @@ Rekomendacja: 403 dla żądań bez dozwolonego Origin. Zmiana zachowania produkc
 **D14. `access-control-allow-origin: *` na stronach statycznych.** Domyślne zachowanie Cloudflare Pages, bez danych prywatnych; niskie ryzyko. Status: **do decyzji**.
 
 **D15. Portfolio: brak linków zwrotnych i niespójne nazwy.**
-Dowód: tylko akrobacja.com linkuje do mamcarz.com; czympojade.pl ma jedynie `founder.url` w schema; procuracost, silence-tax.com, fnp.silence-tax.com, przypominamy.com i filmolot.pl bez linku. czympojade.pl ma tytuł „Kalkulator TCO samochodu”, a mamcarz.com opisuje go jako „Kalkulator TCO floty”. filmolot.pl używa 21 em dashy (np. tytuł „Filmolot — Fotografia…”).
+Dowód: tylko akrobacja.com linkuje do mamcarz.com; czympojade.pl ma jedynie `founder.url` w schema; procuracost, silence-tax.com, fnp.silence-tax.com, przypominamy.com i filmolot.pl bez linku. czympojade.pl ma tytuł „Kalkulator TCO samochodu”, a mamcarz.com opisuje go jako „Kalkulator TCO floty”. filmolot.pl używa 21 em dashy (m.in. w tytule strony, między „Filmolot” a „Fotografia”).
 Rekomendacja: link „Autor: Paweł Mamcarz” w stopkach serwisów, ujednolicenie opisu czympojade, usunięcie em dashy na filmolot.pl (inne repozytoria). Status: **do decyzji**.
 
 **D16. Obrazy kart portfolio bez wymiarów.** Status: **naprawione w PR**.
