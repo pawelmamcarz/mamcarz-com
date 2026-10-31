@@ -218,25 +218,25 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "3f3c9a2b57472149282cffa807cc62e14f03c28c5715217ae7fde100d47426b6",
-  "en/index.html": "46945bb9ed256108d59fa48a6dee9461d9138ab833763bde9c52b3dc876f3476",
-  "uslugi/transformacja-zakupow/index.html": "fffac19ec9b11b530ba8b0c471573252ee723bda3797f182d16d8baae2399dd1",
-  "en/uslugi/transformacja-zakupow/index.html": "4bed2ac8b3630a4bb68fd3f87f4411ac38a6ce6e990ff1c2f353f1af127a9b15",
-  "uslugi/wdrozenie-sap-ariba/index.html": "6472aa640f740db4d67d74eb22a935d72510407a44178de8a76eeeeb4630ac2b",
-  "en/uslugi/wdrozenie-sap-ariba/index.html": "85d8f3c84ddfe470db16597bf812090f2b9243921802a1e23f49f4822aa577f7",
-  "uslugi/doradztwo-zamowienia-publiczne/index.html": "14433b66c911fb5aa9d6a2f7ce28c30ddc0e5f161f6bb4c1c2578dc491f00c76",
-  "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "e33ce670c9509813f85a90620d1070226eb6cbca24efac9335bac0a1092fa1d1",
-  "aplikacje-operacyjne/index.html": "9069869909dbeae3dae7194abc672cd004009cca60aff58438e9c5a3c164b79d",
-  "en/aplikacje-operacyjne/index.html": "4aa1e33382b4a0e2a8ad7c0f8f8e452285df3b6dd0e4de2703c14c1d976e8077",
-  "lotnictwo/index.html": "6ad6b3287758a32e316ca9a07087e6cf8d54ffd5dc5efa5da977cf06d64c6e89",
-  "en/lotnictwo/index.html": "62f07c136afce5c5dd84e4cc9f3d8c65ad6aa58704d737ca89c9ccf60a0540c1",
-  "case-studies/index.html": "8f4fa424061d5f79315e232c8fd74b4aeef708033afd7b4b5a55055c55015c9b",
-  "en/case-studies/index.html": "4d890dd08fb6aabd526a546d0db5f7370bbf5d916f394c7c72714d68b7c1a717",
-  "wiedza/index.html": "fd920733c688241ce880b421b46bf88f9f9bba701f8c51656b5913fdaa19941f",
-  "en/wiedza/index.html": "c4438cc5b631215e6c85fbd6c83c9a41e75bd5f2bbc2d664309f89d214ab96ca",
-  "wystapienia/index.html": "5dc24a6fec484edd7009acdb522114c3e76df3399eefa835bebfcb36868648d2",
-  "en/wystapienia/index.html": "ffc47f9d004ce5f87ec52f42687dd78586368bcb832114394237316987fdeb8d",
-  "procurement-2026/index.html": "b243841e71a5e0e03763efbd004024ad1404cc76b3a7eaea08dd0912546e462e"
+  "index.html": "224cc1d4fb3960646a2abf8e28d29dec25b6e971b3f6b743e86a46eec4172d24",
+  "en/index.html": "003fef8aa4b442cc63682f2bcf84099678e8486172e889071d54be8a5da24c11",
+  "uslugi/transformacja-zakupow/index.html": "f7fe65776009627c485ce6c81ae6881340f8c63d00dddb19d7b27773f88f63aa",
+  "en/uslugi/transformacja-zakupow/index.html": "eb98f102fd91729cc5594ebcc165e1de0f61814a36f2f59d17ae9665557d79e4",
+  "uslugi/wdrozenie-sap-ariba/index.html": "ed12c843d72f04e98afc38a9f231cdc2db2cd13dcdfb9c9e63140ca5bbbc91d7",
+  "en/uslugi/wdrozenie-sap-ariba/index.html": "f528ef38c3ac191312cd862ef2fe3f7642cbff1743a0cb6b48ce9dd917af70b1",
+  "uslugi/doradztwo-zamowienia-publiczne/index.html": "c5e92ffe0bb0dbe5acf99518349348c6911c70274cedcd550f9e8d6d18d2340f",
+  "en/uslugi/doradztwo-zamowienia-publiczne/index.html": "a76d15114c54aa800459e88c8de6df25798227f7ac61a13476d74dfe6ad5e8c9",
+  "aplikacje-operacyjne/index.html": "71729bd36f6f1f824c4847f1648fc202f1c9d5cd53983821ef7022dfcc0af457",
+  "en/aplikacje-operacyjne/index.html": "ba360427af494de376cc316a49f2cc32001d664798940da5eca96e025cf319a3",
+  "lotnictwo/index.html": "18665f8dc0c3425612b6052edd56abf8ca7e933464fcb306f6f0c9cf26e8e8a0",
+  "en/lotnictwo/index.html": "248b837b757505ab1358930a3c8731537eb82d29a127a8708e308a951f665f68",
+  "case-studies/index.html": "fcbc36e96334fa063ad0fa31a95eb400455c9047da947aee0d69a0ac2b2c901f",
+  "en/case-studies/index.html": "3a54135f6c2960fb6ed1640121024d489ab7d9577c0cc621c776ff705517eec6",
+  "wiedza/index.html": "19a2600559581b0daaa8b55bc0ee5ef41cde09dcfdf1f4c93af716faf2b4b592",
+  "en/wiedza/index.html": "722ace8014252a519a2ed8317012bdbf3e3c9e974b23947a837fa6ff78f7a35d",
+  "wystapienia/index.html": "b181f3a8f63de1d08c3a15572488fed5c2b37b9e9931202f55bce6f7183aed85",
+  "en/wystapienia/index.html": "3449566a2038aadba868c2f7525009c7893687c097a29113c4a07e1d996b88fb",
+  "procurement-2026/index.html": "11eb46ed658f123d26351c1c93c80e81bd94f22288f3e131ce3bd65e71d137ca"
 });
 
 const task9ShellCopy = Object.freeze({
@@ -1007,7 +1007,9 @@ function assertServiceRegistryInventoryErrors(results, label) {
 const knowledgeContract = Object.freeze({
   pl: Object.freeze({
     title: "Wiedza",
+    metaTitle: "Wiedza: proces zakupowy i SAP Ariba · Paweł Mamcarz",
     purpose: "Analizy, wystąpienia i narzędzia, które porządkują decyzje w procurement, technologii i operacjach.",
+    description: "Materiały o procesie zakupowym: interaktywny model z mapą SAP Ariba i oceną dojrzałości oraz wystąpienia i wykłady.",
     ctaHref: "/#contact",
     ctaLabel: "Przejdź do kontaktu",
     resources: Object.freeze([
@@ -1017,7 +1019,9 @@ const knowledgeContract = Object.freeze({
   }),
   en: Object.freeze({
     title: "Insights",
+    metaTitle: "Insights: procurement process and SAP Ariba · Paweł Mamcarz",
     purpose: "Analysis, talks and tools that clarify decisions in procurement, technology and operations.",
+    description: "Materials on the procurement process: an interactive model with an SAP Ariba map and a maturity assessment, plus talks and lectures.",
     ctaHref: "/en/#contact",
     ctaLabel: "Go to contact",
     resources: Object.freeze([
@@ -1047,11 +1051,11 @@ function knowledgePageFixture(lang) {
     "@type": "CollectionPage",
     name: contract.title,
     url,
-    description: contract.purpose,
+    description: contract.description,
     inLanguage: lang
   };
   const copy = lang === "pl" ? {
-    description: contract.purpose, ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna",
+    description: contract.description, ogLocale: "pl_PL", skip: "Przejdź do treści", navLabel: "Nawigacja główna",
     home: "/", logoLabel: "Paweł Mamcarz, strona główna", advisory: "Doradztwo",
     submenu: [["/uslugi/transformacja-zakupow/", "Transformacja zakupów"], ["/uslugi/wdrozenie-sap-ariba/", "Wdrożenie SAP Ariba"], ["/uslugi/doradztwo-zamowienia-publiczne/", "Zamówienia publiczne"]],
     primary: [["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza", true], ["/o-mnie/", "O mnie"], ["/#contact", "Kontakt"]],
@@ -1060,7 +1064,7 @@ function knowledgePageFixture(lang) {
     contactLabel: "KONTAKT / NASTĘPNY KROK", contactCopy: "Jeśli materiał dotyczy decyzji, nad którą pracujesz, przejdź do rozmowy.",
     footer: [["/", "Strona główna"], ["/uslugi/transformacja-zakupow/", "Doradztwo"], ["/aplikacje-operacyjne/", "Aplikacje"], ["/lotnictwo/", "Lotnictwo"], ["/case-studies/", "Projekty"], ["/wiedza/", "Wiedza"], ["/o-mnie/", "O mnie"], ["/#contact", "Kontakt"], ["/prywatnosc/", "Prywatność"]]
   } : {
-    description: contract.purpose, ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation",
+    description: contract.description, ogLocale: "en_US", skip: "Skip to content", navLabel: "Main navigation",
     home: "/en/", logoLabel: "Paweł Mamcarz, homepage", advisory: "Advisory",
     submenu: [["/en/uslugi/transformacja-zakupow/", "Procurement transformation"], ["/en/uslugi/wdrozenie-sap-ariba/", "SAP Ariba implementation"], ["/en/uslugi/doradztwo-zamowienia-publiczne/", "Public procurement"]],
     primary: [["/en/aplikacje-operacyjne/", "Applications"], ["/en/lotnictwo/", "Aviation"], ["/en/case-studies/", "Projects"], ["/en/wiedza/", "Insights", true], ["/en/o-mnie/", "About"], ["/en/#contact", "Contact"]],
@@ -1073,10 +1077,10 @@ function knowledgePageFixture(lang) {
   const primary = copy.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = copy.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   return `<!DOCTYPE html><html lang="${lang}"><head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.metaTitle}</title>
     <meta name="description" content="${copy.description}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow">
     <link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="https://mamcarz.com${plRoute}"><link rel="alternate" hreflang="en" href="https://mamcarz.com${enRoute}"><link rel="alternate" hreflang="x-default" href="https://mamcarz.com${plRoute}">
-    <meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
+    <meta property="og:title" content="${contract.metaTitle}"><meta property="og:description" content="${copy.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.metaTitle}"><meta property="og:locale" content="${copy.ogLocale}"><meta property="og:locale:alternate" content="${lang === "pl" ? "en_US" : "pl_PL"}"><meta property="og:site_name" content="Paweł Mamcarz">
     <script type="application/ld+json">${JSON.stringify(schema)}</script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="/assets/css/style.css?v=20261027-flightplan-5">
   </head><body class="knowledge-page" data-page="knowledge">
@@ -1108,14 +1112,14 @@ const applicationContract = {
   pl: {
     title: "Aplikacje operacyjne",
     lead: "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji.",
-    description: "Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.",
+    description: "Aplikacje operacyjne projektowane wokół procesu, danych i pracy użytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.",
     url: "https://mamcarz.com/aplikacje-operacyjne/",
     contactHref: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna"
   },
   en: {
     title: "Operational applications",
     lead: "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work.",
-    description: "Operational application design around process, data, user responsibility and day-to-day work.",
+    description: "Operational applications designed around process, data and day-to-day work. Products: czympojade.pl, Przypominamy.com, ProcuraCost and silence-tax.com.",
     url: "https://mamcarz.com/en/aplikacje-operacyjne/",
     contactHref: "mailto:pawel@mamcarz.com?subject=Operational%20application"
   }
@@ -2150,7 +2154,7 @@ test("Plan 2 Task 2 fix round 1 pins claim-safe body, footer and metadata conten
     ["fabricated body copy", "application-shell-copy", (html) => html.replace('<footer class="site-footer">', '<p>Project price: 100 PLN.</p><footer class="site-footer">')],
     ["fabricated footer copy", "application-shell-copy", (html) => html.replace("</footer>", "<p>Available now.</p></footer>")],
     ["changed search description", "application-metadata", (html) => html.replace(
-      '<meta name="description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
+      '<meta name="description" content="Aplikacje operacyjne projektowane wokół procesu, danych i pracy użytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.">',
       '<meta name="description" content="Applications delivered in two weeks.">'
     )],
     ["extra offer metadata", "application-metadata", (html) => html.replace("</head>", '<meta name="price" content="10000 PLN">\n</head>')]
@@ -2298,8 +2302,8 @@ test("Plan 2 Task 2 fix round 2 preserves case across exact page literals while 
     mutate: (html) => html
       .replace("<dt>Procurement</dt>", "<dt> \n Procurement\u200b \t</dt>")
       .replace(
-        'content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy."',
-        'content="  Projektowanie  aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.  "'
+        'content="Aplikacje operacyjne projektowane wokół procesu, danych i pracy użytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com."',
+        'content="  Aplikacje  operacyjne projektowane wokół procesu, danych i pracy użytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.  "'
       )
   });
   assert.deepEqual(semanticWhitespace.errors, []);
@@ -2440,20 +2444,20 @@ test("Plan 2 Task 2 fix round 3 compares metadata tokens raw and human fields se
   const humanEquivalent = await applicationPageMutation({
     mutate: (html) => html
       .replace(
-        "<title>Aplikacje operacyjne · Paweł Mamcarz</title>",
-        "<title>  Aplikacje   operacyjne · Pawe&#322; Mamcarz  </title>"
+        "<title>Aplikacje operacyjne i produkty · Paweł Mamcarz</title>",
+        "<title>  Aplikacje   operacyjne i produkty · Pawe&#322; Mamcarz  </title>"
       )
       .replace(
-        'content="Aplikacje operacyjne · Paweł Mamcarz"',
-        'content="  Aplikacje   operacyjne · Pawe&#322; Mamcarz  "'
+        'content="Aplikacje operacyjne i produkty · Paweł Mamcarz"',
+        'content="  Aplikacje   operacyjne i produkty · Pawe&#322; Mamcarz  "'
       )
       .replace(
-        '<meta name="description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
-        '<meta name="description" content="  Projektowanie  aplikacji operacyjnych wokół procesu, danych, odpowiedzialnos&#769;ci użytkowników i codziennej pracy.  ">'
+        '<meta name="description" content="Aplikacje operacyjne projektowane wokół procesu, danych i pracy użytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.">',
+        '<meta name="description" content="  Aplikacje  operacyjne projektowane wokół procesu, danych i pracy uz&#775;ytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.  ">'
       )
       .replace(
-        '<meta property="og:description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.">',
-        '<meta property="og:description" content="Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialnos&#769;ci użytkowników i codziennej pracy.">'
+        '<meta property="og:description" content="Aplikacje operacyjne projektowane wokół procesu, danych i pracy użytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.">',
+        '<meta property="og:description" content="Aplikacje operacyjne projektowane wokół procesu, danych i pracy uz&#775;ytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.">'
       )
   });
   assert.deepEqual(humanEquivalent.errors, []);
@@ -2909,7 +2913,7 @@ test("Plan 2 Task 4 pins a bounded CollectionPage to the visible page identity",
     ["wrong schema language", (html) => html.replace('"inLanguage":"pl"}', '"inLanguage":"en"}')],
     ["extra schema key", (html) => html.replace('"@type":"CollectionPage"', '"@type":"CollectionPage","author":{"@type":"Person"}')],
     ["missing language", (html) => html.replace(',"inLanguage":"pl"', '')],
-    ["coordinated page identity drift", (html) => html.replaceAll(knowledgeContract.pl.purpose, 'Materiały o decyzjach zakupowych.')]
+    ["coordinated page identity drift", (html) => html.replaceAll(knowledgeContract.pl.description, 'Materiały o decyzjach zakupowych.')]
   ];
   for (const [label, mutate] of cases) {
     const result = await knowledgePageMutation({ mutate });
@@ -7350,9 +7354,8 @@ function plan3RealPresentationBody() {
 function plan3Sitemap() {
   const blocks = plan3ExpectedPublicPages.map((entry) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = ["/", "/en/", "/aplikacje-operacyjne/", "/en/aplikacje-operacyjne/", "/prywatnosc/", "/en/prywatnosc/"].includes(entry.route) ? "2026-10-27"
-      : ["/o-mnie/", "/en/o-mnie/"].includes(entry.route) ? "2026-10-18"
-      : ["/wystapienia/", "/en/wystapienia/"].includes(entry.route) ? "2026-09-07" : "2026-09-04";
+    const lastmod = ["/prywatnosc/", "/en/prywatnosc/"].includes(entry.route) ? "2026-10-27"
+      : entry.route.startsWith("/diagrams/") ? "2026-09-04" : "2026-10-31";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
   });
   return `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${blocks.join("")}</urlset>`;
@@ -7578,14 +7581,14 @@ test("Plan 3 Task 1 validates registry duplicates enums dates HTTPS sources and 
     ["duplicate ids", [plan3Fact(), plan3Fact()], "fact-duplicate-id"],
     ["duplicate surfaces", [plan3Fact({ surfaces: ["index.html", "index.html"] })], "fact-duplicate-surface"],
     ["unsupported enum", [plan3Fact({ status: "published" })], "fact-status"],
-    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-10-28" })], "fact-as-of-future"],
+    ["future date", [plan3Fact({ kind: "dated", as_of: "2026-11-01" })], "fact-as-of-future"],
     ["malformed date", [plan3Fact({ kind: "dated", as_of: "2026-02-30" })], "fact-as-of"],
     ["public source without HTTPS", [plan3Fact({ source_type: "public_source", source_url: "http://example.com/source" })], "fact-source-url"],
     ["secret-like nested key", [plan3Fact({ evidence: { api_token: "do-not-publish" } })], "fact-secret-key"],
     ["private path material", [plan3Fact({ source_label: "/Users/person/private/cv.pdf" })], "fact-private-material"],
     ["approved fact without surfaces or an unpublished date", [plan3Fact({ surfaces: [] })], "fact-surfaces"],
     ["unpublished fact that still declares surfaces", [plan3Fact({ unpublished_since: "2026-10-18" })], "fact-unpublished"],
-    ["future unpublished date", [plan3Fact({ surfaces: [], unpublished_since: "2026-10-28" })], "fact-unpublished"],
+    ["future unpublished date", [plan3Fact({ surfaces: [], unpublished_since: "2026-11-01" })], "fact-unpublished"],
     ["malformed unpublished date", [plan3Fact({ surfaces: [], unpublished_since: "2026-02-30" })], "fact-unpublished"],
     ["unpublished date on a review fact", [plan3Fact({ status: "review", surfaces: [], unpublished_since: "2026-10-18" })], "fact-unpublished"]
   ];
