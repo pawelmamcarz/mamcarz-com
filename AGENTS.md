@@ -44,6 +44,7 @@ Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny to
 - `content/site-facts.json`: rejestr zatwierdzonych faktów i powierzchni publikacji.
 - `worker/index.js`: czat; `worker/jev-policy.js`: pytania, kryteria i progi TypeSafe Jev; `worker/jev.js`: cienka osłona `typesafe/jev` przez `env.AI`.
 - `scripts/verify-site.mjs`: manifest `PUBLIC_PAGES` i kontrakty weryfikacyjne dla 27 publicznych dokumentów.
+- `scripts/seo-report.mjs` (`npm run seo:report`): raport SEO i llms offline (`--check`, `--write`, opcjonalnie `--online`); opis, cotygodniowa lista kontrolna i raporty w `docs/seo/`.
 - `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, `404.html`: powierzchnie discovery i błędów.
 
 `PUBLIC_PAGES` w `scripts/verify-site.mjs` jest normatywnym manifestem tras. Przy dodaniu lub usunięciu strony aktualizuj razem manifest, sitemapę, odpowiednią parę językową i kontrolowane indeksy llms.
@@ -80,6 +81,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - `404.html` jest celowym wyjątkiem: `noindex`, bez canonicala i bez wpisu w sitemapie.
 - `sitemap.xml` musi odpowiadać dokładnie `PUBLIC_PAGES`; daty `lastmod` mają odzwierciedlać rzeczywistą zmianę treści, nie sam deploy.
 - `llms.txt` jest kontrolowanym indeksem nawigacyjnym, a `llms-full.txt` indeksem faktów generowanym z zatwierdzonych wpisów. Nie dopisuj swobodnej biografii.
+- `npm run seo:report -- --check` sprawdza tytuły, opisy, canonical, `hreflang`, Open Graph, JSON-LD, sitemapę, `robots.txt` i pokrycie llms względem `PUBLIC_PAGES`; kontrola offline jest częścią `npm run test:quality`. Komendy `verify:*` i ich kontrakty pozostają bez zmian.
 
 ## Weryfikacja
 
@@ -97,6 +99,7 @@ npm run verify:site
 npm run test:verify-site
 npm run test:worker
 npm run test:quality
+npm run seo:report -- --check
 npm run package:site
 npm run verify:release
 node --check assets/js/main.js
