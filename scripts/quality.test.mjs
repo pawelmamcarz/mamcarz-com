@@ -16,7 +16,7 @@ test('public scheduling link is approved and identical on both home pages', asyn
   const registry = JSON.parse(await readFile(resolve('content/site-facts.json'), 'utf8'));
   const fact = registry.facts.find((entry) => entry.id === 'contact.scheduling_link');
   assert.equal(fact?.status, 'approved');
-  assert.deepEqual(fact.surfaces, ['index.html', 'en/index.html']);
+  assert.deepEqual(fact.surfaces, ['index.html', 'en/index.html', 'llms.txt']);
   assert.equal(fact.source_url, fact.value);
   for (const [path, label] of [['index.html', fact.display_pl], ['en/index.html', fact.display_en]]) {
     const html = await readFile(resolve(path), 'utf8');

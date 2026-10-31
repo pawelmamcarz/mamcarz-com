@@ -791,6 +791,7 @@ const productionFactSurfaceControls = {
     "25+ years of procurement experience.",
     "Neutral context between the controlled claims.",
     "20+ SAP Ariba implementations.",
+    "Book a call (30 min): https://cal.com/pawelmamcarz/rozmowa",
     "Neutral context after the controlled claims."
   ].join("\n"),
   llmsFull: [
@@ -7069,7 +7070,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
   }
   assert.equal(
     createHash("sha256").update(text).digest("hex"),
-    "f6ba658ce855ed8a7760b136a4a844609c99c72c02b8b7f043146d23efaac6d0",
+    "e20edee41299e09d594e2972b063aceea1de70c0cfbad912a83fa1c0fb321570",
     "llms-full.txt must retain the exact approved fact index without regenerated biography"
   );
 });
@@ -7784,7 +7785,7 @@ test("Plan 3 Task 1 derives discovery coverage from the independent canonical ro
         "navigation narrative",
         "llms.txt",
         plan3ProductLlms.replace(
-          "This file is a navigation index.",
+          "This file is a navigation index for search engines and AI assistants.",
           "This file presents a leading procurement profile."
         ),
         "discovery-llms-contract"

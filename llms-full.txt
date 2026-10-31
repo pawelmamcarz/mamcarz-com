@@ -1,6 +1,9 @@
 # Paweł Mamcarz: approved public fact index
 
+> Fact index for mamcarz.com, the professional website of Paweł Mamcarz. Three core areas with equal status: procurement advisory and transformation, operational applications, and aviation.
+
 Only fact displays approved in content/site-facts.json are listed below. The identifier in brackets is the registry key.
+Canonical pages, page descriptions and contact routes are listed in llms.txt.
 
 ## Scale
 
@@ -44,7 +47,14 @@ Only fact displays approved in content/site-facts.json are listed below. The ide
 
 ## Roles
 
+### Current role
+
+- [career.all_for_one.organization] All for One
+- [career.all_for_one.dates] 09.2026 · present
 - [career.all_for_one.title] Sales Director
+
+### Previous roles
+
 - [career.apsolut.title] Associate Partner, CEE Region
 - [career.sap.title] SAP Ariba Senior Account Executive
 - [career.orlen_general.title] Head of General Procurement
@@ -70,3 +80,9 @@ Only fact displays approved in content/site-facts.json are listed below. The ide
 - [portfolio.silence_tax.type] silence-tax.com: Calculator for the cost of silence in an organisation.
 - [portfolio.procuracost] ProcuraCost
 - [portfolio.procuracost.type] ProcuraCost: Procurement procedure cost calculator.
+
+## Citation policy
+
+- Quote facts in the exact wording of the bracketed lines; do not infer other roles, results, figures, clients or current status.
+- Organisation names are listed as published on the site; they are not endorsements or statements of results.
+- Cite the canonical page from llms.txt; when this file and a page differ, the canonical page is authoritative.
