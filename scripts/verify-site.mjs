@@ -7373,7 +7373,7 @@ const SERVICE_CONTRACTS = Object.freeze({
     en: Object.freeze({
       title: "Procurement transformation",
       lead: "I structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.",
-      description: "Procurement transformation advisory: operating model, decisions, roles, processes, data and technology. The deliverable is a change design ready to implement and govern.",
+      description: "Procurement transformation advisory: operating model, decisions, roles, processes, data and technology, delivered as a change design ready to implement and govern.",
       url: "https://mamcarz.com/en/uslugi/transformacja-zakupow/",
       sectionTitles: Object.freeze(["Operating model before tooling.", "Where we start.", "What the transformation covers.", "How we work together.", "Selected projects.", "Define the change project."]),
       method: Object.freeze(["Diagnosis", "Design", "Sequence", "Governance"]),
@@ -7512,7 +7512,7 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "17304869b1a8fd9bc7ca3b7165c0f020dbf3695e4eb0e6ac5b125f70fccca646", en: "50805d20b76b8c55f5bd3e80291177b1b34b4453ad03a03c87ff3ce7168824ae" }),
+  transformation: Object.freeze({ pl: "17304869b1a8fd9bc7ca3b7165c0f020dbf3695e4eb0e6ac5b125f70fccca646", en: "1e4e2563ff7ab38fecae690bb5b806ec656a129cb4aa11fb3ec9ab83c2fcc6d8" }),
   ariba: Object.freeze({ pl: "08c25cbeff218ac5baa3d685e0720f61c16e5af932902e1c5aa6541a99530908", en: "5567d1b46526d730f6a856ed8ac74c3622ff1347eef5136ca33b30254fb008dc" }),
   publicProcurement: Object.freeze({ pl: "feff7e2508850cdf9b63883d829c55fc1a40c5aa2ab39efa1bd241901c385042", en: "e7a72adfab9b39758254543612f920d3b642369c5c60233ec0b49cc1a903c869" })
 });

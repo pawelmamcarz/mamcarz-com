@@ -221,7 +221,7 @@ const task9ProtectedContentHashes = Object.freeze({
   "index.html": "224cc1d4fb3960646a2abf8e28d29dec25b6e971b3f6b743e86a46eec4172d24",
   "en/index.html": "003fef8aa4b442cc63682f2bcf84099678e8486172e889071d54be8a5da24c11",
   "uslugi/transformacja-zakupow/index.html": "f7fe65776009627c485ce6c81ae6881340f8c63d00dddb19d7b27773f88f63aa",
-  "en/uslugi/transformacja-zakupow/index.html": "eb98f102fd91729cc5594ebcc165e1de0f61814a36f2f59d17ae9665557d79e4",
+  "en/uslugi/transformacja-zakupow/index.html": "67629f23053a402bc11d6b2f96eff50cc2a9db807612ece408081f517438c4be",
   "uslugi/wdrozenie-sap-ariba/index.html": "ed12c843d72f04e98afc38a9f231cdc2db2cd13dcdfb9c9e63140ca5bbbc91d7",
   "en/uslugi/wdrozenie-sap-ariba/index.html": "f528ef38c3ac191312cd862ef2fe3f7642cbff1743a0cb6b48ce9dd917af70b1",
   "uslugi/doradztwo-zamowienia-publiczne/index.html": "c5e92ffe0bb0dbe5acf99518349348c6911c70274cedcd550f9e8d6d18d2340f",

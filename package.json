@@ -14,6 +14,7 @@
     "verify:metadata": "node scripts/verify-site.mjs --scope=metadata",
     "verify:discovery": "node scripts/verify-site.mjs --scope=discovery",
     "verify:seo": "node scripts/verify-site.mjs --scope=seo",
+    "seo:report": "node scripts/seo-report.mjs",
     "test:verify-site": "node --test scripts/verify-site.test.mjs",
     "test:worker": "node --test worker/index.test.mjs",
     "package:site": "node scripts/package-site.mjs",
