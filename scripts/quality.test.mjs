@@ -8,6 +8,7 @@ import { webcrypto } from 'node:crypto';
 import { PUBLIC_PAGES } from './verify-site.mjs';
 import { packageSite, PUBLIC_ROOT_FILES } from './package-site.mjs';
 import { verifyRelease } from './verify-release.mjs';
+import { analyseLlms, analysePage, crossPageChecks, runSeoReport } from './seo-report.mjs';
 import { DESTINATIONS } from '../worker/navigation.js';
 
 const source = await readFile(new URL('../assets/js/main.js', import.meta.url), 'utf8');
@@ -16,7 +17,7 @@ test('public scheduling link is approved and identical on both home pages', asyn
   const registry = JSON.parse(await readFile(resolve('content/site-facts.json'), 'utf8'));
   const fact = registry.facts.find((entry) => entry.id === 'contact.scheduling_link');
   assert.equal(fact?.status, 'approved');
-  assert.deepEqual(fact.surfaces, ['index.html', 'en/index.html']);
+  assert.deepEqual(fact.surfaces, ['index.html', 'en/index.html', 'llms.txt']);
   assert.equal(fact.source_url, fact.value);
   for (const [path, label] of [['index.html', fact.display_pl], ['en/index.html', fact.display_en]]) {
     const html = await readFile(resolve(path), 'utf8');
@@ -144,4 +145,28 @@ test('release package excludes private sources, hidden files and stale bytes', a
   await assert.rejects(verifyRelease({source:root}),/stale/);
   await symlink(resolve(root,'AGENTS.md'),resolve(root,'assets/leak.svg'));
   await assert.rejects(packageSite(root),/Symbolic link/);
+});
+
+test('offline SEO report finds no errors across PUBLIC_PAGES, sitemap, robots and llms', async () => {
+  const report = await runSeoReport();
+  assert.equal(report.online, false);
+  assert.equal(report.pages.length, PUBLIC_PAGES.length);
+  assert.deepEqual(report.errors, []);
+});
+
+test('SEO report flags metadata, heading, alt, em dash and llms drift', async () => {
+  const page = PUBLIC_PAGES.find((entry) => entry.route === '/uslugi/wdrozenie-sap-ariba/');
+  const html = await readFile(resolve(page.file), 'utf8');
+  const broken = analysePage(page, html
+    .replace('<h1', '<h1>Extra</h1><h1')
+    .replace('</main>', '<img src="/x.png">\u2014</main>')
+    .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="Other">'));
+  for (const fragment of ['og:title', '<h1>', 'without alt', 'em dash']) {
+    assert.ok(broken.errors.some((item) => item.includes(fragment)), fragment);
+  }
+  const original = analysePage(page, html);
+  assert.ok(crossPageChecks([original, { ...original, page: { ...page, file: 'copy.html', route: '/copy/' } }]).errors.some((item) => item.startsWith('duplicate title')));
+  const llms = analyseLlms('llms.txt', (await readFile(resolve('llms.txt'), 'utf8')).replace(`https://mamcarz.com${page.route}`, 'https://mamcarz.com/missing/'));
+  assert.ok(llms.errors.some((item) => item.includes(page.route)));
+  assert.ok(llms.errors.some((item) => item.includes('/missing/')));
 });

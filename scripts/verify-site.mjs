@@ -50,7 +50,7 @@ function approvedPublicationAnchor(anchor) {
 
 const PROJECT_SURFACES = Object.freeze(["case-studies/index.html", "en/case-studies/index.html"]);
 const SPEAKING_SURFACES = Object.freeze(["wystapienia/index.html", "en/wystapienia/index.html"]);
-const PLAN3_VALIDATION_DATE = "2026-10-27";
+const PLAN3_VALIDATION_DATE = "2026-10-31";
 
 export const PUBLIC_PAGES = Object.freeze([
   Object.freeze({ file: "index.html", route: "/", lang: "pl", pair: "/en/", schema: Object.freeze(["Person", "WebSite"]) }),
@@ -83,92 +83,121 @@ export const PUBLIC_PAGES = Object.freeze([
 ]);
 
 const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
-  "/": "2026-10-27",
-  "/en/": "2026-10-27",
-  "/uslugi/transformacja-zakupow/": "2026-09-04",
-  "/en/uslugi/transformacja-zakupow/": "2026-09-04",
-  "/uslugi/wdrozenie-sap-ariba/": "2026-09-04",
-  "/en/uslugi/wdrozenie-sap-ariba/": "2026-09-04",
-  "/uslugi/doradztwo-zamowienia-publiczne/": "2026-09-04",
-  "/en/uslugi/doradztwo-zamowienia-publiczne/": "2026-09-04",
-  "/aplikacje-operacyjne/": "2026-10-27",
-  "/en/aplikacje-operacyjne/": "2026-10-27",
-  "/lotnictwo/": "2026-09-04",
-  "/en/lotnictwo/": "2026-09-04",
-  "/case-studies/": "2026-09-04",
-  "/en/case-studies/": "2026-09-04",
-  "/wiedza/": "2026-09-04",
-  "/en/wiedza/": "2026-09-04",
-  "/wystapienia/": "2026-09-07",
-  "/en/wystapienia/": "2026-09-07",
-  "/procurement-2026/": "2026-09-04",
+  "/": "2026-10-31",
+  "/en/": "2026-10-31",
+  "/uslugi/transformacja-zakupow/": "2026-10-31",
+  "/en/uslugi/transformacja-zakupow/": "2026-10-31",
+  "/uslugi/wdrozenie-sap-ariba/": "2026-10-31",
+  "/en/uslugi/wdrozenie-sap-ariba/": "2026-10-31",
+  "/uslugi/doradztwo-zamowienia-publiczne/": "2026-10-31",
+  "/en/uslugi/doradztwo-zamowienia-publiczne/": "2026-10-31",
+  "/aplikacje-operacyjne/": "2026-10-31",
+  "/en/aplikacje-operacyjne/": "2026-10-31",
+  "/lotnictwo/": "2026-10-31",
+  "/en/lotnictwo/": "2026-10-31",
+  "/case-studies/": "2026-10-31",
+  "/en/case-studies/": "2026-10-31",
+  "/wiedza/": "2026-10-31",
+  "/en/wiedza/": "2026-10-31",
+  "/wystapienia/": "2026-10-31",
+  "/en/wystapienia/": "2026-10-31",
+  "/procurement-2026/": "2026-10-31",
   "/diagrams/diagram1_universal": "2026-09-04",
   "/diagrams/diagram2_ariba": "2026-09-04",
   "/diagrams/diagram3_maturity": "2026-09-04",
   "/diagrams/infographic": "2026-09-04",
   "/prywatnosc/": "2026-10-27",
   "/en/prywatnosc/": "2026-10-27",
-  "/o-mnie/": "2026-10-18",
-  "/en/o-mnie/": "2026-10-18",
+  "/o-mnie/": "2026-10-31",
+  "/en/o-mnie/": "2026-10-31",
 });
 
 const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
   "# Paweł Mamcarz",
-  "This file is a navigation index. The three core areas have equal status: Advisory, Operational applications and Aviation.",
-  "## Canonical public pages",
+  "> Professional website of Paweł Mamcarz, published in Polish (root) and English (/en/). Three core areas with equal status: procurement advisory and transformation, operational applications, and aviation.",
+  "This file is a navigation index for search engines and AI assistants. Lines with an identifier in brackets are copied from approved entries in the site's fact registry; all other lines describe site structure only.",
+  "## Who is Paweł Mamcarz",
+  "- Advisory: procurement transformation, SAP Ariba implementation and public procurement advisory.",
+  "- Operational applications: products designed around a process, its data and the people who run it.",
+  "- Aviation: operations, training, safety, media and software, with akrobacja.com as the current aviation venture.",
+  "- Current and previous roles are listed in the Roles section below.",
+  "## Contact",
+  "- Contact section, Polish: /#contact",
+  "- Contact section, English: /en/#contact",
+  "## Key pages",
   "### Home",
-  "- PL | Home: https://mamcarz.com/",
-  "- EN | Home: https://mamcarz.com/en/",
+  "- [Strona główna (PL)](https://mamcarz.com/): overview of the three areas, selected projects and contact.",
+  "- [Home (EN)](https://mamcarz.com/en/): overview of the three areas, selected projects and contact.",
   "### About",
-  "- PL | About: https://mamcarz.com/o-mnie/",
-  "- EN | About: https://mamcarz.com/en/o-mnie/",
+  "- [O mnie (PL)](https://mamcarz.com/o-mnie/): profile with selected professional experience, education and aviation licences.",
+  "- [About (EN)](https://mamcarz.com/en/o-mnie/): profile with selected professional experience, education and aviation licences.",
   "### Advisory / Doradztwo",
-  "- PL | Procurement transformation: https://mamcarz.com/uslugi/transformacja-zakupow/",
-  "- EN | Procurement transformation: https://mamcarz.com/en/uslugi/transformacja-zakupow/",
-  "- PL | SAP Ariba implementation: https://mamcarz.com/uslugi/wdrozenie-sap-ariba/",
-  "- EN | SAP Ariba implementation: https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba/",
-  "- PL | Public procurement advisory: https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne/",
-  "- EN | Public procurement advisory: https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne/",
+  "- [Transformacja zakupów (PL)](https://mamcarz.com/uslugi/transformacja-zakupow/): procurement operating-model design across decisions, roles, processes, data and technology.",
+  "- [Procurement transformation (EN)](https://mamcarz.com/en/uslugi/transformacja-zakupow/): procurement operating-model design across decisions, roles, processes, data and technology.",
+  "- [Wdrożenie SAP Ariba (PL)](https://mamcarz.com/uslugi/wdrozenie-sap-ariba/): SAP Ariba implementation from process and data decisions through integration, testing and launch.",
+  "- [SAP Ariba implementation (EN)](https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba/): SAP Ariba implementation from process and data decisions through integration, testing and launch.",
+  "- [Doradztwo w zamówieniach publicznych (PL)](https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne/): procedure strategy, roles, working documents and decisions in public procurement projects.",
+  "- [Public procurement advisory (EN)](https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne/): procedure strategy, roles, working documents and decisions in public procurement projects.",
   "### Operational applications / Aplikacje operacyjne",
-  "- PL | Operational applications: https://mamcarz.com/aplikacje-operacyjne/",
-  "- EN | Operational applications: https://mamcarz.com/en/aplikacje-operacyjne/",
-  "- Listed products: czympojade.pl, Przypominamy.com, ProcuraCost, silence-tax.com",
-  "- Public Silence Tax variant: https://fnp.silence-tax.com",
+  "- [Aplikacje operacyjne (PL)](https://mamcarz.com/aplikacje-operacyjne/): how operational applications are designed and the products built so far.",
+  "- [Operational applications (EN)](https://mamcarz.com/en/aplikacje-operacyjne/): how operational applications are designed and the products built so far.",
   "### Aviation / Lotnictwo",
-  "- PL | Aviation: https://mamcarz.com/lotnictwo/",
-  "- EN | Aviation: https://mamcarz.com/en/lotnictwo/",
-  "- Aviation venture: akrobacja.com",
+  "- [Lotnictwo (PL)](https://mamcarz.com/lotnictwo/): aviation operations, training and safety, media, software and aviation ventures.",
+  "- [Aviation (EN)](https://mamcarz.com/en/lotnictwo/): aviation operations, training and safety, media, software and aviation ventures.",
   "### Projects, knowledge and speaking",
-  "- PL | Projects: https://mamcarz.com/case-studies/",
-  "- EN | Projects: https://mamcarz.com/en/case-studies/",
-  "- PL | Knowledge: https://mamcarz.com/wiedza/",
-  "- EN | Insights: https://mamcarz.com/en/wiedza/",
-  "- PL | Speaking: https://mamcarz.com/wystapienia/",
-  "- EN | Speaking: https://mamcarz.com/en/wystapienia/",
+  "- [Projekty (PL)](https://mamcarz.com/case-studies/): selected implementations and products with role, scope and solutions used.",
+  "- [Projects (EN)](https://mamcarz.com/en/case-studies/): selected implementations and products with role, scope and solutions used.",
+  "- [Wiedza (PL)](https://mamcarz.com/wiedza/): catalogue of on-site materials on the procurement process and speaking.",
+  "- [Insights (EN)](https://mamcarz.com/en/wiedza/): catalogue of on-site materials on the procurement process and speaking.",
+  "- [Wystąpienia (PL)](https://mamcarz.com/wystapienia/): speaking topics, formats, a recorded interview and a podcast.",
+  "- [Speaking (EN)](https://mamcarz.com/en/wystapienia/): speaking topics, formats, a recorded interview and a podcast.",
   "### Procurement model and helper materials",
-  "- PL only | Procurement Process 2026: https://mamcarz.com/procurement-2026/",
-  "- EN only | Procurement process reference model: https://mamcarz.com/diagrams/diagram1_universal",
-  "- EN only | Conceptual SAP procurement map: https://mamcarz.com/diagrams/diagram2_ariba",
-  "- EN only | Editable procurement maturity scenario: https://mamcarz.com/diagrams/diagram3_maturity",
-  "- EN only | Procurement process reference infographic: https://mamcarz.com/diagrams/infographic",
+  "- [Procurement Process 2026 (PL only)](https://mamcarz.com/procurement-2026/): procurement process model with a stage map, SAP links and an example maturity assessment.",
+  "- [Procurement process reference model (EN only)](https://mamcarz.com/diagrams/diagram1_universal): workshop view of strategic and operational procurement steps with five scenario lenses.",
+  "- [Conceptual SAP procurement map (EN only)](https://mamcarz.com/diagrams/diagram2_ariba): static vocabulary for discussing an SAP procurement landscape; placements are workshop hypotheses.",
+  "- [Editable procurement maturity scenario (EN only)](https://mamcarz.com/diagrams/diagram3_maturity): hypothetical baseline and target across procurement maturity dimensions.",
+  "- [Procurement process reference infographic (EN only)](https://mamcarz.com/diagrams/infographic): compact sheet separating a process sequence from operating-model choices.",
   "### Privacy",
-  "- PL | Privacy: https://mamcarz.com/prywatnosc/",
-  "- EN | Privacy: https://mamcarz.com/en/prywatnosc/",
-  "## Contact routes",
-  "- PL: /#contact",
-  "- EN: /en/#contact",
-  "## Approved short facts"
+  "- [Prywatność (PL)](https://mamcarz.com/prywatnosc/): data processed by the site, the chat, call booking and email contact.",
+  "- [Privacy (EN)](https://mamcarz.com/en/prywatnosc/): data processed by the site, the chat, call booking and email contact.",
+  "## Applications and portfolio",
+  "- czympojade.pl: https://czympojade.pl",
+  "- Przypominamy.com: https://przypominamy.com",
+  "- ProcuraCost: https://procuracost.com",
+  "- silence-tax.com: https://silence-tax.com",
+  "- Public Silence Tax variant: https://fnp.silence-tax.com",
+  "- akrobacja.com: https://akrobacja.com",
+  "- Approved one-line product descriptions are in the Operational products and Aviation sections of llms-full.txt.",
+  "## Approved short facts",
+  "### Organisations",
+  "### Projects",
+  "## Roles",
+  "### Current role",
+  "### Previous roles",
+  "## Citation policy",
+  "- Cite the canonical page URL listed in Key pages, not this file.",
+  "- Quote facts in the exact wording of the bracketed lines; do not infer other roles, results, figures, clients or current status.",
+  "- Organisation names are listed as published on the site; they are not endorsements or statements of results.",
+  "- When this file and a page differ, the canonical page is authoritative; report the difference through the contact routes above."
 ]);
 
 const LLMS_FULL_STATIC_LINES = Object.freeze([
   "# Paweł Mamcarz: approved public fact index",
+  "> Fact index for mamcarz.com, the professional website of Paweł Mamcarz. Three core areas with equal status: procurement advisory and transformation, operational applications, and aviation.",
   "Only fact displays approved in content/site-facts.json are listed below. The identifier in brackets is the registry key.",
+  "Canonical pages, page descriptions and contact routes are listed in llms.txt.",
   "## Scale",
   "## Organisations",
   "## Approved project displays",
   "## Roles",
+  "### Current role",
+  "### Previous roles",
   "## Aviation and verified ventures",
-  "## Operational products"
+  "## Operational products",
+  "## Citation policy",
+  "- Quote facts in the exact wording of the bracketed lines; do not infer other roles, results, figures, clients or current status.",
+  "- Organisation names are listed as published on the site; they are not endorsements or statements of results.",
+  "- Cite the canonical page from llms.txt; when this file and a page differ, the canonical page is authoritative."
 ]);
 
 export const PUBLIC_PAGE_PAIRS = Object.freeze(PUBLIC_PAGES
@@ -3197,7 +3226,7 @@ const WORKER_NAVIGATION_FACT_CONTRACT = Object.freeze([
     display_pl: "pawel@mamcarz.com",
     display_en: "pawel@mamcarz.com",
     source_label: "Owner-confirmed public contact address, 2026-08-25",
-    surfaces: Object.freeze(["worker/index.js"])
+    surfaces: Object.freeze(["worker/index.js", "llms.txt"])
   })
 ]);
 
@@ -4599,7 +4628,7 @@ const APPLICATION_PAGE_CONTRACT = {
     path: "aplikacje-operacyjne/index.html",
     title: "Aplikacje operacyjne",
     lead: "Buduję narzędzia wokół rzeczywistego procesu pracy. Zaczynam od decyzji, danych i odpowiedzialności użytkowników, a kończę na rozwiązaniu uruchomionym w codziennej operacji.",
-    description: "Projektowanie aplikacji operacyjnych wokół procesu, danych, odpowiedzialności użytkowników i codziennej pracy.",
+    description: "Aplikacje operacyjne projektowane wokół procesu, danych i pracy użytkowników. Produkty: czympojade.pl, Przypominamy.com, ProcuraCost i silence-tax.com.",
     url: "https://mamcarz.com/aplikacje-operacyjne/",
     contactHref: "mailto:pawel@mamcarz.com?subject=Aplikacja%20operacyjna",
     deliveryLabels: ["Discovery", "Model danych", "Workflow", "Uruchomienie"]
@@ -4608,7 +4637,7 @@ const APPLICATION_PAGE_CONTRACT = {
     path: "en/aplikacje-operacyjne/index.html",
     title: "Operational applications",
     lead: "I build tools around the way an operation actually works. The starting point is the decision, data and user responsibility; the endpoint is a solution used in day-to-day work.",
-    description: "Operational application design around process, data, user responsibility and day-to-day work.",
+    description: "Operational applications designed around process, data and day-to-day work. Products: czympojade.pl, Przypominamy.com, ProcuraCost and silence-tax.com.",
     url: "https://mamcarz.com/en/aplikacje-operacyjne/",
     contactHref: "mailto:pawel@mamcarz.com?subject=Operational%20application",
     deliveryLabels: ["Discovery", "Data model", "Workflow", "Launch"]
@@ -4640,7 +4669,7 @@ const APPLICATION_EVIDENCE_CONTRACT = Object.freeze([
 
 const APPLICATION_LITERAL_CONTRACT = Object.freeze({
   pl: Object.freeze({
-    documentTitle: "Aplikacje operacyjne · Paweł Mamcarz",
+    documentTitle: "Aplikacje operacyjne i produkty · Paweł Mamcarz",
     locale: "pl_PL",
     skip: "Przejdź do treści",
     backLabel: "Wróć na górę",
@@ -4721,7 +4750,7 @@ const APPLICATION_LITERAL_CONTRACT = Object.freeze({
     ])
   }),
   en: Object.freeze({
-    documentTitle: "Operational applications · Paweł Mamcarz",
+    documentTitle: "Operational applications and products · Paweł Mamcarz",
     locale: "en_US",
     skip: "Skip to content",
     backLabel: "Back to top",
@@ -4912,8 +4941,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 203, digest: "04c6bc08804630bc04a741183c63778c191ff1e8526aef1e5c1f393e63063831" }),
-  en: Object.freeze({ elementCount: 203, digest: "25935b4a0f995f1a7db9de7f047c648fb202d8f92024b03b58858555b1ad1289" })
+  pl: Object.freeze({ elementCount: 203, digest: "162a26f658758ac1a5fe68864058a7353a3fcdf1878b4dc145f073190fe016d8" }),
+  en: Object.freeze({ elementCount: 203, digest: "4b4ce5925ef927a1d568a9e45e96c6c8c836206d25042a891d9eadeeaf600251" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -5996,14 +6025,14 @@ const AVIATION_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({
     title: "Lotnictwo",
     lead: "Lotnictwo jest jednym z głównych obszarów mojej działalności. Łączę operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach, które wymagają jasnych procedur oraz odpowiedzialności.",
-    description: "Operacje, sprzedaż, szkolenie, bezpieczeństwo, media i software w projektach lotniczych opartych na jasnych procedurach oraz odpowiedzialności.",
+    description: "Operacje, szkolenie, bezpieczeństwo, media i software w lotnictwie. Projekty: akrobacja.com, platforma sprzedaży voucherów na loty akrobacyjne, oraz FilmoLot.pl.",
     url: "https://mamcarz.com/lotnictwo/",
     contactHref: "mailto:pawel@mamcarz.com?subject=Projekt%20lotniczy"
   }),
   en: Object.freeze({
     title: "Aviation",
     lead: "Aviation is one of the core areas of my business. I connect operations, sales, training, safety, media and software in work that depends on clear procedures and accountability.",
-    description: "Operations, sales, training, safety, media and software in aviation work built around clear procedures and accountability.",
+    description: "Operations, training, safety, media and software in aviation. Projects: akrobacja.com, a voucher sales platform for aerobatic flights, and FilmoLot.pl.",
     url: "https://mamcarz.com/en/lotnictwo/",
     contactHref: "mailto:pawel@mamcarz.com?subject=Aviation%20project"
   })
@@ -6078,8 +6107,8 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 200, digest: "b9df68274c6e74c198bd20d1fc5c400d5e562aef9bd24be672660ffd7525df30" }),
-  en: Object.freeze({ elementCount: 200, digest: "a2d36ee83fc2cc5a9da2c2f424027f741fab359a09cb0d932281681cc6884575" })
+  pl: Object.freeze({ elementCount: 200, digest: "b11143866ed130ad000978ba31e6de2a2d374b71817543c66449311a3f6a0adb" }),
+  en: Object.freeze({ elementCount: 200, digest: "603be41c3a63ac4e38240b48be3dd955b92a2f7258a67133d67d346dc0f2e8f4" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -6457,7 +6486,9 @@ function verifyAviationPage(path, parsedRoot, lang, factData, errors) {
 const KNOWLEDGE_CONTRACT = Object.freeze({
   pl: Object.freeze({
     title: "Wiedza",
+    metaTitle: "Wiedza: proces zakupowy i SAP Ariba · Paweł Mamcarz",
     purpose: "Analizy, wystąpienia i narzędzia, które porządkują decyzje w procurement, technologii i operacjach.",
+    description: "Materiały o procesie zakupowym: interaktywny model z mapą SAP Ariba i oceną dojrzałości oraz wystąpienia i wykłady.",
     url: "https://mamcarz.com/wiedza/",
     ctaHref: "/#contact",
     ctaLabel: "Przejdź do kontaktu",
@@ -6476,7 +6507,9 @@ const KNOWLEDGE_CONTRACT = Object.freeze({
   }),
   en: Object.freeze({
     title: "Insights",
+    metaTitle: "Insights: procurement process and SAP Ariba · Paweł Mamcarz",
     purpose: "Analysis, talks and tools that clarify decisions in procurement, technology and operations.",
+    description: "Materials on the procurement process: an interactive model with an SAP Ariba map and a maturity assessment, plus talks and lectures.",
     url: "https://mamcarz.com/en/wiedza/",
     ctaHref: "/en/#contact",
     ctaLabel: "Go to contact",
@@ -6556,7 +6589,7 @@ function knowledgeDocumentMarkup(contract, lang) {
   const primary = contract.primary.map(([href, label, current]) => `<li><a href="${href}"${current ? ' aria-current="page"' : ""}>${label}</a></li>`).join("");
   const footer = contract.footer.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("");
   const alternateLocale = lang === "pl" ? "en_US" : "pl_PL";
-  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.title} · Paweł Mamcarz</title><meta name="description" content="${contract.purpose}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.title} · Paweł Mamcarz"><meta property="og:description" content="${contract.purpose}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.title} · Paweł Mamcarz"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="${SHARED_STYLESHEET_HREF}"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="${SHARED_SIGNATURE_SRC}" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">${FOOTER_OWNER_LINE}</div></div><ul class="footer-links">${footer}</ul></footer><script src="${SHARED_SCRIPT_SRC}" defer></script></body></html>`;
+  return `<html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${contract.metaTitle}</title><meta name="description" content="${contract.description}"><meta name="author" content="Paweł Mamcarz"><meta name="robots" content="index, follow"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="pl" href="${plUrl}"><link rel="alternate" hreflang="en" href="${enUrl}"><link rel="alternate" hreflang="x-default" href="${plUrl}"><meta property="og:title" content="${contract.metaTitle}"><meta property="og:description" content="${contract.description}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:image" content="https://mamcarz.com/assets/img/og.jpg"><meta property="og:image:alt" content="${contract.metaTitle}"><meta property="og:locale" content="${contract.ogLocale}"><meta property="og:locale:alternate" content="${alternateLocale}"><meta property="og:site_name" content="Paweł Mamcarz"><script type="application/ld+json">${JSON.stringify(knowledgeSchema(contract, lang))}</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-600-normal.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2" crossorigin><link rel="stylesheet" href="${SHARED_STYLESHEET_HREF}"></head><body class="knowledge-page" data-page="knowledge"><a href="#main" class="skip-link">${contract.skip}</a><nav class="site-nav" aria-label="${contract.navLabel}"><a href="${contract.home}" class="nav-logo"><b>PM</b> · Mamcarz.com</a><ul class="nav-list" id="nav-menu"><li><details class="nav-group"><summary>${contract.advisory}</summary><ul class="nav-submenu">${submenu}</ul></details></li>${primary}</ul><a href="${contract.paired}" class="nav-lang">${contract.pairedLabel}</a><button class="nav-toggle" id="nav-toggle" aria-label="${contract.toggle}" aria-controls="nav-menu" aria-expanded="false"><span></span><span></span><span></span></button></nav><div class="nav-overlay" id="nav-overlay"></div><button class="back-to-top" id="backToTop" aria-label="${contract.back}">↑</button>${knowledgeMainMarkup(contract, lang)}<footer class="site-footer"><div class="footer-brand"><a class="footer-sign" href="${contract.home}" aria-label="${contract.logoLabel}"><img src="${SHARED_SIGNATURE_SRC}" alt="" width="160" height="50" loading="lazy" decoding="async"></a><div class="footer-copy">${FOOTER_OWNER_LINE}</div></div><ul class="footer-links">${footer}</ul></footer><script src="${SHARED_SCRIPT_SRC}" defer></script></body></html>`;
 }
 
 function knowledgeExpectedDocumentShape(contract, lang) {
@@ -6584,7 +6617,7 @@ function knowledgeSchema(contract, lang) {
     "@type": "CollectionPage",
     name: contract.title,
     url: contract.url,
-    description: contract.purpose,
+    description: contract.description,
     inLanguage: lang
   };
 }
@@ -7097,10 +7130,10 @@ const PROJECT_FACT_CONTRACT = Object.freeze([
   Object.freeze({"id":"portfolio.filmolot_pl.type","value":"aviation photography and video","display_pl":"Lotnictwo · fotografia i wideo","display_en":"Aviation · photography and video","kind":"constant","as_of":null,"source_type":"owner_verified","source_label":"Owner-confirmed pre-Task-5 portfolio description, 2026-08-26","source_url":null,"surfaces":["lotnictwo/index.html","en/lotnictwo/index.html","case-studies/index.html","en/case-studies/index.html"],"status":"approved"})
 ]);
 const PROJECT_PAGE_CONTRACT = Object.freeze({
-  pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
-  en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
+  pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", description: "Wybrane wdrożenia i produkty: ORLEN, KGHM, Żabka Polska, PLL LOT i Motor Oil Hellas oraz aplikacje operacyjne i lotnicze. Rola, zakres prac i rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
+  en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", description: "Selected implementations and products: ORLEN, KGHM, Żabka Polska, PLL LOT and Motor Oil Hellas, plus operational and aviation products. Role, scope and solutions.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "f964fde07507d5d9328cbd53fb9c782ab1fb5498879f191ed0f5ee61c9fa7ebb", en: "0f7113e8cfea19554804e331d5691708a5d9b6b27fbb00f8875d319d64d7e189" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "cfd3e82bb4ef6c76f2e64f2f75daea8f57890306ba00cc5a5fbdf227f5ccb8e6", en: "6dba682f123c05ff5067cf92e95800426225ce8093746eb76f5ea580d95e3d4d" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7152,7 +7185,7 @@ function verifyProjectSchema(path, parsedRoot, lang, errors) {
     "@type": "CollectionPage",
     name: contract.title,
     url: contract.url,
-    description: contract.lead,
+    description: contract.description,
     inLanguage: lang,
     mainEntity: {
       "@type": "ItemList",
@@ -7330,7 +7363,7 @@ const SERVICE_CONTRACTS = Object.freeze({
     pl: Object.freeze({
       title: "Transformacja zakupów",
       lead: "Porządkuję model operacyjny zakupów: decyzje, role, procesy, dane i technologię. Efektem pracy jest uzgodniony projekt zmiany, który można wdrożyć i rozliczać.",
-      description: "Projekt modelu operacyjnego zakupów obejmujący decyzje, role, procesy, dane i technologię.",
+      description: "Doradztwo w transformacji zakupów: model operacyjny, decyzje, role, procesy, dane i technologia. Efektem jest projekt zmiany gotowy do wdrożenia i rozliczania.",
       url: "https://mamcarz.com/uslugi/transformacja-zakupow/",
       sectionTitles: Object.freeze(["Model operacyjny przed narzędziem.", "Od czego zaczynamy.", "Co obejmuje transformacja.", "Jak przebiega współpraca.", "Wybrane projekty.", "Ustalmy projekt zmiany."]),
       method: Object.freeze(["Diagnoza", "Projekt", "Sekwencja", "Governance"]),
@@ -7340,7 +7373,7 @@ const SERVICE_CONTRACTS = Object.freeze({
     en: Object.freeze({
       title: "Procurement transformation",
       lead: "I structure the procurement operating model across decisions, roles, processes, data and technology. The deliverable is an agreed change design that can be implemented and governed.",
-      description: "Procurement operating-model design across decisions, roles, processes, data and technology.",
+      description: "Procurement transformation advisory: operating model, decisions, roles, processes, data and technology, delivered as a change design ready to implement and govern.",
       url: "https://mamcarz.com/en/uslugi/transformacja-zakupow/",
       sectionTitles: Object.freeze(["Operating model before tooling.", "Where we start.", "What the transformation covers.", "How we work together.", "Selected projects.", "Define the change project."]),
       method: Object.freeze(["Diagnosis", "Design", "Sequence", "Governance"]),
@@ -7358,7 +7391,7 @@ const SERVICE_CONTRACTS = Object.freeze({
     pl: Object.freeze({
       title: "Wdrożenie SAP Ariba",
       lead: "Prowadzę wdrożenia SAP Ariba od decyzji procesowych i danych po konfigurację, integrację, testy i uruchomienie. Zakres wynika z realnego modelu zakupowego, a nie z listy funkcji systemu.",
-      description: "Prowadzenie wdrożenia SAP Ariba od decyzji procesowych i danych po integrację, testy i uruchomienie.",
+      description: "Wdrożenie SAP Ariba: Sourcing, Contracts, Buying, Supplier Risk i Fieldglass. Decyzje procesowe i dane, integracja z SAP S/4HANA, testy i uruchomienie.",
       url: "https://mamcarz.com/uslugi/wdrozenie-sap-ariba/",
       sectionTitles: Object.freeze(["Proces wyznacza konfigurację.", "Co uzgadniamy przed wdrożeniem.", "Zakres wdrożenia.", "Od decyzji do uruchomienia.", "Przykłady wdrożeń.", "Ustalmy zakres wdrożenia."]),
       method: Object.freeze(["Decyzje procesowe", "Dane i integracja", "Testy", "Uruchomienie"]),
@@ -7368,7 +7401,7 @@ const SERVICE_CONTRACTS = Object.freeze({
     en: Object.freeze({
       title: "SAP Ariba implementation",
       lead: "I lead SAP Ariba implementations from process and data decisions through configuration, integration, testing and launch. The scope follows the real procurement operating model, not a feature checklist.",
-      description: "SAP Ariba implementation leadership from process and data decisions through integration, testing and launch.",
+      description: "SAP Ariba implementation across Sourcing, Contracts, Buying, Supplier Risk and Fieldglass: process and data decisions, SAP S/4HANA integration, testing and launch.",
       url: "https://mamcarz.com/en/uslugi/wdrozenie-sap-ariba/",
       sectionTitles: Object.freeze(["Process determines configuration.", "What we agree before implementation.", "Implementation scope.", "From decisions to launch.", "Implementation examples.", "Define the implementation scope."]),
       method: Object.freeze(["Process decisions", "Data and integration", "Testing", "Launch"]),
@@ -7382,7 +7415,7 @@ const SERVICE_CONTRACTS = Object.freeze({
     pl: Object.freeze({
       title: "Doradztwo w zamówieniach publicznych",
       lead: "Pomagam uporządkować strategię postępowania, odpowiedzialności, dokumenty i decyzje w projektach objętych zamówieniami publicznymi. Pracuję na styku zakupów, technologii i zarządzania projektem, z wyraźną granicą odpowiedzialności prawnej.",
-      description: "Porządkowanie strategii postępowania, odpowiedzialności, dokumentów i decyzji w projektach zamówień publicznych.",
+      description: "Doradztwo w zamówieniach publicznych: strategia postępowania, role, dokumenty robocze i decyzje, na styku zakupów, technologii i zarządzania projektem.",
       url: "https://mamcarz.com/uslugi/doradztwo-zamowienia-publiczne/",
       sectionTitles: Object.freeze(["Decyzje przed dokumentami.", "Granica odpowiedzialności jest częścią zakresu.", "Zakres doradztwa.", "Porządek postępowania.", "Doświadczenie zawodowe.", "Ustalmy zakres doradztwa."]),
       method: Object.freeze(["Strategia", "Role", "Dokumenty robocze", "Governance"]),
@@ -7392,7 +7425,7 @@ const SERVICE_CONTRACTS = Object.freeze({
     en: Object.freeze({
       title: "Public procurement advisory",
       lead: "I help structure procedure strategy, responsibilities, documents and decisions in public procurement projects. I work across procurement, technology and project governance, with a clear boundary around legal responsibility.",
-      description: "Structuring procedure strategy, responsibilities, documents and decisions in public procurement projects.",
+      description: "Public procurement advisory: procedure strategy, roles, working documents and decisions across procurement, technology and project governance.",
       url: "https://mamcarz.com/en/uslugi/doradztwo-zamowienia-publiczne/",
       sectionTitles: Object.freeze(["Decisions before documents.", "The responsibility boundary is part of scope.", "Advisory scope.", "Procedure working order.", "Professional experience.", "Define the advisory scope."]),
       method: Object.freeze(["Strategy", "Roles", "Working documents", "Governance"]),
@@ -7479,9 +7512,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "9156814e160349bd7e518cef8c7c786fddc94da9ca38b323214300253216e1a0", en: "a82e1c17e76588f8681c55f4a9ff2a71e93919b35f2ff5f4309f219bb4f1f6a9" }),
-  ariba: Object.freeze({ pl: "56f5bc68a1d1db8d03f7383fc594cbe79876441734b3ce197a7584927356c8ef", en: "041912a354483d8b370929bee338979d7c467b6bd05aab5860d5864649fc0236" }),
-  publicProcurement: Object.freeze({ pl: "d2c52dba87ccdbc52ebd60a191b86e6a56772829c857494a5666ee20468bd2bd", en: "04b4f7ab4389b340d7f17d137382161a08c39491a7c71e6d04e1288d45a33fdb" })
+  transformation: Object.freeze({ pl: "17304869b1a8fd9bc7ca3b7165c0f020dbf3695e4eb0e6ac5b125f70fccca646", en: "1e4e2563ff7ab38fecae690bb5b806ec656a129cb4aa11fb3ec9ab83c2fcc6d8" }),
+  ariba: Object.freeze({ pl: "08c25cbeff218ac5baa3d685e0720f61c16e5af932902e1c5aa6541a99530908", en: "5567d1b46526d730f6a856ed8ac74c3622ff1347eef5136ca33b30254fb008dc" }),
+  publicProcurement: Object.freeze({ pl: "feff7e2508850cdf9b63883d829c55fc1a40c5aa2ab39efa1bd241901c385042", en: "e7a72adfab9b39758254543612f920d3b642369c5c60233ec0b49cc1a903c869" })
 });
 
 function serviceKeyForPath(path) {
@@ -7779,7 +7812,7 @@ const SPEAKING_CONTRACT = Object.freeze({
     title: "Wystąpienia",
     lead: "Temat i format dobieram do decyzji, z którą mierzy się publiczność. Zakres, czas i materiały ustalamy dopiero po poznaniu kontekstu wydarzenia.",
     url: "https://mamcarz.com/wystapienia/",
-    description: "Temat i format dobieram do decyzji, z którą mierzy się publiczność. Zakres, czas i materiały ustalamy dopiero po poznaniu kontekstu wydarzenia.",
+    description: "Wystąpienia, wykłady i podcasty o zakupach, wdrożeniach i analizie TCO. Temat i format dobieram do decyzji, z którą mierzy się publiczność.",
     topics: Object.freeze([
       ["transformation", "Transformacja zakupów", "Model operacyjny, role, procesy, dane i technologia."],
       ["ariba", "SAP Ariba", "Decyzje procesowe, zakres wdrożenia, integracje, testy i uruchomienie."],
@@ -7809,7 +7842,7 @@ const SPEAKING_CONTRACT = Object.freeze({
     title: "Speaking",
     lead: "I shape the topic and format around the decision facing the audience. Scope, timing and materials are agreed only after the event context is clear.",
     url: "https://mamcarz.com/en/wystapienia/",
-    description: "I shape the topic and format around the decision facing the audience. Scope, timing and materials are agreed only after the event context is clear.",
+    description: "Talks, lectures and podcasts on procurement, implementations and TCO analysis. I shape the topic and format around the decision facing the audience.",
     topics: Object.freeze([
       ["transformation", "Procurement transformation", "Operating model, roles, processes, data and technology."],
       ["ariba", "SAP Ariba", "Process decisions, implementation scope, integrations, testing and launch."],
@@ -7879,7 +7912,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "054013f0de8c6f60aa22e506a6fcac1b108729f6330057105228bc41b7ddfa47", en: "a82f4ffbb3a83a5ecdda1d771afd8a7212e9d5dac4da1b629e55f0c6c9d79702" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "309c422739bf185794904478d361cddf1b492ce9e3b837030ca6880133d53b69", en: "9857b374368c9427655bb35a5137e0e44061d45810f6b2fb9a68e6448074916e" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8182,7 +8215,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", "Materiał po angielsku · rozwiń"]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "1bebabef836f7bd94f4a7dba7338baa220bf99797acf9e746c5f3e3bd4729e02";
+const PROCUREMENT_DOCUMENT_MANIFEST = "76a69f7bfa94de402ed77aa0a83bf2392c025dc5aec84044036ef20df28f13e5";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
