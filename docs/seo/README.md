@@ -41,3 +41,4 @@ Kontrola offline jest wpięta w `npm run test:quality`. Komendy `verify:*` i ich
 
 - `ARCHIWUM/`: raporty generowane przez `seo:report -- --write`.
 - `2026-10-31-raport-seo-llms.md`: przegląd SEO i llms z 2026-10-31, z wnioskami, listą tematów i decyzjami do podjęcia.
+- `raport-2026-11-02.md`: tygodniowy przegląd z 2026-11-02 bez zmian w serwisie, z trzema nowymi tematami treści.
