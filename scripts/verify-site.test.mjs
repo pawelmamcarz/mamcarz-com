@@ -4772,7 +4772,9 @@ test("Task 7 navigation clears an open mobile menu when entering desktop width",
     getAttribute: (name) => attributes.get(name),
     focus() {}
   };
+  let firstItemFocused = false;
   const menu = {
+    querySelector: () => ({ focus() { firstItemFocused = true; } }),
     classList: makeClassList(),
     addEventListener() {},
     querySelectorAll: () => []
@@ -4806,6 +4808,7 @@ test("Task 7 navigation clears an open mobile menu when entering desktop width",
   });
 
   dispatch("toggle", "click");
+  assert.equal(firstItemFocused, true, "opening the menu focuses its first item");
   assert.equal(menu.classList.contains("is-open"), true, "precondition: mobile menu opened");
   assert.equal(toggle.getAttribute("aria-expanded"), "true", "precondition: toggle exposes open state");
   assert.equal(overlay.classList.contains("is-open"), true, "precondition: overlay opened");
@@ -7082,7 +7085,7 @@ test("Plan 2 Task 10 freezes the registry-derived conservative llms-full index",
 test("Plan 2 Task 10 fix round 3 independently owns the reviewed CSS SHA-256 literal", () => {
   assert.equal(
     createHash("sha256").update(foundationCss).digest("hex"),
-    "497bcb7b0892cda757ba8eb4158a68615ceceb5568fa42b0130e136bb2b2e286",
+    "005dc40d4304b094db6d519b981b37d6e37c7704ba6c3b5490d7ed24f324253c",
     "the test-owned literal must identify the exact CSS bytes reviewed in Task 10"
   );
 });

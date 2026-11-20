@@ -760,17 +760,6 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
   filter: saturate(0.75) contrast(1.04);
 }
 
-.hero-domains {
-  position: absolute;
-  z-index: 1;
-  top: 1rem;
-  right: 1rem;
-  left: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
 .hero-domains span,
 .hero-portrait figcaption {
   padding: 0.35rem 0.55rem;
@@ -3276,8 +3265,10 @@ body > nav:not(.breadcrumb) {
 .about-contact .text-link { color: var(--white); }
 
 @media (max-width: 759px) {
+  body { overflow-wrap: anywhere; }
   #hero.home-hero { min-height: auto; grid-template-columns: minmax(0, 1fr); padding-top: 0; }
   .home-hero .hero-content { grid-column: 1; padding: 64px var(--page-gutter) 40px; }
+  .js .home-hero .hero-content { padding-top: calc(var(--nav-height) + 1.5rem); }
   .home-hero .hero-name { max-width: 11ch; font-size: clamp(3.4rem, 15vw, 5.7rem); }
   .home-hero .hero-portrait { grid-column: 1; width: calc(100% - (2 * var(--page-gutter))); aspect-ratio: 4 / 5; margin: 0 auto var(--page-gutter); }
   .hero-domains { gap: 0.15rem 0.75rem; }

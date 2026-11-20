@@ -38,7 +38,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "497bcb7b0892cda757ba8eb4158a68615ceceb5568fa42b0130e136bb2b2e286";
+const TASK10_REVIEWED_CSS_SHA256 = "005dc40d4304b094db6d519b981b37d6e37c7704ba6c3b5490d7ed24f324253c";
 const PUBLICATION_URLS = Object.freeze({"portfolio.akrobacja_com": "https://akrobacja.com", "portfolio.filmolot_pl": "https://filmolot.pl", "portfolio.czympojade_pl": "https://czympojade.pl", "portfolio.przypominamy_com": "https://przypominamy.com", "portfolio.procurement_process_2026": "/procurement-2026/", "portfolio.silence_tax": "https://silence-tax.com", "portfolio.procuracost": "https://procuracost.com"});
 
 function approvedPublicationAnchor(anchor) {

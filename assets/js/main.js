@@ -28,6 +28,7 @@ function initNavigation() {
     menu.classList.toggle("is-open", open);
     toggle.setAttribute("aria-expanded", String(open));
     overlay?.classList.toggle("is-open", open);
+    if (open) menu.querySelector("summary, a[href]")?.focus();
   });
 
   document.addEventListener("keydown", (event) => {
