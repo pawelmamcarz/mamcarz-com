@@ -24,9 +24,9 @@ Serwis jest statycznym HTML-em bez frameworka i bez kroku build. Wersja polska j
 
 ## Wersja produktu i wersja zasobów
 
-Kanoniczna wersja produktu jest w `version.js` jako `VERSION`. Format: `YEAR.WEEK.RELEASE` (rok i numer tygodnia ISO, potem kolejne wydanie w tym tygodniu). Bieżące wydanie: `2026.44.1`. To nie jest semver. Git tag nie jest źródłem prawdy. Numer podbijamy **tylko przy cięciu wydania**; feature PR-y nie ruszają `version.js` ani `CHANGELOG.md`. Ten sam tydzień ISO → tylko N+1. Nowy tydzień → `ROK.NOWY_TYDZIEŃ.1`. Nie ma osobnej komendy bumpa: ręczna edycja przy cięciu. Konkretny build zapisujemy skrótem commita w `CHANGELOG.md` albo w runbooku w `docs/releases/`; nie wstawiamy SHA do HTML.
+Kanoniczna wersja produktu jest w `version.js` jako `VERSION`. Format: `YEAR.WEEK.RELEASE` (rok i numer tygodnia ISO, potem kolejne wydanie w tym tygodniu). Bieżące wydanie: `2026.47.1`. To nie jest semver. Git tag nie jest źródłem prawdy. Numer podbijamy **tylko przy cięciu wydania**; feature PR-y nie ruszają `version.js` ani `CHANGELOG.md`. Ten sam tydzień ISO → tylko N+1. Nowy tydzień → `ROK.NOWY_TYDZIEŃ.1`. Nie ma osobnej komendy bumpa: ręczna edycja przy cięciu. Konkretny build zapisujemy skrótem commita w `CHANGELOG.md` albo w runbooku w `docs/releases/`; nie wstawiamy SHA do HTML.
 
-Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny token cache-bust, nie wersja produktu. Aktualny token: `20261027-flightplan-5`, powiązany z wydaniem `2026.44.1`. Przy cięciu wydania aktualizujemy oba: `VERSION` w `version.js` oraz token zasobów we wszystkich publicznych dokumentach i kontraktach weryfikacyjnych.
+Wspólna wersja zasobów (query `?v=` przy `style.css` i `main.js`) to osobny token cache-bust, nie wersja produktu. Aktualny token: `20261120-flightplan-6`, powiązany z wydaniem `2026.47.1`. Przy cięciu wydania aktualizujemy oba: `VERSION` w `version.js` oraz token zasobów we wszystkich publicznych dokumentach i kontraktach weryfikacyjnych.
 
 ## Struktura i manifest tras
 
@@ -58,7 +58,7 @@ Każda zmiana treściowa w parowanych stronach musi trafić do PL i EN w tej sam
 - Kierunek: „Flight Plan”: redakcyjny, precyzyjny i profesjonalny; lotnictwo jest jednym z trzech równych obszarów, nie dekoracyjną opowieścią dla całego serwisu.
 - Fonty: Barlow Semi Condensed dla nagłówków, DM Sans dla tekstu, DM Mono dla etykiet i danych.
 - Główne tokeny w `:root`: `--runway-ink`, `--signal`, `--signal-dark`, `--sky-band`, `--ink-secondary`, `--line`, `--line-strong`.
-- Wspólna wersja zasobów w publicznych dokumentach: `20261027-flightplan-5` (cache-bust powiązany z wydaniem produktu `2026.44.1`).
+- Wspólna wersja zasobów w publicznych dokumentach: `20261120-flightplan-6` (cache-bust powiązany z wydaniem produktu `2026.47.1`).
 - Nie przywracaj Playfair Display, generycznych kart, przypadkowych gradientów, dekoracyjnych wykresów ani narracji udającej fakty.
 - Zachowuj semantyczny HTML, jeden `main`, jeden `h1`, widoczny focus, działanie bez JavaScriptu i obsługę `prefers-reduced-motion`.
 - `404.html` jest jednym dokumentem PL/EN: PL działa domyślnie bez JS, ma `noindex`, nie ma canonicala, a wczesny skrypt może zmienić wyłącznie `lang`, `title` i istniejący opis.

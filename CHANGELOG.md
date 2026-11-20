@@ -4,6 +4,12 @@ Wersje mamcarz.com numerujemy jako **ROK.TYDZIEŃ.KOLEJNE-WYDANIE** (tydzień IS
 
 Konkretny build wskazujemy skrótem commita w runbooku albo tutaj, nie w HTML strony.
 
+## Wersja 2026.47.1 z dnia 20 listopada 2026
+
+- Na telefonie linki do trzech obszarów działalności są dostępne pod opisem strony w obu językach.
+- Otwarcie menu przenosi fokus na pierwszą pozycję. Powiększony tekst zawija się na wąskim ekranie.
+- Commit poprawek: `1a05f8f`. Token zasobów: `20261120-flightplan-6`.
+
 ## Wersja 2026.44.1 z dnia 27 października 2026
 
 Wydanie wyrównuje repozytorium z produkcją. Wersja opublikowana na mamcarz.com 18 października 2026 (nowa strona główna i profil „O mnie”) nie miała źródeł w `main`. To wydanie odtwarza je z publicznej strony i łączy z poprawkami z PR #20.

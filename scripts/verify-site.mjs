@@ -4941,8 +4941,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 203, digest: "162a26f658758ac1a5fe68864058a7353a3fcdf1878b4dc145f073190fe016d8" }),
-  en: Object.freeze({ elementCount: 203, digest: "4b4ce5925ef927a1d568a9e45e96c6c8c836206d25042a891d9eadeeaf600251" })
+  pl: Object.freeze({ elementCount: 203, digest: "e8f6e6d4ad9bf6321c2cbd26395f8d4332e2a821b862402bb1ecc7d4df4ccdb6" }),
+  en: Object.freeze({ elementCount: 203, digest: "54585bbbe984dd07a35a93cd64c4d9a662b736ec9edd9193a3cdeac5f2b56133" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -6107,8 +6107,8 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 200, digest: "b11143866ed130ad000978ba31e6de2a2d374b71817543c66449311a3f6a0adb" }),
-  en: Object.freeze({ elementCount: 200, digest: "603be41c3a63ac4e38240b48be3dd955b92a2f7258a67133d67d346dc0f2e8f4" })
+  pl: Object.freeze({ elementCount: 200, digest: "11629c8942fa9f3971a36b810176b968292bd36bb7b656f3fbecc6f7b5964397" }),
+  en: Object.freeze({ elementCount: 200, digest: "db7ee67afecac8ec0528e34aaa5bf0aa772a86d65cf824af378cabd02f409d4e" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -7133,7 +7133,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", description: "Wybrane wdrożenia i produkty: ORLEN, KGHM, Żabka Polska, PLL LOT i Motor Oil Hellas oraz aplikacje operacyjne i lotnicze. Rola, zakres prac i rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", description: "Selected implementations and products: ORLEN, KGHM, Żabka Polska, PLL LOT and Motor Oil Hellas, plus operational and aviation products. Role, scope and solutions.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "cfd3e82bb4ef6c76f2e64f2f75daea8f57890306ba00cc5a5fbdf227f5ccb8e6", en: "6dba682f123c05ff5067cf92e95800426225ce8093746eb76f5ea580d95e3d4d" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "0f214b5a8475ff56c2393d45c54cd00197ec2aca55179aed757cdd18b92a48ef", en: "b2717641fed7127d532170c3b25da1436bc8b37d00a2051f7b52698c13145559" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7512,9 +7512,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "17304869b1a8fd9bc7ca3b7165c0f020dbf3695e4eb0e6ac5b125f70fccca646", en: "1e4e2563ff7ab38fecae690bb5b806ec656a129cb4aa11fb3ec9ab83c2fcc6d8" }),
-  ariba: Object.freeze({ pl: "08c25cbeff218ac5baa3d685e0720f61c16e5af932902e1c5aa6541a99530908", en: "5567d1b46526d730f6a856ed8ac74c3622ff1347eef5136ca33b30254fb008dc" }),
-  publicProcurement: Object.freeze({ pl: "feff7e2508850cdf9b63883d829c55fc1a40c5aa2ab39efa1bd241901c385042", en: "e7a72adfab9b39758254543612f920d3b642369c5c60233ec0b49cc1a903c869" })
+  transformation: Object.freeze({ pl: "894887f955fa1f9e0eaec1e92b9a4c608360345ed0c8b69dc61a08bf5c5449f6", en: "e22158ab3032ce8756542baf8ec5a3070cbbfb9c1c8ab948eaceaef48af47361" }),
+  ariba: Object.freeze({ pl: "711dc8af96b251319ec88d5570a7ed968ce706cba291b2af11a89fcc619919c8", en: "28bd2a48f83c0be13402d0080ba51e023a9e71537d806cb8f7d8b698ebb244a8" }),
+  publicProcurement: Object.freeze({ pl: "ab73951ea14f96f69cafed4467be4b736a45fe365beda167b5ab3dc1baf4733f", en: "be7d72095aeb19c1efde14309b78ebad0638a9d218bb68d38db4af507a369fea" })
 });
 
 function serviceKeyForPath(path) {
@@ -7912,7 +7912,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "309c422739bf185794904478d361cddf1b492ce9e3b837030ca6880133d53b69", en: "9857b374368c9427655bb35a5137e0e44061d45810f6b2fb9a68e6448074916e" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "ed3bb4856ce5e2495b24173375013ad6e46316d7cb4d871a0a687e2dd081eac0", en: "54e3b245d618e8d4eca4b070a8e781630b497a8c0ad939b9ef5d568cd8b9e7f4" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8215,7 +8215,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", "Materiał po angielsku · rozwiń"]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "76a69f7bfa94de402ed77aa0a83bf2392c025dc5aec84044036ef20df28f13e5";
+const PROCUREMENT_DOCUMENT_MANIFEST = "396d4e4989ab3bff9711eb523221b4bc8117541788c905e555b0293349d08f20";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");
