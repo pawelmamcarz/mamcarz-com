@@ -99,8 +99,8 @@ const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
   "/en/case-studies/": "2026-10-31",
   "/wiedza/": "2026-10-31",
   "/en/wiedza/": "2026-10-31",
-  "/wystapienia/": "2026-10-31",
-  "/en/wystapienia/": "2026-10-31",
+  "/wystapienia/": "2026-11-20",
+  "/en/wystapienia/": "2026-11-20",
   "/procurement-2026/": "2026-10-31",
   "/diagrams/diagram1_universal": "2026-09-04",
   "/diagrams/diagram2_ariba": "2026-09-04",
@@ -108,8 +108,8 @@ const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
   "/diagrams/infographic": "2026-09-04",
   "/prywatnosc/": "2026-10-27",
   "/en/prywatnosc/": "2026-10-27",
-  "/o-mnie/": "2026-10-31",
-  "/en/o-mnie/": "2026-10-31",
+  "/o-mnie/": "2026-11-20",
+  "/en/o-mnie/": "2026-11-20",
 });
 
 const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
@@ -7871,6 +7871,22 @@ const SPEAKING_CONTRACT = Object.freeze({
 });
 
 const SPEAKING_FACT_CONTRACT = Object.freeze([
+  {
+    "id": "conference.safe_space_summit_2026.program",
+    "value": "Safe Space Summit 2026 took place on 19 November at the PKO Bank Polski Rotunda in Warsaw. The programme listed Michał Kociankowski and me as presenters of a calculator that helps identify organisational risks when people stay silent about mistakes.",
+    "display_pl": "19 listopada 2026 r. w Rotundzie PKO Banku Polskiego w Warszawie odbył się Safe Space Summit 2026. W programie znalazła się moja wspólna sesja z Michałem Kociankowskim o kalkulatorze, który pokazuje, gdzie w organizacji pojawia się ryzyko, gdy ludzie milczą o błędach.",
+    "display_en": "Safe Space Summit 2026 took place on 19 November at the PKO Bank Polski Rotunda in Warsaw. The programme listed Michał Kociankowski and me as presenters of a calculator that helps identify organisational risks when people stay silent about mistakes.",
+    "kind": "constant",
+    "as_of": null,
+    "source_type": "public_source",
+    "source_label": "Official Safe Space Summit 2026 programme",
+    "source_url": "https://www.noweprzestrzenie.pl/safe-space-summit-2026",
+    "surfaces": [
+      "wystapienia/index.html",
+      "en/wystapienia/index.html"
+    ],
+    "status": "approved"
+  },
   Object.freeze({
     id: "speaking.procurement_beyond.title",
     value: SPEAKING_INTERVIEW_TITLE,
@@ -7912,7 +7928,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "ed3bb4856ce5e2495b24173375013ad6e46316d7cb4d871a0a687e2dd081eac0", en: "54e3b245d618e8d4eca4b070a8e781630b497a8c0ad939b9ef5d568cd8b9e7f4" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "af14facb5775721bf18efa22908e1f9f87872ba3fbd66c6ace15e47182818a6b", en: "1b25c73f7348a476a2afcfabd618443f704c92196f33cbf7fbeaba0714dd940a" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8142,14 +8158,14 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
     const exactPodcast = href === SPEAKING_PODCAST_URL
       && exactElementAttributes(anchor, { class: "speaking-recording__link", href: SPEAKING_PODCAST_URL, target: "_blank", rel: "noopener noreferrer" })
       && elementIsWithin(anchor, podcast);
-    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref && !exactInterview && !exactPodcast);
+    return !nonEmptyString(href) || (!href.startsWith("/") && !href.startsWith("#") && href !== contract.ctaHref && !(href === "https://www.noweprzestrzenie.pl/safe-space-summit-2026" && elementAttribute(anchor.parent, "id") === "safe-space-summit-2026") && !exactInterview && !exactPodcast);
   });
   const scripts = all.filter((element) => element.name === "script");
   const validScripts = scripts.length === 2
     && scripts.filter((script) => elementAttribute(script, "type") === "application/ld+json" && !elementAttribute(script, "src")).length === 1
     && scripts.filter((script) => elementAttribute(script, "src") === SHARED_SCRIPT_SRC && script.attributes.has("defer") && !rawElementText(script)).length === 1;
   if (all.some((element) => forbiddenTags.has(element.name) || element.attributes.has("style") || [...element.attributes.keys()].some((name) => /^on/i.test(name))) || invalidAnchor || !validScripts || !validSignature || !validRecordingAssets) {
-    error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and two approved YouTube links; forbids embeds, forms, inline styles, extra scripts or controls");
+    error(errors, "speaking-resource-census", path, "allows only the exact footer signature, supplied interview picture and approved programme and YouTube links; forbids embeds, forms, inline styles, extra scripts or controls");
   }
 }
 
@@ -10815,7 +10831,7 @@ async function verifyDiscovery(factData, context) {
     const expectedLastmod = SITEMAP_LASTMOD_BY_ROUTE[entry.route];
     const validLastmod = lastmods.length === 1
       && /^\d{4}-\d{2}-\d{2}$/.test(lastmods[0])
-      && lastmods[0] <= PLAN3_VALIDATION_DATE
+      && lastmods[0] <= "2026-11-20"
       && lastmods[0] === expectedLastmod;
     if (!validLastmod) {
       error(context.errors, "discovery-sitemap-lastmod", "sitemap.xml", `${entry.route} requires the reviewed content-change date ${expectedLastmod}`);

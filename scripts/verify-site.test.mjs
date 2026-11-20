@@ -234,8 +234,8 @@ const task9ProtectedContentHashes = Object.freeze({
   "en/case-studies/index.html": "3a54135f6c2960fb6ed1640121024d489ab7d9577c0cc621c776ff705517eec6",
   "wiedza/index.html": "19a2600559581b0daaa8b55bc0ee5ef41cde09dcfdf1f4c93af716faf2b4b592",
   "en/wiedza/index.html": "722ace8014252a519a2ed8317012bdbf3e3c9e974b23947a837fa6ff78f7a35d",
-  "wystapienia/index.html": "b181f3a8f63de1d08c3a15572488fed5c2b37b9e9931202f55bce6f7183aed85",
-  "en/wystapienia/index.html": "3449566a2038aadba868c2f7525009c7893687c097a29113c4a07e1d996b88fb",
+  "wystapienia/index.html": "c7bc7415b83c59e933064d3aaa9339d80c25cf4b2c34c2434d4b4b9330ad8760",
+  "en/wystapienia/index.html": "372cdb436515a5ae3ff3281d83a817808c62ceea507ec1c5da07c3041bdf35b1",
   "procurement-2026/index.html": "11eb46ed658f123d26351c1c93c80e81bd94f22288f3e131ce3bd65e71d137ca"
 });
 
@@ -7357,7 +7357,8 @@ function plan3RealPresentationBody() {
 function plan3Sitemap() {
   const blocks = plan3ExpectedPublicPages.map((entry) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = ["/prywatnosc/", "/en/prywatnosc/"].includes(entry.route) ? "2026-10-27"
+    const lastmod = ["/wystapienia/", "/en/wystapienia/", "/o-mnie/", "/en/o-mnie/"].includes(entry.route) ? "2026-11-20"
+      : ["/prywatnosc/", "/en/prywatnosc/"].includes(entry.route) ? "2026-10-27"
       : entry.route.startsWith("/diagrams/") ? "2026-09-04" : "2026-10-31";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
   });
@@ -9248,4 +9249,21 @@ test("Plan 3 Task 1 package scripts expose exact deterministic validator command
   assert.equal(pkg.scripts["verify:seo"], "node scripts/verify-site.mjs --scope=seo");
   assert.equal(pkg.scripts["verify:site"], "node scripts/verify-site.mjs --scope=all");
   assert.equal(pkg.scripts["test:worker"], "node --test worker/index.test.mjs");
+});
+
+test("foundation membership and summit programme use the approved bilingual copy", async () => {
+  const { facts } = await readFacts();
+  for (const [id, route] of [
+    ["foundation.nowe_przestrzenie.member", "o-mnie"],
+    ["conference.safe_space_summit_2026.program", "wystapienia"]
+  ]) {
+    const record = facts.find((fact) => fact.id === id);
+    assert.equal(record.status, "approved");
+    for (const lang of ["pl", "en"]) {
+      const path = (lang === "en" ? "en/" : "") + route + "/index.html";
+      assert.ok(record.surfaces.includes(path));
+      const html = await readFile(resolve(path), "utf8");
+      assert.ok(html.includes(`<p data-fact-id="${id}">${record["display_" + lang]}</p>`));
+    }
+  }
 });
