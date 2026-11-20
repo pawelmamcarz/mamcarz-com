@@ -38,7 +38,7 @@ const unsupportedLlmsFullClauses = Object.freeze([
 // These exact stylesheet bytes received the Task 10 browser, viewport and interaction review.
 // Without a browser engine, a partial cascade model is unsound: any CSS byte change must trigger
 // renewed visual/cascade review followed by an explicit digest baseline refresh.
-const TASK10_REVIEWED_CSS_SHA256 = "005dc40d4304b094db6d519b981b37d6e37c7704ba6c3b5490d7ed24f324253c";
+const TASK10_REVIEWED_CSS_SHA256 = "6ccc15e44ff32228ae712640f728298f236d4a25f8ebf8a918540ebd3ed8e82c";
 const PUBLICATION_URLS = Object.freeze({"portfolio.akrobacja_com": "https://akrobacja.com", "portfolio.filmolot_pl": "https://filmolot.pl", "portfolio.czympojade_pl": "https://czympojade.pl", "portfolio.przypominamy_com": "https://przypominamy.com", "portfolio.procurement_process_2026": "/procurement-2026/", "portfolio.silence_tax": "https://silence-tax.com", "portfolio.procuracost": "https://procuracost.com"});
 
 function approvedPublicationAnchor(anchor) {
@@ -4941,8 +4941,8 @@ const APPLICATION_SECTIONS = ["problem", "delivery", "evidence", "fit", "contact
 const APPLICATION_DELIVERY_STEPS = ["discovery", "data-model", "workflow", "launch"];
 const APPLICATION_SURFACES = ["aplikacje-operacyjne/index.html", "en/aplikacje-operacyjne/index.html"];
 const APPLICATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 203, digest: "e8f6e6d4ad9bf6321c2cbd26395f8d4332e2a821b862402bb1ecc7d4df4ccdb6" }),
-  en: Object.freeze({ elementCount: 203, digest: "54585bbbe984dd07a35a93cd64c4d9a662b736ec9edd9193a3cdeac5f2b56133" })
+  pl: Object.freeze({ elementCount: 203, digest: "989706a2f293253ba5c73f8cafbbefaeebe4796f77eb14d94584559cc1a9bf20" }),
+  en: Object.freeze({ elementCount: 203, digest: "244d7335f19c0b6f9c51f89608e21c95fcc04aa5266df0f3a1d44640b31d0b63" })
 });
 const APPLICATION_RESOURCE_LINK_MANIFEST = Object.freeze({
   pl: Object.freeze([
@@ -6107,8 +6107,8 @@ const AVIATION_RESOURCE_LINKS = Object.freeze({
 });
 
 const AVIATION_DOCUMENT_MANIFEST = Object.freeze({
-  pl: Object.freeze({ elementCount: 200, digest: "11629c8942fa9f3971a36b810176b968292bd36bb7b656f3fbecc6f7b5964397" }),
-  en: Object.freeze({ elementCount: 200, digest: "db7ee67afecac8ec0528e34aaa5bf0aa772a86d65cf824af378cabd02f409d4e" })
+  pl: Object.freeze({ elementCount: 200, digest: "10c808e44acafc883c8fc109a4df23bb7f651476f76446eb4bd3fb753c321db9" }),
+  en: Object.freeze({ elementCount: 200, digest: "575d05c3fb726251c51d3fb58293cee306b0dadbcff3a75b3dca049cdce8fc3d" })
 });
 
 const AVIATION_BODY_TEXT_LEAVES = Object.freeze({
@@ -7133,7 +7133,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", description: "Wybrane wdrożenia i produkty: ORLEN, KGHM, Żabka Polska, PLL LOT i Motor Oil Hellas oraz aplikacje operacyjne i lotnicze. Rola, zakres prac i rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", description: "Selected implementations and products: ORLEN, KGHM, Żabka Polska, PLL LOT and Motor Oil Hellas, plus operational and aviation products. Role, scope and solutions.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "0f214b5a8475ff56c2393d45c54cd00197ec2aca55179aed757cdd18b92a48ef", en: "b2717641fed7127d532170c3b25da1436bc8b37d00a2051f7b52698c13145559" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "d54e91592b67a86c0610d9c986c376bff3004a97268df8892d56dee293507be6", en: "3cabfa0845e356fa4488183bc600f92048ddc487d455c46c8e3d66dabd6c63cf" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -7512,9 +7512,9 @@ async function hasCompleteServiceDocumentContext(root) {
 }
 
 const SERVICE_DOCUMENT_MANIFEST = Object.freeze({
-  transformation: Object.freeze({ pl: "894887f955fa1f9e0eaec1e92b9a4c608360345ed0c8b69dc61a08bf5c5449f6", en: "e22158ab3032ce8756542baf8ec5a3070cbbfb9c1c8ab948eaceaef48af47361" }),
-  ariba: Object.freeze({ pl: "711dc8af96b251319ec88d5570a7ed968ce706cba291b2af11a89fcc619919c8", en: "28bd2a48f83c0be13402d0080ba51e023a9e71537d806cb8f7d8b698ebb244a8" }),
-  publicProcurement: Object.freeze({ pl: "ab73951ea14f96f69cafed4467be4b736a45fe365beda167b5ab3dc1baf4733f", en: "be7d72095aeb19c1efde14309b78ebad0638a9d218bb68d38db4af507a369fea" })
+  transformation: Object.freeze({ pl: "601e8f37f9a78c5720df72e6fefd79d41f8fee5e493ca8e19c5faff3b9a879a5", en: "383db926cb4888abd3d246afa51bac8c9a09de7adde17b06a7156161db98f206" }),
+  ariba: Object.freeze({ pl: "af690a9072686c524ae8fec8921107b47cddde9d9ee68f7ba934624a80e11b4d", en: "1ffc2c9c83119d2d989abc0b116911df8231382072f64ec2184affb97944be7c" }),
+  publicProcurement: Object.freeze({ pl: "a2d99e8483d1e9e9c66a46756fad2a26afd25eed992e5b1be52a45ed94a753cf", en: "36a55f31a248c064d96b1fc22697c771375b7ca0b78b0b2266bb50922cc374ba" })
 });
 
 function serviceKeyForPath(path) {
@@ -7928,7 +7928,7 @@ const SPEAKING_FACT_CONTRACT = Object.freeze([
   })
 ]);
 
-const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "af14facb5775721bf18efa22908e1f9f87872ba3fbd66c6ace15e47182818a6b", en: "1b25c73f7348a476a2afcfabd618443f704c92196f33cbf7fbeaba0714dd940a" });
+const SPEAKING_DOCUMENT_MANIFEST = Object.freeze({ pl: "fd127aab162913bc9165cb9172a73eeae91983939a906d855e29d586bd67d3f8", en: "3ba71ffe0178be9b642ba190a6f33ad4a05c726ba61f16351d6b20da8f6f3480" });
 
 function verifySpeakingRegistryInventory(factData, errors, { required = false } = {}) {
   const records = Array.isArray(factData.facts) ? factData.facts : [];
@@ -8147,7 +8147,7 @@ function verifySpeakingResourceCensus(path, parsedRoot, contract, errors) {
   const validRecordingAssets = recordingImages.length === 1
     && recordingPictures.length === 1
     && recordingSources.length === 1
-    && all.filter((element) => element.name === "img").length === 2
+    && all.filter((element) => element.name === "img").length === 4
     && all.filter((element) => element.name === "picture").length === 1
     && all.filter((element) => element.name === "source").length === 1;
   const invalidAnchor = all.filter((element) => element.name === "a").some((anchor) => {
@@ -8231,7 +8231,7 @@ const PROCUREMENT_PARENT = Object.freeze({
     ["/diagrams/diagram3_maturity", "Procurement Maturity Assessment", "Ocena dojrzałości zakupowej", "Materiał po angielsku · rozwiń"]
   ])
 });
-const PROCUREMENT_DOCUMENT_MANIFEST = "396d4e4989ab3bff9711eb523221b4bc8117541788c905e555b0293349d08f20";
+const PROCUREMENT_DOCUMENT_MANIFEST = "7282ec3542d1b93d831e2918560d27a15d6bd52addd72e61f3bcf873716b6e1a";
 
 function verifyProcurementSchema(parsedRoot, errors) {
   const scripts = elementDescendants(parsedRoot).filter((element) => element.name === "script" && elementAttribute(element, "type") === "application/ld+json");

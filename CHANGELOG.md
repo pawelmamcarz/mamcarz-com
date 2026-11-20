@@ -4,6 +4,10 @@ Wersje mamcarz.com numerujemy jako **ROK.TYDZIEŃ.KOLEJNE-WYDANIE** (tydzień IS
 
 Konkretny build wskazujemy skrótem commita w runbooku albo tutaj, nie w HTML strony.
 
+## Wersja 2026.47.2 z dnia 20 listopada 2026
+
+Na profilu pojawiła się informacja o członkostwie w Fundacji Nowe Przestrzenie. Strona wystąpień zawiera opis Safe Space Summit, program i dwa zdjęcia z konferencji w wersji polskiej i angielskiej. Commit treści: `2ed93da`.
+
 ## Wersja 2026.47.1 z dnia 20 listopada 2026
 
 - Na telefonie linki do trzech obszarów działalności są dostępne pod opisem strony w obu językach.

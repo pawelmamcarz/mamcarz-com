@@ -1889,6 +1889,15 @@ body > nav.nav-scrolled:not(.breadcrumb) { background: var(--white); }
   letter-spacing: 0.12em;
 }
 
+.summit-photos {
+  display: grid;
+  grid-template-columns: minmax(0, 9fr) minmax(0, 16fr);
+  gap: 1rem;
+  margin-block: 1.5rem;
+}
+
+.summit-photos img { width: 100%; }
+
 .speaking-group { border-bottom: var(--line-strong); }
 
 .speaking-group__head {
@@ -2494,6 +2503,8 @@ footer :focus-visible,
 }
 
 @media (max-width: 759px) {
+  .summit-photos { grid-template-columns: minmax(0, 1fr); }
+
   .layout-grid,
   .hero-grid,
   .evidence-row,
