@@ -83,8 +83,8 @@ export const PUBLIC_PAGES = Object.freeze([
 ]);
 
 const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
-  "/": "2026-10-31",
-  "/en/": "2026-10-31",
+  "/": "2026-11-23",
+  "/en/": "2026-11-23",
   "/uslugi/transformacja-zakupow/": "2026-10-31",
   "/en/uslugi/transformacja-zakupow/": "2026-10-31",
   "/uslugi/wdrozenie-sap-ariba/": "2026-10-31",
@@ -95,8 +95,8 @@ const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
   "/en/aplikacje-operacyjne/": "2026-10-31",
   "/lotnictwo/": "2026-10-31",
   "/en/lotnictwo/": "2026-10-31",
-  "/case-studies/": "2026-10-31",
-  "/en/case-studies/": "2026-10-31",
+  "/case-studies/": "2026-11-23",
+  "/en/case-studies/": "2026-11-23",
   "/wiedza/": "2026-10-31",
   "/en/wiedza/": "2026-10-31",
   "/wystapienia/": "2026-11-20",
@@ -108,8 +108,8 @@ const SITEMAP_LASTMOD_BY_ROUTE = Object.freeze({
   "/diagrams/infographic": "2026-09-04",
   "/prywatnosc/": "2026-10-27",
   "/en/prywatnosc/": "2026-10-27",
-  "/o-mnie/": "2026-11-20",
-  "/en/o-mnie/": "2026-11-20",
+  "/o-mnie/": "2026-11-23",
+  "/en/o-mnie/": "2026-11-23",
 });
 
 const LLMS_NAVIGATION_STATIC_LINES = Object.freeze([
@@ -7133,7 +7133,7 @@ const PROJECT_PAGE_CONTRACT = Object.freeze({
   pl: Object.freeze({ title: "Projekty", lead: "Wybrane wdrożenia i produkty: moja rola, zakres prac i wykorzystane rozwiązania.", description: "Wybrane wdrożenia i produkty: ORLEN, KGHM, Żabka Polska, PLL LOT i Motor Oil Hellas oraz aplikacje operacyjne i lotnicze. Rola, zakres prac i rozwiązania.", url: "https://mamcarz.com/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Projekt", ctaLabel: "Napisz o projekcie" }),
   en: Object.freeze({ title: "Projects", lead: "Selected implementations and products: my role, scope of work and the solutions used.", description: "Selected implementations and products: ORLEN, KGHM, Żabka Polska, PLL LOT and Motor Oil Hellas, plus operational and aviation products. Role, scope and solutions.", url: "https://mamcarz.com/en/case-studies/", ctaHref: "mailto:pawel@mamcarz.com?subject=Project%20enquiry", ctaLabel: "Write about the project" })
 });
-const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "d54e91592b67a86c0610d9c986c376bff3004a97268df8892d56dee293507be6", en: "3cabfa0845e356fa4488183bc600f92048ddc487d455c46c8e3d66dabd6c63cf" });
+const PROJECT_DOCUMENT_MANIFEST = Object.freeze({ pl: "e90072843eaa6ea154e586e0fb6db3b88dcb11867fc3e7577dba10a612ca8da0", en: "35b94472bf0af9556c2dcfe50098c04a42e02ab15592cac8e17c1eb508008316" });
 
 function projectExpectedPublicSurfaces() {
   return SERVICE_PUBLIC_SURFACE_CONTRACT;
@@ -10831,7 +10831,7 @@ async function verifyDiscovery(factData, context) {
     const expectedLastmod = SITEMAP_LASTMOD_BY_ROUTE[entry.route];
     const validLastmod = lastmods.length === 1
       && /^\d{4}-\d{2}-\d{2}$/.test(lastmods[0])
-      && lastmods[0] <= "2026-11-20"
+      && lastmods[0] <= "2026-11-23"
       && lastmods[0] === expectedLastmod;
     if (!validLastmod) {
       error(context.errors, "discovery-sitemap-lastmod", "sitemap.xml", `${entry.route} requires the reviewed content-change date ${expectedLastmod}`);

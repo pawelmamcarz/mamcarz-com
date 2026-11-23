@@ -220,8 +220,8 @@ const task9SiteShellProductHtml = Object.freeze(Object.fromEntries(await Promise
   task9SiteShellEntries.map(async ({ path }) => [path, await readFile(resolve(path), "utf8")])
 )));
 const task9ProtectedContentHashes = Object.freeze({
-  "index.html": "224cc1d4fb3960646a2abf8e28d29dec25b6e971b3f6b743e86a46eec4172d24",
-  "en/index.html": "003fef8aa4b442cc63682f2bcf84099678e8486172e889071d54be8a5da24c11",
+  "index.html": "77eef121e91dbceb832c66e5b3f1821f6737dfc0c7ec7985a92e8494863f724c",
+  "en/index.html": "8319db284a22f5c0e978f1cd72599da5d051110d67003b2e16e0040d03cca76d",
   "uslugi/transformacja-zakupow/index.html": "f7fe65776009627c485ce6c81ae6881340f8c63d00dddb19d7b27773f88f63aa",
   "en/uslugi/transformacja-zakupow/index.html": "67629f23053a402bc11d6b2f96eff50cc2a9db807612ece408081f517438c4be",
   "uslugi/wdrozenie-sap-ariba/index.html": "ed12c843d72f04e98afc38a9f231cdc2db2cd13dcdfb9c9e63140ca5bbbc91d7",
@@ -232,8 +232,8 @@ const task9ProtectedContentHashes = Object.freeze({
   "en/aplikacje-operacyjne/index.html": "ba360427af494de376cc316a49f2cc32001d664798940da5eca96e025cf319a3",
   "lotnictwo/index.html": "18665f8dc0c3425612b6052edd56abf8ca7e933464fcb306f6f0c9cf26e8e8a0",
   "en/lotnictwo/index.html": "248b837b757505ab1358930a3c8731537eb82d29a127a8708e308a951f665f68",
-  "case-studies/index.html": "fcbc36e96334fa063ad0fa31a95eb400455c9047da947aee0d69a0ac2b2c901f",
-  "en/case-studies/index.html": "3a54135f6c2960fb6ed1640121024d489ab7d9577c0cc621c776ff705517eec6",
+  "case-studies/index.html": "cb36bcfd865429ddc6afd0add565328f229bd7e90ffeb455b250b95fe11196b3",
+  "en/case-studies/index.html": "b6bfc26d540b8c07aef366815ab29d96ed1bb3ee6a949e97ba1129c3bb7e58af",
   "wiedza/index.html": "19a2600559581b0daaa8b55bc0ee5ef41cde09dcfdf1f4c93af716faf2b4b592",
   "en/wiedza/index.html": "722ace8014252a519a2ed8317012bdbf3e3c9e974b23947a837fa6ff78f7a35d",
   "wystapienia/index.html": "692fccf2d1671afd21d81161501e1a84a9aa592d99d8616f1ba7cae086e45ef3",
@@ -7359,7 +7359,8 @@ function plan3RealPresentationBody() {
 function plan3Sitemap() {
   const blocks = plan3ExpectedPublicPages.map((entry) => {
     const links = plan3Hreflang(entry).replaceAll("<link", "<xhtml:link");
-    const lastmod = ["/wystapienia/", "/en/wystapienia/", "/o-mnie/", "/en/o-mnie/"].includes(entry.route) ? "2026-11-20"
+    const lastmod = ["/", "/en/", "/case-studies/", "/en/case-studies/", "/o-mnie/", "/en/o-mnie/"].includes(entry.route) ? "2026-11-23"
+      : ["/wystapienia/", "/en/wystapienia/"].includes(entry.route) ? "2026-11-20"
       : ["/prywatnosc/", "/en/prywatnosc/"].includes(entry.route) ? "2026-10-27"
       : entry.route.startsWith("/diagrams/") ? "2026-09-04" : "2026-10-31";
     return `<url><loc>https://mamcarz.com${entry.route}</loc>${links}<lastmod>${lastmod}</lastmod></url>`;
